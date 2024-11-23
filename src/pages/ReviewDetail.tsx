@@ -1,14 +1,20 @@
-import { Link, useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { StarRating } from "@/components/StarRating";
 
 interface Review {
   id: string;
   title: string;
   condition: string;
-  content: string;
-  date: string;
   symptoms: string;
-  treatment: string;
+  experience: string;
+  diagnosisDifficulty: number;
+  symptomSeverity: number;
+  hasMedication: boolean;
+  medicationEffectiveness?: number;
+  healingPossibility: number;
+  socialDiscomfort: number;
+  date: string;
 }
 
 // This would normally come from an API
@@ -18,12 +24,16 @@ const getReview = (id: string): Review | undefined => {
       id: "1",
       title: "La mia esperienza con l'emicrania cronica",
       condition: "Emicrania",
-      content: "Ho iniziato a soffrire di emicrania circa due anni fa. I sintomi principali includono forte mal di testa, sensibilità alla luce e nausea. Ho provato diverse terapie farmacologiche e cambiamenti nello stile di vita...",
-      date: "2024-02-20",
-      symptoms: "Forte mal di testa, sensibilità alla luce, nausea",
-      treatment: "Terapia farmacologica e cambiamenti nello stile di vita"
+      symptoms: "Forte mal di testa, sensibilità alla luce, nausea, vertigini",
+      experience: "Ho iniziato a soffrire di emicrania circa due anni fa. Ho provato diverse terapie farmacologiche e cambiamenti nello stile di vita. La situazione è migliorata ma non sono ancora completamente guarito.",
+      diagnosisDifficulty: 4,
+      symptomSeverity: 5,
+      hasMedication: true,
+      medicationEffectiveness: 3,
+      healingPossibility: 2,
+      socialDiscomfort: 4,
+      date: "2024-02-20"
     },
-    // ... altri review objects
   };
   
   return reviews[id as keyof typeof reviews];
@@ -45,20 +55,52 @@ const ReviewDetail = () => {
             <h1 className="text-2xl font-bold text-text">{review.title}</h1>
             <span className="text-sm text-text-light">{review.date}</span>
           </div>
-          <div className="mb-4">
+          
+          <div className="mb-6">
             <span className="inline-block px-3 py-1 bg-secondary rounded-full text-sm text-text-light">
               {review.condition}
             </span>
           </div>
-          <div className="prose max-w-none">
-            <h2 className="text-lg font-semibold mb-2">Sintomi</h2>
-            <p className="mb-4">{review.symptoms}</p>
-            
-            <h2 className="text-lg font-semibold mb-2">Trattamento</h2>
-            <p className="mb-4">{review.treatment}</p>
-            
-            <h2 className="text-lg font-semibold mb-2">Esperienza Dettagliata</h2>
-            <p className="mb-8">{review.content}</p>
+
+          <div className="space-y-6">
+            <section>
+              <h2 className="text-lg font-semibold mb-2">Sintomi</h2>
+              <p className="text-text-light">{review.symptoms}</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold mb-2">Esperienza</h2>
+              <p className="text-text-light">{review.experience}</p>
+            </section>
+
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-medium mb-2">Difficoltà di Diagnosi</h3>
+                <StarRating value={review.diagnosisDifficulty} readOnly />
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Gravità dei Sintomi</h3>
+                <StarRating value={review.symptomSeverity} readOnly />
+              </div>
+
+              {review.hasMedication && (
+                <div>
+                  <h3 className="font-medium mb-2">Efficacia Cura Farmacologica</h3>
+                  <StarRating value={review.medicationEffectiveness || 0} readOnly />
+                </div>
+              )}
+
+              <div>
+                <h3 className="font-medium mb-2">Possibilità di Guarigione</h3>
+                <StarRating value={review.healingPossibility} readOnly />
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Disagio Sociale</h3>
+                <StarRating value={review.socialDiscomfort} readOnly />
+              </div>
+            </section>
           </div>
         </div>
       </Card>
