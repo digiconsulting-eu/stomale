@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "/logo.png"; // Import the logo directly
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,7 +14,7 @@ export const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2 hover:opacity-90 transition-opacity">
-            <img src="/logo.png" alt="StoMale.info" className="h-8" />
+            <img src={logo} alt="StoMale.info" className="h-8" />
           </Link>
 
           {/* Mobile menu button */}
