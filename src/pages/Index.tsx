@@ -28,14 +28,14 @@ const SAMPLE_REVIEWS = [
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <main>
+      <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-gradient-to-b from-secondary to-white py-20">
-          <div className="container mx-auto text-center">
-            <h1 className="text-4xl font-bold text-text mb-6">
+        <section className="py-24 px-4">
+          <div className="container mx-auto text-center max-w-4xl">
+            <h1 className="text-5xl font-bold text-text mb-8 leading-tight">
               Condividi la tua esperienza, aiuta gli altri
             </h1>
-            <p className="text-text-light text-lg mb-8 max-w-2xl mx-auto">
+            <p className="text-text-light text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
               Unisciti alla nostra community per condividere la tua esperienza e scoprire
               le storie di altri pazienti.
             </p>
@@ -44,12 +44,16 @@ const Index = () => {
         </section>
 
         {/* Latest Reviews Section */}
-        <section className="py-16 container mx-auto">
-          <h2 className="text-2xl font-semibold text-text mb-8">Ultime Recensioni</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SAMPLE_REVIEWS.map((review) => (
-              <ReviewCard key={review.id} {...review} />
-            ))}
+        <section className="py-20 px-4 bg-white/50">
+          <div className="container mx-auto">
+            <h2 className="text-3xl font-semibold text-text mb-12 text-center">
+              Ultime Recensioni
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {SAMPLE_REVIEWS.map((review) => (
+                <ReviewCard key={review.id} {...review} />
+              ))}
+            </div>
           </div>
         </section>
       </main>

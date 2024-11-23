@@ -15,7 +15,7 @@ export const StarRating = ({ value, readOnly = false, onChange }: StarRatingProp
           type={readOnly ? "button" : "submit"}
           disabled={readOnly}
           onClick={() => !readOnly && onChange?.(star)}
-          className={`${readOnly ? 'cursor-default' : 'cursor-pointer'}`}
+          className={`${readOnly ? 'cursor-default' : 'cursor-pointer hover:scale-110 transition-transform'}`}
         >
           <Star
             className={`h-6 w-6 ${

@@ -6,22 +6,22 @@
 
 @layer base {
   body {
-    @apply bg-secondary text-text font-sans antialiased;
+    @apply bg-gradient-to-br from-secondary to-white text-text font-sans antialiased min-h-screen;
   }
 }
 
 .card {
-  @apply bg-white rounded-lg shadow-md p-6 transition-all hover:shadow-lg;
+  @apply bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 transition-all hover:shadow-xl border border-gray-100;
 }
 
 .input {
-  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50;
+  @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white/80 backdrop-blur-sm;
 }
 
 .button-primary {
-  @apply px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors;
+  @apply px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors shadow-md hover:shadow-lg;
 }
 
 .button-secondary {
-  @apply px-6 py-2 bg-secondary text-text rounded-lg hover:bg-secondary-hover transition-colors;
+  @apply px-6 py-2 bg-secondary text-text rounded-lg hover:bg-secondary-hover transition-colors shadow-sm hover:shadow-md;
 }
