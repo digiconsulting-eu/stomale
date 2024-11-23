@@ -3,18 +3,21 @@ import { ReviewCard } from "@/components/ReviewCard";
 
 const SAMPLE_REVIEWS = [
   {
+    id: "1",
     title: "La mia esperienza con l'emicrania cronica",
     condition: "Emicrania",
     preview: "Ho iniziato a soffrire di emicrania circa due anni fa...",
     date: "2024-02-20",
   },
   {
+    id: "2",
     title: "Gestire l'artrite reumatoide",
     condition: "Artrite Reumatoide",
     preview: "Dopo la diagnosi, ho scoperto che ci sono molti modi per gestire i sintomi...",
     date: "2024-02-19",
   },
   {
+    id: "3",
     title: "Il mio percorso con l'ansia",
     condition: "Disturbo d'Ansia",
     preview: "Ho imparato che l'ansia può essere gestita con il giusto supporto...",
@@ -44,8 +47,8 @@ const Index = () => {
         <section className="py-16 container mx-auto">
           <h2 className="text-2xl font-semibold text-text mb-8">Ultime Recensioni</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SAMPLE_REVIEWS.map((review, index) => (
-              <ReviewCard key={index} {...review} />
+            {SAMPLE_REVIEWS.map((review) => (
+              <ReviewCard key={review.id} {...review} />
             ))}
           </div>
         </section>
