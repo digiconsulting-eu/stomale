@@ -12,8 +12,8 @@ export const Header = () => {
     <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="text-2xl font-bold text-primary hover:text-primary/90 transition-colors">
-            StoMale
+          <Link to="/" className="flex items-center space-x-2 hover:opacity-90 transition-opacity">
+            <img src="/logo.png" alt="StoMale.info" className="h-8" />
           </Link>
 
           {/* Mobile menu button */}
