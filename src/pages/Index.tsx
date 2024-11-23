@@ -1,4 +1,3 @@
-import { Header } from "@/components/Header";
 import { SearchBar } from "@/components/SearchBar";
 import { ReviewCard } from "@/components/ReviewCard";
 
@@ -26,8 +25,6 @@ const SAMPLE_REVIEWS = [
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      
       <main>
         {/* Hero Section */}
         <section className="bg-gradient-to-b from-secondary to-white py-20">
