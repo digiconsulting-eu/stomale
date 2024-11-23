@@ -20,9 +20,9 @@ export const StarRating = ({ value, readOnly = false, onChange }: StarRatingProp
           <Star
             className={`h-6 w-6 ${
               star <= value
-                ? 'fill-yellow-400 text-yellow-400'
+                ? 'fill-primary text-primary'
                 : 'fill-gray-200 text-gray-200'
-            }`}
+            } transition-colors`}
           />
         </button>
       ))}

@@ -25,8 +25,8 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#4A90E2",
-          hover: "#357ABD",
+          DEFAULT: "#0EA5E9", // Updated to match the logo blue
+          hover: "#0284C7",
         },
         secondary: {
           DEFAULT: "#F5F7FA",
