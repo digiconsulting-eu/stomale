@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-// Import all conditions from SearchCondition.tsx
+// Import all conditions from ConditionsList
 import {
   CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
   CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
@@ -16,12 +16,28 @@ import {
   CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
 } from "../conditions/ConditionsList";
 
+// Combine all conditions into a single sorted array
 const allConditions = [
-  ...CONDITIONS_A, ...CONDITIONS_B, ...CONDITIONS_C, ...CONDITIONS_D,
-  ...CONDITIONS_E, ...CONDITIONS_F, ...CONDITIONS_G, ...CONDITIONS_H,
-  ...CONDITIONS_I, ...CONDITIONS_L, ...CONDITIONS_M, ...CONDITIONS_N,
-  ...CONDITIONS_O, ...CONDITIONS_P, ...CONDITIONS_R, ...CONDITIONS_S,
-  ...CONDITIONS_T, ...CONDITIONS_U, ...CONDITIONS_V, ...CONDITIONS_Z
+  ...(CONDITIONS_A || []),
+  ...(CONDITIONS_B || []),
+  ...(CONDITIONS_C || []),
+  ...(CONDITIONS_D || []),
+  ...(CONDITIONS_E || []),
+  ...(CONDITIONS_F || []),
+  ...(CONDITIONS_G || []),
+  ...(CONDITIONS_H || []),
+  ...(CONDITIONS_I || []),
+  ...(CONDITIONS_L || []),
+  ...(CONDITIONS_M || []),
+  ...(CONDITIONS_N || []),
+  ...(CONDITIONS_O || []),
+  ...(CONDITIONS_P || []),
+  ...(CONDITIONS_R || []),
+  ...(CONDITIONS_S || []),
+  ...(CONDITIONS_T || []),
+  ...(CONDITIONS_U || []),
+  ...(CONDITIONS_V || []),
+  ...(CONDITIONS_Z || [])
 ].sort();
 
 interface ConditionSelectProps {
