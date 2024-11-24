@@ -9,6 +9,7 @@ import { Header } from "./components/Header";
 import Register from "./pages/Register";
 import SearchCondition from "./pages/SearchCondition";
 import NewReview from "./pages/NewReview";
+import ConditionDetail from "./pages/ConditionDetail";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +33,7 @@ const App = () => (
           <Route path="/login" element={<div>Login Page</div>} />
           <Route path="/registrati" element={<Register />} />
           <Route path="/recupera-password" element={<div>Recupera Password Page</div>} />
-          <Route path="/patologia/:condition" element={<div>Pagina Patologia</div>} />
+          <Route path="/patologia/:condition" element={<ConditionDetail />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

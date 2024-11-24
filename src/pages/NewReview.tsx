@@ -10,6 +10,8 @@ import { ConditionSelect } from "@/components/form/ConditionSelect";
 import { StarRatingField } from "@/components/form/StarRatingField";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   condition: z.string().min(1, "Seleziona una patologia"),
@@ -27,10 +29,13 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function NewReview() {
+  const [searchParams] = useSearchParams();
+  const conditionParam = searchParams.get("condition");
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      condition: "",
+      condition: conditionParam || "",
       title: "",
       symptoms: "",
       experience: "",
