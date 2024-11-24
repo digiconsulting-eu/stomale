@@ -1,5 +1,4 @@
 import { useParams, Link } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StarRating } from "@/components/StarRating";
@@ -60,25 +59,19 @@ const ConditionDetail = () => {
       {/* Navigation Buttons */}
       <div className="flex flex-wrap gap-4 mb-8">
         <Button
-          variant="outline"
-          size="lg"
-          className="flex-1"
+          className="flex-1 bg-primary text-white hover:bg-primary-hover"
           onClick={() => document.getElementById("description")?.scrollIntoView({ behavior: "smooth" })}
         >
           Descrizione
         </Button>
         <Button
-          variant="outline"
-          size="lg"
-          className="flex-1"
+          className="flex-1 bg-primary text-white hover:bg-primary-hover"
           onClick={() => document.getElementById("experiences")?.scrollIntoView({ behavior: "smooth" })}
         >
           Leggi Esperienze
         </Button>
         <Button
-          variant="outline"
-          size="lg"
-          className="flex-1"
+          className="flex-1 bg-primary text-white hover:bg-primary-hover"
           asChild
         >
           <Link to={`/nuova-recensione?condition=${encodeURIComponent(decodedCondition)}`}>
