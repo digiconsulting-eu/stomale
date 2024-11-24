@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import ReviewDetail from "./pages/ReviewDetail";
 import { Header } from "./components/Header";
 import Register from "./pages/Register";
+import SearchCondition from "./pages/SearchCondition";
 
 const queryClient = new QueryClient();
 
@@ -22,7 +23,7 @@ const App = () => (
           <Route path="/recensione/:id" element={<ReviewDetail />} />
           <Route path="/recensioni" element={<div>Recensioni Page</div>} />
           <Route path="/nuova-recensione" element={<div>Nuova Recensione Page</div>} />
-          <Route path="/cerca-patologia" element={<div>Cerca Patologia Page</div>} />
+          <Route path="/cerca-patologia" element={<SearchCondition />} />
           <Route path="/cerca-sintomi" element={<div>Cerca Sintomi Page</div>} />
           <Route path="/patologie" element={<div>Elenco Patologie Page</div>} />
           <Route path="/inserisci-patologia" element={<div>Inserisci Patologia Page</div>} />
