@@ -15,7 +15,6 @@ import {
   CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
 } from "../conditions";
 
-// Initialize arrays with empty arrays as fallback
 const allConditions = [
   ...(CONDITIONS_A || []),
   ...(CONDITIONS_B || []),
@@ -74,11 +73,11 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                 </Button>
               </FormControl>
             </PopoverTrigger>
-            <PopoverContent className="w-full p-0">
+            <PopoverContent className="w-[400px] p-0" align="start">
               <Command>
                 <CommandInput placeholder="Cerca una patologia..." />
                 <CommandEmpty>Nessuna patologia trovata.</CommandEmpty>
-                <CommandGroup className="max-h-60 overflow-auto">
+                <CommandGroup className="max-h-[300px] overflow-y-auto">
                   {allConditions.map((condition) => (
                     <CommandItem
                       key={condition}
