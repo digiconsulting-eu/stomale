@@ -30,8 +30,10 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="py-24 px-4">
-          <div className="container mx-auto text-center max-w-4xl">
+        <section className="py-24 px-4 relative">
+          <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10" 
+               style={{ backgroundImage: 'url("/hero-bg.png")' }} />
+          <div className="container mx-auto text-center max-w-4xl relative z-10">
             <h1 className="text-5xl font-bold text-text mb-8 leading-tight">
               Condividi la tua esperienza, aiuta gli altri
             </h1>
