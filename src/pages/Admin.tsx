@@ -11,8 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-// Temporary mock data - replace with actual API calls
 const MOCK_REVIEWS = [
   {
     id: "1",
@@ -45,8 +46,16 @@ const MOCK_COMMENTS = [
 
 const Admin = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [reviews, setReviews] = useState(MOCK_REVIEWS);
   const [comments, setComments] = useState(MOCK_COMMENTS);
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("isAdminAuthenticated");
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handleReviewAction = (id: string, action: "approve" | "reject") => {
     setReviews(reviews.map(review => 
@@ -101,7 +110,7 @@ const Admin = () => {
                     <TableCell>{review.condition}</TableCell>
                     <TableCell>{review.date}</TableCell>
                     <TableCell>
-                      <Badge variant={review.status === "approved" ? "success" : "secondary"}>
+                      <Badge variant={review.status === "approved" ? "default" : "secondary"}>
                         {review.status === "approved" ? "Approvata" : "In attesa"}
                       </Badge>
                     </TableCell>
@@ -153,7 +162,7 @@ const Admin = () => {
                     <TableCell>{comment.reviewTitle}</TableCell>
                     <TableCell>{comment.date}</TableCell>
                     <TableCell>
-                      <Badge variant={comment.status === "approved" ? "success" : "secondary"}>
+                      <Badge variant={comment.status === "approved" ? "default" : "secondary"}>
                         {comment.status === "approved" ? "Approvato" : "In attesa"}
                       </Badge>
                     </TableCell>
