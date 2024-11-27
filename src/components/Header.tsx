@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
-import logo from "/logo.png"; // Import the logo directly
+import { Link, useNavigate } from "react-router-dom";
+import logo from "/logo.png";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  
+  // For now, we'll use localStorage to check login status
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('isAdmin');
+    navigate('/');
+    window.location.reload(); // Refresh to update the UI
+  };
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b">
@@ -53,12 +64,20 @@ export const Header = () => {
 
           {/* Auth buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" asChild>
-              <Link to="/login">Accedi</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/registrati">Registrati</Link>
-            </Button>
+            {isLoggedIn ? (
+              <Button variant="outline" onClick={handleLogout}>
+                Logout
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" asChild>
+                  <Link to="/login">Accedi</Link>
+                </Button>
+                <Button asChild>
+                  <Link to="/registrati">Registrati</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
@@ -116,12 +135,20 @@ export const Header = () => {
                 Blog
               </Link>
               <div className="flex flex-col space-y-2 pt-4">
-                <Button variant="outline" asChild>
-                  <Link to="/login" onClick={toggleMenu}>Accedi</Link>
-                </Button>
-                <Button asChild>
-                  <Link to="/registrati" onClick={toggleMenu}>Registrati</Link>
-                </Button>
+                {isLoggedIn ? (
+                  <Button variant="outline" onClick={handleLogout}>
+                    Logout
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="outline" asChild>
+                      <Link to="/login" onClick={toggleMenu}>Accedi</Link>
+                    </Button>
+                    <Button asChild>
+                      <Link to="/registrati" onClick={toggleMenu}>Registrati</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>
