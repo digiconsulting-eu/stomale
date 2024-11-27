@@ -1,18 +1,11 @@
 import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { Input } from "@/components/ui/input";
-import { Bell } from "lucide-react";
+import { NotificationsTab } from "@/components/admin/NotificationsTab";
+import { ReviewsTab } from "@/components/admin/ReviewsTab";
+import { CommentsTab } from "@/components/admin/CommentsTab";
+import { AdminsTab } from "@/components/admin/AdminsTab";
 
 // Temporary mock data
 const MOCK_REVIEWS = [
@@ -137,11 +130,8 @@ const Admin = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Area Amministrazione</h1>
       
-      <Tabs defaultValue="reviews" className="w-full">
+      <Tabs defaultValue="notifications" className="w-full">
         <TabsList>
-          <TabsTrigger value="reviews">Recensioni</TabsTrigger>
-          <TabsTrigger value="comments">Commenti</TabsTrigger>
-          <TabsTrigger value="admins">Amministratori</TabsTrigger>
           <TabsTrigger value="notifications" className="relative">
             Notifiche
             {notifications.some(n => !n.read) && (
@@ -150,170 +140,39 @@ const Admin = () => {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="reviews">Recensioni</TabsTrigger>
+          <TabsTrigger value="comments">Commenti</TabsTrigger>
+          <TabsTrigger value="admins">Amministratori</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="notifications">
+          <NotificationsTab 
+            notifications={notifications}
+            markNotificationAsRead={markNotificationAsRead}
+          />
+        </TabsContent>
+
         <TabsContent value="reviews">
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Titolo</TableHead>
-                  <TableHead>Autore</TableHead>
-                  <TableHead>Patologia</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Stato</TableHead>
-                  <TableHead>Azioni</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reviews.map((review) => (
-                  <TableRow key={review.id}>
-                    <TableCell>{review.title}</TableCell>
-                    <TableCell>{review.author}</TableCell>
-                    <TableCell>{review.condition}</TableCell>
-                    <TableCell>{review.date}</TableCell>
-                    <TableCell>
-                      <Badge variant={review.status === "approved" ? "default" : "secondary"}>
-                        {review.status === "approved" ? "Approvata" : "In attesa"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleReviewAction(review.id, "approve")}
-                          disabled={review.status === "approved"}
-                        >
-                          Approva
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleReviewAction(review.id, "reject")}
-                          disabled={review.status === "rejected"}
-                        >
-                          Rifiuta
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <ReviewsTab 
+            reviews={reviews}
+            handleReviewAction={handleReviewAction}
+          />
         </TabsContent>
 
         <TabsContent value="comments">
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Contenuto</TableHead>
-                  <TableHead>Autore</TableHead>
-                  <TableHead>Recensione</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Stato</TableHead>
-                  <TableHead>Azioni</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {comments.map((comment) => (
-                  <TableRow key={comment.id}>
-                    <TableCell className="max-w-xs truncate">{comment.content}</TableCell>
-                    <TableCell>{comment.author}</TableCell>
-                    <TableCell>{comment.reviewTitle}</TableCell>
-                    <TableCell>{comment.date}</TableCell>
-                    <TableCell>
-                      <Badge variant={comment.status === "approved" ? "default" : "secondary"}>
-                        {comment.status === "approved" ? "Approvato" : "In attesa"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleCommentAction(comment.id, "approve")}
-                          disabled={comment.status === "approved"}
-                        >
-                          Approva
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleCommentAction(comment.id, "reject")}
-                          disabled={comment.status === "rejected"}
-                        >
-                          Rifiuta
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <CommentsTab 
+            comments={comments}
+            handleCommentAction={handleCommentAction}
+          />
         </TabsContent>
 
         <TabsContent value="admins">
-          <div className="space-y-6">
-            <div className="flex gap-4">
-              <Input
-                type="email"
-                placeholder="Email del nuovo amministratore"
-                value={newAdminEmail}
-                onChange={(e) => setNewAdminEmail(e.target.value)}
-                className="max-w-md"
-              />
-              <Button onClick={handleAddAdmin}>Aggiungi Amministratore</Button>
-            </div>
-
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Data Aggiunta</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {admins.map((admin) => (
-                    <TableRow key={admin.id}>
-                      <TableCell>{admin.email}</TableCell>
-                      <TableCell>{admin.dateAdded}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="notifications">
-          <div className="space-y-4">
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`p-4 rounded-lg border ${
-                  notification.read ? 'bg-gray-50' : 'bg-white'
-                }`}
-                onClick={() => markNotificationAsRead(notification.id)}
-              >
-                <div className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  <h3 className="font-semibold">{notification.title}</h3>
-                  {!notification.read && (
-                    <Badge variant="default" className="ml-auto">
-                      Nuovo
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-gray-600 mt-1">{notification.content}</p>
-                <p className="text-sm text-gray-500 mt-2">{notification.date}</p>
-              </div>
-            ))}
-          </div>
+          <AdminsTab 
+            admins={admins}
+            newAdminEmail={newAdminEmail}
+            setNewAdminEmail={setNewAdminEmail}
+            handleAddAdmin={handleAddAdmin}
+          />
         </TabsContent>
       </Tabs>
     </div>
