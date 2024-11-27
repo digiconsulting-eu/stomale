@@ -11,7 +11,6 @@ import SearchCondition from "./pages/SearchCondition";
 import NewReview from "./pages/NewReview";
 import ConditionDetail from "./pages/ConditionDetail";
 import Admin from "./pages/Admin";
-import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +31,7 @@ const App = () => (
           <Route path="/patologie" element={<div>Elenco Patologie Page</div>} />
           <Route path="/inserisci-patologia" element={<div>Inserisci Patologia Page</div>} />
           <Route path="/blog" element={<div>Blog Page</div>} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<div>Login Page</div>} />
           <Route path="/registrati" element={<Register />} />
           <Route path="/recupera-password" element={<div>Recupera Password Page</div>} />
           <Route path="/patologia/:condition" element={<ConditionDetail />} />
