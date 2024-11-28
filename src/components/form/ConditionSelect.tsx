@@ -43,8 +43,26 @@ interface ConditionSelectProps {
   form: UseFormReturn<any>;
 }
 
+// Helper function to highlight matched text
+const HighlightMatch = ({ text, query }: { text: string; query: string }) => {
+  if (!query) return <>{text}</>;
+  
+  const parts = text.split(new RegExp(`(${query})`, 'gi'));
+  
+  return (
+    <>
+      {parts.map((part, i) => 
+        part.toLowerCase() === query.toLowerCase() ? 
+          <span key={i} className="bg-yellow-100 dark:bg-yellow-900">{part}</span> : 
+          part
+      )}
+    </>
+  );
+};
+
 export const ConditionSelect = ({ form }: ConditionSelectProps) => {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <FormField
@@ -80,6 +98,7 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                 <CommandInput 
                   placeholder="Cerca una patologia..." 
                   className="h-12 text-gray-700 placeholder:text-gray-400"
+                  onValueChange={setSearchQuery}
                 />
                 <CommandEmpty className="py-6 text-gray-500">
                   Nessuna patologia trovata.
@@ -103,7 +122,7 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                             : "opacity-0"
                         )}
                       />
-                      {condition}
+                      <HighlightMatch text={condition} query={searchQuery} />
                     </CommandItem>
                   ))}
                 </CommandGroup>
