@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Search, Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -24,7 +23,6 @@ import {
   CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
 } from "../conditions";
 
-// Ensure each array exists with a default empty array and filter out undefined values
 const allConditions = [
   ...(CONDITIONS_A ?? []),
   ...(CONDITIONS_B ?? []),
@@ -61,7 +59,7 @@ const HighlightMatch = ({ text, query }: { text: string; query: string }) => {
     <>
       {parts.map((part, i) => 
         part.toLowerCase() === query.toLowerCase() ? 
-          <span key={i} className="bg-yellow-100 dark:bg-yellow-900">{part}</span> : 
+          <span key={i} className="bg-yellow-100 font-medium">{part}</span> : 
           part
       )}
     </>
@@ -102,16 +100,18 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
               </FormControl>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="start">
-              <Command shouldFilter={false}>
+              <Command className="rounded-lg border shadow-md" shouldFilter={false}>
                 <CommandInput 
                   placeholder="Cerca una patologia..." 
                   onValueChange={setSearchQuery}
                   value={searchQuery}
-                  className="h-12"
+                  className="h-12 border-b border-gray-100 text-gray-900 placeholder:text-gray-500"
                 />
-                <CommandList>
-                  <CommandEmpty>Nessuna patologia trovata.</CommandEmpty>
-                  <CommandGroup className="max-h-[300px] overflow-y-auto">
+                <CommandList className="max-h-[300px] overflow-y-auto p-2">
+                  <CommandEmpty className="py-6 text-center text-gray-500">
+                    Nessuna patologia trovata.
+                  </CommandEmpty>
+                  <CommandGroup>
                     {allConditions
                       .filter(condition => 
                         condition.toLowerCase().includes(searchQuery.toLowerCase())
@@ -124,11 +124,11 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                             form.setValue("condition", condition);
                             setOpen(false);
                           }}
-                          className="hover:bg-gray-100 cursor-pointer py-2 px-3 text-gray-700"
+                          className="relative flex cursor-pointer select-none items-center rounded-md px-4 py-3 text-gray-900 text-[15px] outline-none hover:bg-gray-100 data-[selected=true]:bg-gray-100"
                         >
                           <Check
                             className={cn(
-                              "mr-2 h-4 w-4",
+                              "mr-3 h-4 w-4 text-primary",
                               condition === field.value
                                 ? "opacity-100"
                                 : "opacity-0"
