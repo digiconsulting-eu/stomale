@@ -15,28 +15,29 @@ import {
   CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
 } from "../conditions";
 
+// Ensure each array exists with a default empty array if undefined
 const allConditions = [
-  ...(CONDITIONS_A || []),
-  ...(CONDITIONS_B || []),
-  ...(CONDITIONS_C || []),
-  ...(CONDITIONS_D || []),
-  ...(CONDITIONS_E || []),
-  ...(CONDITIONS_F || []),
-  ...(CONDITIONS_G || []),
-  ...(CONDITIONS_H || []),
-  ...(CONDITIONS_I || []),
-  ...(CONDITIONS_L || []),
-  ...(CONDITIONS_M || []),
-  ...(CONDITIONS_N || []),
-  ...(CONDITIONS_O || []),
-  ...(CONDITIONS_P || []),
-  ...(CONDITIONS_R || []),
-  ...(CONDITIONS_S || []),
-  ...(CONDITIONS_T || []),
-  ...(CONDITIONS_U || []),
-  ...(CONDITIONS_V || []),
-  ...(CONDITIONS_Z || [])
-].sort();
+  ...CONDITIONS_A || [],
+  ...CONDITIONS_B || [],
+  ...CONDITIONS_C || [],
+  ...CONDITIONS_D || [],
+  ...CONDITIONS_E || [],
+  ...CONDITIONS_F || [],
+  ...CONDITIONS_G || [],
+  ...CONDITIONS_H || [],
+  ...CONDITIONS_I || [],
+  ...CONDITIONS_L || [],
+  ...CONDITIONS_M || [],
+  ...CONDITIONS_N || [],
+  ...CONDITIONS_O || [],
+  ...CONDITIONS_P || [],
+  ...CONDITIONS_R || [],
+  ...CONDITIONS_S || [],
+  ...CONDITIONS_T || [],
+  ...CONDITIONS_U || [],
+  ...CONDITIONS_V || [],
+  ...CONDITIONS_Z || []
+].filter(Boolean).sort();
 
 interface ConditionSelectProps {
   form: UseFormReturn<any>;
