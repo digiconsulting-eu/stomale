@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
@@ -16,6 +16,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Facebook, Linkedin } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
+import { useToast } from "@/components/ui/use-toast";
 
 const loginSchema = z.object({
   email: z.string().email("Inserisci un indirizzo email valido"),
@@ -24,7 +25,12 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+const ADMIN_EMAIL = "franca.castelli@jobreference.it";
+const ADMIN_PASSWORD = "123456";
+
 export default function Login() {
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
@@ -38,10 +44,30 @@ export default function Login() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      // TODO: Implement login logic
-      console.log(data);
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      if (data.email === ADMIN_EMAIL && data.password === ADMIN_PASSWORD) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('isAdmin', 'true');
+        toast({
+          title: "Login effettuato con successo",
+          description: "Benvenuto nell'area amministrazione",
+        });
+        navigate('/admin');
+      } else {
+        toast({
+          title: "Errore di autenticazione",
+          description: "Email o password non corretti",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
-      console.error(error);
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante il login",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
