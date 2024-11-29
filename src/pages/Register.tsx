@@ -9,9 +9,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,7 +22,7 @@ const Register = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
@@ -29,8 +30,23 @@ const Register = () => {
       return;
     }
 
-    // TODO: Implement registration logic
-    toast.success("Registrazione completata con successo!");
+    try {
+      // Simulate API call to get next registration number
+      const registrationNumber = Math.floor(Math.random() * 1000) + 1; // In a real app, this would come from the backend
+      const username = `Anonimo ${registrationNumber}`;
+
+      // Store user data
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('username', username);
+      localStorage.setItem('registrationNumber', registrationNumber.toString());
+      localStorage.setItem('email', email);
+      localStorage.setItem('joinDate', new Date().toISOString());
+
+      toast.success("Registrazione completata con successo!");
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error("Si è verificato un errore durante la registrazione");
+    }
   };
 
   return (

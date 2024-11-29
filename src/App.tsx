@@ -12,6 +12,7 @@ import NewReview from "./pages/NewReview";
 import ConditionDetail from "./pages/ConditionDetail";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
+import UserDashboard from "./pages/UserDashboard";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/recupera-password" element={<div>Recupera Password Page</div>} />
           <Route path="/patologia/:condition" element={<ConditionDetail />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
