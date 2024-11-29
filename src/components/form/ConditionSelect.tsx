@@ -100,14 +100,14 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
               </FormControl>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="start">
-              <Command className="rounded-lg border shadow-md" shouldFilter={false}>
+              <Command className="rounded-lg border shadow-md bg-white" shouldFilter={false}>
                 <CommandInput 
                   placeholder="Cerca una patologia..." 
                   onValueChange={setSearchQuery}
                   value={searchQuery}
                   className="h-12 border-b border-gray-100 text-gray-900 placeholder:text-gray-500"
                 />
-                <CommandList className="max-h-[300px] overflow-y-auto p-2">
+                <CommandList className="max-h-[300px] overflow-y-auto p-2 bg-white">
                   <CommandEmpty className="py-6 text-center text-gray-500">
                     Nessuna patologia trovata.
                   </CommandEmpty>
