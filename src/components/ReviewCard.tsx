@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 interface ReviewCardProps {
   id: string;
-  title: string;
+  title?: string;
   condition: string;
   preview: string;
   date: string;
@@ -20,7 +20,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
   const isAdmin = localStorage.getItem("isAdmin") === "true";
   
   const conditionSlug = condition.toLowerCase().replace(/\s+/g, '-');
-  const titleSlug = title.toLowerCase().replace(/\s+/g, '-');
+  const titleSlug = (title || 'untitled').toLowerCase().replace(/\s+/g, '-');
 
   const handleDelete = async () => {
     try {
@@ -42,7 +42,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
             className="flex-1"
           >
             <h3 className="text-lg font-semibold text-text group-hover:text-primary transition-colors">
-              {title}
+              {title || `Esperienza con ${capitalizeFirstLetter(condition)}`}
             </h3>
           </Link>
           {isAdmin && (
