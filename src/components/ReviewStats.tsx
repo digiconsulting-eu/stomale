@@ -21,29 +21,29 @@ export const ReviewStats = ({
     <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <h3 className="font-medium mb-2">Difficoltà di Diagnosi</h3>
-        <StarRating value={diagnosisDifficulty} readOnly />
+        <StarRating value={diagnosisDifficulty} readOnly onChange={() => {}} />
       </div>
 
       <div>
         <h3 className="font-medium mb-2">Gravità dei Sintomi</h3>
-        <StarRating value={symptomSeverity} readOnly />
+        <StarRating value={symptomSeverity} readOnly onChange={() => {}} />
       </div>
 
       {hasMedication && (
         <div>
           <h3 className="font-medium mb-2">Efficacia Cura Farmacologica</h3>
-          <StarRating value={medicationEffectiveness || 0} readOnly />
+          <StarRating value={medicationEffectiveness || 0} readOnly onChange={() => {}} />
         </div>
       )}
 
       <div>
         <h3 className="font-medium mb-2">Possibilità di Guarigione</h3>
-        <StarRating value={healingPossibility} readOnly />
+        <StarRating value={healingPossibility} readOnly onChange={() => {}} />
       </div>
 
       <div>
         <h3 className="font-medium mb-2">Disagio Sociale</h3>
-        <StarRating value={socialDiscomfort} readOnly />
+        <StarRating value={socialDiscomfort} readOnly onChange={() => {}} />
       </div>
     </section>
   );
