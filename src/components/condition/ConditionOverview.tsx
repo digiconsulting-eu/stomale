@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,13 +13,25 @@ interface ConditionOverviewProps {
 
 export const ConditionOverview = ({ condition, isAdmin }: ConditionOverviewProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [description, setDescription] = useState(
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-  );
-  const [editedDescription, setEditedDescription] = useState(description);
+  const [description, setDescription] = useState("");
+  const [editedDescription, setEditedDescription] = useState("");
+
+  useEffect(() => {
+    // Get descriptions from localStorage
+    const descriptions = JSON.parse(localStorage.getItem('conditionDescriptions') || '{}');
+    const savedDescription = descriptions[condition.toUpperCase()];
+    if (savedDescription) {
+      setDescription(savedDescription);
+      setEditedDescription(savedDescription);
+    }
+  }, [condition]);
 
   const handleSaveDescription = () => {
-    // Here you would typically make an API call to save the description
+    // Save to localStorage
+    const descriptions = JSON.parse(localStorage.getItem('conditionDescriptions') || '{}');
+    descriptions[condition.toUpperCase()] = editedDescription;
+    localStorage.setItem('conditionDescriptions', JSON.stringify(descriptions));
+
     setDescription(editedDescription);
     setIsEditing(false);
     toast.success("Descrizione aggiornata con successo");
@@ -64,7 +76,9 @@ export const ConditionOverview = ({ condition, isAdmin }: ConditionOverviewProps
           </div>
         </div>
       ) : (
-        <p className="text-gray-600">{description}</p>
+        <p className="text-gray-600">
+          {description || "Nessuna descrizione disponibile per questa patologia."}
+        </p>
       )}
     </Card>
   );
