@@ -126,7 +126,12 @@ const StatItem = ({ label, value, description }: { label: string, value: number,
     <p className="text-sm text-gray-500">{label}</p>
     <div className="flex items-center gap-2">
       <span className="text-2xl font-bold">{value.toFixed(1)}</span>
-      <Badge variant="secondary">{description}</Badge>
+      <Badge 
+        variant="secondary" 
+        className="border border-primary/50 text-text"
+      >
+        {description}
+      </Badge>
     </div>
   </div>
 );
