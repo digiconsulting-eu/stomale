@@ -20,7 +20,8 @@ const MOCK_REVIEWS = Array.from({ length: 45 }, (_, i) => ({
     .split('T')[0]
     .split('-')
     .reverse()
-    .join('-')
+    .join('-'),
+  username: `Anonimo ${Math.floor(Math.random() * 100) + 1}`
 }));
 
 const Reviews = () => {

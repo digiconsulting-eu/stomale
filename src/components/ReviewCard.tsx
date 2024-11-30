@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar } from "lucide-react";
+import { Calendar, User } from "lucide-react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 
 interface ReviewCardProps {
@@ -8,10 +8,10 @@ interface ReviewCardProps {
   condition: string;
   preview: string;
   date: string;
+  username: string;
 }
 
-export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardProps) => {
-  // Create URL-friendly slugs for condition and title
+export const ReviewCard = ({ id, title, condition, preview, date, username }: ReviewCardProps) => {
   const conditionSlug = condition.toLowerCase().replace(/\s+/g, '-');
   const titleSlug = title.toLowerCase().replace(/\s+/g, '-');
 
@@ -30,10 +30,14 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
             <span className="text-sm">{formattedDate}</span>
           </div>
         </div>
-        <div className="mb-4">
+        <div className="flex justify-between items-center mb-4">
           <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
             {capitalizeFirstLetter(condition)}
           </span>
+          <div className="flex items-center text-text-light space-x-1">
+            <User size={14} />
+            <span className="text-sm">{username}</span>
+          </div>
         </div>
         <p className="text-text-light line-clamp-3 leading-relaxed">{preview}</p>
       </div>

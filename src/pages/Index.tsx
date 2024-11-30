@@ -8,6 +8,7 @@ const SAMPLE_REVIEWS = [
     condition: "Emicrania",
     preview: "Ho iniziato a soffrire di emicrania circa due anni fa...",
     date: "20-02-2024",
+    username: "Anonimo 1"
   },
   {
     id: "2",
@@ -15,6 +16,7 @@ const SAMPLE_REVIEWS = [
     condition: "Artrite Reumatoide",
     preview: "Dopo la diagnosi, ho scoperto che ci sono molti modi per gestire i sintomi...",
     date: "19-02-2024",
+    username: "Anonimo 2"
   },
   {
     id: "3",
@@ -22,6 +24,7 @@ const SAMPLE_REVIEWS = [
     condition: "Disturbo d'Ansia",
     preview: "Ho imparato che l'ansia può essere gestita con il giusto supporto...",
     date: "18-02-2024",
+    username: "Anonimo 3"
   },
 ];
 
