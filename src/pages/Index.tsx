@@ -58,7 +58,7 @@ const Index = () => {
         {/* Hero Section */}
         <section className="py-24 px-4 relative">
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
             style={{ backgroundImage: 'url("/hero-bg-pills.png")' }}
           />
           <div className="container mx-auto text-center max-w-4xl relative z-10">
@@ -74,7 +74,7 @@ const Index = () => {
                     variant="outline"
                     onClick={() => {
                       setIsEditingTitle(false);
-                      setTitle(title); // Reset to previous value
+                      setTitle(title);
                     }}
                   >
                     Annulla
@@ -112,7 +112,7 @@ const Index = () => {
                     variant="outline"
                     onClick={() => {
                       setIsEditingDescription(false);
-                      setDescription(description); // Reset to previous value
+                      setDescription(description);
                     }}
                   >
                     Annulla
