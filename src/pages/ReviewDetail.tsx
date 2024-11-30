@@ -55,8 +55,8 @@ const getReviewByTitleAndCondition = (condition: string, title: string): Review 
   // Find review by matching condition and title (in a real app, this would be a DB query)
   return Object.values(reviews).find(
     review => 
-      review.condition.toLowerCase() === condition &&
-      review.title.toLowerCase().replace(/\s+/g, '-') === title
+      review.condition.toLowerCase() === condition.toLowerCase() &&
+      review.title.toLowerCase().replace(/\s+/g, '-') === title.toLowerCase().replace(/\s+/g, '-')
   );
 };
 
@@ -70,6 +70,19 @@ const ReviewDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* New section added at the top */}
+      <div className="bg-primary/10 rounded-lg p-6 mb-8">
+        <p className="text-lg font-medium text-primary text-center">
+          Vuoi leggere altre recensioni su {review.condition}?{" "}
+          <Link 
+            to={`/patologia/${review.condition.toLowerCase()}`} 
+            className="text-primary hover:underline font-bold"
+          >
+            Clicca qui
+          </Link>
+        </p>
+      </div>
+
       <Card className="mb-8">
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
@@ -133,8 +146,9 @@ const ReviewDetail = () => {
         </div>
       </Card>
 
+      {/* Existing section at the bottom */}
       <div className="bg-primary/10 rounded-lg p-6 mb-8">
-        <p className="text-lg font-medium text-primary">
+        <p className="text-lg font-medium text-primary text-center">
           Vuoi leggere altre recensioni su {review.condition}?{" "}
           <Link 
             to={`/patologia/${review.condition.toLowerCase()}`} 
