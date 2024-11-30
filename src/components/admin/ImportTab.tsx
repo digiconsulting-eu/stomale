@@ -61,12 +61,12 @@ const ImportTab = () => {
       }
     }
 
-    // Validate date format (YYYY-MM-DD)
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    // Validate date format (DD-MM-YYYY)
+    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
     if (!dateRegex.test(row['Data'])) {
       toast({
         title: "Errore di validazione",
-        description: "Il campo 'Data' deve essere nel formato YYYY-MM-DD",
+        description: "Il campo 'Data' deve essere nel formato DD-MM-YYYY",
         variant: "destructive",
       });
       return null;
@@ -159,7 +159,7 @@ const ImportTab = () => {
           <li>Efficacia cura farmacologica (voto da 1 a 5)</li>
           <li>Possibilità di guarigione (voto da 1 a 5)</li>
           <li>Disagio sociale (voto da 1 a 5)</li>
-          <li>Data (formato YYYY-MM-DD)</li>
+          <li>Data (formato DD-MM-YYYY)</li>
           <li>Nome Utente (testo)</li>
         </ul>
       </div>
