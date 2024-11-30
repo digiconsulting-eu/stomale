@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { ImportInstructions } from "./import/ImportInstructions";
 import { validateRow } from "./import/ImportValidator";
+import { ConfirmDialog } from "../ConfirmDialog";
 
 const ImportTab = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -81,6 +83,12 @@ const ImportTab = () => {
     }
   };
 
+  const handleClearAllReviews = () => {
+    localStorage.setItem('reviews', '[]');
+    toast.success('Tutte le recensioni sono state eliminate con successo');
+    setShowDeleteDialog(false);
+  };
+
   return (
     <div className="space-y-6">
       <ImportInstructions />
@@ -101,7 +109,24 @@ const ImportTab = () => {
             className="absolute inset-0 opacity-0 cursor-pointer"
           />
         </Button>
+
+        <Button
+          variant="destructive"
+          onClick={() => setShowDeleteDialog(true)}
+          className="gap-2"
+        >
+          <Trash2 className="h-4 w-4" />
+          Elimina tutte le recensioni
+        </Button>
       </div>
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleClearAllReviews}
+        title="Elimina tutte le recensioni"
+        description="Sei sicuro di voler eliminare tutte le recensioni? Questa azione non può essere annullata."
+      />
     </div>
   );
 };
