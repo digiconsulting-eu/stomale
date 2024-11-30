@@ -1,132 +1,164 @@
-import { useParams, Link } from "react-router-dom";
-import { Card } from "@/components/ui/card";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { StarRating } from "@/components/StarRating";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReviewCard } from "@/components/ReviewCard";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Temporary mock data - replace with actual API calls
-const MOCK_RATINGS = {
-  diagnosisDifficulty: 4.2,
-  symptomsDiscomfort: 3.8,
-  drugTreatmentEffectiveness: 3.5,
-  healingPossibility: 2.9,
-  socialDiscomfort: 3.7,
-};
-
-const MOCK_REVIEWS = [
-  {
-    id: "1",
-    title: "La mia esperienza con questa patologia",
-    condition: "Emicrania",
-    preview: "Ho iniziato a soffrire di questa patologia circa due anni fa...",
-    date: "2024-02-20",
-  },
-  // Add more mock reviews as needed
-];
-
-const ConditionDetail = () => {
+export default function ConditionDetail() {
   const { condition } = useParams();
-  const decodedCondition = decodeURIComponent(condition || "");
+  const navigate = useNavigate();
+
+  const { data: reviews, isLoading } = useQuery({
+    queryKey: ["reviews", condition],
+    queryFn: async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return [
+        {
+          id: 1,
+          title: "La mia esperienza con l'emicrania",
+          author: "Mario Rossi",
+          date: "2024-01-15",
+          content: "Ho sofferto di emicrania per anni...",
+          rating: 4,
+          helpful: 12
+        },
+        {
+          id: 2,
+          title: "Finalmente ho trovato la cura giusta",
+          author: "Laura Bianchi",
+          date: "2024-01-10",
+          content: "Dopo tanti tentativi...",
+          rating: 5,
+          helpful: 8
+        }
+      ];
+    }
+  });
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in">
-      <h1 className="text-4xl font-bold text-primary mb-8">{decodedCondition}</h1>
-
-      {/* Ratings Overview */}
-      <Card className="p-6 mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div>
-          <h3 className="font-medium mb-2">Difficoltà di Diagnosi</h3>
-          <StarRating value={MOCK_RATINGS.diagnosisDifficulty} readOnly />
-        </div>
-        <div>
-          <h3 className="font-medium mb-2">Gravità dei Sintomi</h3>
-          <StarRating value={MOCK_RATINGS.symptomsDiscomfort} readOnly />
-        </div>
-        <div>
-          <h3 className="font-medium mb-2">Efficacia Cura Farmacologica</h3>
-          <StarRating value={MOCK_RATINGS.drugTreatmentEffectiveness} readOnly />
-        </div>
-        <div>
-          <h3 className="font-medium mb-2">Possibilità di Guarigione</h3>
-          <StarRating value={MOCK_RATINGS.healingPossibility} readOnly />
-        </div>
-        <div>
-          <h3 className="font-medium mb-2">Disagio Sociale</h3>
-          <StarRating value={MOCK_RATINGS.socialDiscomfort} readOnly />
-        </div>
-      </Card>
-
-      {/* Navigation Buttons */}
-      <div className="flex flex-wrap gap-4 mb-8">
-        <Button
-          className="flex-1 bg-primary text-white hover:bg-primary-hover"
-          onClick={() => document.getElementById("description")?.scrollIntoView({ behavior: "smooth" })}
+    <div className="container py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-primary">{condition}</h1>
+        <Button 
+          onClick={() => navigate(`/nuova-recensione?condition=${condition}`)}
+          className="bg-primary text-white"
         >
-          Descrizione
-        </Button>
-        <Button
-          className="flex-1 bg-primary text-white hover:bg-primary-hover"
-          onClick={() => document.getElementById("experiences")?.scrollIntoView({ behavior: "smooth" })}
-        >
-          Leggi Esperienze
-        </Button>
-        <Button
-          className="flex-1 bg-primary text-white hover:bg-primary-hover"
-          asChild
-        >
-          <Link to={`/nuova-recensione?condition=${encodeURIComponent(decodedCondition)}`}>
-            Racconta la tua Esperienza
-          </Link>
+          Racconta la tua Esperienza
         </Button>
       </div>
 
-      {/* Content Sections */}
-      <div className="space-y-8">
-        <section id="description" className="scroll-mt-8">
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <Tabs defaultValue="overview" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="overview">Panoramica</TabsTrigger>
+              <TabsTrigger value="symptoms">Sintomi</TabsTrigger>
+              <TabsTrigger value="treatments">Cure</TabsTrigger>
+              <TabsTrigger value="causes">Cause</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-4">
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Cos'è {condition}?</h2>
+                <p className="text-gray-600">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </p>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="symptoms">
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Sintomi principali</h2>
+                <ul className="list-disc list-inside space-y-2 text-gray-600">
+                  <li>Sintomo 1</li>
+                  <li>Sintomo 2</li>
+                  <li>Sintomo 3</li>
+                </ul>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="treatments">
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Trattamenti disponibili</h2>
+                <ul className="list-disc list-inside space-y-2 text-gray-600">
+                  <li>Trattamento 1</li>
+                  <li>Trattamento 2</li>
+                  <li>Trattamento 3</li>
+                </ul>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="causes">
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Cause comuni</h2>
+                <ul className="list-disc list-inside space-y-2 text-gray-600">
+                  <li>Causa 1</li>
+                  <li>Causa 2</li>
+                  <li>Causa 3</li>
+                </ul>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        <div className="space-y-4">
           <Card className="p-6">
-            <h2 className="text-2xl font-semibold mb-4">Cos'è {decodedCondition}?</h2>
-            <p className="text-text-light mb-6">
-              [Descrizione della patologia da inserire]
-            </p>
+            <h2 className="text-xl font-semibold mb-4">Statistiche</h2>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-500">Difficoltà diagnosi</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold">4.2</span>
+                  <Badge>Media</Badge>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Fastidio sintomi</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold">3.8</span>
+                  <Badge>Moderato</Badge>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Possibilità di guarigione</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold">3.5</span>
+                  <Badge>Media</Badge>
+                </div>
+              </div>
+            </div>
           </Card>
-        </section>
 
-        <section id="experiences" className="scroll-mt-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {MOCK_REVIEWS.map((review) => (
-              <ReviewCard key={review.id} {...review} />
-            ))}
-          </div>
-        </section>
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Tag correlati</h2>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">Tag 1</Badge>
+              <Badge variant="secondary">Tag 2</Badge>
+              <Badge variant="secondary">Tag 3</Badge>
+              <Badge variant="secondary">Tag 4</Badge>
+            </div>
+          </Card>
+        </div>
       </div>
 
-      {/* Disclaimer */}
-      <div className="bg-white rounded-lg p-6 mt-8 text-sm text-text-light">
-        <h2 className="text-lg font-semibold mb-4">{decodedCondition}</h2>
-        <p className="mb-4">
-          Scopri l'esperienza di chi soffre di {decodedCondition} grazie alle recensioni ed esperienze di altri utenti.
-        </p>
-        <p className="mb-4">
-          Su StoMale.info puoi leggere le esperienze di utenti che hanno o hanno avuto a che fare con questa patologia. 
-          Puoi leggere le loro esperienze, commentarle o fare domande e scoprire quali sintomi ha o come si sta curando 
-          chi soffre di {decodedCondition}. Puoi inoltre confrontarti su esperti e cure, chiedendo anche di effetti 
-          positivi oppure effetti collaterali o reazioni, tenendo però presente che si tratta di esperienze individuali 
-          e che quindi bisognerà sempre rivolgersi al proprio medico curante per diagnosi e cura.
-        </p>
-        <p className="mb-4">
-          Leggi le esperienze degli utenti che soffrono di {decodedCondition} e scopri come stanno.
-        </p>
-        <p className="mb-4">
-          Gli utenti scrivono recensioni basate sulla propria esperienza personale e sotto diagnosi e consiglio medico, 
-          questo sito quindi NON è inteso per consulenza medica, diagnosi o trattamento e NON deve in nessun caso 
-          sostituirsi a un consulto medico, una visita specialistica o altro. StoMale.info e DigiConsulting non si 
-          assumono responsabilità sulla libera interpretazione del contenuto scritto da altri utenti. E' doveroso 
-          contattare il proprio medico e/o specialista per la diagnosi di malattie e per la prescrizione e assunzione 
-          di farmaci.
-        </p>
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Esperienze ({reviews?.length || 0})</h2>
+        <div className="space-y-4">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-[200px] w-full" />
+              <Skeleton className="h-[200px] w-full" />
+            </>
+          ) : (
+            reviews?.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
-};
-
-export default ConditionDetail;
+}

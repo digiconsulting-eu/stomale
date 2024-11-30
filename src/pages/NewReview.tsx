@@ -48,6 +48,12 @@ export default function NewReview() {
     },
   });
 
+  useEffect(() => {
+    if (conditionParam) {
+      form.setValue("condition", conditionParam);
+    }
+  }, [conditionParam, form]);
+
   const hasDrugTreatment = form.watch("hasDrugTreatment");
 
   const onSubmit = (data: FormValues) => {
