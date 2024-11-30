@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "/logo.png";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  
-  // For now, we'll use localStorage to check login status
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -17,7 +15,7 @@ export const Header = () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('isAdmin');
     navigate('/');
-    window.location.reload(); // Refresh to update the UI
+    window.location.reload();
   };
 
   return (
@@ -28,7 +26,6 @@ export const Header = () => {
             <img src={logo} alt="StoMale.info" className="h-8" />
           </Link>
 
-          {/* Mobile menu button */}
           <button
             className="md:hidden p-2 rounded-md hover:bg-gray-100"
             onClick={toggleMenu}
@@ -37,7 +34,6 @@ export const Header = () => {
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link to="/recensioni" className="text-text hover:text-primary transition-colors">
               Leggi le recensioni
@@ -62,12 +58,19 @@ export const Header = () => {
             </Link>
           </nav>
 
-          {/* Auth buttons */}
           <div className="hidden md:flex items-center space-x-4">
             {isLoggedIn ? (
-              <Button variant="outline" onClick={handleLogout}>
-                Logout
-              </Button>
+              <>
+                <Button variant="ghost" asChild className="flex items-center gap-2">
+                  <Link to="/dashboard">
+                    <User size={18} />
+                    Dashboard
+                  </Link>
+                </Button>
+                <Button variant="outline" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="outline" asChild>
@@ -81,7 +84,6 @@ export const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden py-4 animate-fade-in">
             <nav className="flex flex-col space-y-4">
@@ -136,9 +138,17 @@ export const Header = () => {
               </Link>
               <div className="flex flex-col space-y-2 pt-4">
                 {isLoggedIn ? (
-                  <Button variant="outline" onClick={handleLogout}>
-                    Logout
-                  </Button>
+                  <>
+                    <Button variant="ghost" asChild className="flex items-center gap-2 justify-start">
+                      <Link to="/dashboard" onClick={toggleMenu}>
+                        <User size={18} />
+                        Dashboard
+                      </Link>
+                    </Button>
+                    <Button variant="outline" onClick={handleLogout}>
+                      Logout
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button variant="outline" asChild>

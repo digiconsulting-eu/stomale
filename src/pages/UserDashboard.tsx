@@ -5,6 +5,8 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { NotificationsTab } from "@/components/admin/NotificationsTab";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { PenLine, Search } from "lucide-react";
 
 interface UserReview {
   id: string;
@@ -30,64 +32,49 @@ interface UserData {
 }
 
 export default function UserDashboard() {
-  // In a real app, these would come from an API
   const [userData] = useState<UserData>({
-    username: "Anonimo 1",
-    email: "user@example.com",
-    registrationNumber: 1,
-    joinDate: "2024-02-25"
+    username: localStorage.getItem('username') || "Anonimo",
+    email: localStorage.getItem('email') || "",
+    registrationNumber: parseInt(localStorage.getItem('registrationNumber') || "0"),
+    joinDate: localStorage.getItem('joinDate') || new Date().toISOString()
   });
 
-  const [reviews] = useState<UserReview[]>([
-    {
-      id: "1",
-      title: "La mia esperienza con l'emicrania",
-      condition: "Emicrania",
-      preview: "Ho sofferto di emicrania per anni...",
-      date: "2024-02-25"
-    }
-  ]);
-
-  const [comments] = useState<UserComment[]>([
-    {
-      id: "1",
-      reviewId: "2",
-      reviewTitle: "Esperienza con artrite",
-      content: "Grazie per aver condiviso la tua esperienza...",
-      date: "2024-02-25"
-    }
-  ]);
-
-  const [notifications] = useState([
-    {
-      id: "1",
-      type: "comment",
-      title: "Nuovo commento",
-      content: "Qualcuno ha commentato la tua recensione sull'emicrania",
-      date: "2024-02-25",
-      read: false
-    }
-  ]);
+  const [reviews] = useState<UserReview[]>([]);
+  const [comments] = useState<UserComment[]>([]);
+  const [notifications] = useState([]);
 
   const handleDeleteReview = (reviewId: string) => {
-    // In a real app, this would call an API
     toast.success("Recensione eliminata con successo");
   };
 
   const handleDeleteComment = (commentId: string) => {
-    // In a real app, this would call an API
     toast.success("Commento eliminato con successo");
   };
 
   const markNotificationAsRead = (notificationId: string) => {
-    // In a real app, this would call an API
     console.log("Marking notification as read:", notificationId);
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Il tuo profilo</h1>
+      <h1 className="text-2xl font-bold mb-6">Benvenuto, {userData.username}</h1>
       
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <Button asChild size="lg" className="h-24">
+          <Link to="/nuova-recensione" className="flex flex-col items-center justify-center space-y-2">
+            <PenLine size={24} />
+            <span>Racconta la tua Esperienza</span>
+          </Link>
+        </Button>
+        <Button asChild size="lg" variant="secondary" className="h-24">
+          <Link to="/cerca-patologia" className="flex flex-col items-center justify-center space-y-2">
+            <Search size={24} />
+            <span>Cerca Patologia</span>
+          </Link>
+        </Button>
+      </div>
+
       <Card className="p-6 mb-8">
         <div className="grid gap-4">
           <div>
@@ -100,7 +87,9 @@ export default function UserDashboard() {
           </div>
           <div>
             <h2 className="font-semibold">Data di registrazione</h2>
-            <p className="text-gray-600">{userData.joinDate}</p>
+            <p className="text-gray-600">
+              {new Date(userData.joinDate).toLocaleDateString('it-IT')}
+            </p>
           </div>
         </div>
       </Card>
@@ -113,40 +102,55 @@ export default function UserDashboard() {
         </TabsList>
 
         <TabsContent value="reviews" className="space-y-4">
-          {reviews.map((review) => (
-            <div key={review.id} className="relative">
-              <ReviewCard {...review} />
-              <Button
-                variant="destructive"
-                size="sm"
-                className="absolute top-4 right-4"
-                onClick={() => handleDeleteReview(review.id)}
-              >
-                Elimina
-              </Button>
-            </div>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="comments" className="space-y-4">
-          {comments.map((comment) => (
-            <Card key={comment.id} className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="font-semibold">{comment.reviewTitle}</h3>
-                  <p className="text-sm text-gray-500">{comment.date}</p>
-                </div>
+          {reviews.length > 0 ? (
+            reviews.map((review) => (
+              <div key={review.id} className="relative">
+                <ReviewCard {...review} />
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => handleDeleteComment(comment.id)}
+                  className="absolute top-4 right-4"
+                  onClick={() => handleDeleteReview(review.id)}
                 >
                   Elimina
                 </Button>
               </div>
-              <p className="text-gray-600">{comment.content}</p>
-            </Card>
-          ))}
+            ))
+          ) : (
+            <p className="text-center text-gray-500 py-8">
+              Non hai ancora scritto recensioni.{" "}
+              <Link to="/nuova-recensione" className="text-primary hover:underline">
+                Scrivi la tua prima recensione
+              </Link>
+            </p>
+          )}
+        </TabsContent>
+
+        <TabsContent value="comments" className="space-y-4">
+          {comments.length > 0 ? (
+            comments.map((comment) => (
+              <Card key={comment.id} className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-semibold">{comment.reviewTitle}</h3>
+                    <p className="text-sm text-gray-500">{comment.date}</p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDeleteComment(comment.id)}
+                  >
+                    Elimina
+                  </Button>
+                </div>
+                <p className="text-gray-600">{comment.content}</p>
+              </Card>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 py-8">
+              Non hai ancora scritto commenti
+            </p>
+          )}
         </TabsContent>
 
         <TabsContent value="notifications">

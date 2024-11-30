@@ -32,7 +32,7 @@ const Register = () => {
 
     try {
       // Simulate API call to get next registration number
-      const registrationNumber = Math.floor(Math.random() * 1000) + 1; // In a real app, this would come from the backend
+      const registrationNumber = Math.floor(Math.random() * 1000) + 1;
       const username = `Anonimo ${registrationNumber}`;
 
       // Store user data
