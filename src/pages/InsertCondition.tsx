@@ -2,32 +2,49 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
+  CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
+  CONDITIONS_I, CONDITIONS_L, CONDITIONS_M, CONDITIONS_N,
+  CONDITIONS_O, CONDITIONS_P, CONDITIONS_R, CONDITIONS_S,
+  CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
+} from "@/components/conditions";
 
 const InsertCondition = () => {
   const [newCondition, setNewCondition] = useState("");
-  const { toast } = useToast();
   const navigate = useNavigate();
+
+  const checkIfConditionExists = (condition: string) => {
+    const allConditions = [
+      ...CONDITIONS_A, ...CONDITIONS_B, ...CONDITIONS_C, ...CONDITIONS_D,
+      ...CONDITIONS_E, ...CONDITIONS_F, ...CONDITIONS_G, ...CONDITIONS_H,
+      ...CONDITIONS_I, ...CONDITIONS_L, ...CONDITIONS_M, ...CONDITIONS_N,
+      ...CONDITIONS_O, ...CONDITIONS_P, ...CONDITIONS_R, ...CONDITIONS_S,
+      ...CONDITIONS_T, ...CONDITIONS_U, ...CONDITIONS_V, ...CONDITIONS_Z
+    ];
+
+    return allConditions.some(existingCondition => 
+      existingCondition.toLowerCase() === condition.trim().toUpperCase()
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!newCondition.trim()) {
-      toast({
-        title: "Errore",
-        description: "Inserisci il nome della patologia",
-        variant: "destructive",
-      });
+      toast.error("Inserisci il nome della patologia");
+      return;
+    }
+
+    if (checkIfConditionExists(newCondition)) {
+      toast.error("Questa patologia è già presente nell'elenco");
       return;
     }
 
     // Here we would typically make an API call to save the condition
-    // For now, we'll just show a success message
-    toast({
-      title: "Patologia inserita con successo",
-      description: "La patologia è stata aggiunta all'elenco",
-    });
+    toast.success("Patologia inserita con successo");
 
     // Create a notification for admin
     const notification = {
@@ -40,7 +57,6 @@ const InsertCondition = () => {
     };
 
     // Here we would save the notification to the database
-    // For now, we'll just log it
     console.log("New notification:", notification);
 
     // Reset form and redirect
