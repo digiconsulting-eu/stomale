@@ -76,6 +76,9 @@ export const NotificationsTab = ({
     approvedConditions.push(conditionName);
     localStorage.setItem('approvedConditions', JSON.stringify(approvedConditions));
 
+    // Force a re-render by triggering a storage event
+    window.dispatchEvent(new Event('storage'));
+
     toast.success(`Patologia "${conditionName}" approvata con successo`);
   };
 
@@ -88,6 +91,9 @@ export const NotificationsTab = ({
       (condition: string) => condition !== conditionName
     );
     localStorage.setItem('pendingConditions', JSON.stringify(updatedPendingConditions));
+
+    // Force a re-render by triggering a storage event
+    window.dispatchEvent(new Event('storage'));
 
     toast.success(`Patologia "${conditionName}" rifiutata`);
     
