@@ -90,11 +90,11 @@ export const CookieConsent = () => {
       </div>
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-white"> {/* Added explicit white background */}
           <DialogHeader>
             <DialogTitle>Impostazioni Cookie</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-4 bg-white"> {/* Added explicit white background */}
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="necessary"
@@ -142,7 +142,7 @@ export const CookieConsent = () => {
               </Label>
             </div>
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end bg-white"> {/* Added explicit white background */}
             <Button onClick={handleSaveSettings}>Salva preferenze</Button>
           </div>
         </DialogContent>
