@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { Textarea } from "@/components/ui/textarea";
+import { Disclaimer } from "@/components/Disclaimer";
 
 // Extract StatItem to a separate component for better organization
 const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
@@ -217,6 +218,10 @@ export default function ConditionDetail() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-8">
+        <Disclaimer condition={capitalizeFirstLetter(condition || '')} />
       </div>
     </div>
   );

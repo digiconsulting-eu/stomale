@@ -1,12 +1,9 @@
 import { useParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { StarRating } from "@/components/StarRating";
-import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
-import { useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
+import { ReviewStats } from "@/components/ReviewStats";
+import { CommentSection } from "@/components/CommentSection";
+import { Disclaimer } from "@/components/Disclaimer";
 
 interface Review {
   id: string;
@@ -67,20 +64,6 @@ const getReviewByTitleAndCondition = (condition: string, title: string): Review 
 const ReviewDetail = () => {
   const { condition, title } = useParams();
   const review = getReviewByTitleAndCondition(condition || "", title || "");
-  const [showCommentForm, setShowCommentForm] = useState(false);
-  const [comment, setComment] = useState("");
-
-  const handleSubmitComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!comment.trim()) {
-      toast.error("Il commento non può essere vuoto");
-      return;
-    }
-    // Here you would typically send the comment to your backend
-    toast.success("Commento inviato con successo!");
-    setComment("");
-    setShowCommentForm(false);
-  };
 
   if (!review) {
     return <div className="container mx-auto px-4 py-8">Recensione non trovata</div>;
@@ -127,68 +110,16 @@ const ReviewDetail = () => {
               <p className="text-text-light">{review.experience}</p>
             </section>
 
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-medium mb-2">Difficoltà di Diagnosi</h3>
-                <StarRating value={review.diagnosisDifficulty} readOnly />
-              </div>
+            <ReviewStats
+              diagnosisDifficulty={review.diagnosisDifficulty}
+              symptomSeverity={review.symptomSeverity}
+              hasMedication={review.hasMedication}
+              medicationEffectiveness={review.medicationEffectiveness}
+              healingPossibility={review.healingPossibility}
+              socialDiscomfort={review.socialDiscomfort}
+            />
 
-              <div>
-                <h3 className="font-medium mb-2">Gravità dei Sintomi</h3>
-                <StarRating value={review.symptomSeverity} readOnly />
-              </div>
-
-              {review.hasMedication && (
-                <div>
-                  <h3 className="font-medium mb-2">Efficacia Cura Farmacologica</h3>
-                  <StarRating value={review.medicationEffectiveness || 0} readOnly />
-                </div>
-              )}
-
-              <div>
-                <h3 className="font-medium mb-2">Possibilità di Guarigione</h3>
-                <StarRating value={review.healingPossibility} readOnly />
-              </div>
-
-              <div>
-                <h3 className="font-medium mb-2">Disagio Sociale</h3>
-                <StarRating value={review.socialDiscomfort} readOnly />
-              </div>
-            </section>
-
-            <div className="space-y-4">
-              <div className="flex justify-end">
-                <Button 
-                  className="flex items-center gap-2"
-                  onClick={() => setShowCommentForm(!showCommentForm)}
-                >
-                  <MessageCircle size={18} />
-                  Commenta
-                </Button>
-              </div>
-
-              {showCommentForm && (
-                <form onSubmit={handleSubmitComment} className="space-y-4">
-                  <Textarea
-                    placeholder="Scrivi il tuo commento..."
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    className="min-h-[120px]"
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowCommentForm(false)}
-                    >
-                      Annulla
-                    </Button>
-                    <Button type="submit">
-                      Invia Commento
-                    </Button>
-                  </div>
-                </form>
-              )}
-            </div>
+            <CommentSection />
           </div>
         </div>
       </Card>
@@ -205,30 +136,7 @@ const ReviewDetail = () => {
         </p>
       </div>
 
-      <div className="bg-white rounded-lg p-6 text-sm text-text-light">
-        <h2 className="text-lg font-semibold mb-4">{review.condition}</h2>
-        <p className="mb-4">
-          Scopri l'esperienza di chi soffre di {review.condition} grazie alle recensioni ed esperienze di altri utenti.
-        </p>
-        <p className="mb-4">
-          Su StoMale.info puoi leggere le esperienze di utenti che hanno o hanno avuto a che fare con questa patologia. 
-          Puoi leggere le loro esperienze, commentarle o fare domande e scoprire quali sintomi ha o come si sta curando 
-          chi soffre di {review.condition}. Puoi inoltre confrontarti su esperti e cure, chiedendo anche di effetti 
-          positivi oppure effetti collaterali o reazioni, tenendo però presente che si tratta di esperienze individuali 
-          e che quindi bisognerà sempre rivolgersi al proprio medico curante per diagnosi e cura.
-        </p>
-        <p className="mb-4">
-          Leggi le esperienze degli utenti che soffrono di {review.condition} e scopri come stanno.
-        </p>
-        <p className="mb-4">
-          Gli utenti scrivono recensioni basate sulla propria esperienza personale e sotto diagnosi e consiglio medico, 
-          questo sito quindi NON è inteso per consulenza medica, diagnosi o trattamento e NON deve in nessun caso 
-          sostituirsi a un consulto medico, una visita specialistica o altro. StoMale.info e DigiConsulting non si 
-          assumono responsabilità sulla libera interpretazione del contenuto scritto da altri utenti. E' doveroso 
-          contattare il proprio medico e/o specialista per la diagnosi di malattie e per la prescrizione e assunzione 
-          di farmaci.
-        </p>
-      </div>
+      <Disclaimer condition={review.condition} />
     </div>
   );
 };
