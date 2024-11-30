@@ -25,6 +25,7 @@ import UserManagement from "./pages/UserManagement";
 import CookiePolicy from "./pages/CookiePolicy";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
+import { CookieConsent } from "./components/CookieConsent";
 
 const ScrollToTop = () => {
   const location = useLocation();
@@ -73,6 +74,7 @@ const App = () => (
             </Routes>
           </main>
           <Footer />
+          <CookieConsent />
         </div>
       </BrowserRouter>
     </TooltipProvider>
