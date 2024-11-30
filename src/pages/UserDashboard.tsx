@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { ReviewCard } from "@/components/ReviewCard";
@@ -6,7 +6,10 @@ import { NotificationsTab } from "@/components/admin/NotificationsTab";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { PenLine, Search, Heart, X } from "lucide-react";
+import { PenLine, Search } from "lucide-react";
+import { FavoritesTab } from "@/components/dashboard/FavoritesTab";
+import { useQuery } from "@tanstack/react-query";
+import { NotificationBadge } from "@/components/ui/notification-badge";
 
 interface UserReview {
   id: string;
@@ -45,6 +48,21 @@ export default function UserDashboard() {
   const [favoriteConditions, setFavoriteConditions] = useState<string[]>(
     JSON.parse(localStorage.getItem('favoriteConditions') || '[]')
   );
+
+  // Fetch notifications for favorite conditions
+  const { data: notificationCounts = {} } = useQuery({
+    queryKey: ["notifications", favoriteConditions],
+    queryFn: async () => {
+      // Simulate API call - replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const mockNotifications: { [key: string]: number } = {};
+      favoriteConditions.forEach(condition => {
+        mockNotifications[condition] = Math.floor(Math.random() * 3); // Mock 0-2 notifications per condition
+      });
+      return mockNotifications;
+    },
+    enabled: favoriteConditions.length > 0
+  });
 
   const handleDeleteReview = (reviewId: string) => {
     toast.success("Recensione eliminata con successo");
@@ -106,45 +124,26 @@ export default function UserDashboard() {
 
       <Tabs defaultValue="favorites" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="favorites">Patologie Preferite</TabsTrigger>
+          <TabsTrigger value="favorites">
+            Patologie Preferite
+            {Object.values(notificationCounts).reduce((a, b) => a + b, 0) > 0 && (
+              <NotificationBadge 
+                count={Object.values(notificationCounts).reduce((a, b) => a + b, 0)}
+                className="ml-2"
+              />
+            )}
+          </TabsTrigger>
           <TabsTrigger value="reviews">Le tue recensioni</TabsTrigger>
           <TabsTrigger value="comments">I tuoi commenti</TabsTrigger>
           <TabsTrigger value="notifications">Notifiche</TabsTrigger>
         </TabsList>
 
         <TabsContent value="favorites">
-          {favoriteConditions.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {favoriteConditions.map((condition) => (
-                <Card key={condition} className="p-4">
-                  <div className="flex justify-between items-start">
-                    <Link 
-                      to={`/patologia/${condition}`}
-                      className="text-lg font-semibold text-primary hover:underline"
-                    >
-                      {condition}
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeFavorite(condition)}
-                      className="text-gray-400 hover:text-red-500"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="p-8 text-center">
-              <Heart className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-              <p className="text-gray-500">Non hai ancora salvato patologie preferite</p>
-              <Button asChild variant="link" className="mt-2">
-                <Link to="/cerca-patologia">Cerca una patologia</Link>
-              </Button>
-            </Card>
-          )}
+          <FavoritesTab 
+            favoriteConditions={favoriteConditions}
+            notifications={notificationCounts}
+            removeFavorite={removeFavorite}
+          />
         </TabsContent>
 
         <TabsContent value="reviews" className="space-y-4">
