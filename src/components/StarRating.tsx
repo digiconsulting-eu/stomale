@@ -1,29 +1,29 @@
-import { Square } from "lucide-react";
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StarRatingProps {
   value: number;
-  readOnly?: boolean;
-  onChange?: (value: number) => void;
+  onChange: (value: number) => void;
+  className?: string;
 }
 
-export const StarRating = ({ value, readOnly = false, onChange }: StarRatingProps) => {
+export const StarRating = ({ value, onChange, className }: StarRatingProps) => {
   return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
+    <div className={cn("flex gap-1", className)}>
+      {[1, 2, 3, 4, 5].map((rating) => (
         <button
-          key={star}
-          type={readOnly ? "button" : "submit"}
-          disabled={readOnly}
-          onClick={() => !readOnly && onChange?.(star)}
-          className={`${readOnly ? 'cursor-default' : 'cursor-pointer hover:scale-110 transition-transform'}`}
+          key={rating}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            onChange(rating);
+          }}
+          className={cn(
+            "p-0 w-6 h-6",
+            rating <= value ? "text-yellow-400" : "text-gray-300"
+          )}
         >
-          <Square
-            className={`h-5 w-5 ${
-              star <= value
-                ? 'fill-primary text-primary'
-                : 'fill-gray-200 text-gray-200'
-            } transition-colors`}
-          />
+          <Star className="w-full h-full fill-current" />
         </button>
       ))}
     </div>
