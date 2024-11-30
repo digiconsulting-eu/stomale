@@ -1,14 +1,16 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 
 interface BlogCardProps {
   id: string;
   title: string;
   imageUrl: string;
+  category: string;
   isFeature?: boolean;
 }
 
-export const BlogCard = ({ id, title, imageUrl, isFeature = false }: BlogCardProps) => {
+export const BlogCard = ({ id, title, imageUrl, category, isFeature = false }: BlogCardProps) => {
   return (
     <Link to={`/blog/${id}`} className="block hover:opacity-95 transition-opacity">
       <Card className={`overflow-hidden ${isFeature ? 'h-[600px]' : 'h-[300px]'}`}>
@@ -20,6 +22,7 @@ export const BlogCard = ({ id, title, imageUrl, isFeature = false }: BlogCardPro
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <CardHeader className="absolute bottom-0 text-white">
+            <Badge className="mb-2 w-fit">{category}</Badge>
             <h3 className={`font-bold ${isFeature ? 'text-2xl' : 'text-xl'}`}>
               {title}
             </h3>
