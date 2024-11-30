@@ -1,6 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { StarRating } from "@/components/StarRating";
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
 
 interface Review {
   id: string;
@@ -18,7 +20,7 @@ interface Review {
 }
 
 // This would normally come from an API
-const getReview = (id: string): Review | undefined => {
+const getReviewByTitleAndCondition = (condition: string, title: string): Review | undefined => {
   const reviews = {
     "1": {
       id: "1",
@@ -36,12 +38,17 @@ const getReview = (id: string): Review | undefined => {
     },
   };
   
-  return reviews[id as keyof typeof reviews];
+  // Find review by matching condition and title (in a real app, this would be a DB query)
+  return Object.values(reviews).find(
+    review => 
+      review.condition.toLowerCase().replace(/\s+/g, '-') === condition &&
+      review.title.toLowerCase().replace(/\s+/g, '-') === title
+  );
 };
 
 const ReviewDetail = () => {
-  const { id } = useParams();
-  const review = getReview(id || "");
+  const { condition, title } = useParams();
+  const review = getReviewByTitleAndCondition(condition || "", title || "");
 
   if (!review) {
     return <div className="container mx-auto px-4 py-8">Recensione non trovata</div>;
@@ -101,14 +108,24 @@ const ReviewDetail = () => {
                 <StarRating value={review.socialDiscomfort} readOnly />
               </div>
             </section>
+
+            <div className="flex justify-end">
+              <Button className="flex items-center gap-2">
+                <MessageCircle size={18} />
+                Commenta
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
 
-      <div className="bg-secondary/20 rounded-lg p-6 mb-8">
-        <p className="text-lg mb-4">
-          Vuoi leggere esperienze di altri utenti su {review.condition}?{" "}
-          <Link to={`/patologia/${review.condition.toLowerCase()}`} className="text-primary hover:underline">
+      <div className="bg-primary/10 rounded-lg p-6 mb-8">
+        <p className="text-lg font-medium text-primary">
+          Vuoi leggere altre recensioni su {review.condition}?{" "}
+          <Link 
+            to={`/patologia/${review.condition.toLowerCase()}`} 
+            className="text-primary hover:underline font-bold"
+          >
             Clicca qui
           </Link>
         </p>
