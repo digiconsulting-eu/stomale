@@ -5,15 +5,35 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Heart } from "lucide-react";
+import { Heart, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
+import { Textarea } from "@/components/ui/textarea";
+
+// Extract StatItem to a separate component for better organization
+const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
+  <div>
+    <p className="text-sm text-gray-500">{label}</p>
+    <div className="flex items-center gap-2">
+      <span className="text-2xl font-bold">{value.toFixed(1)}</span>
+      <Badge variant="secondary" className="border border-primary/50 text-text">
+        {description}
+      </Badge>
+    </div>
+  </div>
+);
 
 export default function ConditionDetail() {
   const { condition } = useParams();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [description, setDescription] = useState(
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  );
+  const [editedDescription, setEditedDescription] = useState(description);
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteConditions') || '[]');
@@ -40,6 +60,13 @@ export default function ConditionDetail() {
     
     localStorage.setItem('favoriteConditions', JSON.stringify(newFavorites));
     setIsFavorite(!isFavorite);
+  };
+
+  const handleSaveDescription = () => {
+    // Here you would typically make an API call to save the description
+    setDescription(editedDescription);
+    setIsEditing(false);
+    toast.success("Descrizione aggiornata con successo");
   };
 
   const { data: reviews, isLoading } = useQuery({
@@ -77,18 +104,28 @@ export default function ConditionDetail() {
     <div className="container py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-primary">{capitalizeFirstLetter(condition || '')}</h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleFavorite}
-          className={`${isFavorite ? 'text-primary' : 'text-gray-400'} hover:text-primary`}
-        >
-          <Heart className={`h-6 w-6 ${isFavorite ? 'fill-current' : ''}`} />
-        </Button>
+        <div className="flex gap-2">
+          {isAdmin && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              <Pencil className="h-6 w-6" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleFavorite}
+            className={`${isFavorite ? 'text-primary' : 'text-gray-400'} hover:text-primary`}
+          >
+            <Heart className={`h-6 w-6 ${isFavorite ? 'fill-current' : ''}`} />
+          </Button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-12 gap-6">
-        {/* Statistics Box - Left Column */}
         <div className="md:col-span-4">
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-6">Statistiche</h2>
@@ -102,7 +139,6 @@ export default function ConditionDetail() {
           </Card>
         </div>
 
-        {/* Action Buttons - Right Column */}
         <div className="md:col-span-8">
           <div className="grid gap-4">
             <Button 
@@ -130,9 +166,31 @@ export default function ConditionDetail() {
           <div id="overview" className="mt-8">
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Cos'è {capitalizeFirstLetter(condition || '')}?</h2>
-              <p className="text-gray-600">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </p>
+              {isEditing ? (
+                <div className="space-y-4">
+                  <Textarea
+                    value={editedDescription}
+                    onChange={(e) => setEditedDescription(e.target.value)}
+                    className="min-h-[150px]"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditedDescription(description);
+                      }}
+                    >
+                      Annulla
+                    </Button>
+                    <Button onClick={handleSaveDescription}>
+                      Salva
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-600">{description}</p>
+              )}
             </Card>
           </div>
 
@@ -163,18 +221,3 @@ export default function ConditionDetail() {
     </div>
   );
 }
-
-const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
-  <div>
-    <p className="text-sm text-gray-500">{label}</p>
-    <div className="flex items-center gap-2">
-      <span className="text-2xl font-bold">{value.toFixed(1)}</span>
-      <Badge 
-        variant="secondary" 
-        className="border border-primary/50 text-text"
-      >
-        {description}
-      </Badge>
-    </div>
-  </div>
-);

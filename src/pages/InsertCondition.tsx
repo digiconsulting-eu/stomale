@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Pencil } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import {
   CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
   CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
@@ -14,7 +16,13 @@ import {
 
 const InsertCondition = () => {
   const [newCondition, setNewCondition] = useState("");
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [description, setDescription] = useState(
+    "Non trovi la patologia che stai cercando? Inseriscila qui e sarà aggiunta all'elenco dopo l'approvazione."
+  );
+  const [editedDescription, setEditedDescription] = useState(description);
   const navigate = useNavigate();
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   const checkIfConditionExists = (condition: string) => {
     const allConditions = [
@@ -64,14 +72,60 @@ const InsertCondition = () => {
     navigate("/cerca-patologia");
   };
 
+  const handleSaveDescription = () => {
+    setDescription(editedDescription);
+    setIsEditingDescription(false);
+    toast.success("Descrizione aggiornata con successo");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Inserisci una nuova patologia</CardTitle>
-          <CardDescription>
-            Non trovi la patologia che stai cercando? Inseriscila qui e sarà aggiunta all'elenco dopo l'approvazione.
-          </CardDescription>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle>Inserisci una nuova patologia</CardTitle>
+              <CardDescription>
+                {isEditingDescription ? (
+                  <div className="space-y-4 mt-4">
+                    <Textarea
+                      value={editedDescription}
+                      onChange={(e) => setEditedDescription(e.target.value)}
+                      className="min-h-[100px]"
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsEditingDescription(false);
+                          setEditedDescription(description);
+                        }}
+                      >
+                        Annulla
+                      </Button>
+                      <Button onClick={handleSaveDescription}>
+                        Salva
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2">
+                    <span>{description}</span>
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsEditingDescription(true)}
+                        className="flex-shrink-0"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
