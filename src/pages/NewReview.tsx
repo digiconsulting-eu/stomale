@@ -50,7 +50,7 @@ export default function NewReview() {
 
   useEffect(() => {
     if (conditionParam) {
-      form.setValue("condition", conditionParam);
+      form.setValue("condition", decodeURIComponent(conditionParam));
     }
   }, [conditionParam, form]);
 

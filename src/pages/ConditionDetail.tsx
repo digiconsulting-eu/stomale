@@ -21,7 +21,8 @@ export default function ConditionDetail() {
           title: "La mia esperienza con l'emicrania",
           author: "Mario Rossi",
           date: "2024-01-15",
-          content: "Ho sofferto di emicrania per anni...",
+          preview: "Ho sofferto di emicrania per anni...",
+          condition: condition,
           rating: 4,
           helpful: 12
         },
@@ -30,7 +31,8 @@ export default function ConditionDetail() {
           title: "Finalmente ho trovato la cura giusta",
           author: "Laura Bianchi",
           date: "2024-01-10",
-          content: "Dopo tanti tentativi...",
+          preview: "Dopo tanti tentativi...",
+          condition: condition,
           rating: 5,
           helpful: 8
         }
@@ -43,7 +45,7 @@ export default function ConditionDetail() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-primary">{condition}</h1>
         <Button 
-          onClick={() => navigate(`/nuova-recensione?condition=${condition}`)}
+          onClick={() => navigate(`/nuova-recensione?condition=${encodeURIComponent(condition || '')}`)}
           className="bg-primary text-white"
         >
           Racconta la tua Esperienza
@@ -154,7 +156,17 @@ export default function ConditionDetail() {
             </>
           ) : (
             reviews?.map((review) => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard 
+                key={review.id} 
+                id={review.id}
+                title={review.title}
+                author={review.author}
+                date={review.date}
+                preview={review.preview}
+                condition={review.condition}
+                rating={review.rating}
+                helpful={review.helpful}
+              />
             ))
           )}
         </div>
