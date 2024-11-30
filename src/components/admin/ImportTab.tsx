@@ -21,37 +21,60 @@ const ImportTab = () => {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      const validReviews = [];
-      let errorCount = 0;
+      console.log('Dati Excel importati:', jsonData);
 
-      for (const row of jsonData) {
+      if (jsonData.length === 0) {
+        toast.error("Il file è vuoto");
+        return;
+      }
+
+      const validReviews = [];
+      const errors = [];
+
+      for (const [index, row] of jsonData.entries()) {
         try {
           const validatedRow = validateRow(row);
           if (validatedRow) {
             validReviews.push(validatedRow);
           }
         } catch (error) {
-          errorCount++;
-          toast.error((error as Error).message);
+          errors.push(`Riga ${index + 2}: ${(error as Error).message}`);
         }
       }
 
+      if (errors.length > 0) {
+        console.error('Errori di validazione:', errors);
+        errors.forEach(error => toast.error(error));
+      }
+
       if (validReviews.length > 0) {
+        // Get existing reviews from localStorage
         const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+        
+        // Add new reviews
         const updatedReviews = [...existingReviews, ...validReviews];
+        
+        // Sort by date (most recent first)
+        updatedReviews.sort((a, b) => {
+          const dateA = new Date(a.date.split('-').reverse().join('-'));
+          const dateB = new Date(b.date.split('-').reverse().join('-'));
+          return dateB.getTime() - dateA.getTime();
+        });
+
+        // Save to localStorage
         localStorage.setItem('reviews', JSON.stringify(updatedReviews));
 
         toast.success(
           `${validReviews.length} recensioni importate con successo${
-            errorCount > 0 ? `. ${errorCount} recensioni ignorate per errori.` : '.'
+            errors.length > 0 ? `. ${errors.length} recensioni ignorate per errori.` : '.'
           }`
         );
       } else {
         toast.error("Nessuna recensione valida trovata nel file.");
       }
     } catch (error) {
+      console.error('Errore durante l\'importazione:', error);
       toast.error("Si è verificato un errore durante l'importazione del file.");
-      console.error(error);
     } finally {
       setIsLoading(false);
       event.target.value = '';
