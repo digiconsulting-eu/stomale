@@ -15,7 +15,7 @@ import Login from "./pages/Login";
 import UserDashboard from "./pages/UserDashboard";
 import Reviews from "./pages/Reviews";
 import { Header } from "./components/Header";
-import { Footer } from "./components/Footer";
+import Footer from "./components/Footer";
 import InsertCondition from "./pages/InsertCondition";
 import Blog from "./pages/Blog";
 import AddArticle from "./pages/AddArticle";
