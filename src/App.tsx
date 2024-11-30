@@ -18,6 +18,7 @@ import { Header } from "./components/Header";
 import InsertCondition from "./pages/InsertCondition";
 import Blog from "./pages/Blog";
 import AddArticle from "./pages/AddArticle";
+import ArticleDetail from "./pages/ArticleDetail";
 
 const ScrollToTop = () => {
   const location = useLocation();
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/inserisci-patologia" element={<InsertCondition />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/nuovo" element={<AddArticle />} />
+          <Route path="/blog/articolo/:id" element={<ArticleDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registrati" element={<Register />} />
           <Route path="/recupera-password" element={<div>Recupera Password Page</div>} />

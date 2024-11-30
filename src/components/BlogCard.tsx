@@ -30,44 +30,50 @@ export const BlogCard = ({ id, title, imageUrl, category, isFeature = false }: B
 
   return (
     <div className={`group relative ${isFeature ? 'row-span-3' : ''}`}>
-      <div className="relative h-full overflow-hidden rounded-lg">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
-        <div className="absolute bottom-0 p-4 w-full">
-          <div className="flex justify-between items-start gap-4">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-white/80 mb-2">{category}</p>
-              <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">
-                {title}
-              </h3>
-            </div>
-            {isAdmin && (
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  asChild
-                >
-                  <Link to={`/blog/modifica/${id}`}>
-                    <Pencil className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
+      <Link to={`/blog/articolo/${id}`} className="block">
+        <div className="relative h-full overflow-hidden rounded-lg">
+          <img
+            src={imageUrl}
+            alt={title}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
+          <div className="absolute bottom-0 p-4 w-full">
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-white/80 mb-2">{category}</p>
+                <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">
+                  {title}
+                </h3>
               </div>
-            )}
+              {isAdmin && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    asChild
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    <Link to={`/blog/modifica/${id}`}>
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowDeleteDialog(true);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </Link>
 
       <ConfirmDialog
         isOpen={showDeleteDialog}
