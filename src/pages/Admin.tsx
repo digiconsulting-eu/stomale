@@ -128,12 +128,12 @@ const Admin = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Area Amministrazione</h1>
+    <div className="container mx-auto px-4 py-4 md:py-8">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8">Area Amministrazione</h1>
       
-      <Tabs defaultValue="notifications" className="w-full">
-        <TabsList>
-          <TabsTrigger value="notifications" className="relative">
+      <Tabs defaultValue="notifications" className="w-full space-y-6">
+        <TabsList className="w-full flex flex-wrap gap-2 h-auto">
+          <TabsTrigger value="notifications" className="relative flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
             Notifiche
             {notifications.some(n => !n.read) && (
               <Badge variant="destructive" className="ml-2">
@@ -141,45 +141,55 @@ const Admin = () => {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="reviews">Recensioni</TabsTrigger>
-          <TabsTrigger value="comments">Commenti</TabsTrigger>
-          <TabsTrigger value="admins">Amministratori</TabsTrigger>
-          <TabsTrigger value="import">Import</TabsTrigger>
+          <TabsTrigger value="reviews" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
+            Recensioni
+          </TabsTrigger>
+          <TabsTrigger value="comments" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
+            Commenti
+          </TabsTrigger>
+          <TabsTrigger value="admins" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
+            Amministratori
+          </TabsTrigger>
+          <TabsTrigger value="import" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
+            Import
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="notifications">
-          <NotificationsTab 
-            notifications={notifications}
-            markNotificationAsRead={markNotificationAsRead}
-          />
-        </TabsContent>
+        <div className="mt-4">
+          <TabsContent value="notifications" className="m-0">
+            <NotificationsTab 
+              notifications={notifications}
+              markNotificationAsRead={markNotificationAsRead}
+            />
+          </TabsContent>
 
-        <TabsContent value="reviews">
-          <ReviewsTab 
-            reviews={reviews}
-            handleReviewAction={handleReviewAction}
-          />
-        </TabsContent>
+          <TabsContent value="reviews" className="m-0">
+            <ReviewsTab 
+              reviews={reviews}
+              handleReviewAction={handleReviewAction}
+            />
+          </TabsContent>
 
-        <TabsContent value="comments">
-          <CommentsTab 
-            comments={comments}
-            handleCommentAction={handleCommentAction}
-          />
-        </TabsContent>
+          <TabsContent value="comments" className="m-0">
+            <CommentsTab 
+              comments={comments}
+              handleCommentAction={handleCommentAction}
+            />
+          </TabsContent>
 
-        <TabsContent value="admins">
-          <AdminsTab 
-            admins={admins}
-            newAdminEmail={newAdminEmail}
-            setNewAdminEmail={setNewAdminEmail}
-            handleAddAdmin={handleAddAdmin}
-          />
-        </TabsContent>
+          <TabsContent value="admins" className="m-0">
+            <AdminsTab 
+              admins={admins}
+              newAdminEmail={newAdminEmail}
+              setNewAdminEmail={setNewAdminEmail}
+              handleAddAdmin={handleAddAdmin}
+            />
+          </TabsContent>
 
-        <TabsContent value="import">
-          <ImportTab />
-        </TabsContent>
+          <TabsContent value="import" className="m-0">
+            <ImportTab />
+          </TabsContent>
+        </div>
       </Tabs>
     </div>
   );
