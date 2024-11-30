@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
@@ -11,54 +11,101 @@ import {
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 const getConditionsByLetter = (letter: string) => {
+  // Get approved conditions from localStorage
+  const approvedConditions = JSON.parse(localStorage.getItem('approvedConditions') || '[]');
+  
+  // Get base conditions from the static list
+  let baseConditions: string[] = [];
   switch (letter) {
     case "A":
-      return CONDITIONS_A;
+      baseConditions = CONDITIONS_A;
+      break;
     case "B":
-      return CONDITIONS_B;
+      baseConditions = CONDITIONS_B;
+      break;
     case "C":
-      return CONDITIONS_C;
+      baseConditions = CONDITIONS_C;
+      break;
     case "D":
-      return CONDITIONS_D;
+      baseConditions = CONDITIONS_D;
+      break;
     case "E":
-      return CONDITIONS_E;
+      baseConditions = CONDITIONS_E;
+      break;
     case "F":
-      return CONDITIONS_F;
+      baseConditions = CONDITIONS_F;
+      break;
     case "G":
-      return CONDITIONS_G;
+      baseConditions = CONDITIONS_G;
+      break;
     case "H":
-      return CONDITIONS_H;
+      baseConditions = CONDITIONS_H;
+      break;
     case "I":
-      return CONDITIONS_I;
+      baseConditions = CONDITIONS_I;
+      break;
     case "L":
-      return CONDITIONS_L;
+      baseConditions = CONDITIONS_L;
+      break;
     case "M":
-      return CONDITIONS_M;
+      baseConditions = CONDITIONS_M;
+      break;
     case "N":
-      return CONDITIONS_N;
+      baseConditions = CONDITIONS_N;
+      break;
     case "O":
-      return CONDITIONS_O;
+      baseConditions = CONDITIONS_O;
+      break;
     case "P":
-      return CONDITIONS_P;
+      baseConditions = CONDITIONS_P;
+      break;
     case "R":
-      return CONDITIONS_R;
+      baseConditions = CONDITIONS_R;
+      break;
     case "S":
-      return CONDITIONS_S;
+      baseConditions = CONDITIONS_S;
+      break;
     case "T":
-      return CONDITIONS_T;
+      baseConditions = CONDITIONS_T;
+      break;
     case "U":
-      return CONDITIONS_U;
+      baseConditions = CONDITIONS_U;
+      break;
     case "V":
-      return CONDITIONS_V;
+      baseConditions = CONDITIONS_V;
+      break;
     case "Z":
-      return CONDITIONS_Z;
+      baseConditions = CONDITIONS_Z;
+      break;
     default:
-      return [];
+      baseConditions = [];
   }
+
+  // Filter approved conditions that start with the current letter
+  const approvedForLetter = approvedConditions.filter((condition: string) => 
+    condition.startsWith(letter)
+  );
+
+  // Combine and sort all conditions
+  return [...baseConditions, ...approvedForLetter].sort();
 };
 
 const SearchCondition = () => {
   const [selectedLetter, setSelectedLetter] = useState("A");
+  const [conditions, setConditions] = useState<string[]>([]);
+
+  // Update conditions when selected letter changes or when localStorage changes
+  useEffect(() => {
+    const updateConditions = () => {
+      setConditions(getConditionsByLetter(selectedLetter));
+    };
+
+    updateConditions();
+
+    // Listen for storage events to update the list when conditions are approved
+    window.addEventListener('storage', updateConditions);
+    return () => window.removeEventListener('storage', updateConditions);
+  }, [selectedLetter]);
 
   const handleLetterChange = (letter: string) => {
     setSelectedLetter(letter);
@@ -97,7 +144,7 @@ const SearchCondition = () => {
           </h2>
 
           <div className="grid gap-3">
-            {getConditionsByLetter(selectedLetter).map((condition) => (
+            {conditions.map((condition) => (
               <Link
                 key={condition}
                 to={`/patologia/${encodeURIComponent(condition.toLowerCase())}`}
