@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Bell, Trash2, Check, X } from "lucide-react";
+import { Bell, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -17,6 +17,43 @@ interface NotificationsTabProps {
   markNotificationAsRead: (id: string) => void;
   onDeleteCondition?: (conditionName: string) => void;
 }
+
+// Helper component for notification actions
+const NotificationActions = ({ 
+  type, 
+  content, 
+  onApprove, 
+  onReject 
+}: { 
+  type: string; 
+  content: string; 
+  onApprove: () => void; 
+  onReject: () => void;
+}) => {
+  if (type === "new_condition") {
+    return (
+      <div className="flex gap-2">
+        <Button
+          variant="default"
+          size="sm"
+          onClick={onApprove}
+        >
+          <Check className="h-4 w-4 mr-1" />
+          Approva
+        </Button>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={onReject}
+        >
+          <X className="h-4 w-4 mr-1" />
+          Rifiuta
+        </Button>
+      </div>
+    );
+  }
+  return null;
+};
 
 export const NotificationsTab = ({ 
   notifications, 
@@ -80,32 +117,12 @@ export const NotificationsTab = ({
           <p className="text-gray-600 mt-1">{notification.content}</p>
           <div className="flex justify-between items-center mt-2">
             <p className="text-sm text-gray-500">{notification.date}</p>
-            {notification.type === "new_condition" && (
-              <div className="flex gap-2">
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleApproveCondition(notification.content);
-                  }}
-                >
-                  <Check className="h-4 w-4 mr-1" />
-                  Approva
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteCondition(notification.content);
-                  }}
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Rifiuta
-                </Button>
-              </div>
-            )}
+            <NotificationActions
+              type={notification.type}
+              content={notification.content}
+              onApprove={() => handleApproveCondition(notification.content)}
+              onReject={() => handleDeleteCondition(notification.content)}
+            />
           </div>
         </div>
       ))}
