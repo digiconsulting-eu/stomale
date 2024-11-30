@@ -17,22 +17,22 @@ export default function ConditionDetail() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       return [
         {
-          id: 1,
+          id: "1",
           title: "La mia esperienza con l'emicrania",
           author: "Mario Rossi",
           date: "2024-01-15",
           preview: "Ho sofferto di emicrania per anni...",
-          condition: condition,
+          condition: condition || "",
           rating: 4,
           helpful: 12
         },
         {
-          id: 2,
+          id: "2",
           title: "Finalmente ho trovato la cura giusta",
           author: "Laura Bianchi",
           date: "2024-01-10",
           preview: "Dopo tanti tentativi...",
-          condition: condition,
+          condition: condition || "",
           rating: 5,
           helpful: 8
         }
@@ -157,15 +157,12 @@ export default function ConditionDetail() {
           ) : (
             reviews?.map((review) => (
               <ReviewCard 
-                key={review.id} 
+                key={review.id}
                 id={review.id}
                 title={review.title}
-                author={review.author}
                 date={review.date}
                 preview={review.preview}
                 condition={review.condition}
-                rating={review.rating}
-                helpful={review.helpful}
               />
             ))
           )}
