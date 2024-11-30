@@ -6,7 +6,7 @@ import { NotificationsTab } from "@/components/admin/NotificationsTab";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { PenLine, Search } from "lucide-react";
+import { PenLine, Search, Heart, X } from "lucide-react";
 
 interface UserReview {
   id: string;
@@ -42,6 +42,9 @@ export default function UserDashboard() {
   const [reviews] = useState<UserReview[]>([]);
   const [comments] = useState<UserComment[]>([]);
   const [notifications] = useState([]);
+  const [favoriteConditions, setFavoriteConditions] = useState<string[]>(
+    JSON.parse(localStorage.getItem('favoriteConditions') || '[]')
+  );
 
   const handleDeleteReview = (reviewId: string) => {
     toast.success("Recensione eliminata con successo");
@@ -49,6 +52,13 @@ export default function UserDashboard() {
 
   const handleDeleteComment = (commentId: string) => {
     toast.success("Commento eliminato con successo");
+  };
+
+  const removeFavorite = (condition: string) => {
+    const newFavorites = favoriteConditions.filter(fav => fav !== condition);
+    localStorage.setItem('favoriteConditions', JSON.stringify(newFavorites));
+    setFavoriteConditions(newFavorites);
+    toast.success("Patologia rimossa dai preferiti");
   };
 
   const markNotificationAsRead = (notificationId: string) => {
@@ -94,12 +104,48 @@ export default function UserDashboard() {
         </div>
       </Card>
 
-      <Tabs defaultValue="reviews" className="space-y-4">
+      <Tabs defaultValue="favorites" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="favorites">Patologie Preferite</TabsTrigger>
           <TabsTrigger value="reviews">Le tue recensioni</TabsTrigger>
           <TabsTrigger value="comments">I tuoi commenti</TabsTrigger>
           <TabsTrigger value="notifications">Notifiche</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="favorites">
+          {favoriteConditions.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {favoriteConditions.map((condition) => (
+                <Card key={condition} className="p-4">
+                  <div className="flex justify-between items-start">
+                    <Link 
+                      to={`/patologia/${condition}`}
+                      className="text-lg font-semibold text-primary hover:underline"
+                    >
+                      {condition}
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeFavorite(condition)}
+                      className="text-gray-400 hover:text-red-500"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="p-8 text-center">
+              <Heart className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+              <p className="text-gray-500">Non hai ancora salvato patologie preferite</p>
+              <Button asChild variant="link" className="mt-2">
+                <Link to="/cerca-patologia">Cerca una patologia</Link>
+              </Button>
+            </Card>
+          )}
+        </TabsContent>
 
         <TabsContent value="reviews" className="space-y-4">
           {reviews.length > 0 ? (

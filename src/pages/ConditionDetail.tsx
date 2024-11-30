@@ -5,10 +5,41 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Heart } from "lucide-react";
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 export default function ConditionDetail() {
   const { condition } = useParams();
   const navigate = useNavigate();
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    const favorites = JSON.parse(localStorage.getItem('favoriteConditions') || '[]');
+    setIsFavorite(favorites.includes(condition));
+  }, [condition]);
+
+  const toggleFavorite = () => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+      toast.error("Devi effettuare l'accesso per salvare le patologie preferite");
+      return;
+    }
+
+    const favorites = JSON.parse(localStorage.getItem('favoriteConditions') || '[]');
+    let newFavorites;
+    
+    if (isFavorite) {
+      newFavorites = favorites.filter((fav: string) => fav !== condition);
+      toast.success("Patologia rimossa dai preferiti");
+    } else {
+      newFavorites = [...favorites, condition];
+      toast.success("Patologia aggiunta ai preferiti");
+    }
+    
+    localStorage.setItem('favoriteConditions', JSON.stringify(newFavorites));
+    setIsFavorite(!isFavorite);
+  };
 
   const { data: reviews, isLoading } = useQuery({
     queryKey: ["reviews", condition],
@@ -41,7 +72,17 @@ export default function ConditionDetail() {
 
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-bold text-primary mb-8">{condition}</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-primary">{condition}</h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleFavorite}
+          className={`${isFavorite ? 'text-primary' : 'text-gray-400'} hover:text-primary`}
+        >
+          <Heart className={`h-6 w-6 ${isFavorite ? 'fill-current' : ''}`} />
+        </Button>
+      </div>
 
       <div className="grid md:grid-cols-12 gap-6">
         {/* Statistics Box - Left Column */}
@@ -120,7 +161,6 @@ export default function ConditionDetail() {
   );
 }
 
-// Helper component for statistics items
 const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
   <div>
     <p className="text-sm text-gray-500">{label}</p>
