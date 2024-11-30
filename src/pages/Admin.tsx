@@ -6,7 +6,7 @@ import { NotificationsTab } from "@/components/admin/NotificationsTab";
 import { ReviewsTab } from "@/components/admin/ReviewsTab";
 import { CommentsTab } from "@/components/admin/CommentsTab";
 import { AdminsTab } from "@/components/admin/AdminsTab";
-import { ImportTab } from "@/components/admin/ImportTab";
+import ImportTab from "@/components/admin/ImportTab";
 
 // Temporary mock data
 const MOCK_REVIEWS = [
