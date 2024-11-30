@@ -130,7 +130,7 @@ export default function Login() {
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full border border-primary"
                 disabled={isLoading}
               >
                 {isLoading ? "Accesso in corso..." : "Accedi"}
