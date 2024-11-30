@@ -91,9 +91,12 @@ const ReviewDetail = () => {
           </div>
           
           <div className="mb-6">
-            <span className="inline-block px-3 py-1 bg-secondary rounded-full text-sm text-text-light">
+            <Link 
+              to={`/patologia/${review.condition.toLowerCase()}`}
+              className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium hover:bg-primary/20 transition-colors"
+            >
               {review.condition}
-            </span>
+            </Link>
           </div>
 
           <div className="space-y-6">
