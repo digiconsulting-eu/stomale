@@ -76,7 +76,7 @@ export const NotificationsTab = ({
     approvedConditions.push(conditionName);
     localStorage.setItem('approvedConditions', JSON.stringify(approvedConditions));
 
-    // Force a re-render by triggering a storage event
+    // Force a re-render
     window.dispatchEvent(new Event('storage'));
 
     toast.success(`Patologia "${conditionName}" approvata con successo`);
@@ -92,7 +92,7 @@ export const NotificationsTab = ({
     );
     localStorage.setItem('pendingConditions', JSON.stringify(updatedPendingConditions));
 
-    // Force a re-render by triggering a storage event
+    // Force a re-render
     window.dispatchEvent(new Event('storage'));
 
     toast.success(`Patologia "${conditionName}" rifiutata`);
@@ -102,17 +102,21 @@ export const NotificationsTab = ({
     }
   };
 
-  // Get pending conditions from localStorage
+  // Get pending conditions from localStorage and filter out approved ones
   const pendingConditions = JSON.parse(localStorage.getItem('pendingConditions') || '[]');
+  const approvedConditions = JSON.parse(localStorage.getItem('approvedConditions') || '[]');
+  const filteredPendingConditions = pendingConditions.filter(
+    (condition: string) => !approvedConditions.includes(condition)
+  );
 
   return (
     <div className="space-y-8">
       {/* Pending Conditions Section */}
-      {pendingConditions.length > 0 && (
+      {filteredPendingConditions.length > 0 && (
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Nuove patologie da approvare</h2>
           <div className="space-y-4">
-            {pendingConditions.map((condition: string) => (
+            {filteredPendingConditions.map((condition: string) => (
               <div
                 key={condition}
                 className="p-4 rounded-lg border bg-white"
