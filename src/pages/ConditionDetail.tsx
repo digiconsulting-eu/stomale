@@ -2,9 +2,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ReviewCard } from "@/components/ReviewCard";
-import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 export default function ConditionDetail() {
   const { condition } = useParams();
@@ -49,14 +49,11 @@ export default function ConditionDetail() {
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-6">Statistiche</h2>
             <div className="space-y-6">
-              <StatItem label="Difficoltà diagnosi" value={4.2} description="Media" />
-              <StatItem label="Fastidio sintomi" value={3.8} description="Moderato" />
-              <StatItem label="Possibilità di guarigione" value={3.5} description="Media" />
-              <StatItem label="Efficacia cure" value={4.0} description="Buona" />
-              <StatItem label="Impatto sulla vita" value={3.9} description="Significativo" />
-              <StatItem label="Costo cure" value={3.2} description="Moderato" />
-              <StatItem label="Supporto medico" value={4.1} description="Buono" />
-              <StatItem label="Tempo diagnosi" value={3.4} description="Medio" />
+              <StatItem label="Difficoltà di Diagnosi" value={4.2} description="Alta" />
+              <StatItem label="Fastidio Sintomi" value={3.8} description="Moderato" />
+              <StatItem label="Efficacia Cura Farmacologica" value={4.0} description="Buona" />
+              <StatItem label="Possibilità di Guarigione" value={3.5} description="Media" />
+              <StatItem label="Disagio Sociale" value={3.9} description="Alto" />
             </div>
           </Card>
         </div>
@@ -65,27 +62,21 @@ export default function ConditionDetail() {
         <div className="md:col-span-8">
           <div className="grid gap-4">
             <Button 
-              variant="default"
-              size="lg"
-              className="w-full text-lg py-6"
+              className="w-full text-lg py-6 bg-blue-100 hover:bg-blue-200 text-blue-800"
               onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Panoramica
             </Button>
             
             <Button 
-              variant="secondary"
-              size="lg"
-              className="w-full text-lg py-6"
+              className="w-full text-lg py-6 bg-blue-100 hover:bg-blue-200 text-blue-800"
               onClick={() => document.getElementById('experiences')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Leggi Esperienze
             </Button>
             
             <Button 
-              variant="outline"
-              size="lg"
-              className="w-full text-lg py-6"
+              className="w-full text-lg py-6 bg-blue-100 hover:bg-blue-200 text-blue-800"
               onClick={() => navigate(`/nuova-recensione?patologia=${condition}`)}
             >
               Racconta la tua Esperienza
@@ -135,7 +126,7 @@ const StatItem = ({ label, value, description }: { label: string, value: number,
     <p className="text-sm text-gray-500">{label}</p>
     <div className="flex items-center gap-2">
       <span className="text-2xl font-bold">{value.toFixed(1)}</span>
-      <Badge>{description}</Badge>
+      <Badge variant="secondary">{description}</Badge>
     </div>
   </div>
 );
