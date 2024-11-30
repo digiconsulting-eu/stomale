@@ -24,7 +24,7 @@ export const CommentSection = () => {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-blue-50 text-primary hover:bg-blue-100"
           onClick={() => setShowCommentForm(!showCommentForm)}
         >
           <MessageCircle size={18} />

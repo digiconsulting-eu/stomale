@@ -56,12 +56,23 @@ export default function ReviewDetail() {
 
   return (
     <div className="container py-8">
-      <Link 
-        to={`/patologia/${condition}`}
-        className="text-primary hover:underline mb-6 block"
-      >
-        ← Leggi altre esperienze su {conditionName}
-      </Link>
+      <div className="flex justify-between items-start mb-6">
+        <Link 
+          to={`/patologia/${condition}`}
+          className="text-primary hover:underline"
+        >
+          ← Leggi altre esperienze su {conditionName}
+        </Link>
+        <Button 
+          asChild
+          className="flex items-center gap-2"
+        >
+          <Link to={`/nuova-recensione?patologia=${condition}`}>
+            <PenSquare className="mr-2 h-4 w-4" />
+            Racconta la tua esperienza
+          </Link>
+        </Button>
+      </div>
 
       <div className="grid md:grid-cols-12 gap-8">
         {/* Left column - Stats */}
@@ -76,18 +87,6 @@ export default function ReviewDetail() {
               healingPossibility={review.healingPossibility}
               socialDiscomfort={review.socialDiscomfort}
             />
-
-            <div className="mt-8 space-y-4">
-              <Button 
-                className="w-full"
-                asChild
-              >
-                <Link to={`/nuova-recensione?patologia=${condition}`}>
-                  <PenSquare className="mr-2 h-4 w-4" />
-                  Racconta la tua esperienza
-                </Link>
-              </Button>
-            </div>
           </Card>
         </div>
 
