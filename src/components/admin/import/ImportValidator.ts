@@ -14,29 +14,39 @@ interface ImportedReview {
   email?: string;
 }
 
-export const validateRow = (row: any): ImportedReview | null => {
-  // Map Excel column names to our expected field names
-  const fieldMappings = {
-    'Patologia': 'condition',
-    'Titolo': 'title',
-    'Sintomi': 'symptoms',
-    'Esperienza': 'experience',
-    'Difficoltà di Diagnosi': 'diagnosisDifficulty',
-    'Quanto sono fastidiosi i sintomi': 'symptomsDiscomfort',
-    'Efficacia cura farmacologica': 'medicationEffectiveness',
-    'Possibilità di guarigione': 'healingPossibility',
-    'Disagio sociale': 'socialDiscomfort',
-    'Data': 'date',
-    'Nome Utente': 'username',
-    'Email': 'email'
-  };
+const formatDate = (dateInput: any): string => {
+  if (!dateInput) {
+    return new Date().toLocaleDateString('it-IT').split('/').join('-');
+  }
 
-  // Check required fields (only Patologia and Esperienza)
-  const requiredFields = ['Patologia', 'Esperienza'];
-  for (const field of requiredFields) {
-    if (row[field] === undefined || row[field] === null || row[field] === '') {
-      throw new Error(`Campo obbligatorio mancante: ${field}`);
+  // If it's already in the correct format DD-MM-YYYY, return as is
+  if (typeof dateInput === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(dateInput)) {
+    return dateInput;
+  }
+
+  try {
+    // Handle Excel date number format
+    if (typeof dateInput === 'number') {
+      const excelEpoch = new Date(1899, 11, 30);
+      const date = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000);
+      return date.toLocaleDateString('it-IT').split('/').join('-');
     }
+
+    // Try to parse the date string
+    const date = new Date(dateInput);
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date');
+    }
+    return date.toLocaleDateString('it-IT').split('/').join('-');
+  } catch {
+    return new Date().toLocaleDateString('it-IT').split('/').join('-');
+  }
+};
+
+export const validateRow = (row: any): ImportedReview | null => {
+  // Check required fields (only Patologia and Esperienza)
+  if (!row['Patologia'] || !row['Esperienza']) {
+    throw new Error('Campi obbligatori mancanti: Patologia e Esperienza sono richiesti');
   }
 
   // Validate ratings if present (must be between 1 and 5)
@@ -58,18 +68,10 @@ export const validateRow = (row: any): ImportedReview | null => {
   }
 
   // Validate email format if present
-  if (row['Email'] !== undefined && row['Email'] !== null && row['Email'] !== '') {
+  if (row['Email'] && typeof row['Email'] === 'string' && row['Email'].trim() !== '') {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(row['Email'])) {
       throw new Error("Formato email non valido");
-    }
-  }
-
-  // Validate date format if present (DD-MM-YYYY)
-  if (row['Data'] !== undefined && row['Data'] !== null && row['Data'] !== '') {
-    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
-    if (!dateRegex.test(row['Data'])) {
-      throw new Error("Il campo 'Data' deve essere nel formato DD-MM-YYYY");
     }
   }
 
@@ -88,7 +90,7 @@ export const validateRow = (row: any): ImportedReview | null => {
     medicationEffectiveness: row['Efficacia cura farmacologica'] ? Number(row['Efficacia cura farmacologica']) : undefined,
     healingPossibility: row['Possibilità di guarigione'] ? Number(row['Possibilità di guarigione']) : undefined,
     socialDiscomfort: row['Disagio sociale'] ? Number(row['Disagio sociale']) : undefined,
-    date: row['Data'] || new Date().toLocaleDateString('it-IT').split('/').join('-'),
+    date: formatDate(row['Data']),
     username: row['Nome Utente'] || 'Anonimo',
     email: row['Email'] || ''
   };
