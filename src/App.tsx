@@ -26,7 +26,7 @@ const App = () => (
         <Header />
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/recensione/:id" element={<ReviewDetail />} />
+          <Route path="/patologia/:condition/esperienza/:title" element={<ReviewDetail />} />
           <Route path="/recensioni" element={<Reviews />} />
           <Route path="/nuova-recensione" element={<NewReview />} />
           <Route path="/cerca-patologia" element={<SearchCondition />} />
