@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StarRatingProps {
@@ -23,11 +23,11 @@ export const StarRating = ({ value, onChange, className, readOnly = false }: Sta
           disabled={readOnly}
           className={cn(
             "p-0 w-6 h-6",
-            rating <= value ? "text-yellow-400" : "text-gray-300",
+            rating <= value ? "text-primary" : "text-gray-300",
             readOnly && "cursor-default"
           )}
         >
-          <Star className="w-full h-full fill-current" />
+          <Square className="w-full h-full fill-current" />
         </button>
       ))}
     </div>
