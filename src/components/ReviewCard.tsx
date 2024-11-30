@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Calendar } from "lucide-react";
+import { capitalizeFirstLetter } from "@/utils/textUtils";
 
 interface ReviewCardProps {
   id: string;
@@ -28,7 +29,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
         </div>
         <div className="mb-4">
           <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
-            {condition}
+            {capitalizeFirstLetter(condition)}
           </span>
         </div>
         <p className="text-text-light line-clamp-3 leading-relaxed">{preview}</p>

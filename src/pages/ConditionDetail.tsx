@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { capitalizeFirstLetter } from "@/utils/textUtils";
 
 export default function ConditionDetail() {
   const { condition } = useParams();
@@ -73,7 +74,7 @@ export default function ConditionDetail() {
   return (
     <div className="container py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-primary">{condition}</h1>
+        <h1 className="text-3xl font-bold text-primary">{capitalizeFirstLetter(condition || '')}</h1>
         <Button
           variant="ghost"
           size="icon"
@@ -126,7 +127,7 @@ export default function ConditionDetail() {
 
           <div id="overview" className="mt-8">
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Cos'è {condition}?</h2>
+              <h2 className="text-xl font-semibold mb-4">Cos'è {capitalizeFirstLetter(condition || '')}?</h2>
               <p className="text-gray-600">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
               </p>

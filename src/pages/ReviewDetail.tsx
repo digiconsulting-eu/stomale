@@ -6,6 +6,7 @@ import { MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { capitalizeFirstLetter } from "@/utils/textUtils";
 
 interface Review {
   id: string;
@@ -87,10 +88,9 @@ const ReviewDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* New section added at the top */}
       <div className="bg-primary/10 rounded-lg p-6 mb-8">
         <p className="text-lg font-medium text-primary text-center">
-          Vuoi leggere altre recensioni su {review.condition}?{" "}
+          Vuoi leggere altre recensioni su {capitalizeFirstLetter(review.condition)}?{" "}
           <Link 
             to={`/patologia/${review.condition.toLowerCase()}`} 
             className="text-primary hover:underline font-bold"
@@ -112,7 +112,7 @@ const ReviewDetail = () => {
               to={`/patologia/${review.condition.toLowerCase()}`}
               className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium hover:bg-primary/20 transition-colors"
             >
-              {review.condition}
+              {capitalizeFirstLetter(review.condition)}
             </Link>
           </div>
 
@@ -193,10 +193,9 @@ const ReviewDetail = () => {
         </div>
       </Card>
 
-      {/* Existing section at the bottom */}
       <div className="bg-primary/10 rounded-lg p-6 mb-8">
         <p className="text-lg font-medium text-primary text-center">
-          Vuoi leggere altre recensioni su {review.condition}?{" "}
+          Vuoi leggere altre recensioni su {capitalizeFirstLetter(review.condition)}?{" "}
           <Link 
             to={`/patologia/${review.condition.toLowerCase()}`} 
             className="text-primary hover:underline font-bold"
