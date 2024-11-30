@@ -30,7 +30,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function NewReview() {
   const [searchParams] = useSearchParams();
-  const conditionParam = searchParams.get("condition");
+  const conditionParam = searchParams.get("patologia");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -50,6 +50,7 @@ export default function NewReview() {
 
   useEffect(() => {
     if (conditionParam) {
+      console.log("Setting condition:", conditionParam);
       form.setValue("condition", conditionParam);
     }
   }, [conditionParam, form]);

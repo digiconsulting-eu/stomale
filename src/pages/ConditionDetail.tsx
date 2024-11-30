@@ -45,7 +45,7 @@ export default function ConditionDetail() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-primary">{condition}</h1>
         <Button 
-          onClick={() => navigate(`/nuova-recensione?condition=${condition}`)}
+          onClick={() => navigate(`/nuova-recensione?patologia=${condition}`)}
           className="bg-primary text-white"
         >
           Racconta la tua Esperienza
