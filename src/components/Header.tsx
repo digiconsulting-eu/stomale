@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "/logo.png";
 
@@ -8,6 +8,7 @@ export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -16,6 +17,43 @@ export const Header = () => {
     localStorage.removeItem('isAdmin');
     navigate('/');
     window.location.reload();
+  };
+
+  const renderAuthButtons = () => {
+    if (isLoggedIn) {
+      return (
+        <>
+          {isAdmin ? (
+            <Button variant="ghost" asChild className="flex items-center gap-2">
+              <Link to="/admin">
+                <ShieldCheck size={18} />
+                Admin Dashboard
+              </Link>
+            </Button>
+          ) : (
+            <Button variant="ghost" asChild className="flex items-center gap-2">
+              <Link to="/dashboard">
+                <User size={18} />
+                Dashboard
+              </Link>
+            </Button>
+          )}
+          <Button variant="outline" onClick={handleLogout}>
+            Logout
+          </Button>
+        </>
+      );
+    }
+    return (
+      <>
+        <Button variant="outline" asChild>
+          <Link to="/login">Accedi</Link>
+        </Button>
+        <Button asChild>
+          <Link to="/registrati">Registrati</Link>
+        </Button>
+      </>
+    );
   };
 
   return (
@@ -56,28 +94,7 @@ export const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
-            {isLoggedIn ? (
-              <>
-                <Button variant="ghost" asChild className="flex items-center gap-2">
-                  <Link to="/dashboard">
-                    <User size={18} />
-                    Dashboard
-                  </Link>
-                </Button>
-                <Button variant="outline" onClick={handleLogout}>
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" asChild>
-                  <Link to="/login">Accedi</Link>
-                </Button>
-                <Button asChild>
-                  <Link to="/registrati">Registrati</Link>
-                </Button>
-              </>
-            )}
+            {renderAuthButtons()}
           </div>
         </div>
 
@@ -129,12 +146,21 @@ export const Header = () => {
               <div className="flex flex-col space-y-2 pt-4">
                 {isLoggedIn ? (
                   <>
-                    <Button variant="ghost" asChild className="flex items-center gap-2 justify-start">
-                      <Link to="/dashboard" onClick={toggleMenu}>
-                        <User size={18} />
-                        Dashboard
-                      </Link>
-                    </Button>
+                    {isAdmin ? (
+                      <Button variant="ghost" asChild className="flex items-center gap-2 justify-start">
+                        <Link to="/admin" onClick={toggleMenu}>
+                          <ShieldCheck size={18} />
+                          Admin Dashboard
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button variant="ghost" asChild className="flex items-center gap-2 justify-start">
+                        <Link to="/dashboard" onClick={toggleMenu}>
+                          <User size={18} />
+                          Dashboard
+                        </Link>
+                      </Button>
+                    )}
                     <Button variant="outline" onClick={handleLogout}>
                       Logout
                     </Button>
