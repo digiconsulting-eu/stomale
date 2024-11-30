@@ -51,21 +51,23 @@ export default function ConditionDetail() {
           id: "1",
           title: "La mia esperienza con l'emicrania",
           author: "Mario Rossi",
-          date: "2024-01-15",
+          date: "15-01-2024",
           preview: "Ho sofferto di emicrania per anni...",
           condition: condition || "",
           rating: 4,
-          helpful: 12
+          helpful: 12,
+          username: "Mario Rossi"
         },
         {
           id: "2",
           title: "Finalmente ho trovato la cura giusta",
           author: "Laura Bianchi",
-          date: "2024-01-10",
+          date: "10-01-2024",
           preview: "Dopo tanti tentativi...",
           condition: condition || "",
           rating: 5,
-          helpful: 8
+          helpful: 8,
+          username: "Laura Bianchi"
         }
       ];
     }

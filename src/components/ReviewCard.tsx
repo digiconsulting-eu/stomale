@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar, User } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 
 interface ReviewCardProps {
@@ -8,15 +8,12 @@ interface ReviewCardProps {
   condition: string;
   preview: string;
   date: string;
-  username: string;
+  username?: string; // Made optional since we won't use it in the card
 }
 
-export const ReviewCard = ({ id, title, condition, preview, date, username }: ReviewCardProps) => {
+export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardProps) => {
   const conditionSlug = condition.toLowerCase().replace(/\s+/g, '-');
   const titleSlug = title.toLowerCase().replace(/\s+/g, '-');
-
-  // Convert date from YYYY-MM-DD to DD-MM-YYYY
-  const formattedDate = date.split('-').reverse().join('-');
 
   return (
     <Link to={`/patologia/${conditionSlug}/esperienza/${titleSlug}`} className="block group">
@@ -27,17 +24,13 @@ export const ReviewCard = ({ id, title, condition, preview, date, username }: Re
           </h3>
           <div className="flex items-center text-text-light space-x-1">
             <Calendar size={14} />
-            <span className="text-sm">{formattedDate}</span>
+            <span className="text-sm">{date}</span>
           </div>
         </div>
-        <div className="flex justify-between items-center mb-4">
+        <div className="mb-4">
           <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
             {capitalizeFirstLetter(condition)}
           </span>
-          <div className="flex items-center text-text-light space-x-1">
-            <User size={14} />
-            <span className="text-sm">{username}</span>
-          </div>
         </div>
         <p className="text-text-light line-clamp-3 leading-relaxed">{preview}</p>
       </div>
