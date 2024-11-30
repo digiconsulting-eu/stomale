@@ -1,9 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 import { ReviewCard } from "@/components/ReviewCard";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -42,132 +41,101 @@ export default function ConditionDetail() {
 
   return (
     <div className="container py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-primary">{condition}</h1>
-        <Button 
-          onClick={() => navigate(`/nuova-recensione?patologia=${condition}`)}
-          className="bg-primary text-white"
-        >
-          Racconta la tua Esperienza
-        </Button>
-      </div>
+      <h1 className="text-3xl font-bold text-primary mb-8">{condition}</h1>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <Tabs defaultValue="overview" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="overview">Panoramica</TabsTrigger>
-              <TabsTrigger value="symptoms">Sintomi</TabsTrigger>
-              <TabsTrigger value="treatments">Cure</TabsTrigger>
-              <TabsTrigger value="causes">Cause</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-4">
-              <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Cos'è {condition}?</h2>
-                <p className="text-gray-600">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </p>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="symptoms">
-              <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Sintomi principali</h2>
-                <ul className="list-disc list-inside space-y-2 text-gray-600">
-                  <li>Sintomo 1</li>
-                  <li>Sintomo 2</li>
-                  <li>Sintomo 3</li>
-                </ul>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="treatments">
-              <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Trattamenti disponibili</h2>
-                <ul className="list-disc list-inside space-y-2 text-gray-600">
-                  <li>Trattamento 1</li>
-                  <li>Trattamento 2</li>
-                  <li>Trattamento 3</li>
-                </ul>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="causes">
-              <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Cause comuni</h2>
-                <ul className="list-disc list-inside space-y-2 text-gray-600">
-                  <li>Causa 1</li>
-                  <li>Causa 2</li>
-                  <li>Causa 3</li>
-                </ul>
-              </Card>
-            </TabsContent>
-          </Tabs>
+      <div className="grid md:grid-cols-12 gap-6">
+        {/* Statistics Box - Left Column */}
+        <div className="md:col-span-4">
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-6">Statistiche</h2>
+            <div className="space-y-6">
+              <StatItem label="Difficoltà diagnosi" value={4.2} description="Media" />
+              <StatItem label="Fastidio sintomi" value={3.8} description="Moderato" />
+              <StatItem label="Possibilità di guarigione" value={3.5} description="Media" />
+              <StatItem label="Efficacia cure" value={4.0} description="Buona" />
+              <StatItem label="Impatto sulla vita" value={3.9} description="Significativo" />
+              <StatItem label="Costo cure" value={3.2} description="Moderato" />
+              <StatItem label="Supporto medico" value={4.1} description="Buono" />
+              <StatItem label="Tempo diagnosi" value={3.4} description="Medio" />
+            </div>
+          </Card>
         </div>
 
-        <div className="space-y-4">
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Statistiche</h2>
+        {/* Action Buttons - Right Column */}
+        <div className="md:col-span-8">
+          <div className="grid gap-4">
+            <Button 
+              variant="default"
+              size="lg"
+              className="w-full text-lg py-6"
+              onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Panoramica
+            </Button>
+            
+            <Button 
+              variant="secondary"
+              size="lg"
+              className="w-full text-lg py-6"
+              onClick={() => document.getElementById('experiences')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Leggi Esperienze
+            </Button>
+            
+            <Button 
+              variant="outline"
+              size="lg"
+              className="w-full text-lg py-6"
+              onClick={() => navigate(`/nuova-recensione?patologia=${condition}`)}
+            >
+              Racconta la tua Esperienza
+            </Button>
+          </div>
+
+          <div id="overview" className="mt-8">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Cos'è {condition}?</h2>
+              <p className="text-gray-600">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </p>
+            </Card>
+          </div>
+
+          <div id="experiences" className="mt-8">
+            <h2 className="text-2xl font-bold mb-4">Esperienze ({reviews?.length || 0})</h2>
             <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-500">Difficoltà diagnosi</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold">4.2</span>
-                  <Badge>Media</Badge>
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Fastidio sintomi</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold">3.8</span>
-                  <Badge>Moderato</Badge>
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Possibilità di guarigione</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold">3.5</span>
-                  <Badge>Media</Badge>
-                </div>
-              </div>
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-[200px] w-full" />
+                  <Skeleton className="h-[200px] w-full" />
+                </>
+              ) : (
+                reviews?.map((review) => (
+                  <ReviewCard 
+                    key={review.id}
+                    id={review.id}
+                    title={review.title}
+                    date={review.date}
+                    preview={review.preview}
+                    condition={review.condition}
+                  />
+                ))
+              )}
             </div>
-          </Card>
-
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Tag correlati</h2>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">Tag 1</Badge>
-              <Badge variant="secondary">Tag 2</Badge>
-              <Badge variant="secondary">Tag 3</Badge>
-              <Badge variant="secondary">Tag 4</Badge>
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Esperienze ({reviews?.length || 0})</h2>
-        <div className="space-y-4">
-          {isLoading ? (
-            <>
-              <Skeleton className="h-[200px] w-full" />
-              <Skeleton className="h-[200px] w-full" />
-            </>
-          ) : (
-            reviews?.map((review) => (
-              <ReviewCard 
-                key={review.id}
-                id={review.id}
-                title={review.title}
-                date={review.date}
-                preview={review.preview}
-                condition={review.condition}
-              />
-            ))
-          )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+// Helper component for statistics items
+const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
+  <div>
+    <p className="text-sm text-gray-500">{label}</p>
+    <div className="flex items-center gap-2">
+      <span className="text-2xl font-bold">{value.toFixed(1)}</span>
+      <Badge>{description}</Badge>
+    </div>
+  </div>
+);
