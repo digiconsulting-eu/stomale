@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import * as XLSX from 'xlsx';
 import { Download } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const ReviewManagement = () => {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -34,6 +35,12 @@ const ReviewManagement = () => {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Recensioni");
     XLSX.writeFile(wb, "recensioni.xlsx");
+  };
+
+  const getReviewUrl = (review: any) => {
+    const conditionSlug = review.condition.toLowerCase().replace(/\s+/g, '-');
+    const titleSlug = (review.title || `esperienza-con-${review.condition}`).toLowerCase().replace(/\s+/g, '-');
+    return `/patologia/${conditionSlug}/esperienza/${titleSlug}`;
   };
 
   return (
@@ -62,7 +69,14 @@ const ReviewManagement = () => {
             {reviews.map((review, index) => (
               <TableRow key={review.id || `${review.title}-${review.date}`}>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell>{review.title}</TableCell>
+                <TableCell>
+                  <Link 
+                    to={getReviewUrl(review)}
+                    className="text-primary hover:underline"
+                  >
+                    {review.title || `Esperienza con ${review.condition}`}
+                  </Link>
+                </TableCell>
                 <TableCell>{review.author || review.username}</TableCell>
                 <TableCell>{review.condition}</TableCell>
                 <TableCell>{review.date}</TableCell>
