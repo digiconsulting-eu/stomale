@@ -46,7 +46,7 @@ export const Header = () => {
     }
     return (
       <>
-        <Button variant="ghost" asChild className="hover:bg-primary/10">
+        <Button variant="ghost" asChild className="hover:bg-primary/10 border border-primary">
           <Link to="/login">Accedi</Link>
         </Button>
         <Button asChild className="bg-primary hover:bg-primary-hover">
@@ -171,7 +171,7 @@ export const Header = () => {
                   </>
                 ) : (
                   <>
-                    <Button variant="ghost" asChild className="hover:bg-primary/10">
+                    <Button variant="ghost" asChild className="hover:bg-primary/10 border border-primary">
                       <Link to="/login" onClick={toggleMenu}>Accedi</Link>
                     </Button>
                     <Button asChild className="bg-primary hover:bg-primary-hover">
