@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -69,6 +69,14 @@ const HighlightMatch = ({ text, query }: { text: string; query: string }) => {
 export const ConditionSelect = ({ form }: ConditionSelectProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedValue, setSelectedValue] = useState("");
+
+  useEffect(() => {
+    const value = form.getValues("condition");
+    if (value) {
+      setSelectedValue(value);
+    }
+  }, [form]);
 
   return (
     <FormField
@@ -90,11 +98,7 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                   )}
                 >
                   <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary" size={24} />
-                  {field.value
-                    ? allConditions.find(
-                        (condition) => condition === field.value
-                      )
-                    : "Seleziona una patologia"}
+                  {selectedValue || field.value || "Seleziona una patologia"}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 absolute right-5 top-1/2 -translate-y-1/2" />
                 </Button>
               </FormControl>
@@ -122,6 +126,7 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                           value={condition}
                           onSelect={() => {
                             form.setValue("condition", condition);
+                            setSelectedValue(condition);
                             setOpen(false);
                           }}
                           className="relative flex cursor-pointer select-none items-center rounded-md px-4 py-3 text-gray-900 text-[15px] outline-none hover:bg-gray-100 data-[selected=true]:bg-gray-100"
