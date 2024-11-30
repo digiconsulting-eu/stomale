@@ -43,13 +43,11 @@ const Index = () => {
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   const handleSaveTitle = () => {
-    // Here you would typically make an API call to save the title
     setIsEditingTitle(false);
     toast.success("Titolo aggiornato con successo");
   };
 
   const handleSaveDescription = () => {
-    // Here you would typically make an API call to save the description
     setIsEditingDescription(false);
     toast.success("Descrizione aggiornata con successo");
   };
@@ -61,7 +59,7 @@ const Index = () => {
         <section className="py-24 px-4 relative">
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
-            style={{ backgroundImage: 'url("/hero-bg.png")' }}
+            style={{ backgroundImage: 'url("/hero-bg-pills.png")' }}
           />
           <div className="container mx-auto text-center max-w-4xl relative z-10">
             {isEditingTitle ? (
