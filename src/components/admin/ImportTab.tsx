@@ -16,6 +16,7 @@ interface ImportedReview {
   socialDiscomfort: number;
   date: string;
   username: string;
+  email: string;
 }
 
 const ImportTab = () => {
@@ -26,7 +27,7 @@ const ImportTab = () => {
       'Patologia', 'Titolo', 'Sintomi', 'Esperienza',
       'Difficoltà di Diagnosi', 'Quanto sono fastidiosi i sintomi?',
       'Efficacia cura farmacologica', 'Possibilità di guarigione',
-      'Disagio sociale', 'Data', 'Nome Utente'
+      'Disagio sociale', 'Data', 'Nome Utente', 'Email'
     ];
 
     for (const field of requiredFields) {
@@ -38,6 +39,17 @@ const ImportTab = () => {
         });
         return null;
       }
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(row['Email'])) {
+      toast({
+        title: "Errore di validazione",
+        description: "Formato email non valido",
+        variant: "destructive",
+      });
+      return null;
     }
 
     // Validate ratings (should be between 1 and 5)
@@ -83,7 +95,8 @@ const ImportTab = () => {
       healingPossibility: Number(row['Possibilità di guarigione']),
       socialDiscomfort: Number(row['Disagio sociale']),
       date: row['Data'],
-      username: row['Nome Utente']
+      username: row['Nome Utente'],
+      email: row['Email']
     };
   };
 
@@ -161,6 +174,7 @@ const ImportTab = () => {
           <li>Disagio sociale (voto da 1 a 5)</li>
           <li>Data (formato DD-MM-YYYY)</li>
           <li>Nome Utente (testo)</li>
+          <li>Email (formato valido)</li>
         </ul>
       </div>
 
