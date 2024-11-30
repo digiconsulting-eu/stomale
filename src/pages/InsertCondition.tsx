@@ -6,13 +6,6 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
-  CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
-  CONDITIONS_I, CONDITIONS_L, CONDITIONS_M, CONDITIONS_N,
-  CONDITIONS_O, CONDITIONS_P, CONDITIONS_R, CONDITIONS_S,
-  CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
-} from "@/components/conditions";
 
 const InsertCondition = () => {
   const navigate = useNavigate();
@@ -25,16 +18,9 @@ const InsertCondition = () => {
   const [editedDescription, setEditedDescription] = useState(description);
 
   const checkIfConditionExists = (condition: string) => {
-    const allConditions = [
-      ...CONDITIONS_A, ...CONDITIONS_B, ...CONDITIONS_C, ...CONDITIONS_D,
-      ...CONDITIONS_E, ...CONDITIONS_F, ...CONDITIONS_G, ...CONDITIONS_H,
-      ...CONDITIONS_I, ...CONDITIONS_L, ...CONDITIONS_M, ...CONDITIONS_N,
-      ...CONDITIONS_O, ...CONDITIONS_P, ...CONDITIONS_R, ...CONDITIONS_S,
-      ...CONDITIONS_T, ...CONDITIONS_U, ...CONDITIONS_V, ...CONDITIONS_Z
-    ];
-
-    return allConditions.some(existingCondition => 
-      existingCondition.toLowerCase() === condition.trim().toUpperCase()
+    const pendingConditions = JSON.parse(localStorage.getItem('pendingConditions') || '[]');
+    return pendingConditions.some((existingCondition: string) => 
+      existingCondition.toLowerCase() === condition.trim().toLowerCase()
     );
   };
 
@@ -51,10 +37,13 @@ const InsertCondition = () => {
       return;
     }
 
-    // Here we would typically make an API call to save the condition
-    toast.success("Patologia inserita con successo");
+    // Save the new condition to pendingConditions in localStorage
+    const pendingConditions = JSON.parse(localStorage.getItem('pendingConditions') || '[]');
+    pendingConditions.push(newCondition.trim().toUpperCase());
+    localStorage.setItem('pendingConditions', JSON.stringify(pendingConditions));
 
     // Create a notification for admin
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
     const notification = {
       id: Date.now().toString(),
       type: "new_condition",
@@ -63,12 +52,12 @@ const InsertCondition = () => {
       date: new Date().toISOString(),
       read: false,
     };
-
-    // Here we would save the notification to the database
-    console.log("New notification:", notification);
+    notifications.push(notification);
+    localStorage.setItem('notifications', JSON.stringify(notifications));
 
     // Reset form and redirect
     setNewCondition("");
+    toast.success("Patologia inserita con successo! Sarà visibile dopo l'approvazione dell'amministratore.");
     navigate("/cerca-patologia");
   };
 
