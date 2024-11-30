@@ -37,7 +37,11 @@ const ImportTab = () => {
         try {
           const validatedRow = validateRow(row);
           if (validatedRow) {
-            validReviews.push(validatedRow);
+            // Mark the review as imported
+            validReviews.push({
+              ...validatedRow,
+              imported: true
+            });
           }
         } catch (error) {
           errors.push(`Riga ${index + 2}: ${(error as Error).message}`);
@@ -83,9 +87,18 @@ const ImportTab = () => {
     }
   };
 
-  const handleClearAllReviews = () => {
-    localStorage.setItem('reviews', '[]');
-    toast.success('Tutte le recensioni sono state eliminate con successo');
+  const handleClearImportedReviews = () => {
+    // Get all reviews
+    const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    
+    // Filter out imported reviews
+    const manualReviews = allReviews.filter((review: any) => !review.imported);
+    
+    // Save back only manual reviews
+    localStorage.setItem('reviews', JSON.stringify(manualReviews));
+    
+    const deletedCount = allReviews.length - manualReviews.length;
+    toast.success(`${deletedCount} recensioni importate sono state eliminate con successo`);
     setShowDeleteDialog(false);
   };
 
@@ -116,16 +129,16 @@ const ImportTab = () => {
           className="gap-2"
         >
           <Trash2 className="h-4 w-4" />
-          Elimina tutte le recensioni
+          Elimina recensioni importate
         </Button>
       </div>
 
       <ConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
-        onConfirm={handleClearAllReviews}
-        title="Elimina tutte le recensioni"
-        description="Sei sicuro di voler eliminare tutte le recensioni? Questa azione non può essere annullata."
+        onConfirm={handleClearImportedReviews}
+        title="Elimina recensioni importate"
+        description="Sei sicuro di voler eliminare tutte le recensioni importate da Excel? Questa azione non può essere annullata. Le recensioni inserite manualmente dagli utenti non verranno eliminate."
       />
     </div>
   );
