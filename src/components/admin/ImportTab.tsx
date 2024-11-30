@@ -14,18 +14,19 @@ interface ImportedReview {
   medicationEffectiveness: number;
   healingPossibility: number;
   socialDiscomfort: number;
+  date: string;
+  username: string;
 }
 
-export const ImportTab = () => {
+const ImportTab = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const validateRow = (row: any): ImportedReview | null => {
-    // Ensure all required fields are present
     const requiredFields = [
       'Patologia', 'Titolo', 'Sintomi', 'Esperienza',
       'Difficoltà di Diagnosi', 'Quanto sono fastidiosi i sintomi?',
       'Efficacia cura farmacologica', 'Possibilità di guarigione',
-      'Disagio sociale'
+      'Disagio sociale', 'Data', 'Nome Utente'
     ];
 
     for (const field of requiredFields) {
@@ -60,6 +61,17 @@ export const ImportTab = () => {
       }
     }
 
+    // Validate date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(row['Data'])) {
+      toast({
+        title: "Errore di validazione",
+        description: "Il campo 'Data' deve essere nel formato YYYY-MM-DD",
+        variant: "destructive",
+      });
+      return null;
+    }
+
     return {
       condition: row['Patologia'],
       title: row['Titolo'],
@@ -69,7 +81,9 @@ export const ImportTab = () => {
       symptomsDiscomfort: Number(row['Quanto sono fastidiosi i sintomi?']),
       medicationEffectiveness: Number(row['Efficacia cura farmacologica']),
       healingPossibility: Number(row['Possibilità di guarigione']),
-      socialDiscomfort: Number(row['Disagio sociale'])
+      socialDiscomfort: Number(row['Disagio sociale']),
+      date: row['Data'],
+      username: row['Nome Utente']
     };
   };
 
@@ -98,8 +112,6 @@ export const ImportTab = () => {
       }
 
       if (validReviews.length > 0) {
-        // Store the reviews in localStorage for now
-        // In a real application, this would be an API call
         const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
         localStorage.setItem('reviews', JSON.stringify([...existingReviews, ...validReviews]));
 
@@ -125,7 +137,6 @@ export const ImportTab = () => {
       console.error(error);
     } finally {
       setIsLoading(false);
-      // Reset the input
       event.target.value = '';
     }
   };
@@ -148,6 +159,8 @@ export const ImportTab = () => {
           <li>Efficacia cura farmacologica (voto da 1 a 5)</li>
           <li>Possibilità di guarigione (voto da 1 a 5)</li>
           <li>Disagio sociale (voto da 1 a 5)</li>
+          <li>Data (formato YYYY-MM-DD)</li>
+          <li>Nome Utente (testo)</li>
         </ul>
       </div>
 
@@ -172,3 +185,5 @@ export const ImportTab = () => {
     </div>
   );
 };
+
+export default ImportTab;
