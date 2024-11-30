@@ -15,6 +15,9 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
   const conditionSlug = condition.toLowerCase().replace(/\s+/g, '-');
   const titleSlug = title.toLowerCase().replace(/\s+/g, '-');
 
+  // Convert date from YYYY-MM-DD to DD-MM-YYYY
+  const formattedDate = date.split('-').reverse().join('-');
+
   return (
     <Link to={`/patologia/${conditionSlug}/esperienza/${titleSlug}`} className="block group">
       <div className="card animate-fade-in group-hover:scale-[1.02] transition-all duration-300">
@@ -24,7 +27,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
           </h3>
           <div className="flex items-center text-text-light space-x-1">
             <Calendar size={14} />
-            <span className="text-sm">{date}</span>
+            <span className="text-sm">{formattedDate}</span>
           </div>
         </div>
         <div className="mb-4">

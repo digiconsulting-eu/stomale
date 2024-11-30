@@ -7,21 +7,21 @@ const SAMPLE_REVIEWS = [
     title: "La mia esperienza con l'emicrania cronica",
     condition: "Emicrania",
     preview: "Ho iniziato a soffrire di emicrania circa due anni fa...",
-    date: "2024-02-20",
+    date: "20-02-2024",
   },
   {
     id: "2",
     title: "Gestire l'artrite reumatoide",
     condition: "Artrite Reumatoide",
     preview: "Dopo la diagnosi, ho scoperto che ci sono molti modi per gestire i sintomi...",
-    date: "2024-02-19",
+    date: "19-02-2024",
   },
   {
     id: "3",
     title: "Il mio percorso con l'ansia",
     condition: "Disturbo d'Ansia",
     preview: "Ho imparato che l'ansia può essere gestita con il giusto supporto...",
-    date: "2024-02-18",
+    date: "18-02-2024",
   },
 ];
 

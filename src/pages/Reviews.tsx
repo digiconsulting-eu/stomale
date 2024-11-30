@@ -15,7 +15,12 @@ const MOCK_REVIEWS = Array.from({ length: 45 }, (_, i) => ({
   title: `Recensione ${i + 1}`,
   condition: ["Emicrania", "Artrite", "Ansia", "Depressione"][Math.floor(Math.random() * 4)],
   preview: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  date: new Date(Date.now() - Math.random() * 10000000000).toISOString().split('T')[0]
+  date: new Date(Date.now() - Math.random() * 10000000000)
+    .toISOString()
+    .split('T')[0]
+    .split('-')
+    .reverse()
+    .join('-')
 }));
 
 const Reviews = () => {
