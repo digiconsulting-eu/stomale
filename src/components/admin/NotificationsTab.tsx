@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Card } from "@/components/ui/card";
 
 interface Notification {
   id: string;
@@ -95,37 +96,80 @@ export const NotificationsTab = ({
     }
   };
 
+  // Get pending conditions from localStorage
+  const pendingConditions = JSON.parse(localStorage.getItem('pendingConditions') || '[]');
+
   return (
-    <div className="space-y-4">
-      {notifications.map((notification) => (
-        <div
-          key={notification.id}
-          className={`p-4 rounded-lg border ${
-            notification.read ? 'bg-gray-50' : 'bg-white'
-          }`}
-          onClick={() => markNotificationAsRead(notification.id)}
-        >
-          <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            <h3 className="font-semibold">{notification.title}</h3>
-            {!notification.read && (
-              <Badge variant="default" className="ml-auto">
-                Nuovo
-              </Badge>
-            )}
+    <div className="space-y-8">
+      {/* Pending Conditions Section */}
+      {pendingConditions.length > 0 && (
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Nuove patologie da approvare</h2>
+          <div className="space-y-4">
+            {pendingConditions.map((condition: string) => (
+              <div
+                key={condition}
+                className="p-4 rounded-lg border bg-white"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">{condition}</h3>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => handleApproveCondition(`Nuova patologia: ${condition}`)}
+                    >
+                      <Check className="h-4 w-4 mr-1" />
+                      Approva
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteCondition(`Nuova patologia: ${condition}`)}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Rifiuta
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          <p className="text-gray-600 mt-1">{notification.content}</p>
-          <div className="flex justify-between items-center mt-2">
-            <p className="text-sm text-gray-500">{notification.date}</p>
-            <NotificationActions
-              type={notification.type}
-              content={notification.content}
-              onApprove={() => handleApproveCondition(notification.content)}
-              onReject={() => handleDeleteCondition(notification.content)}
-            />
+        </Card>
+      )}
+
+      {/* Regular Notifications */}
+      <div className="space-y-4">
+        {notifications.map((notification) => (
+          <div
+            key={notification.id}
+            className={`p-4 rounded-lg border ${
+              notification.read ? 'bg-gray-50' : 'bg-white'
+            }`}
+            onClick={() => markNotificationAsRead(notification.id)}
+          >
+            <div className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              <h3 className="font-semibold">{notification.title}</h3>
+              {!notification.read && (
+                <Badge variant="default" className="ml-auto">
+                  Nuovo
+                </Badge>
+              )}
+            </div>
+            <p className="text-gray-600 mt-1">{notification.content}</p>
+            <div className="flex justify-between items-center mt-2">
+              <p className="text-sm text-gray-500">{notification.date}</p>
+              <NotificationActions
+                type={notification.type}
+                content={notification.content}
+                onApprove={() => handleApproveCondition(notification.content)}
+                onReject={() => handleDeleteCondition(notification.content)}
+              />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
