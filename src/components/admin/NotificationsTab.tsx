@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import { Bell } from "lucide-react";
+import { Bell, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Notification {
   id: string;
@@ -13,9 +14,21 @@ interface Notification {
 interface NotificationsTabProps {
   notifications: Notification[];
   markNotificationAsRead: (id: string) => void;
+  onDeleteCondition?: (conditionName: string) => void;
 }
 
-export const NotificationsTab = ({ notifications, markNotificationAsRead }: NotificationsTabProps) => {
+export const NotificationsTab = ({ 
+  notifications, 
+  markNotificationAsRead,
+  onDeleteCondition 
+}: NotificationsTabProps) => {
+  const handleDeleteCondition = (content: string) => {
+    const conditionName = content.split(": ")[1];
+    if (onDeleteCondition) {
+      onDeleteCondition(conditionName);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {notifications.map((notification) => (
@@ -36,7 +49,22 @@ export const NotificationsTab = ({ notifications, markNotificationAsRead }: Noti
             )}
           </div>
           <p className="text-gray-600 mt-1">{notification.content}</p>
-          <p className="text-sm text-gray-500 mt-2">{notification.date}</p>
+          <div className="flex justify-between items-center mt-2">
+            <p className="text-sm text-gray-500">{notification.date}</p>
+            {notification.type === "new_condition" && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteCondition(notification.content);
+                }}
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Elimina patologia
+              </Button>
+            )}
+          </div>
         </div>
       ))}
     </div>

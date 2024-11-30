@@ -15,6 +15,7 @@ import Login from "./pages/Login";
 import UserDashboard from "./pages/UserDashboard";
 import Reviews from "./pages/Reviews";
 import { Header } from "./components/Header";
+import InsertCondition from "./pages/InsertCondition";
 
 const ScrollToTop = () => {
   const location = useLocation();
@@ -43,7 +44,7 @@ const App = () => (
           <Route path="/nuova-recensione" element={<NewReview />} />
           <Route path="/cerca-patologia" element={<SearchCondition />} />
           <Route path="/cerca-sintomi" element={<div>Cerca Sintomi Page</div>} />
-          <Route path="/inserisci-patologia" element={<div>Inserisci Patologia Page</div>} />
+          <Route path="/inserisci-patologia" element={<InsertCondition />} />
           <Route path="/blog" element={<div>Blog Page</div>} />
           <Route path="/login" element={<Login />} />
           <Route path="/registrati" element={<Register />} />
