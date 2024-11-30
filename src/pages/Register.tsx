@@ -22,6 +22,22 @@ const Register = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
 
+  const getNextRegistrationNumber = () => {
+    // Get all existing registration numbers from localStorage
+    const users = Object.keys(localStorage)
+      .filter(key => key.startsWith('user_'))
+      .map(key => {
+        const userData = JSON.parse(localStorage.getItem(key) || '{}');
+        return parseInt(userData.registrationNumber || '0');
+      });
+
+    // If no users exist, start with 1
+    if (users.length === 0) return 1;
+
+    // Find the highest number and add 1
+    return Math.max(...users) + 1;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -31,11 +47,19 @@ const Register = () => {
     }
 
     try {
-      // Simulate API call to get next registration number
-      const registrationNumber = Math.floor(Math.random() * 1000) + 1;
+      const registrationNumber = getNextRegistrationNumber();
       const username = `Anonimo ${registrationNumber}`;
 
       // Store user data
+      localStorage.setItem(`user_${registrationNumber}`, JSON.stringify({
+        username,
+        email,
+        registrationNumber,
+        birthYear,
+        gender,
+        joinDate: new Date().toISOString()
+      }));
+
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('username', username);
       localStorage.setItem('registrationNumber', registrationNumber.toString());
