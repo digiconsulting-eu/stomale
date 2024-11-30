@@ -6,6 +6,7 @@ import { NotificationsTab } from "@/components/admin/NotificationsTab";
 import { ReviewsTab } from "@/components/admin/ReviewsTab";
 import { CommentsTab } from "@/components/admin/CommentsTab";
 import { AdminsTab } from "@/components/admin/AdminsTab";
+import { ImportTab } from "@/components/admin/ImportTab";
 
 // Temporary mock data
 const MOCK_REVIEWS = [
@@ -143,6 +144,7 @@ const Admin = () => {
           <TabsTrigger value="reviews">Recensioni</TabsTrigger>
           <TabsTrigger value="comments">Commenti</TabsTrigger>
           <TabsTrigger value="admins">Amministratori</TabsTrigger>
+          <TabsTrigger value="import">Import</TabsTrigger>
         </TabsList>
 
         <TabsContent value="notifications">
@@ -173,6 +175,10 @@ const Admin = () => {
             setNewAdminEmail={setNewAdminEmail}
             handleAddAdmin={handleAddAdmin}
           />
+        </TabsContent>
+
+        <TabsContent value="import">
+          <ImportTab />
         </TabsContent>
       </Tabs>
     </div>
