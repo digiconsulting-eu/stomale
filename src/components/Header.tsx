@@ -47,9 +47,6 @@ export const Header = () => {
             <Link to="/cerca-sintomi" className="text-text hover:text-primary transition-colors">
               Cerca Sintomi
             </Link>
-            <Link to="/patologie" className="text-text hover:text-primary transition-colors">
-              Elenco Patologie
-            </Link>
             <Link to="/inserisci-patologia" className="text-text hover:text-primary transition-colors">
               Inserisci Patologia
             </Link>
@@ -114,13 +111,6 @@ export const Header = () => {
                 onClick={toggleMenu}
               >
                 Cerca Sintomi
-              </Link>
-              <Link
-                to="/patologie"
-                className="text-text hover:text-primary transition-colors px-2 py-1"
-                onClick={toggleMenu}
-              >
-                Elenco Patologie
               </Link>
               <Link
                 to="/inserisci-patologia"
