@@ -19,6 +19,8 @@ import InsertCondition from "./pages/InsertCondition";
 import Blog from "./pages/Blog";
 import AddArticle from "./pages/AddArticle";
 import ArticleDetail from "./pages/ArticleDetail";
+import ReviewManagement from "./pages/ReviewManagement";
+import UserManagement from "./pages/UserManagement";
 
 const ScrollToTop = () => {
   const location = useLocation();
@@ -56,6 +58,8 @@ const App = () => (
           <Route path="/recupera-password" element={<div>Recupera Password Page</div>} />
           <Route path="/patologia/:condition" element={<ConditionDetail />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/recensioni" element={<ReviewManagement />} />
+          <Route path="/admin/utenti" element={<UserManagement />} />
           <Route path="/dashboard" element={<UserDashboard />} />
         </Routes>
       </BrowserRouter>

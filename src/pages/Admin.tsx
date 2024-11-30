@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { NotificationsTab } from "@/components/admin/NotificationsTab";
@@ -7,6 +8,8 @@ import { ReviewsTab } from "@/components/admin/ReviewsTab";
 import { CommentsTab } from "@/components/admin/CommentsTab";
 import { AdminsTab } from "@/components/admin/AdminsTab";
 import ImportTab from "@/components/admin/ImportTab";
+import { Link } from "react-router-dom";
+import { Users, ClipboardList } from "lucide-react";
 
 // Temporary mock data
 const MOCK_REVIEWS = [
@@ -129,7 +132,23 @@ const Admin = () => {
 
   return (
     <div className="container mx-auto px-4 py-4 md:py-8">
-      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8">Area Amministrazione</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold">Area Amministrazione</h1>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button asChild className="gap-2">
+            <Link to="/admin/recensioni">
+              <ClipboardList className="h-4 w-4" />
+              Gestione Recensioni
+            </Link>
+          </Button>
+          <Button asChild className="gap-2">
+            <Link to="/admin/utenti">
+              <Users className="h-4 w-4" />
+              Gestione Utenti
+            </Link>
+          </Button>
+        </div>
+      </div>
       
       <Tabs defaultValue="notifications" className="w-full space-y-6">
         <TabsList className="w-full flex flex-wrap gap-2 h-auto">
