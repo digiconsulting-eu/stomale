@@ -19,6 +19,7 @@ interface Review {
   socialDiscomfort?: number;
   date: string;
   username?: string;
+  hasMedication?: boolean;
 }
 
 const ReviewDetail = () => {
@@ -27,10 +28,13 @@ const ReviewDetail = () => {
 
   useEffect(() => {
     const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    const foundReview = reviews.find((r: Review) => 
-      r.condition.toLowerCase() === condition?.toLowerCase() &&
-      (r.title || 'untitled').toLowerCase().replace(/\s+/g, '-') === title
-    );
+    const decodedTitle = decodeURIComponent(title || '');
+    const foundReview = reviews.find((r: Review) => {
+      const reviewTitle = r.title || `Esperienza con ${capitalizeFirstLetter(r.condition)}`;
+      const reviewTitleSlug = reviewTitle.toLowerCase().replace(/\s+/g, '-');
+      return r.condition.toLowerCase() === condition?.toLowerCase() &&
+             reviewTitleSlug === decodedTitle;
+    });
     setReview(foundReview || null);
   }, [condition, title]);
 
@@ -102,11 +106,12 @@ const ReviewDetail = () => {
               review.medicationEffectiveness || review.healingPossibility || 
               review.socialDiscomfort) && (
               <ReviewStats
-                diagnosisDifficulty={review.diagnosisDifficulty}
-                symptomSeverity={review.symptomsDiscomfort}
-                medicationEffectiveness={review.medicationEffectiveness}
-                healingPossibility={review.healingPossibility}
-                socialDiscomfort={review.socialDiscomfort}
+                diagnosisDifficulty={review.diagnosisDifficulty || 0}
+                symptomSeverity={review.symptomsDiscomfort || 0}
+                medicationEffectiveness={review.medicationEffectiveness || 0}
+                healingPossibility={review.healingPossibility || 0}
+                socialDiscomfort={review.socialDiscomfort || 0}
+                hasMedication={review.hasMedication || false}
               />
             )}
 
