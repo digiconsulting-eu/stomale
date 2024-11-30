@@ -7,32 +7,30 @@ import {
   PaginationNext, 
   PaginationPrevious 
 } from "@/components/ui/pagination";
-import { useState } from "react";
-
-// Mock data - replace with actual API call later
-const MOCK_REVIEWS = Array.from({ length: 45 }, (_, i) => ({
-  id: `${i + 1}`,
-  title: `Recensione ${i + 1}`,
-  condition: ["Emicrania", "Artrite", "Ansia", "Depressione"][Math.floor(Math.random() * 4)],
-  preview: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  date: new Date(Date.now() - Math.random() * 10000000000)
-    .toISOString()
-    .split('T')[0]
-    .split('-')
-    .reverse()
-    .join('-'),
-  username: `Anonimo ${Math.floor(Math.random() * 100) + 1}`
-}));
+import { useState, useEffect } from "react";
 
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [reviews, setReviews] = useState<any[]>([]);
   const reviewsPerPage = 20;
-  const totalPages = Math.ceil(MOCK_REVIEWS.length / reviewsPerPage);
+
+  useEffect(() => {
+    const storedReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    // Sort reviews by date in descending order
+    const sortedReviews = storedReviews.sort((a: any, b: any) => {
+      const dateA = new Date(a.date.split('-').reverse().join('-'));
+      const dateB = new Date(b.date.split('-').reverse().join('-'));
+      return dateB.getTime() - dateA.getTime();
+    });
+    setReviews(sortedReviews);
+  }, []);
+
+  const totalPages = Math.ceil(reviews.length / reviewsPerPage);
 
   const getCurrentPageReviews = () => {
     const startIndex = (currentPage - 1) * reviewsPerPage;
     const endIndex = startIndex + reviewsPerPage;
-    return MOCK_REVIEWS.slice(startIndex, endIndex);
+    return reviews.slice(startIndex, endIndex);
   };
 
   return (
@@ -41,7 +39,15 @@ const Reviews = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {getCurrentPageReviews().map((review) => (
-          <ReviewCard key={review.id} {...review} />
+          <ReviewCard 
+            key={review.id || `${review.title}-${review.date}`}
+            id={review.id || `${review.title}-${review.date}`}
+            title={review.title}
+            condition={review.condition}
+            preview={review.experience}
+            date={review.date}
+            username={review.username}
+          />
         ))}
       </div>
 

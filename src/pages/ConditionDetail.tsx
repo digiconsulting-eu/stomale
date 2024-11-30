@@ -61,31 +61,14 @@ export default function ConditionDetail() {
   const { data: reviews, isLoading } = useQuery({
     queryKey: ["reviews", condition],
     queryFn: async () => {
+      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      return [
-        {
-          id: "1",
-          title: "La mia esperienza con l'emicrania",
-          author: "Mario Rossi",
-          date: "15-01-2024",
-          preview: "Ho sofferto di emicrania per anni...",
-          condition: condition || "",
-          rating: 4,
-          helpful: 12,
-          username: "Mario Rossi"
-        },
-        {
-          id: "2",
-          title: "Finalmente ho trovato la cura giusta",
-          author: "Laura Bianchi",
-          date: "10-01-2024",
-          preview: "Dopo tanti tentativi...",
-          condition: condition || "",
-          rating: 5,
-          helpful: 8,
-          username: "Laura Bianchi"
-        }
-      ];
+      
+      // Get reviews from localStorage and filter by condition
+      const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+      return allReviews.filter((review: any) => 
+        review.condition.toLowerCase() === condition?.toLowerCase()
+      );
     }
   });
 
@@ -160,7 +143,7 @@ export default function ConditionDetail() {
                     id={review.id}
                     title={review.title}
                     date={review.date}
-                    preview={review.preview}
+                    preview={review.experience}
                     condition={review.condition}
                   />
                 ))
