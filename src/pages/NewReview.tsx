@@ -10,9 +10,8 @@ import { ConditionSelect } from "@/components/form/ConditionSelect";
 import { StarRatingField } from "@/components/form/StarRatingField";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   condition: z.string().min(1, "Seleziona una patologia"),
@@ -63,19 +62,25 @@ export default function NewReview() {
     },
   });
 
+  const hasDrugTreatment = form.watch("hasDrugTreatment");
+
+  const onSubmit = (data: FormValues) => {
+    console.log(data);
+    toast.success(
+      "La tua esperienza è stata inviata con successo! Sarà pubblicata entro 48 ore dopo la revisione.",
+      {
+        duration: 5000,
+      }
+    );
+    navigate("/");
+  };
+
   useEffect(() => {
     if (conditionParam) {
       console.log("Setting condition:", conditionParam);
       form.setValue("condition", conditionParam);
     }
   }, [conditionParam, form]);
-
-  const hasDrugTreatment = form.watch("hasDrugTreatment");
-
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
-    toast.success("La tua esperienza è stata inviata con successo!");
-  };
 
   return (
     <div className="container max-w-3xl py-8 space-y-8 animate-fade-in">
