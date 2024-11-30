@@ -12,6 +12,7 @@ import { CommentSection } from "@/components/CommentSection";
 
 export default function ReviewDetail() {
   const { condition, title } = useParams();
+  const conditionName = capitalizeFirstLetter(condition || '');
 
   const { data: review, isLoading } = useQuery({
     queryKey: ["review", condition, title],
@@ -52,8 +53,6 @@ export default function ReviewDetail() {
     );
   }
 
-  const conditionName = capitalizeFirstLetter(condition || '');
-
   return (
     <div className="container py-8">
       <div className="flex justify-between items-start mb-6">
@@ -75,7 +74,6 @@ export default function ReviewDetail() {
       </div>
 
       <div className="grid md:grid-cols-12 gap-8">
-        {/* Left column - Stats */}
         <div className="md:col-span-4">
           <Card className="p-6 sticky top-24">
             <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
@@ -90,21 +88,23 @@ export default function ReviewDetail() {
           </Card>
         </div>
 
-        {/* Right column - Content */}
         <div className="md:col-span-8">
           <h1 className="text-3xl font-bold text-primary mb-2">
             {review.title || `Esperienza con ${conditionName}`}
           </h1>
           
-          <div className="flex items-center text-sm text-muted-foreground mb-8">
-            <span>{new Date(review.date).toLocaleDateString('it-IT')}</span>
-            <Separator orientation="vertical" className="mx-2 h-4" />
-            <Link 
-              to={`/patologia/${condition}`}
-              className="text-primary font-medium hover:underline"
-            >
-              {conditionName}
-            </Link>
+          <div className="flex items-center mb-4">
+            <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
+              <Link 
+                to={`/patologia/${condition}`}
+                className="hover:underline"
+              >
+                {conditionName}
+              </Link>
+            </span>
+            <div className="flex items-center text-text-light ml-4">
+              <span className="text-sm">{new Date(review.date).toLocaleDateString('it-IT')}</span>
+            </div>
           </div>
 
           <div className="prose prose-lg max-w-none mb-8">
