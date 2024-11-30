@@ -12,7 +12,6 @@ import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ConditionOverview } from "@/components/condition/ConditionOverview";
 
-// Extract StatItem to a separate component for better organization
 const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
   <div>
     <p className="text-sm text-gray-500">{label}</p>
@@ -24,6 +23,13 @@ const StatItem = ({ label, value, description }: { label: string, value: number,
     </div>
   </div>
 );
+
+const getDescriptionForValue = (value: number): string => {
+  if (value === 0) return "Nessun dato";
+  if (value <= 2) return "Basso";
+  if (value <= 3.5) return "Moderato";
+  return "Alto";
+};
 
 export default function ConditionDetail() {
   const { condition } = useParams();
@@ -61,16 +67,49 @@ export default function ConditionDetail() {
   const { data: reviews, isLoading } = useQuery({
     queryKey: ["reviews", condition],
     queryFn: async () => {
-      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Get reviews from localStorage and filter by condition
       const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
       return allReviews.filter((review: any) => 
         review.condition.toLowerCase() === condition?.toLowerCase()
       );
     }
   });
+
+  const calculateStats = () => {
+    if (!reviews || reviews.length === 0) {
+      return {
+        diagnosisDifficulty: 0,
+        symptomsDiscomfort: 0,
+        medicationEffectiveness: 0,
+        healingPossibility: 0,
+        socialDiscomfort: 0
+      };
+    }
+
+    const sum = reviews.reduce((acc: any, review: any) => ({
+      diagnosisDifficulty: acc.diagnosisDifficulty + (review.diagnosisDifficulty || 0),
+      symptomsDiscomfort: acc.symptomsDiscomfort + (review.symptomsDiscomfort || 0),
+      medicationEffectiveness: acc.medicationEffectiveness + (review.medicationEffectiveness || 0),
+      healingPossibility: acc.healingPossibility + (review.healingPossibility || 0),
+      socialDiscomfort: acc.socialDiscomfort + (review.socialDiscomfort || 0)
+    }), {
+      diagnosisDifficulty: 0,
+      symptomsDiscomfort: 0,
+      medicationEffectiveness: 0,
+      healingPossibility: 0,
+      socialDiscomfort: 0
+    });
+
+    return {
+      diagnosisDifficulty: sum.diagnosisDifficulty / reviews.length,
+      symptomsDiscomfort: sum.symptomsDiscomfort / reviews.length,
+      medicationEffectiveness: sum.medicationEffectiveness / reviews.length,
+      healingPossibility: sum.healingPossibility / reviews.length,
+      socialDiscomfort: sum.socialDiscomfort / reviews.length
+    };
+  };
+
+  const stats = calculateStats();
 
   return (
     <div className="container py-8">
@@ -91,11 +130,31 @@ export default function ConditionDetail() {
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-6">Statistiche</h2>
             <div className="space-y-6">
-              <StatItem label="Difficoltà di Diagnosi" value={4.2} description="Alta" />
-              <StatItem label="Fastidio Sintomi" value={3.8} description="Moderato" />
-              <StatItem label="Efficacia Cura Farmacologica" value={4.0} description="Buona" />
-              <StatItem label="Possibilità di Guarigione" value={3.5} description="Media" />
-              <StatItem label="Disagio Sociale" value={3.9} description="Alto" />
+              <StatItem 
+                label="Difficoltà di Diagnosi" 
+                value={stats.diagnosisDifficulty} 
+                description={getDescriptionForValue(stats.diagnosisDifficulty)} 
+              />
+              <StatItem 
+                label="Fastidio Sintomi" 
+                value={stats.symptomsDiscomfort} 
+                description={getDescriptionForValue(stats.symptomsDiscomfort)} 
+              />
+              <StatItem 
+                label="Efficacia Cura Farmacologica" 
+                value={stats.medicationEffectiveness} 
+                description={getDescriptionForValue(stats.medicationEffectiveness)} 
+              />
+              <StatItem 
+                label="Possibilità di Guarigione" 
+                value={stats.healingPossibility} 
+                description={getDescriptionForValue(stats.healingPossibility)} 
+              />
+              <StatItem 
+                label="Disagio Sociale" 
+                value={stats.socialDiscomfort} 
+                description={getDescriptionForValue(stats.socialDiscomfort)} 
+              />
             </div>
           </Card>
         </div>
