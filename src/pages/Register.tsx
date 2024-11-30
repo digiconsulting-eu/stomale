@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
+import { BirthYearSelect } from "@/components/registration/BirthYearSelect";
+import { GenderSelect } from "@/components/registration/GenderSelect";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -18,25 +13,6 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [gender, setGender] = useState("");
-
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
-
-  const getNextRegistrationNumber = () => {
-    // Get all existing registration numbers from localStorage
-    const users = Object.keys(localStorage)
-      .filter(key => key.startsWith('user_'))
-      .map(key => {
-        const userData = JSON.parse(localStorage.getItem(key) || '{}');
-        return parseInt(userData.registrationNumber || '0');
-      });
-
-    // If no users exist, start with 1
-    if (users.length === 0) return 1;
-
-    // Find the highest number and add 1
-    return Math.max(...users) + 1;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +26,6 @@ const Register = () => {
       const registrationNumber = getNextRegistrationNumber();
       const username = `Anonimo ${registrationNumber}`;
 
-      // Store user data
       localStorage.setItem(`user_${registrationNumber}`, JSON.stringify({
         username,
         email,
@@ -71,6 +46,17 @@ const Register = () => {
     } catch (error) {
       toast.error("Si è verificato un errore durante la registrazione");
     }
+  };
+
+  const getNextRegistrationNumber = () => {
+    const users = Object.keys(localStorage)
+      .filter(key => key.startsWith('user_'))
+      .map(key => {
+        const userData = JSON.parse(localStorage.getItem(key) || '{}');
+        return parseInt(userData.registrationNumber || '0');
+      });
+
+    return users.length === 0 ? 1 : Math.max(...users) + 1;
   };
 
   return (
@@ -121,40 +107,8 @@ const Register = () => {
             />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="birthYear" className="text-sm font-medium">
-              Anno di Nascita
-            </label>
-            <Select value={birthYear} onValueChange={setBirthYear}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleziona anno" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year} value={year.toString()}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="gender" className="text-sm font-medium">
-              Sesso
-            </label>
-            <Select value={gender} onValueChange={setGender}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleziona sesso" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="M">Maschio</SelectItem>
-                <SelectItem value="F">Femmina</SelectItem>
-                <SelectItem value="O">Altro</SelectItem>
-                <SelectItem value="N">Preferisco non specificare</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <BirthYearSelect value={birthYear} onChange={setBirthYear} />
+          <GenderSelect value={gender} onChange={setGender} />
 
           <Button type="submit" className="w-full">
             Registrati
