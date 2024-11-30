@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Square } from "lucide-react";
 
 interface StarRatingProps {
   value: number;
@@ -17,8 +17,8 @@ export const StarRating = ({ value, readOnly = false, onChange }: StarRatingProp
           onClick={() => !readOnly && onChange?.(star)}
           className={`${readOnly ? 'cursor-default' : 'cursor-pointer hover:scale-110 transition-transform'}`}
         >
-          <Star
-            className={`h-6 w-6 ${
+          <Square
+            className={`h-5 w-5 ${
               star <= value
                 ? 'fill-primary text-primary'
                 : 'fill-gray-200 text-gray-200'
