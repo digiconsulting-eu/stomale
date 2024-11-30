@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   condition: z.string().min(1, "Seleziona una patologia"),
@@ -29,6 +30,20 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function NewReview() {
+  const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      toast.error("Devi effettuare l'accesso per raccontare la tua esperienza");
+      navigate("/registrati");
+    }
+  }, [isLoggedIn, navigate]);
+
+  if (!isLoggedIn) {
+    return null;
+  }
+
   const [searchParams] = useSearchParams();
   const conditionParam = searchParams.get("patologia");
 

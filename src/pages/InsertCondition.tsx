@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,14 +15,14 @@ import {
 } from "@/components/conditions";
 
 const InsertCondition = () => {
+  const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
   const [newCondition, setNewCondition] = useState("");
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [description, setDescription] = useState(
     "Non trovi la patologia che stai cercando? Inseriscila qui e sarà aggiunta all'elenco dopo l'approvazione."
   );
   const [editedDescription, setEditedDescription] = useState(description);
-  const navigate = useNavigate();
-  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   const checkIfConditionExists = (condition: string) => {
     const allConditions = [
@@ -78,6 +78,17 @@ const InsertCondition = () => {
     toast.success("Descrizione aggiornata con successo");
   };
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      toast.error("Devi effettuare l'accesso per inserire una nuova patologia");
+      navigate("/registrati");
+    }
+  }, [isLoggedIn, navigate]);
+
+  if (!isLoggedIn) {
+    return null;
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="max-w-2xl mx-auto">
@@ -111,7 +122,7 @@ const InsertCondition = () => {
                 ) : (
                   <div className="flex items-start gap-2">
                     <span>{description}</span>
-                    {isAdmin && (
+                    {isLoggedIn && (
                       <Button
                         variant="ghost"
                         size="icon"
