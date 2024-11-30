@@ -18,7 +18,7 @@ export const ReviewStats = ({
   socialDiscomfort
 }: ReviewStatsProps) => {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <section className="grid grid-cols-1 gap-6">
       <div>
         <h3 className="font-medium mb-2">Difficoltà di Diagnosi</h3>
         <StarRating value={diagnosisDifficulty} readOnly onChange={() => {}} />
@@ -29,10 +29,10 @@ export const ReviewStats = ({
         <StarRating value={symptomSeverity} readOnly onChange={() => {}} />
       </div>
 
-      {hasMedication && (
+      {hasMedication && medicationEffectiveness !== undefined && (
         <div>
           <h3 className="font-medium mb-2">Efficacia Cura Farmacologica</h3>
-          <StarRating value={medicationEffectiveness || 0} readOnly onChange={() => {}} />
+          <StarRating value={medicationEffectiveness} readOnly onChange={() => {}} />
         </div>
       )}
 

@@ -1,11 +1,12 @@
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { ReviewStats } from "@/components/ReviewStats";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ReviewStats } from "@/components/ReviewStats";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { MessageCircle, PenSquare } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { CommentSection } from "@/components/CommentSection";
 
@@ -15,7 +16,6 @@ export default function ReviewDetail() {
   const { data: review, isLoading } = useQuery({
     queryKey: ["review", condition, title],
     queryFn: async () => {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
       return reviews.find((r: any) => 
@@ -81,9 +81,9 @@ export default function ReviewDetail() {
             <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
             <ReviewStats
               diagnosisDifficulty={review.diagnosisDifficulty}
-              symptomSeverity={review.symptomSeverity}
-              hasMedication={review.hasMedication}
-              medicationEffectiveness={review.medicationEffectiveness}
+              symptomSeverity={review.symptomsDiscomfort}
+              hasMedication={review.hasDrugTreatment === 'yes'}
+              medicationEffectiveness={review.drugTreatmentEffectiveness}
               healingPossibility={review.healingPossibility}
               socialDiscomfort={review.socialDiscomfort}
             />
@@ -99,7 +99,12 @@ export default function ReviewDetail() {
           <div className="flex items-center text-sm text-muted-foreground mb-8">
             <span>{new Date(review.date).toLocaleDateString('it-IT')}</span>
             <Separator orientation="vertical" className="mx-2 h-4" />
-            <span>{conditionName}</span>
+            <Link 
+              to={`/patologia/${condition}`}
+              className="text-primary font-medium hover:underline"
+            >
+              {conditionName}
+            </Link>
           </div>
 
           <div className="prose prose-lg max-w-none mb-8">
