@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { BlogCard } from "@/components/BlogCard";
 import { Link } from "react-router-dom";
