@@ -22,7 +22,7 @@ export const validateRow = (row: any): ImportedReview | null => {
     'Sintomi': 'symptoms',
     'Esperienza': 'experience',
     'Difficoltà di Diagnosi': 'diagnosisDifficulty',
-    'Quanto sono fastidiosi i sintomi?': 'symptomsDiscomfort',
+    'Quanto sono fastidiosi i sintomi': 'symptomsDiscomfort',
     'Efficacia cura farmacologica': 'medicationEffectiveness',
     'Possibilità di guarigione': 'healingPossibility',
     'Disagio sociale': 'socialDiscomfort',
@@ -42,7 +42,7 @@ export const validateRow = (row: any): ImportedReview | null => {
   // Validate ratings (must be between 1 and 5)
   const ratingFields = [
     'Difficoltà di Diagnosi',
-    'Quanto sono fastidiosi i sintomi?',
+    'Quanto sono fastidiosi i sintomi',
     'Efficacia cura farmacologica',
     'Possibilità di guarigione',
     'Disagio sociale'
@@ -81,7 +81,7 @@ export const validateRow = (row: any): ImportedReview | null => {
     symptoms: row['Sintomi'],
     experience: row['Esperienza'],
     diagnosisDifficulty: Number(row['Difficoltà di Diagnosi']),
-    symptomsDiscomfort: Number(row['Quanto sono fastidiosi i sintomi?']),
+    symptomsDiscomfort: Number(row['Quanto sono fastidiosi i sintomi']),
     medicationEffectiveness: Number(row['Efficacia cura farmacologica']),
     healingPossibility: Number(row['Possibilità di guarigione']),
     socialDiscomfort: Number(row['Disagio sociale']),
