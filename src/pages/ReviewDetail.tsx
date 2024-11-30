@@ -1,10 +1,13 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ReviewStats } from "@/components/ReviewStats";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { MessageCircle, PenSquare } from "lucide-react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
+import { CommentSection } from "@/components/CommentSection";
 
 export default function ReviewDetail() {
   const { condition, title } = useParams();
@@ -49,12 +52,21 @@ export default function ReviewDetail() {
     );
   }
 
+  const conditionName = capitalizeFirstLetter(condition || '');
+
   return (
     <div className="container py-8">
+      <Link 
+        to={`/patologia/${condition}`}
+        className="text-primary hover:underline mb-6 block"
+      >
+        ← Leggi altre esperienze su {conditionName}
+      </Link>
+
       <div className="grid md:grid-cols-12 gap-8">
         {/* Left column - Stats */}
         <div className="md:col-span-4">
-          <Card className="p-6">
+          <Card className="p-6 sticky top-24">
             <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
             <ReviewStats
               diagnosisDifficulty={review.diagnosisDifficulty}
@@ -64,23 +76,46 @@ export default function ReviewDetail() {
               healingPossibility={review.healingPossibility}
               socialDiscomfort={review.socialDiscomfort}
             />
+
+            <div className="mt-8 space-y-4">
+              <Button 
+                className="w-full"
+                asChild
+              >
+                <Link to={`/nuova-recensione?patologia=${condition}`}>
+                  <PenSquare className="mr-2 h-4 w-4" />
+                  Racconta la tua esperienza
+                </Link>
+              </Button>
+            </div>
           </Card>
         </div>
 
         {/* Right column - Content */}
         <div className="md:col-span-8">
           <h1 className="text-3xl font-bold text-primary mb-2">
-            {review.title || `Esperienza con ${capitalizeFirstLetter(review.condition)}`}
+            {review.title || `Esperienza con ${conditionName}`}
           </h1>
           
           <div className="flex items-center text-sm text-muted-foreground mb-8">
             <span>{new Date(review.date).toLocaleDateString('it-IT')}</span>
             <Separator orientation="vertical" className="mx-2 h-4" />
-            <span>{capitalizeFirstLetter(review.condition)}</span>
+            <span>{conditionName}</span>
           </div>
 
-          <div className="prose prose-lg max-w-none">
+          <div className="prose prose-lg max-w-none mb-8">
             <p className="whitespace-pre-wrap">{review.experience}</p>
+          </div>
+
+          <CommentSection />
+
+          <div className="mt-8 pt-8 border-t">
+            <Link 
+              to={`/patologia/${condition}`}
+              className="text-primary hover:underline block"
+            >
+              ← Leggi altre esperienze su {conditionName}
+            </Link>
           </div>
         </div>
       </div>
