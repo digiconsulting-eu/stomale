@@ -36,12 +36,26 @@ const getReviewByTitleAndCondition = (condition: string, title: string): Review 
       socialDiscomfort: 4,
       date: "2024-02-20"
     },
+    "2": {
+      id: "2",
+      title: "Recensione 1",
+      condition: "Depressione",
+      symptoms: "Stanchezza cronica, mancanza di interesse, disturbi del sonno",
+      experience: "La mia esperienza con la depressione è iniziata gradualmente. All'inizio non mi rendevo conto di cosa stesse succedendo, ma con il tempo i sintomi sono diventati più evidenti.",
+      diagnosisDifficulty: 3,
+      symptomSeverity: 4,
+      hasMedication: true,
+      medicationEffectiveness: 4,
+      healingPossibility: 3,
+      socialDiscomfort: 5,
+      date: "2024-02-19"
+    }
   };
   
   // Find review by matching condition and title (in a real app, this would be a DB query)
   return Object.values(reviews).find(
     review => 
-      review.condition.toLowerCase().replace(/\s+/g, '-') === condition &&
+      review.condition.toLowerCase() === condition &&
       review.title.toLowerCase().replace(/\s+/g, '-') === title
   );
 };
