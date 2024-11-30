@@ -62,21 +62,21 @@ export default function ConditionDetail() {
         <div className="md:col-span-8">
           <div className="grid gap-4">
             <Button 
-              className="w-full text-lg py-6 bg-white/80 hover:bg-white/90 text-primary border border-gray-100"
+              className="w-full text-lg py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
               onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Panoramica
             </Button>
             
             <Button 
-              className="w-full text-lg py-6 bg-white/80 hover:bg-white/90 text-primary border border-gray-100"
+              className="w-full text-lg py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
               onClick={() => document.getElementById('experiences')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Leggi Esperienze
             </Button>
             
             <Button 
-              className="w-full text-lg py-6 bg-white/80 hover:bg-white/90 text-primary border border-gray-100"
+              className="w-full text-lg py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
               onClick={() => navigate(`/nuova-recensione?patologia=${condition}`)}
             >
               Racconta la tua Esperienza
