@@ -60,6 +60,11 @@ const getConditionsByLetter = (letter: string) => {
 const SearchCondition = () => {
   const [selectedLetter, setSelectedLetter] = useState("A");
 
+  const handleLetterChange = (letter: string) => {
+    setSelectedLetter(letter);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Alphabet Navigation */}
@@ -68,7 +73,7 @@ const SearchCondition = () => {
           {ALPHABET.map((letter) => (
             <button
               key={letter}
-              onClick={() => setSelectedLetter(letter)}
+              onClick={() => handleLetterChange(letter)}
               className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-semibold transition-all
                 ${
                   selectedLetter === letter
