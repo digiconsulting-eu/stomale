@@ -98,7 +98,7 @@ export const RichTextEditor = ({ content, onChange, editable = true }: RichTextE
   return (
     <div className="border rounded-md">
       <MenuBar />
-      <div className="p-4">
+      <div className={`p-4 ${editable ? 'prose-editable' : 'prose'} max-w-none`}>
         <EditorContent editor={editor} />
       </div>
     </div>
