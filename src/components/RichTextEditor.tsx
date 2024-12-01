@@ -16,7 +16,6 @@ export const RichTextEditor = ({ content, onChange, editable = true }: RichTextE
       StarterKit,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
-        alignments: ['left', 'center', 'right'],
       }),
     ],
     content,

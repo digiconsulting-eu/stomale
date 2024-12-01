@@ -30,6 +30,10 @@ const CookiePolicy = () => {
     toast.success("Contenuto salvato con successo");
   };
 
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       {isAdmin && !isEditing && (
@@ -40,7 +44,11 @@ const CookiePolicy = () => {
 
       {isEditing ? (
         <div className="space-y-4">
-          <RichTextEditor content={content} onChange={setContent} editable={true} />
+          <RichTextEditor 
+            content={content} 
+            onChange={handleContentChange} 
+            editable={true} 
+          />
           <div className="space-x-2">
             <Button onClick={handleSave}>Salva</Button>
             <Button variant="outline" onClick={() => setIsEditing(false)}>
@@ -50,7 +58,11 @@ const CookiePolicy = () => {
         </div>
       ) : (
         <div className="prose max-w-none">
-          <RichTextEditor content={content} onChange={() => {}} editable={false} />
+          <RichTextEditor 
+            content={content} 
+            onChange={() => {}} 
+            editable={false} 
+          />
         </div>
       )}
     </div>
