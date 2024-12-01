@@ -1,21 +1,28 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import TextAlign from '@tiptap/extension-text-align';
 import { Button } from './ui/button';
 import { Bold, Italic, List, Heading, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 interface RichTextEditorProps {
   content: string;
-  onChange: (content: string) => void;
+  onChange?: (content: string) => void;
   editable?: boolean;
 }
 
 export const RichTextEditor = ({ content, onChange, editable = true }: RichTextEditorProps) => {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right'],
+      }),
+    ],
     content,
     editable,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      onChange?.(editor.getHTML());
     },
   });
 

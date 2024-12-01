@@ -50,7 +50,7 @@ const Terms = () => {
         </div>
       ) : (
         <div className="prose max-w-none">
-          <RichTextEditor content={content} editable={false} />
+          <RichTextEditor content={content} editable={false} onChange={() => {}} />
         </div>
       )}
     </div>
