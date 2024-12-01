@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { toast } from "sonner";
 
 const PrivacyPolicy = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(`
-# Privacy Policy
+<h1>Privacy Policy</h1>
 
-Ultima modifica: ${new Date().toLocaleDateString()}
+<p>Ultima modifica: ${new Date().toLocaleDateString()}</p>
 
-## Informativa sulla Privacy
+<h2>Informativa sulla Privacy</h2>
 
-La presente informativa descrive le modalità di gestione del sito web in riferimento al trattamento dei dati personali degli utenti che lo consultano.
+<p>La presente informativa descrive le modalità di gestione del sito web in riferimento al trattamento dei dati personali degli utenti che lo consultano.</p>
   `);
 
   const isAdmin = localStorage.getItem("isAdmin") === "true";
@@ -40,11 +40,7 @@ La presente informativa descrive le modalità di gestione del sito web in riferi
 
       {isEditing ? (
         <div className="space-y-4">
-          <Textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="min-h-[500px] font-mono"
-          />
+          <RichTextEditor content={content} onChange={setContent} />
           <div className="space-x-2">
             <Button onClick={handleSave}>Salva</Button>
             <Button variant="outline" onClick={() => setIsEditing(false)}>
@@ -54,7 +50,7 @@ La presente informativa descrive le modalità di gestione del sito web in riferi
         </div>
       ) : (
         <div className="prose max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: content }} />
+          <RichTextEditor content={content} editable={false} />
         </div>
       )}
     </div>

@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { toast } from "sonner";
 
 const CookiePolicy = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(`
-# Cookie Policy
+<h1>Cookie Policy</h1>
 
-Ultima modifica: ${new Date().toLocaleDateString()}
+<p>Ultima modifica: ${new Date().toLocaleDateString()}</p>
 
-## Cosa sono i cookie?
+<h2>Cosa sono i cookie?</h2>
 
-I cookie sono piccoli file di testo che i siti visitati inviano al terminale dell'utente, dove vengono memorizzati, per poi essere ritrasmessi agli stessi siti alla visita successiva.
+<p>I cookie sono piccoli file di testo che i siti visitati inviano al terminale dell'utente, dove vengono memorizzati, per poi essere ritrasmessi agli stessi siti alla visita successiva.</p>
   `);
 
   const isAdmin = localStorage.getItem("isAdmin") === "true";
@@ -40,11 +40,7 @@ I cookie sono piccoli file di testo che i siti visitati inviano al terminale del
 
       {isEditing ? (
         <div className="space-y-4">
-          <Textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="min-h-[500px] font-mono"
-          />
+          <RichTextEditor content={content} onChange={setContent} />
           <div className="space-x-2">
             <Button onClick={handleSave}>Salva</Button>
             <Button variant="outline" onClick={() => setIsEditing(false)}>
@@ -54,7 +50,7 @@ I cookie sono piccoli file di testo che i siti visitati inviano al terminale del
         </div>
       ) : (
         <div className="prose max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: content }} />
+          <RichTextEditor content={content} editable={false} />
         </div>
       )}
     </div>

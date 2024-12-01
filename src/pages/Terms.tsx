@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { toast } from "sonner";
 
 const Terms = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(`
-# Termini e Condizioni
+<h1>Termini e Condizioni</h1>
 
-Ultima modifica: ${new Date().toLocaleDateString()}
+<p>Ultima modifica: ${new Date().toLocaleDateString()}</p>
 
-## Condizioni Generali di Utilizzo
+<h2>Condizioni Generali di Utilizzo</h2>
 
-Le presenti condizioni generali di utilizzo regolano l'accesso e l'utilizzo del sito web StoMale.info.
+<p>Le presenti condizioni generali di utilizzo regolano l'accesso e l'utilizzo del sito web StoMale.info.</p>
   `);
 
   const isAdmin = localStorage.getItem("isAdmin") === "true";
@@ -40,11 +40,7 @@ Le presenti condizioni generali di utilizzo regolano l'accesso e l'utilizzo del 
 
       {isEditing ? (
         <div className="space-y-4">
-          <Textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="min-h-[500px] font-mono"
-          />
+          <RichTextEditor content={content} onChange={setContent} />
           <div className="space-x-2">
             <Button onClick={handleSave}>Salva</Button>
             <Button variant="outline" onClick={() => setIsEditing(false)}>
@@ -54,7 +50,7 @@ Le presenti condizioni generali di utilizzo regolano l'accesso e l'utilizzo del 
         </div>
       ) : (
         <div className="prose max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: content }} />
+          <RichTextEditor content={content} editable={false} />
         </div>
       )}
     </div>
