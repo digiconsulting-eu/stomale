@@ -8,11 +8,11 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 const fetchConditions = async () => {
   const { data, error } = await supabase
     .from('PATOLOGIE')
-    .select('id')
-    .order('id');
+    .select('Patologia')
+    .order('Patologia');
     
   if (error) throw error;
-  return data.map(item => item.id);
+  return data.map(item => item.Patologia);
 };
 
 const getConditionsByLetter = (conditions: string[], letter: string) => {
