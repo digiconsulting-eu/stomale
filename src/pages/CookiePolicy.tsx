@@ -40,7 +40,7 @@ const CookiePolicy = () => {
 
       {isEditing ? (
         <div className="space-y-4">
-          <RichTextEditor content={content} onChange={setContent} />
+          <RichTextEditor content={content} onChange={setContent} editable={true} />
           <div className="space-x-2">
             <Button onClick={handleSave}>Salva</Button>
             <Button variant="outline" onClick={() => setIsEditing(false)}>
@@ -50,7 +50,7 @@ const CookiePolicy = () => {
         </div>
       ) : (
         <div className="prose max-w-none">
-          <RichTextEditor content={content} editable={false} onChange={() => {}} />
+          <RichTextEditor content={content} onChange={() => {}} editable={false} />
         </div>
       )}
     </div>
