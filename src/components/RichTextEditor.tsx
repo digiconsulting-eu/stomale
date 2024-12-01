@@ -16,12 +16,19 @@ export const RichTextEditor = ({ content, onChange, editable = true }: RichTextE
       StarterKit,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right'],
+        defaultAlignment: 'left',
       }),
     ],
     content,
     editable,
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class: 'prose max-w-none focus:outline-none',
+      },
     },
   });
 
@@ -97,7 +104,7 @@ export const RichTextEditor = ({ content, onChange, editable = true }: RichTextE
   return (
     <div className="border rounded-md">
       <MenuBar />
-      <div className={`p-4 ${editable ? 'prose-editable' : 'prose'} max-w-none`}>
+      <div className={`p-4 min-h-[200px] ${editable ? 'prose-editable' : 'prose'} max-w-none`}>
         <EditorContent editor={editor} />
       </div>
     </div>
