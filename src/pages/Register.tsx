@@ -1,27 +1,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { BirthYearSelect } from "@/components/registration/BirthYearSelect";
+import { GenderSelect } from "@/components/registration/GenderSelect";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [gender, setGender] = useState("");
 
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
@@ -29,8 +22,41 @@ const Register = () => {
       return;
     }
 
-    // TODO: Implement registration logic
-    toast.success("Registrazione completata con successo!");
+    try {
+      const registrationNumber = getNextRegistrationNumber();
+      const username = `Anonimo ${registrationNumber}`;
+
+      localStorage.setItem(`user_${registrationNumber}`, JSON.stringify({
+        username,
+        email,
+        registrationNumber,
+        birthYear,
+        gender,
+        joinDate: new Date().toISOString()
+      }));
+
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('username', username);
+      localStorage.setItem('registrationNumber', registrationNumber.toString());
+      localStorage.setItem('email', email);
+      localStorage.setItem('joinDate', new Date().toISOString());
+
+      toast.success("Registrazione completata con successo!");
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error("Si è verificato un errore durante la registrazione");
+    }
+  };
+
+  const getNextRegistrationNumber = () => {
+    const users = Object.keys(localStorage)
+      .filter(key => key.startsWith('user_'))
+      .map(key => {
+        const userData = JSON.parse(localStorage.getItem(key) || '{}');
+        return parseInt(userData.registrationNumber || '0');
+      });
+
+    return users.length === 0 ? 1 : Math.max(...users) + 1;
   };
 
   return (
@@ -81,40 +107,8 @@ const Register = () => {
             />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="birthYear" className="text-sm font-medium">
-              Anno di Nascita
-            </label>
-            <Select value={birthYear} onValueChange={setBirthYear}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleziona anno" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year} value={year.toString()}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="gender" className="text-sm font-medium">
-              Sesso
-            </label>
-            <Select value={gender} onValueChange={setGender}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleziona sesso" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="M">Maschio</SelectItem>
-                <SelectItem value="F">Femmina</SelectItem>
-                <SelectItem value="O">Altro</SelectItem>
-                <SelectItem value="N">Preferisco non specificare</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <BirthYearSelect value={birthYear} onChange={setBirthYear} />
+          <GenderSelect value={gender} onChange={setGender} />
 
           <Button type="submit" className="w-full">
             Registrati
