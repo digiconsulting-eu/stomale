@@ -16,11 +16,15 @@ interface ImportedReview {
 
 const formatDate = (dateInput: any): string => {
   if (!dateInput) {
-    return new Date().toLocaleDateString('it-IT').split('/').join('-');
+    return new Date().toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).split('/').join('/');
   }
 
-  // If it's already in the correct format DD-MM-YYYY, return as is
-  if (typeof dateInput === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(dateInput)) {
+  // If it's already in the correct format DD/MM/YYYY, return as is
+  if (typeof dateInput === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(dateInput)) {
     return dateInput;
   }
 
@@ -29,7 +33,11 @@ const formatDate = (dateInput: any): string => {
     if (typeof dateInput === 'number') {
       const excelEpoch = new Date(1899, 11, 30);
       const date = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000);
-      return date.toLocaleDateString('it-IT').split('/').join('-');
+      return date.toLocaleDateString('it-IT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
     }
 
     // Try to parse the date string
@@ -37,9 +45,17 @@ const formatDate = (dateInput: any): string => {
     if (isNaN(date.getTime())) {
       throw new Error('Invalid date');
     }
-    return date.toLocaleDateString('it-IT').split('/').join('-');
+    return date.toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   } catch {
-    return new Date().toLocaleDateString('it-IT').split('/').join('-');
+    return new Date().toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   }
 };
 

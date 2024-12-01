@@ -22,6 +22,9 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
   const conditionSlug = condition.toLowerCase().replace(/\s+/g, '-');
   const titleSlug = (title || 'untitled').toLowerCase().replace(/\s+/g, '-');
 
+  // Format date from YYYY-MM-DD to DD/MM/YYYY
+  const formattedDate = date.split('-').reverse().join('/');
+
   const handleDelete = async () => {
     try {
       // Here you would make an API call to delete the review
@@ -72,7 +75,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
           </span>
           <div className="flex items-center text-text-light space-x-1">
             <Calendar size={14} />
-            <span className="text-sm">{date}</span>
+            <span className="text-sm">{formattedDate}</span>
           </div>
         </div>
         <p className="text-text-light line-clamp-3 leading-relaxed">{preview}</p>
