@@ -1,38 +1,138 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-const fetchConditions = async () => {
-  const { data, error } = await supabase
-    .from('PATOLOGIE')
-    .select('Patologia')
-    .order('Patologia');
-    
-  if (error) throw error;
-  return data.map(item => item.Patologia);
-};
+const CONDITIONS_A = [
+  "ACALASIA", "ACETONEMIA", "ACIDOSI METABOLICA", "ACNE", "ACONDROPLASIA",
+  "ACROMEGALIA", "ADENOIDI IPERTROFICHE", "ADENOIDITE", "AIDS", "ALBINISMO",
+  "ALCOLISMO", "ALGODISTROFIA", "ALLERGIA ALIMENTARE", "ALLERGIA AL NICHEL e SNAS",
+  "ALLERGIA AL LATTOSIO", "ALLERGIA DA CONTATTO", "ALLERGIE RESPIRATORIE",
+  "ALLUCE VALGO", "ALOPECIA AREATA", "AMBLIOPIA", "AMEBIASI", "AMILOIDOSI",
+  "ANAFILASSI", "ANEMIA", "ANEMIA DI FANCONI", "ANEMIA EMOLITICA",
+  "ANEURISMA AORTICO", "ANEURISMA CEREBRALE", "ANGINA ADDOMINALE",
+  "ANGINA INSTABILE", "ANGINA PECTORIS", "ANGIODISPLASIA", "ANGIOMA",
+  "ANISAKIASI", "ANORESSIA", "ANSIA", "ANTRACE", "APNEA NOTTURNA",
+  "APPENDICITE", "ARRESTO CARDIACO", "ARTERITE A CELLULE GIGANTI", "ARTRITE",
+  "ARTRITE GOTTOSA", "ARTRITE IDIOPATICA GIOVANILE", "ARTRITE PSORIASICA",
+  "ARTRITE REATTIVA", "ARTRITE REUMATOIDE", "ARTROSI", "ARTROSI DELLE MANI",
+  "ARTROSI CERVICALE", "ASBESTOSI", "ASCESSO GENGIVALE", "ASCESSO PERIANALE",
+  "ASCESSO POLMONARE", "ASMA", "ASPERGILLOSI", "ASTIGMATISMO", "ATEROSCLEROSI",
+  "ATRESIA ESOFAGEA", "ATROFIA MUSCOLARE SPINALE", "ATTACCO DI ANSIA",
+  "ATTACCO DI PANICO", "ATTACCO ISCHEMICO TRANSITORIO", "AUTISMO"
+];
 
-const getConditionsByLetter = (conditions: string[], letter: string) => {
-  return conditions.filter(condition => condition.startsWith(letter));
+const CONDITIONS_B = [
+  "BABESIOSI", "BALANOPOSTITE", "BERIBERI", "BINGE DRINKING", "BLEFARITE",
+  "BORSITE", "BOTULISMO", "BPCO", "BRONCHIECTASIE", "BRONCHIOLITE",
+  "BRONCHITE", "BRUCELLOSI", "BRUXISMO", "BULIMIA"
+];
+
+const CONDITIONS_C = [
+  "CALAZIO", "CALCOLI AL FEGATO", "CALCOLI ALLA CISTIFELLEA", "CALCOLI RENALI",
+  "CALCOLI TONSILLARI", "CALCOLOSI SALIVARE", "CALCOLOSI RENALE",
+  "CANCRO AL COLLO DELL'UTERO (TUMORE)", "CANCRO AL COLON (TUMORE)",
+  "CANCRO AL SENO (TUMORE)", "CANCRO ALLA PROSTATA (TUMORE)",
+  "CANCRO ALL'ENDOMETRIO (TUMORE)", "CANCRO DELLA VESCICA (TUMORE)", "CANCROIDE",
+  "CANDIDA", "CARCINOMA BASO-CELLULARE (BASALIOMA)",
+  "CARCINOMA DELLA CERVICE UTERINA", "CARCINOMA SQUAMO - CELLULARE", "CARIE",
+  "CARATATTA", "CEFALEA", "CELIACHIA", "CELLULITE", "CELLULITE INFETTIVA",
+  "CERVICITE", "CHELOIDE", "CHERATITE DA HERPES SIMPLEX", "CHERATOCONO",
+  "CHERATOSI ATTINICA", "CHETOACIDOSI ALCOLICA", "CHETOACIDOSI DIABETICA",
+  "CHIKUNGUNYA", "CINETOSI", "CIRROSI BILIARE", "CIRROSI EPATICA",
+  "CISTI DERMOIDE", "CISTI DI BAKER", "CISTI DI BARTOLINI", "CISTI OVARICA",
+  "CISTICERCOSI", "CISTINURIA", "CISTITE", "CISTITE INTERSTIZIALE",
+  "CISTOPIELITE", "CITOMEGALOVIRUS", "CLAMIDIA", "CLAUDICATIO INTERMITTENS",
+  "COAGULAZIONE INTRAVASCOLARE DISSEMINATA", "COGGIGODINIA",
+  "COLANGIOCARCINOMA", "COLANGITE SCLEROSANTE", "COLECISTITE",
+  "COLECISTITE ALITIASICA", "COLELITIASI o CALCOLI BILIARI",
+  "COLERA", "COLICA RENALE", "COLITE", "COLITE ISCHEMICA", "COLITE SPASTICA",
+  "COLITE ULCEROSA", "COLPO DELLA STREGA", "COLPO DI CALORE",
+  "COLPO DI FRUSTA CERVICALE", "CONDILOMA", "CONDROCALCINOSI", "CONDROMA",
+  "CONDROMALACIA", "CONDROSARCOMA", "CONGELAMENTO", "CONGESTIONE DIGESTIVA",
+  "CONGIUNTIVITE", "CONTRATTURA MUSCOLARE", "CORONOPATIA",
+  "CORPO LUTEO EMORRAGICO", "COUPEROSE", "COVID 19 (CORONAVIRUS)",
+  "CRIOGLOBULINEMIA", "CRIPTOCOCCOSI", "CROUP", "CUORE POLMONARE"
+];
+
+const CONDITIONS_D = [
+  "DACRIOCISTITE", "DEGENERAZIONE MACULARE SENILE", "DEMENZA SENILE",
+  "DEMENZA VASCOLARE", "DENGUE", "DEPRESSIONE", "DEPRESSIONE POST PARTUM",
+  "DERMATITE", "DERMATITE ATOPICA", "DERMATITE DA PANNOLINO",
+  "DERMATITE PERIORALE", "DERMATITE SEBORROICA", "DERMATOFIBROMA",
+  "DERMATOFITOSI", "DIABETE", "DIABETE GESTAZIONALE", "DIABETE INSIPIDO",
+  "DIARREA DEL VIAGGIATORE", "DIFETTO INTERATRIALE", "DIFTERITE", "DISIDROSI",
+  "DISLESSIA", "DISLIPIDEMIE", "DISPRASSIA", "DISTACCO DI RETINA", "DISTIMIA",
+  "DISTORSIONE", "DISTORSIONE DELLA CAVIGLIA", "DISTRESS RESPIRATORIO",
+  "DISTROFIA DI DUCHENNE", "DISTURBI DELLA COAGULAZIONE", "DISTURBO BIPOLARE",
+  "DISTURBO CICLOTIMICO", "DISTURBO DA ALIMENTAZIONE INCONTROLLATA",
+  "DISTURBO DI PERSONALITA' BORDERLINE", "DISTURBO EVITANTE DI PERSONALITA'",
+  "DISTURBO NARCISISTICO DI PERSONALITA'", "DISTURBO OSSESSIVO COMPULSIVO",
+  "DISTURBO POST TRAUMATICO DA STRESS", "DITO A SCATTO", "DIVERTICOLI ESOFAGEI",
+  "DIVERTICOLITE", "DIVERTICOLO DI MECKEL", "DIVERTICOLO DI ZENKER",
+  "DIVERTICOLOSI", "DREPANOCITOSI", "DUODENITE"
+];
+
+const CONDITIONS_E = [
+  "EBOLA", "ECHINOCOCCOSI", "ECTASIA DUTTALE", "EDEMA CEREBRALE",
+  "EDEMA POLMONARE", "EMBOLIA", "EMBOLIA ARTERIOSA", "EMBOLIA POLMONARE",
+  "EMICRANIA", "EMOCROMATOSI", "EMOCROMATOSI PRIMITIVA E SECONDARIA",
+  "EMOFILIA", "EMOGLOBINURIA PAROSSISTICA NOTTURNA", "EMORRAGIA CEREBRALE",
+  "EMORROIDI", "EMOSIDEROSI", "ENCEFALITE", "ENCEFALITE DA ZECCA (TBE)",
+  "ENCEFALITE GIAPPONESE", "ENCEFALOPATIA DI WERNICKE", "ENCONDROMA",
+  "ENDOCARDITE INFETTIVA", "ENDOCARDITE NON INFETTIVA", "ENDOMETRIOSI",
+  "ENFISEMA", "ENTERITE", "ENTESITE", "EPATITE", "EPATITE A", "EPATITE B",
+  "EPATITE C", "EPATITE D", "EPATITE E", "EPATITE FULMINANTE", "EPICONDILITE",
+  "EPIDERMODISPLASIA VERRUCIFORME", "EPIDERMOLISI BOLLOSA", "EPIDIDIMITE",
+  "EPISCLERITE", "EPITROCLEITE", "EPULIDE", "ERISIPELA", "ERITEMA MULTIFORME",
+  "ERITEMA SOLARE", "ERITRASMA", "ERITROBLASTOSI FETALE", "ERNIA ADDOMINALE",
+  "ERNIA DEL DISCO", "ERNIA IATALE", "ERNIA INGUINALE", "ESOFAGITE",
+  "ESOFAGO DI BARRET"
+];
+
+const CONDITIONS_F = [
+  "FARINGITE", "FARINGITE CRONICA", "FARINGOTONSILLITE", "FASCITE PLANTARE",
+  "FAVISMO", "FEBBRE", "FEBBRE DI LASSA", "FEBBRE EMORRAGICA CRIMEA - CONGO",
+  "FEBBRE EMORRAGICA DI MARBURG", "FEBBRE GIALLA", "FEBBRE REUMATICA",
+  "FEOCROMOCITOMA", "FIBRILLAZIONE ATRIALE",
+  "FIBRODISPLASIA OSSIFICANTE PROGRESSIVA", "FIBROMA MAMMARIO",
+  "FIBROMA PENDULO", "FIBROMA UTERINO", "FIBROSI CISTICA", "FIBROSI EPATICA",
+  "FIBROSI POLMONARE", "FIBROTECOMA OVARICO", "FIMOSI", "FISTOLA ANALE",
+  "FLUOROSI", "FOLLICOLITE", "FRATTURA", "FRATTURA DEL PENE",
+  "FUNGHI DELLA PELLE", "FUOCO DI SANT'ANTONIO"
+];
+
+const CONDITIONS_G = [
+  "GASTRITE", "GASTROENTERITE", "GASTROENTERITE VIRALE", "GELONI", "GENGIVITE",
+  "GIARDIASI", "GINOCCHIO VALGO", "GINOCCHIO VARO", "GIRADITO", "GLAUCOMA",
+  "GONARTROSI", "GONORREA", "GOTTA", "GOZZO", "GOZZO TIROIDEO",
+  "GRANULOMA ANULARE", "GRANULOMA PIOGENICO", "GRAVIDANZA",
+  "GRAVIDANZA ECTOPICA"
+];
+
+const getConditionsByLetter = (letter: string) => {
+  switch (letter) {
+    case "A":
+      return CONDITIONS_A;
+    case "B":
+      return CONDITIONS_B;
+    case "C":
+      return CONDITIONS_C;
+    case "D":
+      return CONDITIONS_D;
+    case "E":
+      return CONDITIONS_E;
+    case "F":
+      return CONDITIONS_F;
+    case "G":
+      return CONDITIONS_G;
+    default:
+      return [];
+  }
 };
 
 const SearchCondition = () => {
   const [selectedLetter, setSelectedLetter] = useState("A");
-
-  const { data: allConditions = [], isLoading } = useQuery({
-    queryKey: ['conditions'],
-    queryFn: fetchConditions,
-  });
-
-  const conditions = getConditionsByLetter(allConditions, selectedLetter);
-
-  const handleLetterChange = (letter: string) => {
-    setSelectedLetter(letter);
-    window.scrollTo(0, 0);
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -42,7 +142,7 @@ const SearchCondition = () => {
           {ALPHABET.map((letter) => (
             <button
               key={letter}
-              onClick={() => handleLetterChange(letter)}
+              onClick={() => setSelectedLetter(letter)}
               className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-semibold transition-all
                 ${
                   selectedLetter === letter
@@ -66,25 +166,17 @@ const SearchCondition = () => {
           </h2>
 
           <div className="grid gap-3">
-            {isLoading ? (
-              <div className="text-center py-8 text-gray-500">Caricamento patologie...</div>
-            ) : conditions.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                Nessuna patologia trovata per questa lettera.
-              </div>
-            ) : (
-              conditions.map((condition) => (
-                <Link
-                  key={condition}
-                  to={`/patologia/${encodeURIComponent(condition.toLowerCase())}`}
-                  className="card group hover:border-primary/20 transition-all"
-                >
-                  <h3 className="text-lg font-medium text-text group-hover:text-primary transition-colors">
-                    {condition}
-                  </h3>
-                </Link>
-              ))
-            )}
+            {getConditionsByLetter(selectedLetter).map((condition) => (
+              <Link
+                key={condition}
+                to={`/patologia/${encodeURIComponent(condition.toLowerCase())}`}
+                className="card group hover:border-primary/20 transition-all"
+              >
+                <h3 className="text-lg font-medium text-text group-hover:text-primary transition-colors">
+                  {condition}
+                </h3>
+              </Link>
+            ))}
           </div>
         </div>
 

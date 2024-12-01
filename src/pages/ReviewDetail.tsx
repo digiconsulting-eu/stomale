@@ -1,128 +1,145 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { ReviewStats } from "@/components/ReviewStats";
-import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { MessageCircle, PenSquare } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { capitalizeFirstLetter } from "@/utils/textUtils";
-import { CommentSection } from "@/components/CommentSection";
+import { StarRating } from "@/components/StarRating";
 
-export default function ReviewDetail() {
-  const { condition, title } = useParams();
-  const conditionName = capitalizeFirstLetter(condition || '');
+interface Review {
+  id: string;
+  title: string;
+  condition: string;
+  symptoms: string;
+  experience: string;
+  diagnosisDifficulty: number;
+  symptomSeverity: number;
+  hasMedication: boolean;
+  medicationEffectiveness?: number;
+  healingPossibility: number;
+  socialDiscomfort: number;
+  date: string;
+}
 
-  const { data: review, isLoading } = useQuery({
-    queryKey: ["review", condition, title],
-    queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-      return reviews.find((r: any) => 
-        r.condition.toLowerCase() === condition?.toLowerCase() &&
-        (r.title || '').toLowerCase().replace(/\s+/g, '-') === title
-      );
-    }
-  });
+// This would normally come from an API
+const getReview = (id: string): Review | undefined => {
+  const reviews = {
+    "1": {
+      id: "1",
+      title: "La mia esperienza con l'emicrania cronica",
+      condition: "Emicrania",
+      symptoms: "Forte mal di testa, sensibilità alla luce, nausea, vertigini",
+      experience: "Ho iniziato a soffrire di emicrania circa due anni fa. Ho provato diverse terapie farmacologiche e cambiamenti nello stile di vita. La situazione è migliorata ma non sono ancora completamente guarito.",
+      diagnosisDifficulty: 4,
+      symptomSeverity: 5,
+      hasMedication: true,
+      medicationEffectiveness: 3,
+      healingPossibility: 2,
+      socialDiscomfort: 4,
+      date: "2024-02-20"
+    },
+  };
+  
+  return reviews[id as keyof typeof reviews];
+};
 
-  if (isLoading) {
-    return (
-      <div className="container py-8">
-        <div className="grid md:grid-cols-12 gap-8">
-          <div className="md:col-span-4">
-            <Skeleton className="h-[400px] w-full" />
-          </div>
-          <div className="md:col-span-8">
-            <Skeleton className="h-12 w-3/4 mb-4" />
-            <Skeleton className="h-6 w-1/4 mb-8" />
-            <Skeleton className="h-32 w-full" />
-          </div>
-        </div>
-      </div>
-    );
-  }
+const ReviewDetail = () => {
+  const { id } = useParams();
+  const review = getReview(id || "");
 
   if (!review) {
-    return (
-      <div className="container py-8">
-        <h1 className="text-2xl font-bold text-center text-gray-800">
-          Esperienza non trovata
-        </h1>
-      </div>
-    );
+    return <div className="container mx-auto px-4 py-8">Recensione non trovata</div>;
   }
 
   return (
-    <div className="container py-8">
-      <div className="flex justify-between items-start mb-6">
-        <Link 
-          to={`/patologia/${condition}`}
-          className="text-primary hover:underline"
-        >
-          ← Leggi altre esperienze su {conditionName}
-        </Link>
-        <Button 
-          asChild
-          className="flex items-center gap-2"
-        >
-          <Link to={`/nuova-recensione?patologia=${condition}`}>
-            <PenSquare className="mr-2 h-4 w-4" />
-            Racconta la tua esperienza
+    <div className="container mx-auto px-4 py-8">
+      <Card className="mb-8">
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-4">
+            <h1 className="text-2xl font-bold text-text">{review.title}</h1>
+            <span className="text-sm text-text-light">{review.date}</span>
+          </div>
+          
+          <div className="mb-6">
+            <span className="inline-block px-3 py-1 bg-secondary rounded-full text-sm text-text-light">
+              {review.condition}
+            </span>
+          </div>
+
+          <div className="space-y-6">
+            <section>
+              <h2 className="text-lg font-semibold mb-2">Sintomi</h2>
+              <p className="text-text-light">{review.symptoms}</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold mb-2">Esperienza</h2>
+              <p className="text-text-light">{review.experience}</p>
+            </section>
+
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-medium mb-2">Difficoltà di Diagnosi</h3>
+                <StarRating value={review.diagnosisDifficulty} readOnly />
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Gravità dei Sintomi</h3>
+                <StarRating value={review.symptomSeverity} readOnly />
+              </div>
+
+              {review.hasMedication && (
+                <div>
+                  <h3 className="font-medium mb-2">Efficacia Cura Farmacologica</h3>
+                  <StarRating value={review.medicationEffectiveness || 0} readOnly />
+                </div>
+              )}
+
+              <div>
+                <h3 className="font-medium mb-2">Possibilità di Guarigione</h3>
+                <StarRating value={review.healingPossibility} readOnly />
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Disagio Sociale</h3>
+                <StarRating value={review.socialDiscomfort} readOnly />
+              </div>
+            </section>
+          </div>
+        </div>
+      </Card>
+
+      <div className="bg-secondary/20 rounded-lg p-6 mb-8">
+        <p className="text-lg mb-4">
+          Vuoi leggere esperienze di altri utenti su {review.condition}?{" "}
+          <Link to={`/patologia/${review.condition.toLowerCase()}`} className="text-primary hover:underline">
+            Clicca qui
           </Link>
-        </Button>
+        </p>
       </div>
 
-      <div className="grid md:grid-cols-12 gap-8">
-        <div className="md:col-span-4">
-          <Card className="p-6 sticky top-24">
-            <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
-            <ReviewStats
-              diagnosisDifficulty={review.diagnosisDifficulty}
-              symptomSeverity={review.symptomsDiscomfort}
-              hasMedication={review.hasDrugTreatment === 'yes'}
-              medicationEffectiveness={review.drugTreatmentEffectiveness}
-              healingPossibility={review.healingPossibility}
-              socialDiscomfort={review.socialDiscomfort}
-            />
-          </Card>
-        </div>
-
-        <div className="md:col-span-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">
-            {review.title || `Esperienza con ${conditionName}`}
-          </h1>
-          
-          <div className="flex items-center mb-4">
-            <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
-              <Link 
-                to={`/patologia/${condition}`}
-                className="hover:underline"
-              >
-                {conditionName}
-              </Link>
-            </span>
-            <div className="flex items-center text-text-light ml-4">
-              <span className="text-sm">{new Date(review.date).toLocaleDateString('it-IT')}</span>
-            </div>
-          </div>
-
-          <div className="prose prose-lg max-w-none mb-8">
-            <p className="whitespace-pre-wrap">{review.experience}</p>
-          </div>
-
-          <CommentSection />
-
-          <div className="mt-8 pt-8 border-t">
-            <Link 
-              to={`/patologia/${condition}`}
-              className="text-primary hover:underline block"
-            >
-              ← Leggi altre esperienze su {conditionName}
-            </Link>
-          </div>
-        </div>
+      <div className="bg-white rounded-lg p-6 text-sm text-text-light">
+        <h2 className="text-lg font-semibold mb-4">{review.condition}</h2>
+        <p className="mb-4">
+          Scopri l'esperienza di chi soffre di {review.condition} grazie alle recensioni ed esperienze di altri utenti.
+        </p>
+        <p className="mb-4">
+          Su StoMale.info puoi leggere le esperienze di utenti che hanno o hanno avuto a che fare con questa patologia. 
+          Puoi leggere le loro esperienze, commentarle o fare domande e scoprire quali sintomi ha o come si sta curando 
+          chi soffre di {review.condition}. Puoi inoltre confrontarti su esperti e cure, chiedendo anche di effetti 
+          positivi oppure effetti collaterali o reazioni, tenendo però presente che si tratta di esperienze individuali 
+          e che quindi bisognerà sempre rivolgersi al proprio medico curante per diagnosi e cura.
+        </p>
+        <p className="mb-4">
+          Leggi le esperienze degli utenti che soffrono di {review.condition} e scopri come stanno.
+        </p>
+        <p className="mb-4">
+          Gli utenti scrivono recensioni basate sulla propria esperienza personale e sotto diagnosi e consiglio medico, 
+          questo sito quindi NON è inteso per consulenza medica, diagnosi o trattamento e NON deve in nessun caso 
+          sostituirsi a un consulto medico, una visita specialistica o altro. StoMale.info e DigiConsulting non si 
+          assumono responsabilità sulla libera interpretazione del contenuto scritto da altri utenti. E' doveroso 
+          contattare il proprio medico e/o specialista per la diagnosi di malattie e per la prescrizione e assunzione 
+          di farmaci.
+        </p>
       </div>
     </div>
   );
-}
+};
+
+export default ReviewDetail;
