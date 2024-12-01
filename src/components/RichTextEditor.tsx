@@ -1,34 +1,21 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import TextAlign from '@tiptap/extension-text-align';
 import { Button } from './ui/button';
 import { Bold, Italic, List, Heading, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 interface RichTextEditorProps {
   content: string;
-  onChange?: (content: string) => void;
+  onChange: (content: string) => void;
   editable?: boolean;
 }
 
 export const RichTextEditor = ({ content, onChange, editable = true }: RichTextEditorProps) => {
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-        alignments: ['left', 'center', 'right'],
-        defaultAlignment: 'left',
-      }),
-    ],
+    extensions: [StarterKit],
     content,
     editable,
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getHTML());
-    },
-    editorProps: {
-      attributes: {
-        class: 'prose max-w-none focus:outline-none',
-      },
+      onChange(editor.getHTML());
     },
   });
 
@@ -104,7 +91,7 @@ export const RichTextEditor = ({ content, onChange, editable = true }: RichTextE
   return (
     <div className="border rounded-md">
       <MenuBar />
-      <div className={`p-4 min-h-[200px] ${editable ? 'prose-editable' : 'prose'} max-w-none`}>
+      <div className="p-4">
         <EditorContent editor={editor} />
       </div>
     </div>
