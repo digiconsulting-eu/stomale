@@ -16,21 +16,7 @@ const fetchConditions = async () => {
 };
 
 const getConditionsByLetter = (conditions: string[], letter: string) => {
-  // Get approved conditions from localStorage
-  const approvedConditions = JSON.parse(localStorage.getItem('approvedConditions') || '[]');
-  
-  // Filter conditions that start with the current letter
-  const baseConditions = conditions.filter(condition => 
-    condition.startsWith(letter)
-  );
-
-  // Filter approved conditions that start with the current letter
-  const approvedForLetter = approvedConditions.filter((condition: string) => 
-    condition.startsWith(letter)
-  );
-
-  // Combine and sort all conditions
-  return [...baseConditions, ...approvedForLetter].sort();
+  return conditions.filter(condition => condition.startsWith(letter));
 };
 
 const SearchCondition = () => {
@@ -83,7 +69,9 @@ const SearchCondition = () => {
             {isLoading ? (
               <div className="text-center py-8 text-gray-500">Caricamento patologie...</div>
             ) : conditions.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">Nessuna patologia trovata per questa lettera.</div>
+              <div className="text-center py-8 text-gray-500">
+                Nessuna patologia trovata per questa lettera.
+              </div>
             ) : (
               conditions.map((condition) => (
                 <Link

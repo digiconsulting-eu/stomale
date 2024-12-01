@@ -26,16 +26,13 @@ export type Database = {
       }
       PATOLOGIE: {
         Row: {
-          created_at: string
-          id: string
+          Patologia: string
         }
         Insert: {
-          created_at?: string
-          id: string
+          Patologia?: string
         }
         Update: {
-          created_at?: string
-          id?: string
+          Patologia?: string
         }
         Relationships: []
       }
