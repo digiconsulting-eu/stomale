@@ -11,7 +11,11 @@ const fetchConditions = async () => {
     .select('Patologia')
     .order('Patologia');
     
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching conditions:', error);
+    throw error;
+  }
+  
   return data.map(item => item.Patologia);
 };
 
@@ -22,10 +26,14 @@ const getConditionsByLetter = (conditions: string[], letter: string) => {
 const SearchCondition = () => {
   const [selectedLetter, setSelectedLetter] = useState("A");
 
-  const { data: allConditions = [], isLoading } = useQuery({
+  const { data: allConditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: fetchConditions,
   });
+
+  if (error) {
+    console.error('Query error:', error);
+  }
 
   const conditions = getConditionsByLetter(allConditions, selectedLetter);
 
@@ -77,7 +85,7 @@ const SearchCondition = () => {
                 <Link
                   key={condition}
                   to={`/patologia/${encodeURIComponent(condition.toLowerCase())}`}
-                  className="card group hover:border-primary/20 transition-all"
+                  className="p-4 rounded-lg border border-gray-200 hover:border-primary/20 transition-all bg-white shadow-sm hover:shadow-md"
                 >
                   <h3 className="text-lg font-medium text-text group-hover:text-primary transition-colors">
                     {condition}
