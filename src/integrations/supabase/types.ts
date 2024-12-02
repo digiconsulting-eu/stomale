@@ -43,6 +43,7 @@ export type Database = {
           "diagnosisDifficulty (difficoltà diagnosi)": number | null
           "experience (esperienza)": string | null
           "healingPossibility (possibilità guarigione)": number | null
+          id: string
           "medicationEffectiveness (efficacia farmaci)": number | null
           "socialDiscomfort (disagio sociale)": number | null
           "status (stato: approvata/in attesa)": string | null
@@ -57,6 +58,7 @@ export type Database = {
           "diagnosisDifficulty (difficoltà diagnosi)"?: number | null
           "experience (esperienza)"?: string | null
           "healingPossibility (possibilità guarigione)"?: number | null
+          id?: string
           "medicationEffectiveness (efficacia farmaci)"?: number | null
           "socialDiscomfort (disagio sociale)"?: number | null
           "status (stato: approvata/in attesa)"?: string | null
@@ -71,6 +73,7 @@ export type Database = {
           "diagnosisDifficulty (difficoltà diagnosi)"?: number | null
           "experience (esperienza)"?: string | null
           "healingPossibility (possibilità guarigione)"?: number | null
+          id?: string
           "medicationEffectiveness (efficacia farmaci)"?: number | null
           "socialDiscomfort (disagio sociale)"?: number | null
           "status (stato: approvata/in attesa)"?: string | null
