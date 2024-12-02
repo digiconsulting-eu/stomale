@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 const fetchConditions = async () => {
+  console.log('Fetching conditions...');
   const { data, error } = await supabase
     .from('PATOLOGIE')
     .select('Patologia')
@@ -16,11 +17,14 @@ const fetchConditions = async () => {
     throw error;
   }
   
-  return data.map(item => item.Patologia);
+  console.log('Fetched conditions:', data);
+  return data?.map(item => item.Patologia) || [];
 };
 
 const getConditionsByLetter = (conditions: string[], letter: string) => {
-  return conditions.filter(condition => condition.startsWith(letter));
+  const filtered = conditions.filter(condition => condition.startsWith(letter));
+  console.log(`Filtered conditions for letter ${letter}:`, filtered);
+  return filtered;
 };
 
 const SearchCondition = () => {
@@ -29,12 +33,15 @@ const SearchCondition = () => {
   const { data: allConditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: fetchConditions,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    retry: 3,
   });
 
   if (error) {
     console.error('Query error:', error);
   }
 
+  console.log('All conditions:', allConditions);
   const conditions = getConditionsByLetter(allConditions, selectedLetter);
 
   const handleLetterChange = (letter: string) => {
