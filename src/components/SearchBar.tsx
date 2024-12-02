@@ -11,27 +11,41 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import {
+  CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
+  CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
+  CONDITIONS_I, CONDITIONS_L, CONDITIONS_M, CONDITIONS_N,
+  CONDITIONS_O, CONDITIONS_P, CONDITIONS_R, CONDITIONS_S,
+  CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
+} from "./conditions";
 
-const fetchConditions = async () => {
-  const { data, error } = await supabase
-    .from('PATOLOGIE')
-    .select('Patologia')
-    .order('Patologia');
-    
-  if (error) throw error;
-  return data.map(item => item.Patologia);
-};
+// Combine all conditions and sort them alphabetically
+const allConditions = [
+  ...(CONDITIONS_A || []),
+  ...(CONDITIONS_B || []),
+  ...(CONDITIONS_C || []),
+  ...(CONDITIONS_D || []),
+  ...(CONDITIONS_E || []),
+  ...(CONDITIONS_F || []),
+  ...(CONDITIONS_G || []),
+  ...(CONDITIONS_H || []),
+  ...(CONDITIONS_I || []),
+  ...(CONDITIONS_L || []),
+  ...(CONDITIONS_M || []),
+  ...(CONDITIONS_N || []),
+  ...(CONDITIONS_O || []),
+  ...(CONDITIONS_P || []),
+  ...(CONDITIONS_R || []),
+  ...(CONDITIONS_S || []),
+  ...(CONDITIONS_T || []),
+  ...(CONDITIONS_U || []),
+  ...(CONDITIONS_V || []),
+  ...(CONDITIONS_Z || [])
+].sort();
 
 export const SearchBar = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-
-  const { data: conditions = [], isLoading } = useQuery({
-    queryKey: ['conditions'],
-    queryFn: fetchConditions,
-  });
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
@@ -53,10 +67,10 @@ export const SearchBar = () => {
           />
           <CommandList className="text-gray-700 bg-white">
             <CommandEmpty className="py-6 text-gray-500">
-              {isLoading ? "Caricamento..." : "Nessuna patologia trovata."}
+              Nessuna patologia trovata.
             </CommandEmpty>
             <CommandGroup heading="Patologie" className="text-gray-900 font-medium">
-              {conditions.map((condition) => (
+              {allConditions.map((condition) => (
                 <CommandItem
                   key={condition}
                   value={condition}

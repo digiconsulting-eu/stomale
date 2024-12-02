@@ -14,18 +14,37 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 
-const fetchConditions = async () => {
-  const { data, error } = await supabase
-    .from('PATOLOGIE')
-    .select('Patologia')
-    .order('Patologia');
-    
-  if (error) throw error;
-  return data.map(item => item.Patologia);
-};
+import {
+  CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
+  CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
+  CONDITIONS_I, CONDITIONS_L, CONDITIONS_M, CONDITIONS_N,
+  CONDITIONS_O, CONDITIONS_P, CONDITIONS_R, CONDITIONS_S,
+  CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
+} from "../conditions";
+
+const allConditions = [
+  ...(CONDITIONS_A ?? []),
+  ...(CONDITIONS_B ?? []),
+  ...(CONDITIONS_C ?? []),
+  ...(CONDITIONS_D ?? []),
+  ...(CONDITIONS_E ?? []),
+  ...(CONDITIONS_F ?? []),
+  ...(CONDITIONS_G ?? []),
+  ...(CONDITIONS_H ?? []),
+  ...(CONDITIONS_I ?? []),
+  ...(CONDITIONS_L ?? []),
+  ...(CONDITIONS_M ?? []),
+  ...(CONDITIONS_N ?? []),
+  ...(CONDITIONS_O ?? []),
+  ...(CONDITIONS_P ?? []),
+  ...(CONDITIONS_R ?? []),
+  ...(CONDITIONS_S ?? []),
+  ...(CONDITIONS_T ?? []),
+  ...(CONDITIONS_U ?? []),
+  ...(CONDITIONS_V ?? []),
+  ...(CONDITIONS_Z ?? [])
+].filter(Boolean).sort();
 
 interface ConditionSelectProps {
   form: UseFormReturn<any>;
@@ -51,11 +70,6 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
-
-  const { data: conditions = [], isLoading } = useQuery({
-    queryKey: ['conditions'],
-    queryFn: fetchConditions,
-  });
 
   useEffect(() => {
     const value = form.getValues("condition");
@@ -99,10 +113,10 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                 />
                 <CommandList className="max-h-[300px] overflow-y-auto p-2 bg-white">
                   <CommandEmpty className="py-6 text-center text-gray-500">
-                    {isLoading ? "Caricamento..." : "Nessuna patologia trovata."}
+                    Nessuna patologia trovata.
                   </CommandEmpty>
                   <CommandGroup>
-                    {conditions
+                    {allConditions
                       .filter(condition => 
                         condition.toLowerCase().includes(searchQuery.toLowerCase())
                       )
