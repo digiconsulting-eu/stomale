@@ -7,7 +7,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { toast } from "sonner";
 
 interface ReviewCardProps {
-  id: string;
+  id?: string;
   title?: string;
   condition: string;
   preview: string;
@@ -31,7 +31,9 @@ export const ReviewCard = ({
   
   const conditionSlug = condition.toLowerCase().replace(/\s+/g, '-');
   const titleSlug = (title || 'untitled').toLowerCase().replace(/\s+/g, '-');
+  const generatedId = `${conditionSlug}-${date.replace(/\//g, '')}-${titleSlug}`;
 
+  const reviewId = id || generatedId;
   const formattedDate = date.split('-').reverse().join('/');
 
   const handleDelete = async () => {
@@ -62,7 +64,7 @@ export const ReviewCard = ({
                 size="icon"
                 asChild
               >
-                <Link to={`/recensione/modifica/${id}`}>
+                <Link to={`/recensione/modifica/${reviewId}`}>
                   <Pencil className="h-4 w-4" />
                 </Link>
               </Button>
