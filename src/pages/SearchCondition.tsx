@@ -77,9 +77,9 @@ const SearchCondition = () => {
                 <Link
                   key={condition}
                   to={`/patologia/${encodeURIComponent(condition.toLowerCase())}`}
-                  className="card group hover:border-primary/20 transition-all"
+                  className="p-4 rounded-lg border border-gray-200 hover:border-primary/20 transition-all bg-white shadow-sm hover:shadow-md"
                 >
-                  <h3 className="text-lg font-medium text-text group-hover:text-primary transition-colors">
+                  <h3 className="text-lg font-medium text-text hover:text-primary transition-colors">
                     {condition}
                   </h3>
                 </Link>
