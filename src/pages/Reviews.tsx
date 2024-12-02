@@ -7,18 +7,23 @@ import {
   PaginationNext, 
   PaginationPrevious 
 } from "@/components/ui/pagination";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchReviews } from "@/queries/reviewQueries";
+import { useState, useEffect } from "react";
 
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [reviews, setReviews] = useState<any[]>([]);
   const reviewsPerPage = 20;
 
-  const { data: reviews = [], isLoading } = useQuery({
-    queryKey: ['reviews'],
-    queryFn: fetchReviews
-  });
+  useEffect(() => {
+    const storedReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    // Sort reviews by date in descending order
+    const sortedReviews = storedReviews.sort((a: any, b: any) => {
+      const dateA = new Date(a.date.split('-').reverse().join('-'));
+      const dateB = new Date(b.date.split('-').reverse().join('-'));
+      return dateB.getTime() - dateA.getTime();
+    });
+    setReviews(sortedReviews);
+  }, []);
 
   const totalPages = Math.ceil(reviews.length / reviewsPerPage);
 
@@ -33,17 +38,15 @@ const Reviews = () => {
       <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {isLoading ? (
-          <p>Caricamento recensioni...</p>
-        ) : getCurrentPageReviews().map((review) => (
+        {getCurrentPageReviews().map((review) => (
           <ReviewCard 
-            key={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
-            id={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
-            title={review['title (titolo)']}
-            condition={review['condition (patologia)']}
-            experience={review['experience (esperienza)']}
-            date={review['date (data)']}
-            username={review['username (nome utente)']}
+            key={review.id || `${review.title}-${review.date}`}
+            id={review.id || `${review.title}-${review.date}`}
+            title={review.title}
+            condition={review.condition}
+            preview={review.experience}
+            date={review.date}
+            username={review.username}
           />
         ))}
       </div>

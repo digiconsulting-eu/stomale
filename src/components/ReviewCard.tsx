@@ -7,34 +7,28 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { toast } from "sonner";
 
 interface ReviewCardProps {
-  id?: string;
+  id: string;
   title?: string;
-  condition?: string;
-  experience?: string;
-  date?: string;
+  condition: string;
+  preview: string;
+  date: string;
   username?: string;
-  medicationEffectiveness?: number;
 }
 
-export const ReviewCard = ({ 
-  id, 
-  title, 
-  condition = "", 
-  experience = "", 
-  date = "",
-  username,
-  medicationEffectiveness
-}: ReviewCardProps) => {
+export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const isAdmin = localStorage.getItem("isAdmin") === "true";
   
   const conditionSlug = condition.toLowerCase().replace(/\s+/g, '-');
   const titleSlug = (title || 'untitled').toLowerCase().replace(/\s+/g, '-');
-  const reviewId = id || `${conditionSlug}-${date.replace(/\//g, '')}-${titleSlug}`;
+
+  // Format date from YYYY-MM-DD to DD/MM/YYYY
   const formattedDate = date.split('-').reverse().join('/');
 
   const handleDelete = async () => {
     try {
+      // Here you would make an API call to delete the review
+      // For now, we'll just show a success message
       toast.success("Recensione eliminata con successo");
       setShowDeleteDialog(false);
     } catch (error) {
@@ -61,7 +55,7 @@ export const ReviewCard = ({
                 size="icon"
                 asChild
               >
-                <Link to={`/recensione/modifica/${reviewId}`}>
+                <Link to={`/recensione/modifica/${id}`}>
                   <Pencil className="h-4 w-4" />
                 </Link>
               </Button>
@@ -84,12 +78,7 @@ export const ReviewCard = ({
             <span className="text-sm">{formattedDate}</span>
           </div>
         </div>
-        <p className="text-text-light line-clamp-3 leading-relaxed">{experience}</p>
-        {medicationEffectiveness && (
-          <div className="mt-4 text-sm text-text-light">
-            Efficacia cura farmacologica: {medicationEffectiveness}/5
-          </div>
-        )}
+        <p className="text-text-light line-clamp-3 leading-relaxed">{preview}</p>
       </div>
 
       <ConfirmDialog

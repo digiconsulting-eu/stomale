@@ -36,69 +36,6 @@ export type Database = {
         }
         Relationships: []
       }
-      RECENSIONI: {
-        Row: {
-          "condition (patologia)": string | null
-          "date (data)": string | null
-          "diagnosisDifficulty (difficoltà diagnosi)": number | null
-          "experience (esperienza)": string | null
-          "healingPossibility (possibilità guarigione)": number | null
-          id: string
-          "medicationEffectiveness (efficacia farmaci)": number | null
-          "socialDiscomfort (disagio sociale)": number | null
-          "status (stato: approvata/in attesa)": string | null
-          "symptoms (sintomi)": string | null
-          "symptomsDiscomfort (fastidio sintomi)": number | null
-          "title (titolo)": string | null
-          "username (nome utente)": string | null
-        }
-        Insert: {
-          "condition (patologia)"?: string | null
-          "date (data)"?: string | null
-          "diagnosisDifficulty (difficoltà diagnosi)"?: number | null
-          "experience (esperienza)"?: string | null
-          "healingPossibility (possibilità guarigione)"?: number | null
-          id?: string
-          "medicationEffectiveness (efficacia farmaci)"?: number | null
-          "socialDiscomfort (disagio sociale)"?: number | null
-          "status (stato: approvata/in attesa)"?: string | null
-          "symptoms (sintomi)"?: string | null
-          "symptomsDiscomfort (fastidio sintomi)"?: number | null
-          "title (titolo)"?: string | null
-          "username (nome utente)"?: string | null
-        }
-        Update: {
-          "condition (patologia)"?: string | null
-          "date (data)"?: string | null
-          "diagnosisDifficulty (difficoltà diagnosi)"?: number | null
-          "experience (esperienza)"?: string | null
-          "healingPossibility (possibilità guarigione)"?: number | null
-          id?: string
-          "medicationEffectiveness (efficacia farmaci)"?: number | null
-          "socialDiscomfort (disagio sociale)"?: number | null
-          "status (stato: approvata/in attesa)"?: string | null
-          "symptoms (sintomi)"?: string | null
-          "symptomsDiscomfort (fastidio sintomi)"?: number | null
-          "title (titolo)"?: string | null
-          "username (nome utente)"?: string | null
-        }
-        Relationships: []
-      }
-      UTENTI: {
-        Row: {
-          created_at: string
-          id: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
