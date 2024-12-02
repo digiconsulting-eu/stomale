@@ -37,13 +37,13 @@ const Reviews = () => {
           <p>Caricamento recensioni...</p>
         ) : getCurrentPageReviews().map((review) => (
           <ReviewCard 
-            key={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
-            id={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
-            "title (titolo)"={review["title (titolo)"]}
-            "condition (patologia)"={review["condition (patologia)"]}
-            "experience (esperienza)"={review["experience (esperienza)"]}
-            "date (data)"={review["date (data)"]}
-            "username (nome utente)"={review["username (nome utente)"]}
+            key={review.id || `${review.title}-${review.date}`}
+            id={review.id || `${review.title}-${review.date}`}
+            title={review.title}
+            condition={review.condition}
+            experience={review.experience}
+            date={review.date}
+            username={review.username}
           />
         ))}
       </div>

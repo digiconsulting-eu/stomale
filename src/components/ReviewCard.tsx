@@ -11,12 +11,12 @@ type ReviewCardProps = Partial<Review>;
 
 export const ReviewCard = ({ 
   id, 
-  "title (titolo)": title, 
-  "condition (patologia)": condition = "", 
-  "experience (esperienza)": preview = "", 
-  "date (data)": date = "",
-  "username (nome utente)": username,
-  "medicationEffectiveness (efficacia farmaci)": medicationEffectiveness
+  title, 
+  condition = "", 
+  experience = "", 
+  date = "",
+  username,
+  medicationEffectiveness
 }: ReviewCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const isAdmin = localStorage.getItem("isAdmin") === "true";
@@ -77,7 +77,7 @@ export const ReviewCard = ({
             <span className="text-sm">{formattedDate}</span>
           </div>
         </div>
-        <p className="text-text-light line-clamp-3 leading-relaxed">{preview}</p>
+        <p className="text-text-light line-clamp-3 leading-relaxed">{experience}</p>
         {medicationEffectiveness && (
           <div className="mt-4 text-sm text-text-light">
             Efficacia cura farmacologica: {medicationEffectiveness}/5

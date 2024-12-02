@@ -25,10 +25,10 @@ const ConditionDetail = () => {
           <ReviewCard 
             key={review.id}
             id={review.id}
-            "title (titolo)"={review["title (titolo)"]}
-            "condition (patologia)"={review["condition (patologia)"]}
-            "experience (esperienza)"={review["experience (esperienza)"]}
-            "date (data)"={review["date (data)"]}
+            title={review.title}
+            condition={review.condition}
+            experience={review.experience}
+            date={review.date}
           />
         ))}
       </div>
