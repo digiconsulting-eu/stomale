@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { ReviewCard } from "@/components/ReviewCard";
+import { Review } from "@/types/review";
 import { useQuery } from "@tanstack/react-query";
 
 const UserDashboard = () => {
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
 
   const fetchReviews = async () => {
     const response = await fetch('/api/reviews');
@@ -24,10 +25,10 @@ const UserDashboard = () => {
           <ReviewCard
             key={review.id}
             id={review.id}
-            title={review.title}
-            condition={review.condition}
-            preview={review.preview}
-            date={review.date}
+            "title (titolo)"={review["title (titolo)"]}
+            "condition (patologia)"={review["condition (patologia)"]}
+            "experience (esperienza)"={review["experience (esperienza)"]}
+            "date (data)"={review["date (data)"]}
           />
         ))}
       </div>

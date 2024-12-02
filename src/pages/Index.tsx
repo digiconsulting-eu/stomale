@@ -135,11 +135,11 @@ const Index = () => {
                 <ReviewCard 
                   key={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
                   id={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
-                  title={review['title (titolo)']}
-                  condition={review['condition (patologia)']}
-                  preview={review['experience (esperienza)']}
-                  date={review['date (data)']}
-                  username={review['username (nome utente)']}
+                  "title (titolo)"={review["title (titolo)"]}
+                  "condition (patologia)"={review["condition (patologia)"]}
+                  "experience (esperienza)"={review["experience (esperienza)"]}
+                  "date (data)"={review["date (data)"]}
+                  "username (nome utente)"={review["username (nome utente)"]}
                 />
               ))}
             </div>
