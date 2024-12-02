@@ -13,22 +13,29 @@ interface ReviewCardProps {
   preview: string;
   date: string;
   username?: string;
+  hasDrugTreatment?: 'Y' | 'N';
+  medicationEffectiveness?: number;
 }
 
-export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardProps) => {
+export const ReviewCard = ({ 
+  id, 
+  title, 
+  condition, 
+  preview, 
+  date,
+  hasDrugTreatment,
+  medicationEffectiveness 
+}: ReviewCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const isAdmin = localStorage.getItem("isAdmin") === "true";
   
   const conditionSlug = condition.toLowerCase().replace(/\s+/g, '-');
   const titleSlug = (title || 'untitled').toLowerCase().replace(/\s+/g, '-');
 
-  // Format date from YYYY-MM-DD to DD/MM/YYYY
   const formattedDate = date.split('-').reverse().join('/');
 
   const handleDelete = async () => {
     try {
-      // Here you would make an API call to delete the review
-      // For now, we'll just show a success message
       toast.success("Recensione eliminata con successo");
       setShowDeleteDialog(false);
     } catch (error) {
@@ -79,6 +86,11 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
           </div>
         </div>
         <p className="text-text-light line-clamp-3 leading-relaxed">{preview}</p>
+        {hasDrugTreatment === 'Y' && medicationEffectiveness && (
+          <div className="mt-4 text-sm text-text-light">
+            Efficacia cura farmacologica: {medicationEffectiveness}/5
+          </div>
+        )}
       </div>
 
       <ConfirmDialog

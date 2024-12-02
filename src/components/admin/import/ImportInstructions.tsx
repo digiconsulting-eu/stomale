@@ -14,7 +14,8 @@ export const ImportInstructions = () => (
       <li><strong>Esperienza</strong> (obbligatorio)</li>
       <li>Difficoltà di Diagnosi (1-5)</li>
       <li>Quanto sono fastidiosi i sintomi (1-5)</li>
-      <li>Efficacia cura farmacologica (1-5)</li>
+      <li><strong>Cura Farmacologica</strong> (Y/N)</li>
+      <li>Efficacia cura farmacologica (1-5, solo se Cura Farmacologica = Y)</li>
       <li>Possibilità di guarigione (1-5)</li>
       <li>Disagio sociale (1-5)</li>
       <li>Data (DD-MM-YYYY)</li>
