@@ -10,17 +10,6 @@ export const fetchReviews = async () => {
   return data;
 };
 
-export const fetchReviewsByCondition = async (condition: string) => {
-  const { data, error } = await supabase
-    .from('RECENSIONI')
-    .select('*')
-    .eq('condition (patologia)', condition)
-    .order('date (data)', { ascending: false });
-
-  if (error) throw error;
-  return data;
-};
-
 export const fetchLatestReviews = async (limit: number = 3) => {
   const { data, error } = await supabase
     .from('RECENSIONI')

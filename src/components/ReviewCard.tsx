@@ -5,9 +5,16 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { toast } from "sonner";
-import { Review } from "@/types/review";
 
-type ReviewCardProps = Partial<Review>;
+interface ReviewCardProps {
+  id?: string;
+  title?: string;
+  condition?: string;
+  experience?: string;
+  date?: string;
+  username?: string;
+  medicationEffectiveness?: number;
+}
 
 export const ReviewCard = ({ 
   id, 

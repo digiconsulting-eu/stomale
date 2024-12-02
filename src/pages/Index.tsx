@@ -133,13 +133,13 @@ const Index = () => {
                 <p>Caricamento recensioni...</p>
               ) : reviews?.map((review) => (
                 <ReviewCard 
-                  key={review.id || `${review.title}-${review.date}`}
-                  id={review.id || `${review.title}-${review.date}`}
-                  title={review.title}
-                  condition={review.condition}
-                  experience={review.experience}
-                  date={review.date}
-                  username={review.username}
+                  key={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
+                  id={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
+                  title={review['title (titolo)']}
+                  condition={review['condition (patologia)']}
+                  experience={review['experience (esperienza)']}
+                  date={review['date (data)']}
+                  username={review['username (nome utente)']}
                 />
               ))}
             </div>
