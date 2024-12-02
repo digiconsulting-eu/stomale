@@ -5,33 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Pencil } from "lucide-react";
 import { toast } from "sonner";
-
-const SAMPLE_REVIEWS = [
-  {
-    id: "1",
-    title: "La mia esperienza con l'emicrania cronica",
-    condition: "Emicrania",
-    preview: "Ho iniziato a soffrire di emicrania circa due anni fa...",
-    date: "20-02-2024",
-    username: "Anonimo 1"
-  },
-  {
-    id: "2",
-    title: "Gestire l'artrite reumatoide",
-    condition: "Artrite Reumatoide",
-    preview: "Dopo la diagnosi, ho scoperto che ci sono molti modi per gestire i sintomi...",
-    date: "19-02-2024",
-    username: "Anonimo 2"
-  },
-  {
-    id: "3",
-    title: "Il mio percorso con l'ansia",
-    condition: "Disturbo d'Ansia",
-    preview: "Ho imparato che l'ansia può essere gestita con il giusto supporto...",
-    date: "18-02-2024",
-    username: "Anonimo 3"
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { fetchLatestReviews } from "@/queries/reviewQueries";
 
 const Index = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -41,6 +16,11 @@ const Index = () => {
     "Unisciti alla nostra community per condividere la tua esperienza e scoprire le storie di altri pazienti."
   );
   const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+  const { data: reviews, isLoading } = useQuery({
+    queryKey: ['latestReviews'],
+    queryFn: () => fetchLatestReviews(3)
+  });
 
   const handleSaveTitle = () => {
     setIsEditingTitle(false);
@@ -149,8 +129,18 @@ const Index = () => {
               Ultime Recensioni
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {SAMPLE_REVIEWS.map((review) => (
-                <ReviewCard key={review.id} {...review} />
+              {isLoading ? (
+                <p>Caricamento recensioni...</p>
+              ) : reviews?.map((review) => (
+                <ReviewCard 
+                  key={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
+                  id={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
+                  title={review['title (titolo)']}
+                  condition={review['condition (patologia)']}
+                  preview={review['experience (esperienza)']}
+                  date={review['date (data)']}
+                  username={review['username (nome utente)']}
+                />
               ))}
             </div>
           </div>

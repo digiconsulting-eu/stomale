@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ConditionOverview } from "@/components/condition/ConditionOverview";
+import { fetchReviewsByCondition } from "@/queries/reviewQueries";
 
 const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
   <div>
@@ -37,6 +38,12 @@ export default function ConditionDetail() {
   const [isFavorite, setIsFavorite] = useState(false);
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
+  const { data: reviews = [], isLoading } = useQuery({
+    queryKey: ['reviews', condition],
+    queryFn: () => fetchReviewsByCondition(condition || ''),
+    enabled: !!condition
+  });
+
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteConditions') || '[]');
     setIsFavorite(favorites.includes(condition));
@@ -51,7 +58,7 @@ export default function ConditionDetail() {
 
     const favorites = JSON.parse(localStorage.getItem('favoriteConditions') || '[]');
     let newFavorites;
-    
+
     if (isFavorite) {
       newFavorites = favorites.filter((fav: string) => fav !== condition);
       toast.success("Patologia rimossa dai preferiti");
@@ -59,21 +66,10 @@ export default function ConditionDetail() {
       newFavorites = [...favorites, condition];
       toast.success("Patologia aggiunta ai preferiti");
     }
-    
+
     localStorage.setItem('favoriteConditions', JSON.stringify(newFavorites));
     setIsFavorite(!isFavorite);
   };
-
-  const { data: reviews, isLoading } = useQuery({
-    queryKey: ["reviews", condition],
-    queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-      return allReviews.filter((review: any) => 
-        review.condition.toLowerCase() === condition?.toLowerCase()
-      );
-    }
-  });
 
   const calculateStats = () => {
     if (!reviews || reviews.length === 0) {
@@ -86,12 +82,12 @@ export default function ConditionDetail() {
       };
     }
 
-    const sum = reviews.reduce((acc: any, review: any) => ({
-      diagnosisDifficulty: acc.diagnosisDifficulty + (review.diagnosisDifficulty || 0),
-      symptomsDiscomfort: acc.symptomsDiscomfort + (review.symptomsDiscomfort || 0),
-      medicationEffectiveness: acc.medicationEffectiveness + (review.medicationEffectiveness || 0),
-      healingPossibility: acc.healingPossibility + (review.healingPossibility || 0),
-      socialDiscomfort: acc.socialDiscomfort + (review.socialDiscomfort || 0)
+    const sum = reviews.reduce((acc, review) => ({
+      diagnosisDifficulty: acc.diagnosisDifficulty + (review['diagnosisDifficulty (difficoltà diagnosi)'] || 0),
+      symptomsDiscomfort: acc.symptomsDiscomfort + (review['symptomsDiscomfort (fastidio sintomi)'] || 0),
+      medicationEffectiveness: acc.medicationEffectiveness + (review['medicationEffectiveness (efficacia farmaci)'] || 0),
+      healingPossibility: acc.healingPossibility + (review['healingPossibility (possibilità guarigione)'] || 0),
+      socialDiscomfort: acc.socialDiscomfort + (review['socialDiscomfort (disagio sociale)'] || 0)
     }), {
       diagnosisDifficulty: 0,
       symptomsDiscomfort: 0,
@@ -198,12 +194,12 @@ export default function ConditionDetail() {
               ) : (
                 reviews?.map((review) => (
                   <ReviewCard 
-                    key={review.id}
-                    id={review.id}
-                    title={review.title}
-                    date={review.date}
-                    preview={review.experience}
-                    condition={review.condition}
+                    key={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
+                    id={review.id || `${review['title (titolo)']}-${review['date (data)']}`}
+                    title={review['title (titolo)']}
+                    date={review['date (data)']}
+                    preview={review['experience (esperienza)']}
+                    condition={review['condition (patologia)']}
                   />
                 ))
               )}
