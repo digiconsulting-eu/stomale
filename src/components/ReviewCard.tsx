@@ -5,35 +5,25 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { toast } from "sonner";
+import { Review } from "@/types/review";
 
-interface ReviewCardProps {
-  id?: string;
-  title?: string;
-  condition: string;
-  preview: string;
-  date: string;
-  username?: string;
-  hasDrugTreatment?: 'Y' | 'N';
-  medicationEffectiveness?: number;
-}
+type ReviewCardProps = Partial<Review>;
 
 export const ReviewCard = ({ 
   id, 
-  title, 
-  condition, 
-  preview, 
-  date,
-  hasDrugTreatment,
-  medicationEffectiveness 
+  "title (titolo)": title, 
+  "condition (patologia)": condition = "", 
+  "experience (esperienza)": preview = "", 
+  "date (data)": date = "",
+  "username (nome utente)": username,
+  "medicationEffectiveness (efficacia farmaci)": medicationEffectiveness
 }: ReviewCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const isAdmin = localStorage.getItem("isAdmin") === "true";
   
   const conditionSlug = condition.toLowerCase().replace(/\s+/g, '-');
   const titleSlug = (title || 'untitled').toLowerCase().replace(/\s+/g, '-');
-  const generatedId = `${conditionSlug}-${date.replace(/\//g, '')}-${titleSlug}`;
-
-  const reviewId = id || generatedId;
+  const reviewId = id || `${conditionSlug}-${date.replace(/\//g, '')}-${titleSlug}`;
   const formattedDate = date.split('-').reverse().join('/');
 
   const handleDelete = async () => {
@@ -88,7 +78,7 @@ export const ReviewCard = ({
           </div>
         </div>
         <p className="text-text-light line-clamp-3 leading-relaxed">{preview}</p>
-        {hasDrugTreatment === 'Y' && medicationEffectiveness && (
+        {medicationEffectiveness && (
           <div className="mt-4 text-sm text-text-light">
             Efficacia cura farmacologica: {medicationEffectiveness}/5
           </div>
