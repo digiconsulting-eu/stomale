@@ -7,7 +7,7 @@ import { ImportInstructions } from "./import/ImportInstructions";
 import { validateRow } from "./import/ImportValidator";
 import { ConfirmDialog } from "../ConfirmDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const ImportTab = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -102,7 +102,6 @@ const ImportTab = () => {
         return;
       }
 
-      const descriptions: Record<string, string> = {};
       const errors: string[] = [];
       const updates = [];
 
@@ -115,9 +114,6 @@ const ImportTab = () => {
           continue;
         }
 
-        descriptions[condition.toUpperCase()] = description;
-        
-        // Prepare Supabase upsert
         updates.push({
           Patologia: condition.toUpperCase(),
           Descrizione: description
@@ -129,18 +125,18 @@ const ImportTab = () => {
       }
 
       if (updates.length > 0) {
-        // Upsert to Supabase
-        const { error } = await supabase
-          .from('PATOLOGIE')
-          .upsert(updates, {
-            onConflict: 'Patologia',
-            ignoreDuplicates: false
-          });
+        for (const update of updates) {
+          const { error } = await supabase
+            .from('PATOLOGIE')
+            .upsert(update, {
+              onConflict: 'patologia_unique'
+            });
 
-        if (error) {
-          console.error('Errore Supabase:', error);
-          toast.error("Errore durante il salvataggio nel database");
-          return;
+          if (error) {
+            console.error('Errore Supabase:', error);
+            toast.error(`Errore durante il salvataggio di ${update.Patologia}`);
+            return;
+          }
         }
 
         toast.success(`${updates.length} descrizioni importate con successo`);
