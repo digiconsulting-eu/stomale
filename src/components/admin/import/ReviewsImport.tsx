@@ -36,12 +36,14 @@ export const ReviewsImport = () => {
         try {
           const validatedRow = await validateRow(row);
           if (validatedRow) {
+            console.log('Validated row before insert:', validatedRow); // Debug log
+            
             const reviewData = {
               Patologia: validatedRow.condition,
               Titolo: validatedRow.title || null,
               Sintomi: validatedRow.symptoms || null,
               Esperienza: validatedRow.experience,
-              "Difficoltà Diagnosi": validatedRow.diagnosisDifficulty,
+              "Difficoltà diagnosi": validatedRow.diagnosisDifficulty,
               "Fastidio sintomi": validatedRow.symptomsDiscomfort,
               "Efficacia farmaci": validatedRow.medicationEffectiveness,
               "Possibilità guarigione": validatedRow.healingPossibility,
@@ -50,11 +52,14 @@ export const ReviewsImport = () => {
               Stato: 'approved'
             };
 
+            console.log('Review data to insert:', reviewData); // Debug log
+
             const { error: insertError } = await supabase
               .from('RECENSIONI')
               .insert(reviewData);
 
             if (insertError) {
+              console.error('Insert error:', insertError); // Debug log
               errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
             } else {
               validReviews.push(reviewData);

@@ -95,16 +95,30 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       patologiaId = existingConditions[0].id;
     }
 
+    const diagnosisDifficulty = validateNumericField(row['Difficoltà di Diagnosi'], 'Difficoltà di Diagnosi');
+    const symptomsDiscomfort = validateNumericField(row['Quanto sono fastidiosi i sintomi'], 'Fastidio sintomi');
+    const medicationEffectiveness = validateNumericField(row['Efficacia cura farmacologica'], 'Efficacia farmaci');
+    const healingPossibility = validateNumericField(row['Possibilità di guarigione'], 'Possibilità guarigione');
+    const socialDiscomfort = validateNumericField(row['Disagio sociale'], 'Disagio sociale');
+
+    console.log('Numeric fields after validation:', {
+      diagnosisDifficulty,
+      symptomsDiscomfort,
+      medicationEffectiveness,
+      healingPossibility,
+      socialDiscomfort
+    });
+
     return {
       condition: patologiaId,
       title: row['Titolo'] || '',
       symptoms: row['Sintomi'] || '',
       experience: row['Esperienza'],
-      diagnosisDifficulty: validateNumericField(row['Difficoltà di Diagnosi'], 'Difficoltà di Diagnosi'),
-      symptomsDiscomfort: validateNumericField(row['Quanto sono fastidiosi i sintomi'], 'Fastidio sintomi'),
-      medicationEffectiveness: validateNumericField(row['Efficacia cura farmacologica'], 'Efficacia farmaci') || 0,
-      healingPossibility: validateNumericField(row['Possibilità di guarigione'], 'Possibilità guarigione'),
-      socialDiscomfort: validateNumericField(row['Disagio sociale'], 'Disagio sociale'),
+      diagnosisDifficulty,
+      symptomsDiscomfort,
+      medicationEffectiveness: medicationEffectiveness || 0,
+      healingPossibility,
+      socialDiscomfort: socialDiscomfort || 0,
       date: formatDate(row['Data']),
     };
   } catch (error) {
