@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 interface ImportedReview {
-  condition: number; // Changed from string to number
+  condition: number;
   title?: string;
   symptoms?: string;
   experience: string;
@@ -19,20 +19,17 @@ const formatDate = (dateInput: any): string => {
     return new Date().toLocaleDateString('it-IT').split('/').join('-');
   }
 
-  // If it's already in the correct format DD-MM-YYYY, return as is
   if (typeof dateInput === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(dateInput)) {
     return dateInput;
   }
 
   try {
-    // Handle Excel date number format
     if (typeof dateInput === 'number') {
       const excelEpoch = new Date(1899, 11, 30);
       const date = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000);
       return date.toLocaleDateString('it-IT').split('/').join('-');
     }
 
-    // Try to parse the date string
     const date = new Date(dateInput);
     if (isNaN(date.getTime())) {
       throw new Error('Invalid date');
@@ -44,12 +41,10 @@ const formatDate = (dateInput: any): string => {
 };
 
 export const validateRow = async (row: any): Promise<ImportedReview | null> => {
-  // Check required fields
   if (!row['Patologia'] || !row['Esperienza']) {
     throw new Error('Campi obbligatori mancanti: Patologia e Esperienza sono richiesti');
   }
 
-  // Validate ratings if present (must be between 1 and 5)
   const ratingFields = [
     'Difficoltà di Diagnosi',
     'Quanto sono fastidiosi i sintomi',
@@ -67,25 +62,38 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
     }
   }
 
-  // Get Patologia ID from Supabase
-  const { data: patologiaData, error: patologiaError } = await supabase
+  // Get or create Patologia
+  const { data: existingPatologia, error: searchError } = await supabase
     .from('PATOLOGIE')
     .select('id')
-    .eq('Patologia', row['Patologia'])
-    .single();
+    .eq('Patologia', row['Patologia'].toUpperCase())
+    .maybeSingle();
 
-  if (patologiaError || !patologiaData) {
-    throw new Error(`Patologia "${row['Patologia']}" non trovata nel database`);
+  let patologiaId: number;
+
+  if (!existingPatologia) {
+    // Create new patologia
+    const { data: newPatologia, error: insertError } = await supabase
+      .from('PATOLOGIE')
+      .insert({ Patologia: row['Patologia'].toUpperCase() })
+      .select('id')
+      .single();
+
+    if (insertError) {
+      throw new Error(`Errore durante l'inserimento della patologia: ${insertError.message}`);
+    }
+    patologiaId = newPatologia.id;
+  } else {
+    patologiaId = existingPatologia.id;
   }
 
-  // Validate Cura Farmacologica
   const hasDrugTreatment = row['Cura Farmacologica']?.toString().toUpperCase();
   if (hasDrugTreatment && !['Y', 'N'].includes(hasDrugTreatment)) {
     throw new Error('Il campo "Cura Farmacologica" deve essere Y o N');
   }
 
   return {
-    condition: patologiaData.id, // This is now a number
+    condition: patologiaId,
     title: row['Titolo'] || '',
     symptoms: row['Sintomi'] || '',
     experience: row['Esperienza'],
