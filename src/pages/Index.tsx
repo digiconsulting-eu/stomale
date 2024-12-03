@@ -6,32 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 
-const SAMPLE_REVIEWS = [
-  {
-    id: "1",
-    title: "La mia esperienza con l'emicrania cronica",
-    condition: "Emicrania",
-    preview: "Ho iniziato a soffrire di emicrania circa due anni fa...",
-    date: "20-02-2024",
-    username: "Anonimo 1"
-  },
-  {
-    id: "2",
-    title: "Gestire l'artrite reumatoide",
-    condition: "Artrite Reumatoide",
-    preview: "Dopo la diagnosi, ho scoperto che ci sono molti modi per gestire i sintomi...",
-    date: "19-02-2024",
-    username: "Anonimo 2"
-  },
-  {
-    id: "3",
-    title: "Il mio percorso con l'ansia",
-    condition: "Disturbo d'Ansia",
-    preview: "Ho imparato che l'ansia può essere gestita con il giusto supporto...",
-    date: "18-02-2024",
-    username: "Anonimo 3"
-  },
-];
+const SAMPLE_REVIEWS: any[] = [];
 
 const Index = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
