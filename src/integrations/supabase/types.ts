@@ -9,21 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      "DESCRIZIONE PATOLOGIE": {
-        Row: {
-          descrizione: string | null
-          patologia: string
-        }
-        Insert: {
-          descrizione?: string | null
-          patologia: string
-        }
-        Update: {
-          descrizione?: string | null
-          patologia?: string
-        }
-        Relationships: []
-      }
       PATOLOGIE: {
         Row: {
           Descrizione: string | null
@@ -44,51 +29,59 @@ export type Database = {
       }
       RECENSIONI: {
         Row: {
-          "condition (patologia)": string | null
-          "date (data)": string | null
-          "diagnosisDifficulty (difficoltà diagnosi)": number | null
-          "experience (esperienza)": string | null
-          "healingPossibility (possibilità guarigione)": number | null
+          "condition (patologia)": number
+          "Cura Farmacologica": boolean | null
+          Data: string | null
+          "Difficoltà Diagnosi": number | null
+          "Disagio sociale": number | null
+          "Efficacia farmaci": number | null
+          Esperienza: string | null
+          "Fastidio sintomi": number | null
           id: string
-          "medicationEffectiveness (efficacia farmaci)": number | null
-          "socialDiscomfort (disagio sociale)": number | null
-          "status (stato: approvata/in attesa)": string | null
-          "symptoms (sintomi)": string | null
-          "symptomsDiscomfort (fastidio sintomi)": number | null
-          "title (titolo)": string | null
-          "username (nome utente)": string | null
+          "Possibilità guarigione": number | null
+          Sintomi: string | null
+          "Stato: approvata/in attesa": string | null
+          Titolo: string | null
         }
         Insert: {
-          "condition (patologia)"?: string | null
-          "date (data)"?: string | null
-          "diagnosisDifficulty (difficoltà diagnosi)"?: number | null
-          "experience (esperienza)"?: string | null
-          "healingPossibility (possibilità guarigione)"?: number | null
+          "condition (patologia)": number
+          "Cura Farmacologica"?: boolean | null
+          Data?: string | null
+          "Difficoltà Diagnosi"?: number | null
+          "Disagio sociale"?: number | null
+          "Efficacia farmaci"?: number | null
+          Esperienza?: string | null
+          "Fastidio sintomi"?: number | null
           id?: string
-          "medicationEffectiveness (efficacia farmaci)"?: number | null
-          "socialDiscomfort (disagio sociale)"?: number | null
-          "status (stato: approvata/in attesa)"?: string | null
-          "symptoms (sintomi)"?: string | null
-          "symptomsDiscomfort (fastidio sintomi)"?: number | null
-          "title (titolo)"?: string | null
-          "username (nome utente)"?: string | null
+          "Possibilità guarigione"?: number | null
+          Sintomi?: string | null
+          "Stato: approvata/in attesa"?: string | null
+          Titolo?: string | null
         }
         Update: {
-          "condition (patologia)"?: string | null
-          "date (data)"?: string | null
-          "diagnosisDifficulty (difficoltà diagnosi)"?: number | null
-          "experience (esperienza)"?: string | null
-          "healingPossibility (possibilità guarigione)"?: number | null
+          "condition (patologia)"?: number
+          "Cura Farmacologica"?: boolean | null
+          Data?: string | null
+          "Difficoltà Diagnosi"?: number | null
+          "Disagio sociale"?: number | null
+          "Efficacia farmaci"?: number | null
+          Esperienza?: string | null
+          "Fastidio sintomi"?: number | null
           id?: string
-          "medicationEffectiveness (efficacia farmaci)"?: number | null
-          "socialDiscomfort (disagio sociale)"?: number | null
-          "status (stato: approvata/in attesa)"?: string | null
-          "symptoms (sintomi)"?: string | null
-          "symptomsDiscomfort (fastidio sintomi)"?: number | null
-          "title (titolo)"?: string | null
-          "username (nome utente)"?: string | null
+          "Possibilità guarigione"?: number | null
+          Sintomi?: string | null
+          "Stato: approvata/in attesa"?: string | null
+          Titolo?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "RECENSIONI_condition (patologia)_fkey"
+            columns: ["condition (patologia)"]
+            isOneToOne: false
+            referencedRelation: "PATOLOGIE"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       UTENTI: {
         Row: {
