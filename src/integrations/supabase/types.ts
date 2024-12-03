@@ -28,17 +28,17 @@ export type Database = {
         Row: {
           Descrizione: string | null
           id: number
-          patologia_unique: string
+          Patologia: string
         }
         Insert: {
           Descrizione?: string | null
           id?: number
-          patologia_unique?: string
+          Patologia?: string
         }
         Update: {
           Descrizione?: string | null
           id?: number
-          patologia_unique?: string
+          Patologia?: string
         }
         Relationships: []
       }
