@@ -1,111 +1,26 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
-  CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
-  CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
-  CONDITIONS_I, CONDITIONS_L, CONDITIONS_M, CONDITIONS_N,
-  CONDITIONS_O, CONDITIONS_P, CONDITIONS_R, CONDITIONS_S,
-  CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
-} from "@/components/conditions/ConditionsList";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-const getConditionsByLetter = (letter: string) => {
-  // Get approved conditions from localStorage
-  const approvedConditions = JSON.parse(localStorage.getItem('approvedConditions') || '[]');
-  
-  // Get base conditions from the static list
-  let baseConditions: string[] = [];
-  switch (letter) {
-    case "A":
-      baseConditions = CONDITIONS_A;
-      break;
-    case "B":
-      baseConditions = CONDITIONS_B;
-      break;
-    case "C":
-      baseConditions = CONDITIONS_C;
-      break;
-    case "D":
-      baseConditions = CONDITIONS_D;
-      break;
-    case "E":
-      baseConditions = CONDITIONS_E;
-      break;
-    case "F":
-      baseConditions = CONDITIONS_F;
-      break;
-    case "G":
-      baseConditions = CONDITIONS_G;
-      break;
-    case "H":
-      baseConditions = CONDITIONS_H;
-      break;
-    case "I":
-      baseConditions = CONDITIONS_I;
-      break;
-    case "L":
-      baseConditions = CONDITIONS_L;
-      break;
-    case "M":
-      baseConditions = CONDITIONS_M;
-      break;
-    case "N":
-      baseConditions = CONDITIONS_N;
-      break;
-    case "O":
-      baseConditions = CONDITIONS_O;
-      break;
-    case "P":
-      baseConditions = CONDITIONS_P;
-      break;
-    case "R":
-      baseConditions = CONDITIONS_R;
-      break;
-    case "S":
-      baseConditions = CONDITIONS_S;
-      break;
-    case "T":
-      baseConditions = CONDITIONS_T;
-      break;
-    case "U":
-      baseConditions = CONDITIONS_U;
-      break;
-    case "V":
-      baseConditions = CONDITIONS_V;
-      break;
-    case "Z":
-      baseConditions = CONDITIONS_Z;
-      break;
-    default:
-      baseConditions = [];
-  }
-
-  // Filter approved conditions that start with the current letter
-  const approvedForLetter = approvedConditions.filter((condition: string) => 
-    condition.startsWith(letter)
-  );
-
-  // Combine and sort all conditions
-  return [...baseConditions, ...approvedForLetter].sort();
-};
-
 const SearchCondition = () => {
   const [selectedLetter, setSelectedLetter] = useState("A");
-  const [conditions, setConditions] = useState<string[]>([]);
 
-  // Update conditions when selected letter changes or when localStorage changes
-  useEffect(() => {
-    const updateConditions = () => {
-      setConditions(getConditionsByLetter(selectedLetter));
-    };
-
-    updateConditions();
-
-    // Listen for storage events to update the list when conditions are approved
-    window.addEventListener('storage', updateConditions);
-    return () => window.removeEventListener('storage', updateConditions);
-  }, [selectedLetter]);
+  const { data: conditions = [] } = useQuery({
+    queryKey: ['conditions', selectedLetter],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('Patologia')
+        .ilike('Patologia', `${selectedLetter}%`)
+        .order('Patologia');
+      
+      if (error) throw error;
+      return data.map(row => row.Patologia);
+    }
+  });
 
   const handleLetterChange = (letter: string) => {
     setSelectedLetter(letter);
