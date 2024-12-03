@@ -73,7 +73,7 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
 
   try {
     // First try to find the existing condition
-    const { data: conditions, error: searchError } = await supabase
+    const { data: existingConditions, error: searchError } = await supabase
       .from('PATOLOGIE')
       .select('id')
       .eq('Patologia', normalizedCondition);
@@ -85,26 +85,28 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
 
     let patologiaId: number;
 
-    if (!conditions || conditions.length === 0) {
+    if (!existingConditions || existingConditions.length === 0) {
       console.log('Patologia non trovata, creazione nuova:', normalizedCondition);
       
-      const { data: newPatologie, error: insertError } = await supabase
+      // Create new condition
+      const { data: newCondition, error: insertError } = await supabase
         .from('PATOLOGIE')
         .insert([{ 
           Patologia: normalizedCondition,
           Descrizione: '' 
         }])
-        .select();
+        .select()
+        .single();
 
-      if (insertError || !newPatologie || newPatologie.length === 0) {
+      if (insertError || !newCondition) {
         console.error('Errore durante inserimento patologia:', insertError);
         throw new Error(`Errore durante l'inserimento della patologia: ${insertError?.message || 'Unknown error'}`);
       }
       
-      patologiaId = newPatologie[0].id;
+      patologiaId = newCondition.id;
       console.log('Nuova patologia creata con ID:', patologiaId);
     } else {
-      patologiaId = conditions[0].id;
+      patologiaId = existingConditions[0].id;
       console.log('Patologia esistente trovata con ID:', patologiaId);
     }
 
