@@ -7,6 +7,7 @@ import { ImportInstructions } from "./import/ImportInstructions";
 import { validateRow } from "./import/ImportValidator";
 import { ConfirmDialog } from "../ConfirmDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/lib/supabase";
 
 const ImportTab = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -103,28 +104,48 @@ const ImportTab = () => {
 
       const descriptions: Record<string, string> = {};
       const errors: string[] = [];
+      const updates = [];
 
-      jsonData.forEach((row: any, index: number) => {
+      for (const [index, row] of jsonData.entries()) {
         const condition = row['Patologia'];
         const description = row['Descrizione'];
 
         if (!condition || !description) {
           errors.push(`Riga ${index + 2}: Manca la patologia o la descrizione`);
-          return;
+          continue;
         }
 
         descriptions[condition.toUpperCase()] = description;
-      });
+        
+        // Prepare Supabase upsert
+        updates.push({
+          Patologia: condition.toUpperCase(),
+          Descrizione: description
+        });
+      }
 
       if (errors.length > 0) {
         errors.forEach(error => toast.error(error));
       }
 
-      const existingDescriptions = JSON.parse(localStorage.getItem('conditionDescriptions') || '{}');
-      const updatedDescriptions = { ...existingDescriptions, ...descriptions };
-      localStorage.setItem('conditionDescriptions', JSON.stringify(updatedDescriptions));
+      if (updates.length > 0) {
+        // Upsert to Supabase
+        const { error } = await supabase
+          .from('PATOLOGIE')
+          .upsert(updates, {
+            onConflict: 'Patologia',
+            ignoreDuplicates: false
+          });
 
-      toast.success(`${Object.keys(descriptions).length} descrizioni importate con successo`);
+        if (error) {
+          console.error('Errore Supabase:', error);
+          toast.error("Errore durante il salvataggio nel database");
+          return;
+        }
+
+        toast.success(`${updates.length} descrizioni importate con successo`);
+      }
+
     } catch (error) {
       console.error('Errore durante l\'importazione:', error);
       toast.error("Si è verificato un errore durante l'importazione del file");
@@ -136,11 +157,8 @@ const ImportTab = () => {
 
   const handleClearImportedReviews = () => {
     const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-
     const manualReviews = allReviews.filter((review: any) => !review.imported);
-
     localStorage.setItem('reviews', JSON.stringify(manualReviews));
-
     const deletedCount = allReviews.length - manualReviews.length;
     toast.success(`${deletedCount} recensioni importate sono state eliminate con successo`);
     setShowDeleteDialog(false);
