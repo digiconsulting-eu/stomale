@@ -62,17 +62,13 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
     }
   }
 
-  // Normalize the condition name and handle special characters
   const normalizedCondition = row['Patologia']
     .toUpperCase()
     .trim()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, ""); // Remove accents
-
-  console.log('Cercando patologia:', normalizedCondition);
+    .replace(/[\u0300-\u036f]/g, "");
 
   try {
-    // First try to find the existing condition
     const { data: existingConditions, error: searchError } = await supabase
       .from('PATOLOGIE')
       .select('id')
@@ -86,9 +82,6 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
     let patologiaId: number;
 
     if (!existingConditions || existingConditions.length === 0) {
-      console.log('Patologia non trovata, creazione nuova:', normalizedCondition);
-      
-      // Create new condition
       const { data: newCondition, error: insertError } = await supabase
         .from('PATOLOGIE')
         .insert([{ 
@@ -104,10 +97,8 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       }
       
       patologiaId = newCondition.id;
-      console.log('Nuova patologia creata con ID:', patologiaId);
     } else {
       patologiaId = existingConditions[0].id;
-      console.log('Patologia esistente trovata con ID:', patologiaId);
     }
 
     const hasDrugTreatment = row['Cura Farmacologica']?.toString().toUpperCase();
@@ -115,17 +106,24 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       throw new Error('Il campo "Cura Farmacologica" deve essere Y o N');
     }
 
+    // Convert numeric fields ensuring they are numbers or undefined
+    const diagnosisDifficulty = row['Difficoltà di Diagnosi'] ? Number(row['Difficoltà di Diagnosi']) : undefined;
+    const symptomsDiscomfort = row['Quanto sono fastidiosi i sintomi'] ? Number(row['Quanto sono fastidiosi i sintomi']) : undefined;
+    const medicationEffectiveness = row['Efficacia cura farmacologica'] ? Number(row['Efficacia cura farmacologica']) : 0;
+    const healingPossibility = row['Possibilità di guarigione'] ? Number(row['Possibilità di guarigione']) : undefined;
+    const socialDiscomfort = row['Disagio sociale'] ? Number(row['Disagio sociale']) : undefined;
+
     return {
       condition: patologiaId,
       title: row['Titolo'] || '',
       symptoms: row['Sintomi'] || '',
       experience: row['Esperienza'],
-      diagnosisDifficulty: row['Difficoltà di Diagnosi'] ? Number(row['Difficoltà di Diagnosi']) : undefined,
-      symptomsDiscomfort: row['Quanto sono fastidiosi i sintomi'] ? Number(row['Quanto sono fastidiosi i sintomi']) : undefined,
+      diagnosisDifficulty,
+      symptomsDiscomfort,
       hasDrugTreatment: hasDrugTreatment,
-      medicationEffectiveness: row['Efficacia cura farmacologica'] ? Number(row['Efficacia cura farmacologica']) : 0,
-      healingPossibility: row['Possibilità di guarigione'] ? Number(row['Possibilità di guarigione']) : undefined,
-      socialDiscomfort: row['Disagio sociale'] ? Number(row['Disagio sociale']) : undefined,
+      medicationEffectiveness,
+      healingPossibility,
+      socialDiscomfort,
       date: formatDate(row['Data']),
     };
   } catch (error) {

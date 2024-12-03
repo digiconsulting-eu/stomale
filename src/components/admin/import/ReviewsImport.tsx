@@ -36,9 +36,8 @@ export const ReviewsImport = () => {
         try {
           const validatedRow = await validateRow(row);
           if (validatedRow) {
-            // Prepare the review data for Supabase with correct types
             const reviewData = {
-              Patologia: validatedRow.condition, // This is now a number
+              Patologia: validatedRow.condition,
               Titolo: validatedRow.title || null,
               Sintomi: validatedRow.symptoms || null,
               Esperienza: validatedRow.experience || null,
@@ -52,7 +51,6 @@ export const ReviewsImport = () => {
               Stato: 'approved'
             };
 
-            // Insert into Supabase
             const { error: insertError } = await supabase
               .from('RECENSIONI')
               .insert(reviewData);
