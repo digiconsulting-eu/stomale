@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 interface ImportedReview {
-  condition: string;
+  condition: number; // Changed from string to number
   title?: string;
   symptoms?: string;
   experience: string;
@@ -85,7 +85,7 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
   }
 
   return {
-    condition: patologiaData.id,
+    condition: patologiaData.id, // This is now a number
     title: row['Titolo'] || '',
     symptoms: row['Sintomi'] || '',
     experience: row['Esperienza'],

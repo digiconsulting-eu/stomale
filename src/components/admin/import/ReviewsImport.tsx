@@ -36,19 +36,19 @@ export const ReviewsImport = () => {
         try {
           const validatedRow = await validateRow(row);
           if (validatedRow) {
-            // Prepare the review data for Supabase
+            // Prepare the review data for Supabase with correct types
             const reviewData = {
-              Patologia: validatedRow.condition,
-              Titolo: validatedRow.title,
-              Sintomi: validatedRow.symptoms,
-              Esperienza: validatedRow.experience,
-              "Difficoltà Diagnosi": validatedRow.diagnosisDifficulty,
-              "Fastidio sintomi": validatedRow.symptomsDiscomfort,
+              Patologia: validatedRow.condition, // This is now a number
+              Titolo: validatedRow.title || null,
+              Sintomi: validatedRow.symptoms || null,
+              Esperienza: validatedRow.experience || null,
+              "Difficoltà Diagnosi": validatedRow.diagnosisDifficulty || null,
+              "Fastidio sintomi": validatedRow.symptomsDiscomfort || null,
               "Cura Farmacologica": validatedRow.hasDrugTreatment === 'Y',
-              "Efficacia farmaci": validatedRow.medicationEffectiveness,
-              "Possibilità guarigione": validatedRow.healingPossibility,
-              "Disagio sociale": validatedRow.socialDiscomfort,
-              Data: validatedRow.date,
+              "Efficacia farmaci": validatedRow.medicationEffectiveness || 0,
+              "Possibilità guarigione": validatedRow.healingPossibility || null,
+              "Disagio sociale": validatedRow.socialDiscomfort || null,
+              Data: validatedRow.date || null,
               Stato: 'approved'
             };
 
