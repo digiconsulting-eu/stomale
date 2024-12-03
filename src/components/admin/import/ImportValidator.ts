@@ -62,47 +62,59 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
     }
   }
 
-  // Get or create Patologia
-  const { data: existingPatologia, error: searchError } = await supabase
-    .from('PATOLOGIE')
-    .select('id')
-    .eq('Patologia', row['Patologia'].toUpperCase())
-    .maybeSingle();
+  // Normalize the condition name
+  const normalizedCondition = row['Patologia'].toUpperCase().trim();
 
-  let patologiaId: number;
-
-  if (!existingPatologia) {
-    // Create new patologia
-    const { data: newPatologia, error: insertError } = await supabase
+  try {
+    // First try to find the existing condition
+    const { data: existingPatologia } = await supabase
       .from('PATOLOGIE')
-      .insert({ Patologia: row['Patologia'].toUpperCase() })
       .select('id')
-      .single();
+      .eq('Patologia', normalizedCondition)
+      .maybeSingle();
 
-    if (insertError) {
-      throw new Error(`Errore durante l'inserimento della patologia: ${insertError.message}`);
+    let patologiaId: number;
+
+    if (!existingPatologia) {
+      // If not found, create a new one
+      const { data: newPatologia, error: insertError } = await supabase
+        .from('PATOLOGIE')
+        .insert([{ 
+          Patologia: normalizedCondition,
+          Descrizione: '' // Set empty description for new conditions
+        }])
+        .select('id')
+        .single();
+
+      if (insertError || !newPatologia) {
+        throw new Error(`Errore durante l'inserimento della patologia: ${insertError?.message || 'Unknown error'}`);
+      }
+      
+      patologiaId = newPatologia.id;
+    } else {
+      patologiaId = existingPatologia.id;
     }
-    patologiaId = newPatologia.id;
-  } else {
-    patologiaId = existingPatologia.id;
-  }
 
-  const hasDrugTreatment = row['Cura Farmacologica']?.toString().toUpperCase();
-  if (hasDrugTreatment && !['Y', 'N'].includes(hasDrugTreatment)) {
-    throw new Error('Il campo "Cura Farmacologica" deve essere Y o N');
-  }
+    const hasDrugTreatment = row['Cura Farmacologica']?.toString().toUpperCase();
+    if (hasDrugTreatment && !['Y', 'N'].includes(hasDrugTreatment)) {
+      throw new Error('Il campo "Cura Farmacologica" deve essere Y o N');
+    }
 
-  return {
-    condition: patologiaId,
-    title: row['Titolo'] || '',
-    symptoms: row['Sintomi'] || '',
-    experience: row['Esperienza'],
-    diagnosisDifficulty: row['Difficoltà di Diagnosi'] ? Number(row['Difficoltà di Diagnosi']) : undefined,
-    symptomsDiscomfort: row['Quanto sono fastidiosi i sintomi'] ? Number(row['Quanto sono fastidiosi i sintomi']) : undefined,
-    hasDrugTreatment: hasDrugTreatment,
-    medicationEffectiveness: row['Efficacia cura farmacologica'] ? Number(row['Efficacia cura farmacologica']) : undefined,
-    healingPossibility: row['Possibilità di guarigione'] ? Number(row['Possibilità di guarigione']) : undefined,
-    socialDiscomfort: row['Disagio sociale'] ? Number(row['Disagio sociale']) : undefined,
-    date: formatDate(row['Data']),
-  };
+    return {
+      condition: patologiaId,
+      title: row['Titolo'] || '',
+      symptoms: row['Sintomi'] || '',
+      experience: row['Esperienza'],
+      diagnosisDifficulty: row['Difficoltà di Diagnosi'] ? Number(row['Difficoltà di Diagnosi']) : undefined,
+      symptomsDiscomfort: row['Quanto sono fastidiosi i sintomi'] ? Number(row['Quanto sono fastidiosi i sintomi']) : undefined,
+      hasDrugTreatment: hasDrugTreatment,
+      medicationEffectiveness: row['Efficacia cura farmacologica'] ? Number(row['Efficacia cura farmacologica']) : 0,
+      healingPossibility: row['Possibilità di guarigione'] ? Number(row['Possibilità di guarigione']) : undefined,
+      socialDiscomfort: row['Disagio sociale'] ? Number(row['Disagio sociale']) : undefined,
+      date: formatDate(row['Data']),
+    };
+  } catch (error) {
+    console.error('Error in validateRow:', error);
+    throw error;
+  }
 };
