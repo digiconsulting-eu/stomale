@@ -52,7 +52,7 @@ export const DescriptionsImport = () => {
           const { error } = await supabase
             .from('PATOLOGIE')
             .upsert(update, {
-              onConflict: 'patologia_unique'
+              onConflict: 'Patologia'
             });
 
           if (error) {
