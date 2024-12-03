@@ -49,49 +49,49 @@ export type Database = {
         Row: {
           "Cura Farmacologica": boolean | null
           Data: string | null
-          "Difficoltà Diagnosi": number | null
-          "Disagio sociale": number | null
+          "Difficoltà diagnosi": number | null
+          "Disagio sociale": number
           "Efficacia farmaci": number
-          Esperienza: string | null
+          Esperienza: string
           "Fastidio sintomi": number | null
           id: string
           Patologia: number
           "Possibilità guarigione": number | null
-          Sintomi: string | null
+          Sintomi: string
           Stato: string
-          Titolo: string | null
+          Titolo: string
           Utente: number | null
         }
         Insert: {
           "Cura Farmacologica"?: boolean | null
           Data?: string | null
-          "Difficoltà Diagnosi"?: number | null
-          "Disagio sociale"?: number | null
+          "Difficoltà diagnosi"?: number | null
+          "Disagio sociale": number
           "Efficacia farmaci": number
-          Esperienza?: string | null
+          Esperienza: string
           "Fastidio sintomi"?: number | null
           id?: string
           Patologia: number
           "Possibilità guarigione"?: number | null
-          Sintomi?: string | null
+          Sintomi: string
           Stato: string
-          Titolo?: string | null
+          Titolo: string
           Utente?: number | null
         }
         Update: {
           "Cura Farmacologica"?: boolean | null
           Data?: string | null
-          "Difficoltà Diagnosi"?: number | null
-          "Disagio sociale"?: number | null
+          "Difficoltà diagnosi"?: number | null
+          "Disagio sociale"?: number
           "Efficacia farmaci"?: number
-          Esperienza?: string | null
+          Esperienza?: string
           "Fastidio sintomi"?: number | null
           id?: string
           Patologia?: number
           "Possibilità guarigione"?: number | null
-          Sintomi?: string | null
+          Sintomi?: string
           Stato?: string
-          Titolo?: string | null
+          Titolo?: string
           Utente?: number | null
         }
         Relationships: [

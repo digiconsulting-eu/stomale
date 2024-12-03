@@ -40,14 +40,13 @@ export const ReviewsImport = () => {
               Patologia: validatedRow.condition,
               Titolo: validatedRow.title || null,
               Sintomi: validatedRow.symptoms || null,
-              Esperienza: validatedRow.experience || null,
-              "Difficoltà Diagnosi": validatedRow.diagnosisDifficulty || null,
-              "Fastidio sintomi": validatedRow.symptomsDiscomfort || null,
-              "Cura Farmacologica": validatedRow.hasDrugTreatment === 'Y',
-              "Efficacia farmaci": validatedRow.medicationEffectiveness || 0,
-              "Possibilità guarigione": validatedRow.healingPossibility || null,
-              "Disagio sociale": validatedRow.socialDiscomfort || null,
-              Data: validatedRow.date || null,
+              Esperienza: validatedRow.experience,
+              "Difficoltà Diagnosi": validatedRow.diagnosisDifficulty,
+              "Fastidio sintomi": validatedRow.symptomsDiscomfort,
+              "Efficacia farmaci": validatedRow.medicationEffectiveness,
+              "Possibilità guarigione": validatedRow.healingPossibility,
+              "Disagio sociale": validatedRow.socialDiscomfort,
+              Data: validatedRow.date,
               Stato: 'approved'
             };
 
