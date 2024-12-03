@@ -6,6 +6,7 @@ import { Loader2, Trash2 } from "lucide-react";
 import { ImportInstructions } from "./ImportInstructions";
 import { validateRow } from "./ImportValidator";
 import { ConfirmDialog } from "../../ConfirmDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 export const ReviewsImport = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,12 +34,34 @@ export const ReviewsImport = () => {
 
       for (const [index, row] of jsonData.entries()) {
         try {
-          const validatedRow = validateRow(row);
+          const validatedRow = await validateRow(row);
           if (validatedRow) {
-            validReviews.push({
-              ...validatedRow,
-              imported: true
-            });
+            // Prepare the review data for Supabase
+            const reviewData = {
+              Patologia: validatedRow.condition,
+              Titolo: validatedRow.title,
+              Sintomi: validatedRow.symptoms,
+              Esperienza: validatedRow.experience,
+              "Difficoltà Diagnosi": validatedRow.diagnosisDifficulty,
+              "Fastidio sintomi": validatedRow.symptomsDiscomfort,
+              "Cura Farmacologica": validatedRow.hasDrugTreatment === 'Y',
+              "Efficacia farmaci": validatedRow.medicationEffectiveness,
+              "Possibilità guarigione": validatedRow.healingPossibility,
+              "Disagio sociale": validatedRow.socialDiscomfort,
+              Data: validatedRow.date,
+              Stato: 'approved'
+            };
+
+            // Insert into Supabase
+            const { error: insertError } = await supabase
+              .from('RECENSIONI')
+              .insert(reviewData);
+
+            if (insertError) {
+              errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
+            } else {
+              validReviews.push(reviewData);
+            }
           }
         } catch (error) {
           errors.push(`Riga ${index + 2}: ${(error as Error).message}`);
@@ -51,16 +74,6 @@ export const ReviewsImport = () => {
       }
 
       if (validReviews.length > 0) {
-        const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-        const updatedReviews = [...existingReviews, ...validReviews];
-
-        updatedReviews.sort((a, b) => {
-          const dateA = new Date(a.date.split('-').reverse().join('-'));
-          const dateB = new Date(b.date.split('-').reverse().join('-'));
-          return dateB.getTime() - dateA.getTime();
-        });
-
-        localStorage.setItem('reviews', JSON.stringify(updatedReviews));
         toast.success(
           `${validReviews.length} recensioni importate con successo${
             errors.length > 0 ? `. ${errors.length} recensioni ignorate per errori.` : '.'
@@ -78,12 +91,22 @@ export const ReviewsImport = () => {
     }
   };
 
-  const handleClearImportedReviews = () => {
-    const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    const manualReviews = allReviews.filter((review: any) => !review.imported);
-    localStorage.setItem('reviews', JSON.stringify(manualReviews));
-    const deletedCount = allReviews.length - manualReviews.length;
-    toast.success(`${deletedCount} recensioni importate sono state eliminate con successo`);
+  const handleClearImportedReviews = async () => {
+    try {
+      const { error } = await supabase
+        .from('RECENSIONI')
+        .delete()
+        .eq('Stato', 'approved');
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Tutte le recensioni importate sono state eliminate con successo");
+    } catch (error) {
+      console.error('Errore durante l\'eliminazione:', error);
+      toast.error("Si è verificato un errore durante l'eliminazione delle recensioni");
+    }
     setShowDeleteDialog(false);
   };
 
@@ -123,7 +146,7 @@ export const ReviewsImport = () => {
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleClearImportedReviews}
         title="Elimina recensioni importate"
-        description="Sei sicuro di voler eliminare tutte le recensioni importate da Excel? Questa azione non può essere annullata. Le recensioni inserite manualmente dagli utenti non verranno eliminate."
+        description="Sei sicuro di voler eliminare tutte le recensioni importate? Questa azione non può essere annullata."
       />
     </div>
   );

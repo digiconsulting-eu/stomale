@@ -47,57 +47,57 @@ export type Database = {
       }
       RECENSIONI: {
         Row: {
-          "condition (patologia)": number
           "Cura Farmacologica": boolean | null
           Data: string | null
           "Difficoltà Diagnosi": number | null
           "Disagio sociale": number | null
-          "Efficacia farmaci": number | null
+          "Efficacia farmaci": number
           Esperienza: string | null
           "Fastidio sintomi": number | null
           id: string
+          Patologia: number
           "Possibilità guarigione": number | null
           Sintomi: string | null
-          "Stato: approvata/in attesa/rifiutata": string | null
+          Stato: string
           Titolo: string | null
-          Utente: number
+          Utente: number | null
         }
         Insert: {
-          "condition (patologia)": number
           "Cura Farmacologica"?: boolean | null
           Data?: string | null
           "Difficoltà Diagnosi"?: number | null
           "Disagio sociale"?: number | null
-          "Efficacia farmaci"?: number | null
+          "Efficacia farmaci": number
           Esperienza?: string | null
           "Fastidio sintomi"?: number | null
           id?: string
+          Patologia: number
           "Possibilità guarigione"?: number | null
           Sintomi?: string | null
-          "Stato: approvata/in attesa/rifiutata"?: string | null
+          Stato: string
           Titolo?: string | null
-          Utente: number
+          Utente?: number | null
         }
         Update: {
-          "condition (patologia)"?: number
           "Cura Farmacologica"?: boolean | null
           Data?: string | null
           "Difficoltà Diagnosi"?: number | null
           "Disagio sociale"?: number | null
-          "Efficacia farmaci"?: number | null
+          "Efficacia farmaci"?: number
           Esperienza?: string | null
           "Fastidio sintomi"?: number | null
           id?: string
+          Patologia?: number
           "Possibilità guarigione"?: number | null
           Sintomi?: string | null
-          "Stato: approvata/in attesa/rifiutata"?: string | null
+          Stato?: string
           Titolo?: string | null
-          Utente?: number
+          Utente?: number | null
         }
         Relationships: [
           {
             foreignKeyName: "RECENSIONI_condition (patologia)_fkey"
-            columns: ["condition (patologia)"]
+            columns: ["Patologia"]
             isOneToOne: false
             referencedRelation: "PATOLOGIE"
             referencedColumns: ["id"]

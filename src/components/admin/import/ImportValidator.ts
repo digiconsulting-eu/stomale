@@ -1,17 +1,17 @@
+import { supabase } from "@/integrations/supabase/client";
+
 interface ImportedReview {
-  id?: string;
   condition: string;
   title?: string;
   symptoms?: string;
   experience: string;
   diagnosisDifficulty?: number;
   symptomsDiscomfort?: number;
+  hasDrugTreatment?: string;
   medicationEffectiveness?: number;
   healingPossibility?: number;
   socialDiscomfort?: number;
   date?: string;
-  username?: string;
-  email?: string;
 }
 
 const formatDate = (dateInput: any): string => {
@@ -43,8 +43,8 @@ const formatDate = (dateInput: any): string => {
   }
 };
 
-export const validateRow = (row: any): ImportedReview | null => {
-  // Check required fields (only Patologia and Esperienza)
+export const validateRow = async (row: any): Promise<ImportedReview | null> => {
+  // Check required fields
   if (!row['Patologia'] || !row['Esperienza']) {
     throw new Error('Campi obbligatori mancanti: Patologia e Esperienza sono richiesti');
   }
@@ -67,31 +67,34 @@ export const validateRow = (row: any): ImportedReview | null => {
     }
   }
 
-  // Validate email format if present
-  if (row['Email'] && typeof row['Email'] === 'string' && row['Email'].trim() !== '') {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(row['Email'])) {
-      throw new Error("Formato email non valido");
-    }
+  // Get Patologia ID from Supabase
+  const { data: patologiaData, error: patologiaError } = await supabase
+    .from('PATOLOGIE')
+    .select('id')
+    .eq('Patologia', row['Patologia'])
+    .single();
+
+  if (patologiaError || !patologiaData) {
+    throw new Error(`Patologia "${row['Patologia']}" non trovata nel database`);
   }
 
-  // Create a unique ID for the review
-  const id = `${row['Patologia'].toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+  // Validate Cura Farmacologica
+  const hasDrugTreatment = row['Cura Farmacologica']?.toString().toUpperCase();
+  if (hasDrugTreatment && !['Y', 'N'].includes(hasDrugTreatment)) {
+    throw new Error('Il campo "Cura Farmacologica" deve essere Y o N');
+  }
 
-  // Return the validated review object with optional fields
   return {
-    id,
-    condition: row['Patologia'],
+    condition: patologiaData.id,
     title: row['Titolo'] || '',
     symptoms: row['Sintomi'] || '',
     experience: row['Esperienza'],
     diagnosisDifficulty: row['Difficoltà di Diagnosi'] ? Number(row['Difficoltà di Diagnosi']) : undefined,
     symptomsDiscomfort: row['Quanto sono fastidiosi i sintomi'] ? Number(row['Quanto sono fastidiosi i sintomi']) : undefined,
+    hasDrugTreatment: hasDrugTreatment,
     medicationEffectiveness: row['Efficacia cura farmacologica'] ? Number(row['Efficacia cura farmacologica']) : undefined,
     healingPossibility: row['Possibilità di guarigione'] ? Number(row['Possibilità di guarigione']) : undefined,
     socialDiscomfort: row['Disagio sociale'] ? Number(row['Disagio sociale']) : undefined,
     date: formatDate(row['Data']),
-    username: row['Nome Utente'] || 'Anonimo',
-    email: row['Email'] || ''
   };
 };
