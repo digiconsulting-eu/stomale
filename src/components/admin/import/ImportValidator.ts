@@ -62,17 +62,21 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
     }
   }
 
-  // Normalize the condition name
-  const normalizedCondition = row['Patologia'].toUpperCase().trim();
+  // Normalize the condition name and handle special characters
+  const normalizedCondition = row['Patologia']
+    .toUpperCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // Remove accents
+
   console.log('Cercando patologia:', normalizedCondition);
 
   try {
     // First try to find the existing condition
-    const { data: existingPatologia, error: searchError } = await supabase
+    const { data: conditions, error: searchError } = await supabase
       .from('PATOLOGIE')
       .select('id')
-      .eq('Patologia', normalizedCondition)
-      .maybeSingle();
+      .eq('Patologia', normalizedCondition);
 
     if (searchError) {
       console.error('Errore durante la ricerca della patologia:', searchError);
@@ -81,27 +85,26 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
 
     let patologiaId: number;
 
-    if (!existingPatologia) {
+    if (!conditions || conditions.length === 0) {
       console.log('Patologia non trovata, creazione nuova:', normalizedCondition);
       
-      const { data: newPatologia, error: insertError } = await supabase
+      const { data: newPatologie, error: insertError } = await supabase
         .from('PATOLOGIE')
         .insert([{ 
           Patologia: normalizedCondition,
           Descrizione: '' 
         }])
-        .select('id')
-        .maybeSingle();
+        .select();
 
-      if (insertError || !newPatologia) {
+      if (insertError || !newPatologie || newPatologie.length === 0) {
         console.error('Errore durante inserimento patologia:', insertError);
         throw new Error(`Errore durante l'inserimento della patologia: ${insertError?.message || 'Unknown error'}`);
       }
       
-      patologiaId = newPatologia.id;
+      patologiaId = newPatologie[0].id;
       console.log('Nuova patologia creata con ID:', patologiaId);
     } else {
-      patologiaId = existingPatologia.id;
+      patologiaId = conditions[0].id;
       console.log('Patologia esistente trovata con ID:', patologiaId);
     }
 
