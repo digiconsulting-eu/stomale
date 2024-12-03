@@ -64,35 +64,45 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
 
   // Normalize the condition name
   const normalizedCondition = row['Patologia'].toUpperCase().trim();
+  console.log('Cercando patologia:', normalizedCondition);
 
   try {
     // First try to find the existing condition
-    const { data: existingPatologia } = await supabase
+    const { data: existingPatologia, error: searchError } = await supabase
       .from('PATOLOGIE')
       .select('id')
       .eq('Patologia', normalizedCondition)
       .maybeSingle();
 
+    if (searchError) {
+      console.error('Errore durante la ricerca della patologia:', searchError);
+      throw searchError;
+    }
+
     let patologiaId: number;
 
     if (!existingPatologia) {
-      // If not found, create a new one
+      console.log('Patologia non trovata, creazione nuova:', normalizedCondition);
+      
       const { data: newPatologia, error: insertError } = await supabase
         .from('PATOLOGIE')
         .insert([{ 
           Patologia: normalizedCondition,
-          Descrizione: '' // Set empty description for new conditions
+          Descrizione: '' 
         }])
         .select('id')
-        .single();
+        .maybeSingle();
 
       if (insertError || !newPatologia) {
+        console.error('Errore durante inserimento patologia:', insertError);
         throw new Error(`Errore durante l'inserimento della patologia: ${insertError?.message || 'Unknown error'}`);
       }
       
       patologiaId = newPatologia.id;
+      console.log('Nuova patologia creata con ID:', patologiaId);
     } else {
       patologiaId = existingPatologia.id;
+      console.log('Patologia esistente trovata con ID:', patologiaId);
     }
 
     const hasDrugTreatment = row['Cura Farmacologica']?.toString().toUpperCase();
