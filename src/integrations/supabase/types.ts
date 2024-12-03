@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ADMIN: {
+        Row: {
+          created_at: string
+          Email: string | null
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          Email?: string | null
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          Email?: string | null
+          id?: number
+        }
+        Relationships: []
+      }
       PATOLOGIE: {
         Row: {
           Descrizione: string | null
@@ -40,8 +58,9 @@ export type Database = {
           id: string
           "Possibilità guarigione": number | null
           Sintomi: string | null
-          "Stato: approvata/in attesa": string | null
+          "Stato: approvata/in attesa/rifiutata": string | null
           Titolo: string | null
+          Utente: number
         }
         Insert: {
           "condition (patologia)": number
@@ -55,8 +74,9 @@ export type Database = {
           id?: string
           "Possibilità guarigione"?: number | null
           Sintomi?: string | null
-          "Stato: approvata/in attesa"?: string | null
+          "Stato: approvata/in attesa/rifiutata"?: string | null
           Titolo?: string | null
+          Utente: number
         }
         Update: {
           "condition (patologia)"?: number
@@ -70,8 +90,9 @@ export type Database = {
           id?: string
           "Possibilità guarigione"?: number | null
           Sintomi?: string | null
-          "Stato: approvata/in attesa"?: string | null
+          "Stato: approvata/in attesa/rifiutata"?: string | null
           Titolo?: string | null
+          Utente?: number
         }
         Relationships: [
           {
@@ -81,20 +102,42 @@ export type Database = {
             referencedRelation: "PATOLOGIE"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "RECENSIONI_Utente_fkey"
+            columns: ["Utente"]
+            isOneToOne: false
+            referencedRelation: "UTENTI"
+            referencedColumns: ["id"]
+          },
         ]
       }
       UTENTI: {
         Row: {
-          created_at: string
+          "Anno Nascita": string | null
+          Email: string | null
           id: number
+          Password: string | null
+          Sesso: string | null
+          "Time Stamp": string
+          User: string | null
         }
         Insert: {
-          created_at?: string
+          "Anno Nascita"?: string | null
+          Email?: string | null
           id?: number
+          Password?: string | null
+          Sesso?: string | null
+          "Time Stamp"?: string
+          User?: string | null
         }
         Update: {
-          created_at?: string
+          "Anno Nascita"?: string | null
+          Email?: string | null
           id?: number
+          Password?: string | null
+          Sesso?: string | null
+          "Time Stamp"?: string
+          User?: string | null
         }
         Relationships: []
       }
