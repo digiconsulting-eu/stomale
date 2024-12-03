@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface ConditionOverviewProps {
   condition: string;
@@ -13,28 +15,42 @@ interface ConditionOverviewProps {
 
 export const ConditionOverview = ({ condition, isAdmin }: ConditionOverviewProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [description, setDescription] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
 
-  useEffect(() => {
-    // Get descriptions from localStorage
-    const descriptions = JSON.parse(localStorage.getItem('conditionDescriptions') || '{}');
-    const savedDescription = descriptions[condition.toUpperCase()];
-    if (savedDescription) {
-      setDescription(savedDescription);
-      setEditedDescription(savedDescription);
+  const { data: descriptionData, refetch } = useQuery({
+    queryKey: ['condition-description', condition],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('Descrizione')
+        .eq('Patologia', condition.toUpperCase())
+        .single();
+      
+      if (error) throw error;
+      return data?.Descrizione || "";
     }
-  }, [condition]);
+  });
 
-  const handleSaveDescription = () => {
-    // Save to localStorage
-    const descriptions = JSON.parse(localStorage.getItem('conditionDescriptions') || '{}');
-    descriptions[condition.toUpperCase()] = editedDescription;
-    localStorage.setItem('conditionDescriptions', JSON.stringify(descriptions));
+  const handleSaveDescription = async () => {
+    try {
+      const { error } = await supabase
+        .from('PATOLOGIE')
+        .upsert({
+          Patologia: condition.toUpperCase(),
+          Descrizione: editedDescription
+        }, {
+          onConflict: 'Patologia'
+        });
 
-    setDescription(editedDescription);
-    setIsEditing(false);
-    toast.success("Descrizione aggiornata con successo");
+      if (error) throw error;
+
+      await refetch();
+      setIsEditing(false);
+      toast.success("Descrizione aggiornata con successo");
+    } catch (error) {
+      console.error('Error saving description:', error);
+      toast.error("Errore durante il salvataggio della descrizione");
+    }
   };
 
   return (
@@ -47,7 +63,10 @@ export const ConditionOverview = ({ condition, isAdmin }: ConditionOverviewProps
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={() => {
+              setIsEditing(!isEditing);
+              setEditedDescription(descriptionData || "");
+            }}
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -65,7 +84,7 @@ export const ConditionOverview = ({ condition, isAdmin }: ConditionOverviewProps
               variant="outline"
               onClick={() => {
                 setIsEditing(false);
-                setEditedDescription(description);
+                setEditedDescription(descriptionData || "");
               }}
             >
               Annulla
@@ -77,7 +96,7 @@ export const ConditionOverview = ({ condition, isAdmin }: ConditionOverviewProps
         </div>
       ) : (
         <p className="text-gray-600">
-          {description || "Nessuna descrizione disponibile per questa patologia."}
+          {descriptionData || "Nessuna descrizione disponibile per questa patologia."}
         </p>
       )}
     </Card>

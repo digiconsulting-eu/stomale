@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import {
@@ -11,41 +11,25 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import {
-  CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
-  CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
-  CONDITIONS_I, CONDITIONS_L, CONDITIONS_M, CONDITIONS_N,
-  CONDITIONS_O, CONDITIONS_P, CONDITIONS_R, CONDITIONS_S,
-  CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
-} from "./conditions";
-
-// Combine all conditions and sort them alphabetically
-const allConditions = [
-  ...(CONDITIONS_A || []),
-  ...(CONDITIONS_B || []),
-  ...(CONDITIONS_C || []),
-  ...(CONDITIONS_D || []),
-  ...(CONDITIONS_E || []),
-  ...(CONDITIONS_F || []),
-  ...(CONDITIONS_G || []),
-  ...(CONDITIONS_H || []),
-  ...(CONDITIONS_I || []),
-  ...(CONDITIONS_L || []),
-  ...(CONDITIONS_M || []),
-  ...(CONDITIONS_N || []),
-  ...(CONDITIONS_O || []),
-  ...(CONDITIONS_P || []),
-  ...(CONDITIONS_R || []),
-  ...(CONDITIONS_S || []),
-  ...(CONDITIONS_T || []),
-  ...(CONDITIONS_U || []),
-  ...(CONDITIONS_V || []),
-  ...(CONDITIONS_Z || [])
-].sort();
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 export const SearchBar = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+
+  const { data: conditions = [] } = useQuery({
+    queryKey: ['conditions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('Patologia')
+        .order('Patologia');
+      
+      if (error) throw error;
+      return data.map(row => row.Patologia);
+    }
+  });
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
@@ -70,7 +54,7 @@ export const SearchBar = () => {
               Nessuna patologia trovata.
             </CommandEmpty>
             <CommandGroup heading="Patologie" className="text-gray-900 font-medium">
-              {allConditions.map((condition) => (
+              {conditions.map((condition) => (
                 <CommandItem
                   key={condition}
                   value={condition}
