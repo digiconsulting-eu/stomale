@@ -1,43 +1,72 @@
-import { useParams } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { ReviewStats } from "@/components/ReviewStats";
+import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { CommentSection } from "@/components/CommentSection";
+import { ReviewStats } from "@/components/ReviewStats";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function ReviewDetail() {
   const { condition, title } = useParams();
   const conditionName = capitalizeFirstLetter(condition || '');
+  const decodedTitle = decodeURIComponent(title || '');
 
-  const { data: review, isLoading } = useQuery({
+  const { data: review, isLoading, error } = useQuery({
     queryKey: ["review", condition, title],
     queryFn: async () => {
-      // Prima otteniamo l'ID della patologia
-      const { data: patologiaData } = await supabase
-        .from('PATOLOGIE')
-        .select('id')
-        .eq('Patologia', condition?.toUpperCase())
-        .single();
+      try {
+        // First get the pathology ID
+        const { data: patologiaData, error: patologiaError } = await supabase
+          .from('PATOLOGIE')
+          .select('id')
+          .eq('Patologia', condition?.toUpperCase())
+          .single();
 
-      if (!patologiaData) throw new Error('Patologia non trovata');
+        if (patologiaError) throw patologiaError;
+        if (!patologiaData) throw new Error('Patologia non trovata');
 
-      // Poi otteniamo la recensione
-      const { data: reviewData } = await supabase
-        .from('RECENSIONI')
-        .select('*')
-        .eq('Patologia', patologiaData.id)
-        .eq('Titolo', decodeURIComponent(title || ''))
-        .single();
+        // Then get the review
+        const { data: reviewData, error: reviewError } = await supabase
+          .from('RECENSIONI')
+          .select('*')
+          .eq('Patologia', patologiaData.id)
+          .eq('Titolo', decodedTitle)
+          .maybeSingle(); // Use maybeSingle() instead of single()
 
-      if (!reviewData) throw new Error('Recensione non trovata');
-      return reviewData;
-    }
+        if (reviewError) throw reviewError;
+        if (!reviewData) throw new Error('Recensione non trovata');
+
+        return reviewData;
+      } catch (error) {
+        console.error('Error fetching review:', error);
+        throw error;
+      }
+    },
+    retry: false
   });
+
+  if (error) {
+    toast.error("Recensione non trovata");
+    return (
+      <div className="container py-8">
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold text-primary">Recensione non trovata</h1>
+          <p className="text-text-light">
+            La recensione che stai cercando non esiste o potrebbe essere stata rimossa.
+          </p>
+          <Link 
+            to={`/patologia/${condition}`}
+            className="text-primary hover:underline inline-block mt-4"
+          >
+            ← Torna a {conditionName}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -59,9 +88,18 @@ export default function ReviewDetail() {
   if (!review) {
     return (
       <div className="container py-8">
-        <h1 className="text-2xl font-bold text-center text-gray-800">
-          Esperienza non trovata
-        </h1>
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold text-primary">Recensione non trovata</h1>
+          <p className="text-text-light">
+            La recensione che stai cercando non esiste o potrebbe essere stata rimossa.
+          </p>
+          <Link 
+            to={`/patologia/${condition}`}
+            className="text-primary hover:underline inline-block mt-4"
+          >
+            ← Torna a {conditionName}
+          </Link>
+        </div>
       </div>
     );
   }
@@ -79,17 +117,19 @@ export default function ReviewDetail() {
 
       <div className="grid md:grid-cols-12 gap-8">
         <div className="md:col-span-4">
-          <Card className="p-6 sticky top-24">
-            <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
-            <ReviewStats
-              diagnosisDifficulty={Number(review["Difficoltà diagnosi"])}
-              symptomSeverity={Number(review["Fastidio sintomi"])}
-              hasMedication={review["Cura Farmacologica"]}
-              medicationEffectiveness={Number(review["Efficacia farmaci"])}
-              healingPossibility={Number(review["Possibilità guarigione"])}
-              socialDiscomfort={Number(review["Disagio sociale"])}
-            />
-          </Card>
+          <div className="sticky top-24 space-y-6">
+            <div className="card">
+              <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
+              <ReviewStats
+                diagnosisDifficulty={Number(review["Difficoltà diagnosi"])}
+                symptomSeverity={Number(review["Fastidio sintomi"])}
+                hasMedication={review["Cura Farmacologica"]}
+                medicationEffectiveness={Number(review["Efficacia farmaci"])}
+                healingPossibility={Number(review["Possibilità guarigione"])}
+                socialDiscomfort={Number(review["Disagio sociale"])}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="md:col-span-8">
@@ -120,16 +160,7 @@ export default function ReviewDetail() {
             <p className="whitespace-pre-wrap mb-8">{review.Esperienza}</p>
           </div>
 
-          <CommentSection />
-
-          <div className="mt-8 pt-8 border-t">
-            <Link 
-              to={`/patologia/${condition}`}
-              className="text-primary hover:underline block"
-            >
-              ← Torna a {conditionName}
-            </Link>
-          </div>
+          <CommentSection reviewId={review.id} />
         </div>
       </div>
     </div>
