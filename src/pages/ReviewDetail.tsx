@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -13,12 +13,15 @@ export default function ReviewDetail() {
   const { condition, title } = useParams();
   const conditionName = capitalizeFirstLetter(condition || '');
   const decodedTitle = decodeURIComponent(title || '');
+  
+  // Remove leading/trailing hyphens and convert to normal text
+  const normalizedTitle = decodedTitle.replace(/^-+|-+$/g, '').replace(/-/g, ' ');
 
   const { data: review, isLoading, error } = useQuery({
-    queryKey: ["review", condition, decodedTitle],
+    queryKey: ["review", condition, normalizedTitle],
     queryFn: async () => {
       try {
-        console.log('Fetching review for:', { condition, decodedTitle });
+        console.log('Fetching review for:', { condition, normalizedTitle });
         
         // First get the pathology ID
         const normalizedCondition = condition?.toUpperCase().replace(/-/g, ' ');
@@ -52,7 +55,7 @@ export default function ReviewDetail() {
             )
           `)
           .eq('Patologia', patologiaData.id)
-          .eq('Titolo', decodedTitle)
+          .ilike('Titolo', normalizedTitle)
           .limit(1);
 
         if (reviewError) {
@@ -61,7 +64,7 @@ export default function ReviewDetail() {
         }
 
         if (!reviewData || reviewData.length === 0) {
-          console.error('No review found for:', { patologiaId: patologiaData.id, decodedTitle });
+          console.error('No review found for:', { patologiaId: patologiaData.id, normalizedTitle });
           throw new Error('Recensione non trovata');
         }
 
@@ -83,12 +86,12 @@ export default function ReviewDetail() {
           <p className="text-text-light">
             La recensione che stai cercando non esiste o potrebbe essere stata rimossa.
           </p>
-          <Link 
-            to={`/patologia/${condition}`}
+          <a 
+            href={`/patologia/${condition}`}
             className="text-primary hover:underline inline-block mt-4"
           >
             ← Torna a {conditionName}
-          </Link>
+          </a>
         </div>
       </div>
     );
@@ -119,12 +122,12 @@ export default function ReviewDetail() {
           <p className="text-text-light">
             La recensione che stai cercando non esiste o potrebbe essere stata rimossa.
           </p>
-          <Link 
-            to={`/patologia/${condition}`}
+          <a 
+            href={`/patologia/${condition}`}
             className="text-primary hover:underline inline-block mt-4"
           >
             ← Torna a {conditionName}
-          </Link>
+          </a>
         </div>
       </div>
     );
@@ -133,12 +136,12 @@ export default function ReviewDetail() {
   return (
     <div className="container py-8">
       <div className="flex justify-between items-start mb-6">
-        <Link 
-          to={`/patologia/${condition}`}
+        <a 
+          href={`/patologia/${condition}`}
           className="text-primary hover:underline"
         >
           ← Torna a {conditionName}
-        </Link>
+        </a>
       </div>
 
       <div className="grid md:grid-cols-12 gap-8">
@@ -165,12 +168,12 @@ export default function ReviewDetail() {
           
           <div className="flex items-center gap-4 mb-6">
             <Badge variant="secondary" className="px-4 py-1.5">
-              <Link 
-                to={`/patologia/${condition}`}
+              <a 
+                href={`/patologia/${condition}`}
                 className="hover:underline"
               >
                 {conditionName}
-              </Link>
+              </a>
             </Badge>
             <div className="flex items-center text-text-light">
               <Calendar size={14} className="mr-1" />
