@@ -95,7 +95,6 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       patologiaId = existingConditions[0].id;
     }
 
-    // Assicuriamoci di leggere i campi numerici con i nomi esatti delle colonne Excel
     const diagnosisDifficulty = validateNumericField(row['Difficoltà diagnosi'], 'Difficoltà diagnosi');
     const symptomsDiscomfort = validateNumericField(row['Fastidio sintomi'], 'Fastidio sintomi');
     const medicationEffectiveness = validateNumericField(row['Efficacia farmaci'], 'Efficacia farmaci');

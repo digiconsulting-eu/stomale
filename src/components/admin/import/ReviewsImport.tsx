@@ -36,23 +36,23 @@ export const ReviewsImport = () => {
         try {
           const validatedRow = await validateRow(row);
           if (validatedRow) {
-            console.log('Riga validata prima dell\'inserimento:', validatedRow);
+            console.log('Riga validata:', validatedRow);
             
             const reviewData = {
               Patologia: validatedRow.condition,
               Titolo: validatedRow.title || null,
               Sintomi: validatedRow.symptoms || null,
               Esperienza: validatedRow.experience,
-              "Difficoltà diagnosi": validatedRow.diagnosisDifficulty,
-              "Fastidio sintomi": validatedRow.symptomsDiscomfort,
-              "Efficacia farmaci": validatedRow.medicationEffectiveness,
-              "Possibilità guarigione": validatedRow.healingPossibility,
-              "Disagio sociale": validatedRow.socialDiscomfort,
+              "Difficoltà diagnosi": validatedRow.diagnosisDifficulty?.toString(),
+              "Fastidio sintomi": validatedRow.symptomsDiscomfort?.toString(),
+              "Efficacia farmaci": validatedRow.medicationEffectiveness?.toString(),
+              "Possibilità guarigione": validatedRow.healingPossibility?.toString(),
+              "Disagio sociale": validatedRow.socialDiscomfort?.toString(),
               Data: validatedRow.date,
               Stato: 'approved'
             };
 
-            console.log('Dati recensione da inserire:', reviewData);
+            console.log('Dati da inserire nel database:', reviewData);
 
             const { error: insertError } = await supabase
               .from('RECENSIONI')
