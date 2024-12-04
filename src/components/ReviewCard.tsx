@@ -37,14 +37,9 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
     <div className="block group">
       <div className="card animate-fade-in group-hover:scale-[1.02] transition-all duration-300">
         <div className="flex justify-between items-start mb-4">
-          <Link 
-            to={`/patologia/${conditionSlug}/esperienza/${titleSlug}`}
-            className="flex-1"
-          >
-            <h3 className="text-lg font-semibold text-text group-hover:text-primary transition-colors">
-              {title || `Esperienza con ${capitalizeFirstLetter(condition)}`}
-            </h3>
-          </Link>
+          <h3 className="text-lg font-semibold text-text group-hover:text-primary transition-colors">
+            {title || `Esperienza con ${capitalizeFirstLetter(condition)}`}
+          </h3>
           {isAdmin && (
             <div className="flex items-center gap-2 ml-4">
               <Button
@@ -75,7 +70,18 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
             <span className="text-sm">{date}</span>
           </div>
         </div>
-        <p className="text-text-light line-clamp-3 leading-relaxed">{preview}</p>
+        <p className="text-text-light line-clamp-2 leading-relaxed mb-4">{preview}</p>
+        <div className="flex justify-end">
+          <Button 
+            variant="outline"
+            asChild
+            className="text-primary hover:text-primary-dark"
+          >
+            <Link to={`/patologia/${conditionSlug}/esperienza/${titleSlug}`}>
+              Leggi Esperienza
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <ConfirmDialog
