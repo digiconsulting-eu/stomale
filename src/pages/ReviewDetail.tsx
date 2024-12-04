@@ -17,18 +17,26 @@ export default function ReviewDetail() {
     queryKey: ["review", condition, title],
     queryFn: async () => {
       try {
+        console.log('Fetching review for:', { condition, title });
+        
         // First get the pathology ID
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
           .select('id')
-          .ilike('Patologia', condition || '')
+          .eq('Patologia', condition?.toUpperCase())
           .single();
 
         if (patologiaError) {
           console.error('Error fetching patologia:', patologiaError);
           throw new Error('Patologia non trovata');
         }
-        if (!patologiaData) throw new Error('Patologia non trovata');
+        
+        if (!patologiaData) {
+          console.error('No patologia found for:', condition);
+          throw new Error('Patologia non trovata');
+        }
+
+        console.log('Found patologia:', patologiaData);
 
         // Then get the review using the pathology ID
         const { data: reviewData, error: reviewError } = await supabase
@@ -40,15 +48,20 @@ export default function ReviewDetail() {
             )
           `)
           .eq('Patologia', patologiaData.id)
-          .ilike('Titolo', decodeURIComponent(title || ''))
+          .eq('Titolo', decodeURIComponent(title || ''))
           .maybeSingle();
 
         if (reviewError) {
           console.error('Error fetching review:', reviewError);
           throw new Error('Errore nel caricamento della recensione');
         }
-        if (!reviewData) throw new Error('Recensione non trovata');
 
+        if (!reviewData) {
+          console.error('No review found for:', { patologiaId: patologiaData.id, title });
+          throw new Error('Recensione non trovata');
+        }
+
+        console.log('Found review:', reviewData);
         return reviewData;
       } catch (error) {
         console.error('Error in review query:', error);
