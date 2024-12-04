@@ -50,20 +50,20 @@ export default function ReviewDetail() {
           `)
           .eq('Patologia', patologiaData.id)
           .eq('Titolo', decodedTitle)
-          .single();
+          .limit(1);
 
         if (reviewError) {
           console.error('Error fetching review:', reviewError);
           throw new Error('Errore nel caricamento della recensione');
         }
 
-        if (!reviewData) {
+        if (!reviewData || reviewData.length === 0) {
           console.error('No review found for:', { patologiaId: patologiaData.id, decodedTitle });
           throw new Error('Recensione non trovata');
         }
 
-        console.log('Found review:', reviewData);
-        return reviewData;
+        console.log('Found review:', reviewData[0]);
+        return reviewData[0];
       } catch (error) {
         console.error('Error in review query:', error);
         throw error;
