@@ -23,8 +23,6 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ reviewId }) => {
     setIsSubmitting(true);
 
     try {
-      // Implement comment submission logic here
-      // This is a placeholder - you'll need to adjust based on your actual comments table structure
       const { error } = await supabase
         .from('COMMENTI')
         .insert({

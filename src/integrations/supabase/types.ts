@@ -27,6 +27,52 @@ export type Database = {
         }
         Relationships: []
       }
+      COMMENTI: {
+        Row: {
+          Data: string | null
+          id: string
+          ReviewId: string
+          Testo: string
+          Utente: number | null
+        }
+        Insert: {
+          Data?: string | null
+          id?: string
+          ReviewId: string
+          Testo: string
+          Utente?: number | null
+        }
+        Update: {
+          Data?: string | null
+          id?: string
+          ReviewId?: string
+          Testo?: string
+          Utente?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commenti_review_fk"
+            columns: ["ReviewId"]
+            isOneToOne: false
+            referencedRelation: "RECENSIONI"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "COMMENTI_ReviewId_fkey"
+            columns: ["ReviewId"]
+            isOneToOne: false
+            referencedRelation: "RECENSIONI"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "COMMENTI_Utente_fkey"
+            columns: ["Utente"]
+            isOneToOne: false
+            referencedRelation: "UTENTI"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       PATOLOGIE: {
         Row: {
           Descrizione: string | null
