@@ -43,11 +43,11 @@ export const ReviewsImport = () => {
               Titolo: validatedRow.title || null,
               Sintomi: validatedRow.symptoms || null,
               Esperienza: validatedRow.experience,
-              "Difficoltà diagnosi": validatedRow.diagnosisDifficulty?.toString(),
-              "Fastidio sintomi": validatedRow.symptomsDiscomfort?.toString(),
-              "Efficacia farmaci": validatedRow.medicationEffectiveness?.toString(),
-              "Possibilità guarigione": validatedRow.healingPossibility?.toString(),
-              "Disagio sociale": validatedRow.socialDiscomfort?.toString(),
+              "Difficoltà diagnosi": validatedRow.diagnosisDifficulty ? validatedRow.diagnosisDifficulty.toString() : null,
+              "Fastidio sintomi": validatedRow.symptomsDiscomfort ? validatedRow.symptomsDiscomfort.toString() : null,
+              "Efficacia farmaci": validatedRow.medicationEffectiveness.toString(), // Required
+              "Possibilità guarigione": validatedRow.healingPossibility ? validatedRow.healingPossibility.toString() : null,
+              "Disagio sociale": validatedRow.socialDiscomfort.toString(), // Required
               Data: validatedRow.date,
               Stato: 'approved'
             };

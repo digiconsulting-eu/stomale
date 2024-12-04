@@ -7,9 +7,9 @@ interface ImportedReview {
   experience: string;
   diagnosisDifficulty?: number;
   symptomsDiscomfort?: number;
-  medicationEffectiveness?: number;
+  medicationEffectiveness: number; // Changed to required
   healingPossibility?: number;
-  socialDiscomfort?: number;
+  socialDiscomfort: number; // This was already required
   date?: string;
 }
 
@@ -39,9 +39,12 @@ const formatDate = (dateInput: any): string => {
   }
 };
 
-const validateNumericField = (value: any, fieldName: string): number | undefined => {
+const validateNumericField = (value: any, fieldName: string, required: boolean = false): number => {
   if (value === undefined || value === null || value === '') {
-    return undefined;
+    if (required) {
+      throw new Error(`Il campo "${fieldName}" è obbligatorio e deve essere un numero da 1 a 5`);
+    }
+    return 0; // Default value for non-required fields
   }
   
   const numValue = Number(value);
@@ -97,9 +100,9 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
 
     const diagnosisDifficulty = validateNumericField(row['Difficoltà diagnosi'], 'Difficoltà diagnosi');
     const symptomsDiscomfort = validateNumericField(row['Fastidio sintomi'], 'Fastidio sintomi');
-    const medicationEffectiveness = validateNumericField(row['Efficacia farmaci'], 'Efficacia farmaci');
+    const medicationEffectiveness = validateNumericField(row['Efficacia farmaci'], 'Efficacia farmaci', true); // Required
     const healingPossibility = validateNumericField(row['Possibilità guarigione'], 'Possibilità guarigione');
-    const socialDiscomfort = validateNumericField(row['Disagio sociale'], 'Disagio sociale');
+    const socialDiscomfort = validateNumericField(row['Disagio sociale'], 'Disagio sociale', true); // Required
 
     console.log('Valori numerici letti dal file Excel:', {
       'Difficoltà diagnosi': row['Difficoltà diagnosi'],
