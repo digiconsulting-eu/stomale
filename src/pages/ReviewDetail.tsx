@@ -12,7 +12,6 @@ import { toast } from "sonner";
 export default function ReviewDetail() {
   const { condition, title } = useParams();
   const conditionName = capitalizeFirstLetter(condition || '');
-  const decodedTitle = decodeURIComponent(title || '');
 
   const { data: review, isLoading, error } = useQuery({
     queryKey: ["review", condition, title],
@@ -22,19 +21,24 @@ export default function ReviewDetail() {
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
           .select('id')
-          .eq('Patologia', condition?.toUpperCase())
+          .ilike('Patologia', condition || '')
           .single();
 
         if (patologiaError) throw patologiaError;
         if (!patologiaData) throw new Error('Patologia non trovata');
 
-        // Then get the review
+        // Then get the review using the pathology ID
         const { data: reviewData, error: reviewError } = await supabase
           .from('RECENSIONI')
-          .select('*')
+          .select(`
+            *,
+            PATOLOGIE (
+              Patologia
+            )
+          `)
           .eq('Patologia', patologiaData.id)
-          .eq('Titolo', decodedTitle)
-          .maybeSingle(); // Use maybeSingle() instead of single()
+          .ilike('Titolo', decodeURIComponent(title || ''))
+          .single();
 
         if (reviewError) throw reviewError;
         if (!reviewData) throw new Error('Recensione non trovata');
@@ -44,8 +48,7 @@ export default function ReviewDetail() {
         console.error('Error fetching review:', error);
         throw error;
       }
-    },
-    retry: false
+    }
   });
 
   if (error) {
