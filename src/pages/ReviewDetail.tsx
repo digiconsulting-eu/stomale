@@ -1,14 +1,14 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { ReviewStats } from "@/components/ReviewStats";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, PenSquare } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Calendar } from "lucide-react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { CommentSection } from "@/components/CommentSection";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 export default function ReviewDetail() {
   const { condition, title } = useParams();
@@ -17,12 +17,25 @@ export default function ReviewDetail() {
   const { data: review, isLoading } = useQuery({
     queryKey: ["review", condition, title],
     queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-      return reviews.find((r: any) => 
-        r.condition.toLowerCase() === condition?.toLowerCase() &&
-        (r.title || '').toLowerCase().replace(/\s+/g, '-') === title
-      );
+      // Prima otteniamo l'ID della patologia
+      const { data: patologiaData } = await supabase
+        .from('PATOLOGIE')
+        .select('id')
+        .eq('Patologia', condition?.toUpperCase())
+        .single();
+
+      if (!patologiaData) throw new Error('Patologia non trovata');
+
+      // Poi otteniamo la recensione
+      const { data: reviewData } = await supabase
+        .from('RECENSIONI')
+        .select('*')
+        .eq('Patologia', patologiaData.id)
+        .eq('Titolo', decodeURIComponent(title || ''))
+        .single();
+
+      if (!reviewData) throw new Error('Recensione non trovata');
+      return reviewData;
     }
   });
 
@@ -60,17 +73,8 @@ export default function ReviewDetail() {
           to={`/patologia/${condition}`}
           className="text-primary hover:underline"
         >
-          ← Leggi altre esperienze su {conditionName}
+          ← Torna a {conditionName}
         </Link>
-        <Button 
-          asChild
-          className="flex items-center gap-2"
-        >
-          <Link to={`/nuova-recensione?patologia=${condition}`}>
-            <PenSquare className="mr-2 h-4 w-4" />
-            Racconta la tua esperienza
-          </Link>
-        </Button>
       </div>
 
       <div className="grid md:grid-cols-12 gap-8">
@@ -78,37 +82,42 @@ export default function ReviewDetail() {
           <Card className="p-6 sticky top-24">
             <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
             <ReviewStats
-              diagnosisDifficulty={review.diagnosisDifficulty}
-              symptomSeverity={review.symptomsDiscomfort}
-              hasMedication={review.hasDrugTreatment === 'yes'}
-              medicationEffectiveness={review.drugTreatmentEffectiveness}
-              healingPossibility={review.healingPossibility}
-              socialDiscomfort={review.socialDiscomfort}
+              diagnosisDifficulty={Number(review["Difficoltà diagnosi"])}
+              symptomSeverity={Number(review["Fastidio sintomi"])}
+              hasMedication={review["Cura Farmacologica"]}
+              medicationEffectiveness={Number(review["Efficacia farmaci"])}
+              healingPossibility={Number(review["Possibilità guarigione"])}
+              socialDiscomfort={Number(review["Disagio sociale"])}
             />
           </Card>
         </div>
 
         <div className="md:col-span-8">
           <h1 className="text-3xl font-bold text-primary mb-2">
-            {review.title || `Esperienza con ${conditionName}`}
+            {review.Titolo || `Esperienza con ${conditionName}`}
           </h1>
           
-          <div className="flex items-center mb-4">
-            <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
+          <div className="flex items-center gap-4 mb-6">
+            <Badge variant="secondary" className="px-4 py-1.5">
               <Link 
                 to={`/patologia/${condition}`}
                 className="hover:underline"
               >
                 {conditionName}
               </Link>
-            </span>
-            <div className="flex items-center text-text-light ml-4">
-              <span className="text-sm">{new Date(review.date).toLocaleDateString('it-IT')}</span>
+            </Badge>
+            <div className="flex items-center text-text-light">
+              <Calendar size={14} className="mr-1" />
+              <span className="text-sm">{review.Data}</span>
             </div>
           </div>
 
           <div className="prose prose-lg max-w-none mb-8">
-            <p className="whitespace-pre-wrap">{review.experience}</p>
+            <h2 className="text-xl font-semibold mb-4">Sintomi</h2>
+            <p className="whitespace-pre-wrap mb-6">{review.Sintomi}</p>
+
+            <h2 className="text-xl font-semibold mb-4">Esperienza</h2>
+            <p className="whitespace-pre-wrap mb-8">{review.Esperienza}</p>
           </div>
 
           <CommentSection />
@@ -118,7 +127,7 @@ export default function ReviewDetail() {
               to={`/patologia/${condition}`}
               className="text-primary hover:underline block"
             >
-              ← Leggi altre esperienze su {conditionName}
+              ← Torna a {conditionName}
             </Link>
           </div>
         </div>
