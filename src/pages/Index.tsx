@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Pencil } from "lucide-react";
 import { toast } from "sonner";
-
-const SAMPLE_REVIEWS: any[] = [];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -16,6 +17,32 @@ const Index = () => {
     "Unisciti alla nostra community per condividere la tua esperienza e scoprire le storie di altri pazienti."
   );
   const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+  const { data: reviews, isLoading } = useQuery({
+    queryKey: ['latest-reviews'],
+    queryFn: async () => {
+      console.log('Fetching latest reviews...');
+      const { data, error } = await supabase
+        .from('RECENSIONI')
+        .select(`
+          *,
+          PATOLOGIE (
+            Patologia
+          )
+        `)
+        .eq('Stato', 'approved')
+        .order('Data', { ascending: false })
+        .limit(6);
+
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        throw error;
+      }
+
+      console.log('Fetched reviews:', data);
+      return data;
+    }
+  });
 
   const handleSaveTitle = () => {
     setIsEditingTitle(false);
@@ -123,11 +150,30 @@ const Index = () => {
             <h2 className="text-3xl font-semibold text-text mb-12 text-center">
               Ultime Recensioni
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {SAMPLE_REVIEWS.map((review) => (
-                <ReviewCard key={review.id} {...review} />
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} className="h-[200px] w-full" />
+                ))}
+              </div>
+            ) : reviews && reviews.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {reviews.map((review) => (
+                  <ReviewCard 
+                    key={review.id}
+                    id={review.id}
+                    title={review.Titolo}
+                    condition={review.PATOLOGIE.Patologia}
+                    preview={review.Esperienza}
+                    date={review.Data}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-text-light">
+                Nessuna recensione disponibile al momento.
+              </p>
+            )}
           </div>
         </section>
       </main>
