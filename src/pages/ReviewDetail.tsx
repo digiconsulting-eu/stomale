@@ -24,7 +24,10 @@ export default function ReviewDetail() {
           .ilike('Patologia', condition || '')
           .single();
 
-        if (patologiaError) throw patologiaError;
+        if (patologiaError) {
+          console.error('Error fetching patologia:', patologiaError);
+          throw new Error('Patologia non trovata');
+        }
         if (!patologiaData) throw new Error('Patologia non trovata');
 
         // Then get the review using the pathology ID
@@ -38,17 +41,21 @@ export default function ReviewDetail() {
           `)
           .eq('Patologia', patologiaData.id)
           .ilike('Titolo', decodeURIComponent(title || ''))
-          .single();
+          .maybeSingle();
 
-        if (reviewError) throw reviewError;
+        if (reviewError) {
+          console.error('Error fetching review:', reviewError);
+          throw new Error('Errore nel caricamento della recensione');
+        }
         if (!reviewData) throw new Error('Recensione non trovata');
 
         return reviewData;
       } catch (error) {
-        console.error('Error fetching review:', error);
+        console.error('Error in review query:', error);
         throw error;
       }
-    }
+    },
+    retry: false
   });
 
   if (error) {
