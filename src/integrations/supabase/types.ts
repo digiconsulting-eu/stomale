@@ -48,15 +48,15 @@ export type Database = {
       RECENSIONI: {
         Row: {
           "Cura Farmacologica": boolean | null
-          Data: string | null
-          "Difficoltà diagnosi": number | null
-          "Disagio sociale": number
-          "Efficacia farmaci": number
+          Data: string
+          "Difficoltà diagnosi": string | null
+          "Disagio sociale": string
+          "Efficacia farmaci": string
           Esperienza: string
-          "Fastidio sintomi": number | null
+          "Fastidio sintomi": string | null
           id: string
           Patologia: number
-          "Possibilità guarigione": number | null
+          "Possibilità guarigione": string | null
           Sintomi: string
           Stato: string
           Titolo: string
@@ -64,15 +64,15 @@ export type Database = {
         }
         Insert: {
           "Cura Farmacologica"?: boolean | null
-          Data?: string | null
-          "Difficoltà diagnosi"?: number | null
-          "Disagio sociale": number
-          "Efficacia farmaci": number
+          Data: string
+          "Difficoltà diagnosi"?: string | null
+          "Disagio sociale": string
+          "Efficacia farmaci": string
           Esperienza: string
-          "Fastidio sintomi"?: number | null
+          "Fastidio sintomi"?: string | null
           id?: string
           Patologia: number
-          "Possibilità guarigione"?: number | null
+          "Possibilità guarigione"?: string | null
           Sintomi: string
           Stato: string
           Titolo: string
@@ -80,15 +80,15 @@ export type Database = {
         }
         Update: {
           "Cura Farmacologica"?: boolean | null
-          Data?: string | null
-          "Difficoltà diagnosi"?: number | null
-          "Disagio sociale"?: number
-          "Efficacia farmaci"?: number
+          Data?: string
+          "Difficoltà diagnosi"?: string | null
+          "Disagio sociale"?: string
+          "Efficacia farmaci"?: string
           Esperienza?: string
-          "Fastidio sintomi"?: number | null
+          "Fastidio sintomi"?: string | null
           id?: string
           Patologia?: number
-          "Possibilità guarigione"?: number | null
+          "Possibilità guarigione"?: string | null
           Sintomi?: string
           Stato?: string
           Titolo?: string

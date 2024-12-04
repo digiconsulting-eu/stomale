@@ -95,13 +95,22 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       patologiaId = existingConditions[0].id;
     }
 
-    const diagnosisDifficulty = validateNumericField(row['Difficoltà di Diagnosi'], 'Difficoltà di Diagnosi');
-    const symptomsDiscomfort = validateNumericField(row['Quanto sono fastidiosi i sintomi'], 'Fastidio sintomi');
-    const medicationEffectiveness = validateNumericField(row['Efficacia cura farmacologica'], 'Efficacia farmaci');
-    const healingPossibility = validateNumericField(row['Possibilità di guarigione'], 'Possibilità guarigione');
+    // Assicuriamoci di leggere i campi numerici con i nomi esatti delle colonne Excel
+    const diagnosisDifficulty = validateNumericField(row['Difficoltà diagnosi'], 'Difficoltà diagnosi');
+    const symptomsDiscomfort = validateNumericField(row['Fastidio sintomi'], 'Fastidio sintomi');
+    const medicationEffectiveness = validateNumericField(row['Efficacia farmaci'], 'Efficacia farmaci');
+    const healingPossibility = validateNumericField(row['Possibilità guarigione'], 'Possibilità guarigione');
     const socialDiscomfort = validateNumericField(row['Disagio sociale'], 'Disagio sociale');
 
-    console.log('Numeric fields after validation:', {
+    console.log('Valori numerici letti dal file Excel:', {
+      'Difficoltà diagnosi': row['Difficoltà diagnosi'],
+      'Fastidio sintomi': row['Fastidio sintomi'],
+      'Efficacia farmaci': row['Efficacia farmaci'],
+      'Possibilità guarigione': row['Possibilità guarigione'],
+      'Disagio sociale': row['Disagio sociale']
+    });
+
+    console.log('Valori numerici dopo la validazione:', {
       diagnosisDifficulty,
       symptomsDiscomfort,
       medicationEffectiveness,
@@ -116,9 +125,9 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       experience: row['Esperienza'],
       diagnosisDifficulty,
       symptomsDiscomfort,
-      medicationEffectiveness: medicationEffectiveness || 0,
+      medicationEffectiveness,
       healingPossibility,
-      socialDiscomfort: socialDiscomfort || 0,
+      socialDiscomfort,
       date: formatDate(row['Data']),
     };
   } catch (error) {

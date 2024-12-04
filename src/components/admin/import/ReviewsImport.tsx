@@ -36,7 +36,7 @@ export const ReviewsImport = () => {
         try {
           const validatedRow = await validateRow(row);
           if (validatedRow) {
-            console.log('Validated row before insert:', validatedRow); // Debug log
+            console.log('Riga validata prima dell\'inserimento:', validatedRow);
             
             const reviewData = {
               Patologia: validatedRow.condition,
@@ -52,14 +52,14 @@ export const ReviewsImport = () => {
               Stato: 'approved'
             };
 
-            console.log('Review data to insert:', reviewData); // Debug log
+            console.log('Dati recensione da inserire:', reviewData);
 
             const { error: insertError } = await supabase
               .from('RECENSIONI')
               .insert(reviewData);
 
             if (insertError) {
-              console.error('Insert error:', insertError); // Debug log
+              console.error('Errore di inserimento:', insertError);
               errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
             } else {
               validReviews.push(reviewData);
