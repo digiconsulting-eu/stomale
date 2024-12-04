@@ -1,58 +1,69 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { MessageCircle } from "lucide-react";
-import { toast } from "sonner";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-export const CommentSection = () => {
-  const [showCommentForm, setShowCommentForm] = useState(false);
-  const [comment, setComment] = useState("");
+interface CommentSectionProps {
+  reviewId: string;
+}
 
-  const handleSubmitComment = (e: React.FormEvent) => {
+export const CommentSection: React.FC<CommentSectionProps> = ({ reviewId }) => {
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!comment.trim()) {
-      toast.error("Il commento non può essere vuoto");
+      toast.error('Il commento non può essere vuoto');
       return;
     }
-    // Here you would typically send the comment to your backend
-    toast.success("Commento inviato con successo!");
-    setComment("");
-    setShowCommentForm(false);
+
+    setIsSubmitting(true);
+
+    try {
+      // Implement comment submission logic here
+      // This is a placeholder - you'll need to adjust based on your actual comments table structure
+      const { error } = await supabase
+        .from('COMMENTI')
+        .insert({
+          ReviewId: reviewId,
+          Testo: comment,
+          // Add other necessary fields like user ID, timestamp, etc.
+        });
+
+      if (error) throw error;
+
+      toast.success('Commento inviato con successo');
+      setComment('');
+    } catch (error) {
+      console.error('Errore durante l\'invio del commento:', error);
+      toast.error('Impossibile inviare il commento');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <h2 className="text-xl font-semibold">Commenti</h2>
+      <form onSubmit={handleSubmitComment} className="space-y-4">
+        <Textarea
+          placeholder="Scrivi un commento..."
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          className="min-h-[100px]"
+        />
         <Button 
-          className="flex items-center gap-2 bg-blue-50 text-primary hover:bg-blue-100"
-          onClick={() => setShowCommentForm(!showCommentForm)}
+          type="submit" 
+          disabled={isSubmitting}
+          className="w-full"
         >
-          <MessageCircle size={18} />
-          Commenta
+          {isSubmitting ? 'Invio in corso...' : 'Invia Commento'}
         </Button>
-      </div>
-
-      {showCommentForm && (
-        <form onSubmit={handleSubmitComment} className="space-y-4">
-          <Textarea
-            placeholder="Scrivi il tuo commento..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            className="min-h-[120px]"
-          />
-          <div className="flex justify-end gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowCommentForm(false)}
-            >
-              Annulla
-            </Button>
-            <Button type="submit">
-              Invia Commento
-            </Button>
-          </div>
-        </form>
-      )}
+      </form>
+      {/* Future: Add a list of existing comments here */}
     </div>
   );
 };
