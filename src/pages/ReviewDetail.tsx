@@ -21,11 +21,14 @@ export default function ReviewDetail() {
         console.log('Fetching review for:', { condition, decodedTitle });
         
         // First get the pathology ID
+        const normalizedCondition = condition?.toUpperCase().replace(/-/g, ' ');
+        console.log('Normalized condition:', normalizedCondition);
+        
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
           .select('id')
-          .eq('Patologia', condition?.toUpperCase())
-          .single();
+          .eq('Patologia', normalizedCondition)
+          .maybeSingle();
 
         if (patologiaError) {
           console.error('Error fetching patologia:', patologiaError);
@@ -33,7 +36,7 @@ export default function ReviewDetail() {
         }
         
         if (!patologiaData) {
-          console.error('No patologia found for:', condition);
+          console.error('No patologia found for:', normalizedCondition);
           throw new Error('Patologia non trovata');
         }
 
