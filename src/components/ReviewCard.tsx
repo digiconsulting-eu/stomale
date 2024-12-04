@@ -33,6 +33,9 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
     }
   };
 
+  // Format the date to Italian format (dd/mm/yyyy)
+  const formattedDate = new Date(date).toLocaleDateString('it-IT');
+
   return (
     <div className="block group">
       <div className="card animate-fade-in group-hover:scale-[1.02] transition-all duration-300">
@@ -72,7 +75,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
           </span>
           <div className="flex items-center text-text-light space-x-1">
             <Calendar size={14} />
-            <span className="text-sm">{date}</span>
+            <span className="text-sm">{formattedDate}</span>
           </div>
         </div>
         <p className="text-text-light line-clamp-3 leading-relaxed">{preview}</p>

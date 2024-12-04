@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ConditionOverview } from "@/components/condition/ConditionOverview";
+import { supabase } from "@/integrations/supabase/client";
 
 const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
   <div>
@@ -64,14 +65,33 @@ export default function ConditionDetail() {
     setIsFavorite(!isFavorite);
   };
 
-  const { data: reviews, isLoading } = useQuery({
-    queryKey: ["reviews", condition],
+  // Query per ottenere l'ID della patologia
+  const { data: patologiaData } = useQuery({
+    queryKey: ["patologia", condition],
     queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-      return allReviews.filter((review: any) => 
-        review.condition.toLowerCase() === condition?.toLowerCase()
-      );
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('id')
+        .eq('Patologia', condition?.toUpperCase())
+        .single();
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Query per ottenere le recensioni
+  const { data: reviews, isLoading } = useQuery({
+    queryKey: ["reviews", patologiaData?.id],
+    enabled: !!patologiaData?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('RECENSIONI')
+        .select('*')
+        .eq('Patologia', patologiaData.id);
+      
+      if (error) throw error;
+      return data;
     }
   });
 
@@ -86,12 +106,12 @@ export default function ConditionDetail() {
       };
     }
 
-    const sum = reviews.reduce((acc: any, review: any) => ({
-      diagnosisDifficulty: acc.diagnosisDifficulty + (review.diagnosisDifficulty || 0),
-      symptomsDiscomfort: acc.symptomsDiscomfort + (review.symptomsDiscomfort || 0),
-      medicationEffectiveness: acc.medicationEffectiveness + (review.medicationEffectiveness || 0),
-      healingPossibility: acc.healingPossibility + (review.healingPossibility || 0),
-      socialDiscomfort: acc.socialDiscomfort + (review.socialDiscomfort || 0)
+    const sum = reviews.reduce((acc, review) => ({
+      diagnosisDifficulty: acc.diagnosisDifficulty + (Number(review["Difficoltà diagnosi"]) || 0),
+      symptomsDiscomfort: acc.symptomsDiscomfort + (Number(review["Fastidio sintomi"]) || 0),
+      medicationEffectiveness: acc.medicationEffectiveness + (Number(review["Efficacia farmaci"]) || 0),
+      healingPossibility: acc.healingPossibility + (Number(review["Possibilità guarigione"]) || 0),
+      socialDiscomfort: acc.socialDiscomfort + (Number(review["Disagio sociale"]) || 0)
     }), {
       diagnosisDifficulty: 0,
       symptomsDiscomfort: 0,
@@ -100,12 +120,13 @@ export default function ConditionDetail() {
       socialDiscomfort: 0
     });
 
+    const count = reviews.length;
     return {
-      diagnosisDifficulty: sum.diagnosisDifficulty / reviews.length,
-      symptomsDiscomfort: sum.symptomsDiscomfort / reviews.length,
-      medicationEffectiveness: sum.medicationEffectiveness / reviews.length,
-      healingPossibility: sum.healingPossibility / reviews.length,
-      socialDiscomfort: sum.socialDiscomfort / reviews.length
+      diagnosisDifficulty: sum.diagnosisDifficulty / count,
+      symptomsDiscomfort: sum.symptomsDiscomfort / count,
+      medicationEffectiveness: sum.medicationEffectiveness / count,
+      healingPossibility: sum.healingPossibility / count,
+      socialDiscomfort: sum.socialDiscomfort / count
     };
   };
 
@@ -200,10 +221,10 @@ export default function ConditionDetail() {
                   <ReviewCard 
                     key={review.id}
                     id={review.id}
-                    title={review.title}
-                    date={review.date}
-                    preview={review.experience}
-                    condition={review.condition}
+                    title={review.Titolo}
+                    date={review.Data}
+                    preview={review.Esperienza}
+                    condition={condition || ''}
                   />
                 ))
               )}
