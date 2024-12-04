@@ -12,12 +12,13 @@ import { toast } from "sonner";
 export default function ReviewDetail() {
   const { condition, title } = useParams();
   const conditionName = capitalizeFirstLetter(condition || '');
+  const decodedTitle = decodeURIComponent(title || '');
 
   const { data: review, isLoading, error } = useQuery({
-    queryKey: ["review", condition, title],
+    queryKey: ["review", condition, decodedTitle],
     queryFn: async () => {
       try {
-        console.log('Fetching review for:', { condition, title });
+        console.log('Fetching review for:', { condition, decodedTitle });
         
         // First get the pathology ID
         const { data: patologiaData, error: patologiaError } = await supabase
@@ -48,8 +49,8 @@ export default function ReviewDetail() {
             )
           `)
           .eq('Patologia', patologiaData.id)
-          .eq('Titolo', decodeURIComponent(title || ''))
-          .maybeSingle();
+          .eq('Titolo', decodedTitle)
+          .single();
 
         if (reviewError) {
           console.error('Error fetching review:', reviewError);
@@ -57,7 +58,7 @@ export default function ReviewDetail() {
         }
 
         if (!reviewData) {
-          console.error('No review found for:', { patologiaId: patologiaData.id, title });
+          console.error('No review found for:', { patologiaId: patologiaData.id, decodedTitle });
           throw new Error('Recensione non trovata');
         }
 
@@ -67,8 +68,7 @@ export default function ReviewDetail() {
         console.error('Error in review query:', error);
         throw error;
       }
-    },
-    retry: false
+    }
   });
 
   if (error) {
