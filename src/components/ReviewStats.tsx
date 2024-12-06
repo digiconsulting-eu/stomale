@@ -4,7 +4,7 @@ interface ReviewStatsProps {
   diagnosisDifficulty: number;
   symptomSeverity: number;
   hasMedication: boolean;
-  medicationEffectiveness?: number;
+  medicationEffectiveness: number;
   healingPossibility: number;
   socialDiscomfort: number;
 }
@@ -29,7 +29,7 @@ export const ReviewStats = ({
         <StarRating value={symptomSeverity} readOnly onChange={() => {}} />
       </div>
 
-      {hasMedication && medicationEffectiveness !== undefined && (
+      {hasMedication && (
         <div>
           <h3 className="font-medium mb-2">Efficacia Cura Farmacologica</h3>
           <StarRating value={medicationEffectiveness} readOnly onChange={() => {}} />
