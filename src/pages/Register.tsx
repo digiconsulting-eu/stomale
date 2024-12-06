@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { BirthYearSelect } from "@/components/registration/BirthYearSelect";
 import { GenderSelect } from "@/components/registration/GenderSelect";
+import { supabase } from "@/integrations/supabase/client";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [gender, setGender] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,41 +24,37 @@ const Register = () => {
       return;
     }
 
-    try {
-      const registrationNumber = getNextRegistrationNumber();
-      const username = `Anonimo ${registrationNumber}`;
-
-      localStorage.setItem(`user_${registrationNumber}`, JSON.stringify({
-        username,
-        email,
-        registrationNumber,
-        birthYear,
-        gender,
-        joinDate: new Date().toISOString()
-      }));
-
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('username', username);
-      localStorage.setItem('registrationNumber', registrationNumber.toString());
-      localStorage.setItem('email', email);
-      localStorage.setItem('joinDate', new Date().toISOString());
-
-      toast.success("Registrazione completata con successo!");
-      navigate('/dashboard');
-    } catch (error) {
-      toast.error("Si è verificato un errore durante la registrazione");
+    if (!email || !password || !birthYear || !gender) {
+      toast.error("Compila tutti i campi richiesti");
+      return;
     }
-  };
 
-  const getNextRegistrationNumber = () => {
-    const users = Object.keys(localStorage)
-      .filter(key => key.startsWith('user_'))
-      .map(key => {
-        const userData = JSON.parse(localStorage.getItem(key) || '{}');
-        return parseInt(userData.registrationNumber || '0');
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            birth_year: birthYear,
+            gender: gender,
+          },
+        },
       });
 
-    return users.length === 0 ? 1 : Math.max(...users) + 1;
+      if (error) throw error;
+
+      if (data.user) {
+        toast.success("Registrazione completata con successo!");
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      console.error('Error during registration:', error);
+      toast.error(error.message || "Si è verificato un errore durante la registrazione");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -76,6 +74,7 @@ const Register = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="La tua email"
+              disabled={isLoading}
             />
           </div>
 
@@ -90,6 +89,7 @@ const Register = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Scegli una password"
+              disabled={isLoading}
             />
           </div>
 
@@ -104,14 +104,15 @@ const Register = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               placeholder="Conferma la password"
+              disabled={isLoading}
             />
           </div>
 
           <BirthYearSelect value={birthYear} onChange={setBirthYear} />
           <GenderSelect value={gender} onChange={setGender} />
 
-          <Button type="submit" className="w-full">
-            Registrati
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Registrazione in corso..." : "Registrati"}
           </Button>
         </form>
 
@@ -128,13 +129,13 @@ const Register = () => {
           </div>
 
           <div className="mt-6 grid grid-cols-3 gap-3">
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled={isLoading}>
               Google
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled={isLoading}>
               Facebook
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled={isLoading}>
               LinkedIn
             </Button>
           </div>

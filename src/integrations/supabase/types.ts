@@ -91,6 +91,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          birth_year: string | null
+          created_at: string
+          email: string | null
+          gender: string | null
+          id: string
+          username: string
+        }
+        Insert: {
+          birth_year?: string | null
+          created_at?: string
+          email?: string | null
+          gender?: string | null
+          id: string
+          username: string
+        }
+        Update: {
+          birth_year?: string | null
+          created_at?: string
+          email?: string | null
+          gender?: string | null
+          id?: string
+          username?: string
+        }
+        Relationships: []
+      }
       RECENSIONI: {
         Row: {
           "Cura Farmacologica": boolean | null
