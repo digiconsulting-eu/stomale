@@ -1,31 +1,22 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "lucide-react";
-import { capitalizeFirstLetter } from "@/utils/textUtils";
-import { CommentSection } from "@/components/CommentSection";
 import { ReviewStats } from "@/components/ReviewStats";
+import { CommentSection } from "@/components/CommentSection";
+import { ReviewContent } from "@/components/review/ReviewContent";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function ReviewDetail() {
   const { condition, title } = useParams();
-  const conditionName = capitalizeFirstLetter(condition || '');
   const decodedTitle = decodeURIComponent(title || '');
-  
-  // Remove leading/trailing hyphens and convert to normal text
   const normalizedTitle = decodedTitle.replace(/^-+|-+$/g, '').replace(/-/g, ' ');
 
   const { data: review, isLoading, error } = useQuery({
     queryKey: ["review", condition, normalizedTitle],
     queryFn: async () => {
       try {
-        console.log('Fetching review for:', { condition, normalizedTitle });
-        
-        // First get the pathology ID
         const normalizedCondition = condition?.toUpperCase().replace(/-/g, ' ');
-        console.log('Normalized condition:', normalizedCondition);
         
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
@@ -33,19 +24,9 @@ export default function ReviewDetail() {
           .eq('Patologia', normalizedCondition)
           .maybeSingle();
 
-        if (patologiaError) {
-          console.error('Error fetching patologia:', patologiaError);
-          throw new Error('Patologia non trovata');
-        }
-        
-        if (!patologiaData) {
-          console.error('No patologia found for:', normalizedCondition);
-          throw new Error('Patologia non trovata');
-        }
+        if (patologiaError) throw new Error('Patologia non trovata');
+        if (!patologiaData) throw new Error('Patologia non trovata');
 
-        console.log('Found patologia:', patologiaData);
-
-        // Then get the review using the pathology ID
         const { data: reviewData, error: reviewError } = await supabase
           .from('RECENSIONI')
           .select(`
@@ -58,17 +39,9 @@ export default function ReviewDetail() {
           .ilike('Titolo', normalizedTitle)
           .limit(1);
 
-        if (reviewError) {
-          console.error('Error fetching review:', reviewError);
-          throw new Error('Errore nel caricamento della recensione');
-        }
+        if (reviewError) throw new Error('Errore nel caricamento della recensione');
+        if (!reviewData || reviewData.length === 0) throw new Error('Recensione non trovata');
 
-        if (!reviewData || reviewData.length === 0) {
-          console.error('No review found for:', { patologiaId: patologiaData.id, normalizedTitle });
-          throw new Error('Recensione non trovata');
-        }
-
-        console.log('Found review:', reviewData[0]);
         return reviewData[0];
       } catch (error) {
         console.error('Error in review query:', error);
@@ -90,7 +63,7 @@ export default function ReviewDetail() {
             href={`/patologia/${condition}`}
             className="text-primary hover:underline inline-block mt-4"
           >
-            ← Torna a {conditionName}
+            ← Torna a {condition}
           </a>
         </div>
       </div>
@@ -100,38 +73,17 @@ export default function ReviewDetail() {
   if (isLoading) {
     return (
       <div className="container py-8">
-        <div className="grid md:grid-cols-12 gap-8">
-          <div className="md:col-span-4">
-            <Skeleton className="h-[400px] w-full" />
-          </div>
-          <div className="md:col-span-8">
-            <Skeleton className="h-12 w-3/4 mb-4" />
-            <Skeleton className="h-6 w-1/4 mb-8" />
-            <Skeleton className="h-32 w-full" />
-          </div>
+        <div className="space-y-8">
+          <Skeleton className="h-12 w-3/4" />
+          <Skeleton className="h-6 w-1/4" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-[400px] w-full" />
         </div>
       </div>
     );
   }
 
-  if (!review) {
-    return (
-      <div className="container py-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl font-bold text-primary">Recensione non trovata</h1>
-          <p className="text-text-light">
-            La recensione che stai cercando non esiste o potrebbe essere stata rimossa.
-          </p>
-          <a 
-            href={`/patologia/${condition}`}
-            className="text-primary hover:underline inline-block mt-4"
-          >
-            ← Torna a {conditionName}
-          </a>
-        </div>
-      </div>
-    );
-  }
+  if (!review) return null;
 
   return (
     <div className="container py-8">
@@ -140,13 +92,26 @@ export default function ReviewDetail() {
           href={`/patologia/${condition}`}
           className="text-primary hover:underline"
         >
-          ← Torna a {conditionName}
+          ← Torna a {condition}
         </a>
       </div>
 
-      <div className="grid md:grid-cols-12 gap-8">
-        <div className="md:col-span-4">
-          <div className="sticky top-24 space-y-6">
+      <div className="grid lg:grid-cols-12 gap-8">
+        {/* Content section - appears first on mobile */}
+        <div className="lg:col-span-8 lg:order-2">
+          <ReviewContent
+            title={review.Titolo}
+            condition={condition || ''}
+            date={review.Data}
+            symptoms={review.Sintomi}
+            experience={review.Esperienza}
+          />
+          <CommentSection reviewId={review.id} />
+        </div>
+
+        {/* Stats section - appears second on mobile */}
+        <div className="lg:col-span-4 lg:order-1">
+          <div className="lg:sticky lg:top-24 space-y-6">
             <div className="card">
               <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
               <ReviewStats
@@ -159,37 +124,6 @@ export default function ReviewDetail() {
               />
             </div>
           </div>
-        </div>
-
-        <div className="md:col-span-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">
-            {review.Titolo || `Esperienza con ${conditionName}`}
-          </h1>
-          
-          <div className="flex items-center gap-4 mb-6">
-            <Badge variant="secondary" className="px-4 py-1.5">
-              <a 
-                href={`/patologia/${condition}`}
-                className="hover:underline"
-              >
-                {conditionName}
-              </a>
-            </Badge>
-            <div className="flex items-center text-text-light">
-              <Calendar size={14} className="mr-1" />
-              <span className="text-sm">{review.Data}</span>
-            </div>
-          </div>
-
-          <div className="prose prose-lg max-w-none mb-8">
-            <h2 className="text-xl font-semibold mb-4">Sintomi</h2>
-            <p className="whitespace-pre-wrap mb-6">{review.Sintomi}</p>
-
-            <h2 className="text-xl font-semibold mb-4">Esperienza</h2>
-            <p className="whitespace-pre-wrap mb-8">{review.Esperienza}</p>
-          </div>
-
-          <CommentSection reviewId={review.id} />
         </div>
       </div>
     </div>
