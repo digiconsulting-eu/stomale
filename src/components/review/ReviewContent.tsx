@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
+import { Disclaimer } from "@/components/Disclaimer";
 
 interface ReviewContentProps {
   title: string;
@@ -15,15 +16,27 @@ export const ReviewContent = ({ title, condition, date, symptoms, experience }: 
   
   return (
     <div>
+      <div className="flex justify-between items-start mb-6">
+        <a 
+          href={`/recensioni`}
+          className="text-primary hover:underline"
+        >
+          ← Leggi tutte le recensioni su {conditionName}
+        </a>
+      </div>
+
       <h1 className="text-3xl font-bold text-primary mb-2">
         {title || `Esperienza con ${conditionName}`}
       </h1>
       
       <div className="flex items-center gap-4 mb-6">
-        <Badge variant="secondary" className="px-4 py-1.5">
+        <Badge 
+          variant="secondary" 
+          className="px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+        >
           <a 
             href={`/patologia/${condition}`}
-            className="hover:underline"
+            className="hover:text-primary-hover"
           >
             {conditionName}
           </a>
@@ -41,6 +54,8 @@ export const ReviewContent = ({ title, condition, date, symptoms, experience }: 
         <h2 className="text-xl font-semibold mb-4">Esperienza</h2>
         <p className="whitespace-pre-wrap mb-8">{experience}</p>
       </div>
+
+      <Disclaimer condition={conditionName} />
     </div>
   );
 };
