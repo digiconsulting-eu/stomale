@@ -10,7 +10,13 @@ import { toast } from "sonner";
 export default function ReviewDetail() {
   const { condition, title } = useParams();
   const decodedTitle = decodeURIComponent(title || '');
-  const normalizedTitle = decodedTitle.replace(/^-+|-+$/g, '').replace(/-/g, ' ');
+  // Remove leading/trailing hyphens and normalize internal spaces
+  const normalizedTitle = decodedTitle
+    .replace(/^-+|-+$/g, '')  // Remove leading/trailing hyphens
+    .replace(/-/g, ' ')       // Replace remaining hyphens with spaces
+    .replace(/\s+/g, ' ')     // Normalize multiple spaces to single space
+    .trim();                  // Remove leading/trailing spaces
+  
   const normalizedCondition = condition?.toUpperCase().replace(/-/g, ' ');
 
   const { data: review, isLoading, error } = useQuery({
@@ -18,8 +24,8 @@ export default function ReviewDetail() {
     queryFn: async () => {
       try {
         console.log('Searching for condition:', normalizedCondition);
+        console.log('Searching for title:', normalizedTitle);
         
-        // First get the patologia ID
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
           .select('id')
@@ -34,7 +40,6 @@ export default function ReviewDetail() {
 
         console.log('Found patologia:', patologiaData);
 
-        // Then get the review using the patologia ID
         const { data: reviews, error: reviewError } = await supabase
           .from('RECENSIONI')
           .select(`
@@ -43,24 +48,24 @@ export default function ReviewDetail() {
               Patologia
             )
           `)
-          .eq('Patologia', patologiaData.id)
-          .eq('Titolo', normalizedTitle);
+          .eq('Patologia', patologiaData.id);
 
         if (reviewError) {
           console.error('Review error:', reviewError);
           throw new Error('Errore nel caricamento della recensione');
         }
 
-        // Find the exact matching review
+        // Find the review with a case-insensitive title match
         const matchingReview = reviews?.find(r => 
-          r.Titolo.toLowerCase() === normalizedTitle.toLowerCase()
+          r.Titolo.toLowerCase().trim() === normalizedTitle.toLowerCase().trim()
         );
 
         if (!matchingReview) {
+          console.log('No matching review found. Available reviews:', reviews?.map(r => r.Titolo));
           throw new Error('Recensione non trovata');
         }
 
-        console.log('Found review:', matchingReview);
+        console.log('Found matching review:', matchingReview);
         return matchingReview;
       } catch (error) {
         console.error('Error in review query:', error);
