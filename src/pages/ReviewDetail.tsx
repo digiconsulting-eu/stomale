@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CommentSection } from "@/components/CommentSection";
 import { ReviewContent } from "@/components/review/ReviewContent";
+import { ReviewStats } from "@/components/ReviewStats"; // Add this import
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
