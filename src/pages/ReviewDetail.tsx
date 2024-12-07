@@ -1,9 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CommentSection } from "@/components/CommentSection";
 import { ReviewContent } from "@/components/review/ReviewContent";
-import { ReviewStats } from "@/components/ReviewStats";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -125,8 +123,8 @@ export default function ReviewDetail() {
             medicationEffectiveness={Number(review["Efficacia farmaci"])}
             healingPossibility={Number(review["Possibilità guarigione"])}
             socialDiscomfort={Number(review["Disagio sociale"])}
+            reviewId={review.id}
           />
-          <CommentSection reviewId={review.id} />
         </div>
 
         <div className="lg:col-span-4 lg:order-1">

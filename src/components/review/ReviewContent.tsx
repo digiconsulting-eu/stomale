@@ -3,6 +3,7 @@ import { Calendar } from "lucide-react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ReviewStats } from "@/components/ReviewStats";
+import { CommentSection } from "@/components/CommentSection";
 
 interface ReviewContentProps {
   title: string;
@@ -16,6 +17,7 @@ interface ReviewContentProps {
   medicationEffectiveness: number;
   healingPossibility: number;
   socialDiscomfort: number;
+  reviewId: string;
 }
 
 export const ReviewContent = ({ 
@@ -29,7 +31,8 @@ export const ReviewContent = ({
   hasMedication,
   medicationEffectiveness,
   healingPossibility,
-  socialDiscomfort
+  socialDiscomfort,
+  reviewId
 }: ReviewContentProps) => {
   const conditionName = capitalizeFirstLetter(condition);
   
@@ -71,6 +74,10 @@ export const ReviewContent = ({
 
         <h2 className="text-xl font-semibold mb-4">Esperienza</h2>
         <p className="whitespace-pre-wrap mb-8">{experience}</p>
+      </div>
+
+      <div className="mb-8">
+        <CommentSection reviewId={reviewId} />
       </div>
 
       <div className="mb-8">
