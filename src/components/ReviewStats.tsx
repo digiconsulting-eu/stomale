@@ -1,4 +1,4 @@
-import { StarRating } from "@/components/StarRating";
+import { Square } from "lucide-react";
 
 interface ReviewStatsProps {
   diagnosisDifficulty: number;
@@ -9,42 +9,47 @@ interface ReviewStatsProps {
   socialDiscomfort: number;
 }
 
+const StatSquare = ({ value, label }: { value: number; label: string }) => (
+  <div className="space-y-2">
+    <div className="w-full aspect-square bg-primary/10 rounded-lg flex items-center justify-center text-xl font-semibold text-primary">
+      {value}
+    </div>
+    <p className="text-sm text-text-light text-center">{label}</p>
+  </div>
+);
+
 export const ReviewStats = ({
   diagnosisDifficulty,
   symptomSeverity,
   hasMedication,
   medicationEffectiveness,
   healingPossibility,
-  socialDiscomfort
+  socialDiscomfort,
 }: ReviewStatsProps) => {
   return (
-    <section className="grid grid-cols-1 gap-6">
-      <div>
-        <h3 className="font-medium mb-2">Difficoltà di Diagnosi</h3>
-        <StarRating value={diagnosisDifficulty} readOnly onChange={() => {}} />
-      </div>
-
-      <div>
-        <h3 className="font-medium mb-2">Gravità dei Sintomi</h3>
-        <StarRating value={symptomSeverity} readOnly onChange={() => {}} />
-      </div>
-
+    <div className="grid grid-cols-2 gap-4">
+      <StatSquare 
+        value={diagnosisDifficulty} 
+        label="Difficoltà Diagnosi" 
+      />
+      <StatSquare 
+        value={symptomSeverity} 
+        label="Fastidio Sintomi" 
+      />
       {hasMedication && (
-        <div>
-          <h3 className="font-medium mb-2">Efficacia Cura Farmacologica</h3>
-          <StarRating value={medicationEffectiveness} readOnly onChange={() => {}} />
-        </div>
+        <StatSquare 
+          value={medicationEffectiveness} 
+          label="Efficacia Farmaci" 
+        />
       )}
-
-      <div>
-        <h3 className="font-medium mb-2">Possibilità di Guarigione</h3>
-        <StarRating value={healingPossibility} readOnly onChange={() => {}} />
-      </div>
-
-      <div>
-        <h3 className="font-medium mb-2">Disagio Sociale</h3>
-        <StarRating value={socialDiscomfort} readOnly onChange={() => {}} />
-      </div>
-    </section>
+      <StatSquare 
+        value={healingPossibility} 
+        label="Possibilità Guarigione" 
+      />
+      <StatSquare 
+        value={socialDiscomfort} 
+        label="Disagio Sociale" 
+      />
+    </div>
   );
 };

@@ -60,16 +60,15 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ reviewId }) => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Commenti</h2>
-      
       {!isCommentBoxOpen ? (
-        <Button 
-          onClick={handleOpenCommentBox}
-          variant="outline"
-          className="w-full"
-        >
-          Scrivi un commento
-        </Button>
+        <div className="flex justify-end">
+          <Button 
+            onClick={handleOpenCommentBox}
+            className="bg-primary/10 hover:bg-primary/20 text-primary"
+          >
+            Commenta
+          </Button>
+        </div>
       ) : (
         <form onSubmit={handleSubmitComment} className="space-y-4">
           <Textarea
