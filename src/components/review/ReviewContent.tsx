@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { Disclaimer } from "@/components/Disclaimer";
+import { ReviewStats } from "@/components/ReviewStats";
 
 interface ReviewContentProps {
   title: string;
@@ -9,9 +10,27 @@ interface ReviewContentProps {
   date: string;
   symptoms: string;
   experience: string;
+  diagnosisDifficulty: number;
+  symptomSeverity: number;
+  hasMedication: boolean;
+  medicationEffectiveness: number;
+  healingPossibility: number;
+  socialDiscomfort: number;
 }
 
-export const ReviewContent = ({ title, condition, date, symptoms, experience }: ReviewContentProps) => {
+export const ReviewContent = ({ 
+  title, 
+  condition, 
+  date, 
+  symptoms, 
+  experience,
+  diagnosisDifficulty,
+  symptomSeverity,
+  hasMedication,
+  medicationEffectiveness,
+  healingPossibility,
+  socialDiscomfort
+}: ReviewContentProps) => {
   const conditionName = capitalizeFirstLetter(condition);
   
   return (
@@ -29,22 +48,21 @@ export const ReviewContent = ({ title, condition, date, symptoms, experience }: 
         {title || `Esperienza con ${conditionName}`}
       </h1>
       
-      <div className="flex items-center gap-4 mb-6">
+      <a 
+        href={`/patologia/${condition}`}
+        className="block mb-6"
+      >
         <Badge 
           variant="secondary" 
-          className="px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+          className="inline-flex px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
         >
-          <a 
-            href={`/patologia/${condition}`}
-            className="hover:text-primary-hover"
-          >
-            {conditionName}
-          </a>
+          {conditionName}
         </Badge>
-        <div className="flex items-center text-text-light">
-          <Calendar size={14} className="mr-1" />
-          <span className="text-sm">{date}</span>
-        </div>
+      </a>
+
+      <div className="flex items-center text-text-light mb-6">
+        <Calendar size={14} className="mr-1" />
+        <span className="text-sm">{date}</span>
       </div>
 
       <div className="prose prose-lg max-w-none mb-8">
@@ -53,6 +71,17 @@ export const ReviewContent = ({ title, condition, date, symptoms, experience }: 
 
         <h2 className="text-xl font-semibold mb-4">Esperienza</h2>
         <p className="whitespace-pre-wrap mb-8">{experience}</p>
+      </div>
+
+      <div className="mb-8">
+        <ReviewStats
+          diagnosisDifficulty={diagnosisDifficulty}
+          symptomSeverity={symptomSeverity}
+          hasMedication={hasMedication}
+          medicationEffectiveness={medicationEffectiveness}
+          healingPossibility={healingPossibility}
+          socialDiscomfort={socialDiscomfort}
+        />
       </div>
 
       <Disclaimer condition={conditionName} />

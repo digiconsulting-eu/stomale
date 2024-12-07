@@ -1,7 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReviewStats } from "@/components/ReviewStats";
 import { CommentSection } from "@/components/CommentSection";
 import { ReviewContent } from "@/components/review/ReviewContent";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,15 +10,13 @@ export default function ReviewDetail() {
   const { condition, title } = useParams();
   const decodedTitle = decodeURIComponent(title || '');
   const normalizedTitle = decodedTitle.replace(/^-+|-+$/g, '').replace(/-/g, ' ');
-  
-  // Convert condition from URL format (with hyphens) to database format (with spaces)
   const normalizedCondition = condition?.toUpperCase().replace(/-/g, ' ');
 
   const { data: review, isLoading, error } = useQuery({
     queryKey: ["review", normalizedCondition, normalizedTitle],
     queryFn: async () => {
       try {
-        console.log('Searching for condition:', normalizedCondition); // Debug log
+        console.log('Searching for condition:', normalizedCondition);
         
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
@@ -28,12 +25,12 @@ export default function ReviewDetail() {
           .single();
 
         if (patologiaError) {
-          console.error('Patologia error:', patologiaError); // Debug log
+          console.error('Patologia error:', patologiaError);
           throw new Error('Patologia non trovata');
         }
         if (!patologiaData) throw new Error('Patologia non trovata');
 
-        console.log('Found patologia:', patologiaData); // Debug log
+        console.log('Found patologia:', patologiaData);
 
         const { data: reviewData, error: reviewError } = await supabase
           .from('RECENSIONI')
@@ -48,12 +45,12 @@ export default function ReviewDetail() {
           .single();
 
         if (reviewError) {
-          console.error('Review error:', reviewError); // Debug log
+          console.error('Review error:', reviewError);
           throw new Error('Errore nel caricamento della recensione');
         }
         if (!reviewData) throw new Error('Recensione non trovata');
 
-        console.log('Found review:', reviewData); // Debug log
+        console.log('Found review:', reviewData);
         return reviewData;
       } catch (error) {
         console.error('Error in review query:', error);
@@ -99,17 +96,7 @@ export default function ReviewDetail() {
 
   return (
     <div className="container py-8">
-      <div className="flex justify-between items-start mb-6">
-        <a 
-          href={`/patologia/${condition}`}
-          className="text-primary hover:underline"
-        >
-          ← Torna a {condition}
-        </a>
-      </div>
-
       <div className="grid lg:grid-cols-12 gap-8">
-        {/* Content section - appears first on mobile */}
         <div className="lg:col-span-8 lg:order-2">
           <ReviewContent
             title={review.Titolo}
@@ -117,11 +104,16 @@ export default function ReviewDetail() {
             date={review.Data}
             symptoms={review.Sintomi}
             experience={review.Esperienza}
+            diagnosisDifficulty={Number(review["Difficoltà diagnosi"])}
+            symptomSeverity={Number(review["Fastidio sintomi"])}
+            hasMedication={review["Cura Farmacologica"]}
+            medicationEffectiveness={Number(review["Efficacia farmaci"])}
+            healingPossibility={Number(review["Possibilità guarigione"])}
+            socialDiscomfort={Number(review["Disagio sociale"])}
           />
           <CommentSection reviewId={review.id} />
         </div>
 
-        {/* Stats section - appears second on mobile */}
         <div className="lg:col-span-4 lg:order-1">
           <div className="lg:sticky lg:top-24 space-y-6">
             <div className="card">
