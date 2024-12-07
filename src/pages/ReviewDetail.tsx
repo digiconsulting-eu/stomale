@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CommentSection } from "@/components/CommentSection";
 import { ReviewContent } from "@/components/review/ReviewContent";
-import { ReviewStats } from "@/components/ReviewStats"; // Add this import
+import { ReviewStats } from "@/components/ReviewStats";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -19,6 +19,7 @@ export default function ReviewDetail() {
       try {
         console.log('Searching for condition:', normalizedCondition);
         
+        // First get the patologia ID
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
           .select('id')
@@ -33,7 +34,8 @@ export default function ReviewDetail() {
 
         console.log('Found patologia:', patologiaData);
 
-        const { data: reviewData, error: reviewError } = await supabase
+        // Then get the review using the patologia ID
+        const { data: reviews, error: reviewError } = await supabase
           .from('RECENSIONI')
           .select(`
             *,
@@ -42,17 +44,24 @@ export default function ReviewDetail() {
             )
           `)
           .eq('Patologia', patologiaData.id)
-          .ilike('Titolo', normalizedTitle)
-          .single();
+          .eq('Titolo', normalizedTitle);
 
         if (reviewError) {
           console.error('Review error:', reviewError);
           throw new Error('Errore nel caricamento della recensione');
         }
-        if (!reviewData) throw new Error('Recensione non trovata');
 
-        console.log('Found review:', reviewData);
-        return reviewData;
+        // Find the exact matching review
+        const matchingReview = reviews?.find(r => 
+          r.Titolo.toLowerCase() === normalizedTitle.toLowerCase()
+        );
+
+        if (!matchingReview) {
+          throw new Error('Recensione non trovata');
+        }
+
+        console.log('Found review:', matchingReview);
+        return matchingReview;
       } catch (error) {
         console.error('Error in review query:', error);
         throw error;
