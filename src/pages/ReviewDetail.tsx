@@ -11,21 +11,29 @@ export default function ReviewDetail() {
   const { condition, title } = useParams();
   const decodedTitle = decodeURIComponent(title || '');
   const normalizedTitle = decodedTitle.replace(/^-+|-+$/g, '').replace(/-/g, ' ');
+  
+  // Convert condition from URL format (with hyphens) to database format (with spaces)
+  const normalizedCondition = condition?.toUpperCase().replace(/-/g, ' ');
 
   const { data: review, isLoading, error } = useQuery({
-    queryKey: ["review", condition, normalizedTitle],
+    queryKey: ["review", normalizedCondition, normalizedTitle],
     queryFn: async () => {
       try {
-        const normalizedCondition = condition?.toUpperCase().replace(/-/g, ' ');
+        console.log('Searching for condition:', normalizedCondition); // Debug log
         
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
           .select('id')
           .eq('Patologia', normalizedCondition)
-          .maybeSingle();
+          .single();
 
-        if (patologiaError) throw new Error('Patologia non trovata');
+        if (patologiaError) {
+          console.error('Patologia error:', patologiaError); // Debug log
+          throw new Error('Patologia non trovata');
+        }
         if (!patologiaData) throw new Error('Patologia non trovata');
+
+        console.log('Found patologia:', patologiaData); // Debug log
 
         const { data: reviewData, error: reviewError } = await supabase
           .from('RECENSIONI')
@@ -37,12 +45,16 @@ export default function ReviewDetail() {
           `)
           .eq('Patologia', patologiaData.id)
           .ilike('Titolo', normalizedTitle)
-          .limit(1);
+          .single();
 
-        if (reviewError) throw new Error('Errore nel caricamento della recensione');
-        if (!reviewData || reviewData.length === 0) throw new Error('Recensione non trovata');
+        if (reviewError) {
+          console.error('Review error:', reviewError); // Debug log
+          throw new Error('Errore nel caricamento della recensione');
+        }
+        if (!reviewData) throw new Error('Recensione non trovata');
 
-        return reviewData[0];
+        console.log('Found review:', reviewData); // Debug log
+        return reviewData;
       } catch (error) {
         console.error('Error in review query:', error);
         throw error;
