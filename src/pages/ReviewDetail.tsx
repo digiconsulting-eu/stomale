@@ -18,6 +18,13 @@ export default function ReviewDetail() {
 
         console.log('Fetching review with condition:', condition, 'and title:', title);
         
+        // Normalize the title by converting dashes back to spaces and decoding URI components
+        const normalizedTitle = decodeURIComponent(title)
+          .replace(/-/g, ' ')
+          .trim();
+
+        console.log('Normalized title:', normalizedTitle);
+        
         // First get the condition ID
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
@@ -37,7 +44,7 @@ export default function ReviewDetail() {
 
         console.log('Found patologia with ID:', patologiaData.id);
 
-        // Then get the review using the condition ID and title
+        // Then get the review using the condition ID and normalized title
         const { data: reviewData, error: reviewError } = await supabase
           .from('reviews')
           .select(`
@@ -47,7 +54,7 @@ export default function ReviewDetail() {
             )
           `)
           .eq('condition_id', patologiaData.id)
-          .eq('title', title)
+          .eq('title', normalizedTitle)
           .maybeSingle();
 
         if (reviewError) {
@@ -56,7 +63,7 @@ export default function ReviewDetail() {
         }
 
         if (!reviewData) {
-          console.error('No review found with title:', title);
+          console.error('No review found with title:', normalizedTitle);
           throw new Error('Recensione non trovata');
         }
 
