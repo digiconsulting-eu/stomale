@@ -36,27 +36,23 @@ export const ReviewsImport = () => {
         try {
           const validatedRow = await validateRow(row);
           if (validatedRow) {
-            console.log('Riga validata:', validatedRow);
-            
             const reviewData = {
               condition_id: validatedRow.condition,
               title: validatedRow.title || null,
               symptoms: validatedRow.symptoms || null,
               experience: validatedRow.experience,
-              diagnosis_difficulty: validatedRow.diagnosisDifficulty ? validatedRow.diagnosisDifficulty.toString() : null,
-              symptoms_severity: validatedRow.symptomsDiscomfort ? validatedRow.symptomsDiscomfort.toString() : null,
-              has_medication: validatedRow.hasMedication,
-              medication_effectiveness: validatedRow.medicationEffectiveness.toString(), // Required
-              healing_possibility: validatedRow.healingPossibility ? validatedRow.healingPossibility.toString() : null,
-              social_discomfort: validatedRow.socialDiscomfort.toString(), // Required
+              diagnosis_difficulty: validatedRow.diagnosisDifficulty || null,
+              symptoms_severity: validatedRow.symptomsDiscomfort || null,
+              has_medication: validatedRow.hasMedication || false,
+              medication_effectiveness: validatedRow.medicationEffectiveness || null,
+              healing_possibility: validatedRow.healingPossibility || null,
+              social_discomfort: validatedRow.socialDiscomfort || null,
               created_at: validatedRow.date,
               status: 'approved'
             };
 
-            console.log('Dati da inserire nel database:', reviewData);
-
             const { error: insertError } = await supabase
-              .from('Reviews')
+              .from('reviews')
               .insert(reviewData);
 
             if (insertError) {
@@ -97,7 +93,7 @@ export const ReviewsImport = () => {
   const handleClearImportedReviews = async () => {
     try {
       const { error } = await supabase
-        .from('Reviews')
+        .from('reviews')
         .delete()
         .eq('status', 'approved');
 

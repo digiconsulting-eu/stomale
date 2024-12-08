@@ -7,35 +7,32 @@ interface ImportedReview {
   experience: string;
   diagnosisDifficulty?: number;
   symptomsDiscomfort?: number;
-  medicationEffectiveness: number; // Changed to required
+  hasMedication?: boolean;
+  medicationEffectiveness: number;
   healingPossibility?: number;
-  socialDiscomfort: number; // This was already required
+  socialDiscomfort: number;
   date?: string;
 }
 
 const formatDate = (dateInput: any): string => {
   if (!dateInput) {
-    return new Date().toLocaleDateString('it-IT').split('/').join('-');
-  }
-
-  if (typeof dateInput === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(dateInput)) {
-    return dateInput;
+    return new Date().toISOString();
   }
 
   try {
     if (typeof dateInput === 'number') {
       const excelEpoch = new Date(1899, 11, 30);
       const date = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000);
-      return date.toLocaleDateString('it-IT').split('/').join('-');
+      return date.toISOString();
     }
 
     const date = new Date(dateInput);
     if (isNaN(date.getTime())) {
       throw new Error('Invalid date');
     }
-    return date.toLocaleDateString('it-IT').split('/').join('-');
+    return date.toISOString();
   } catch {
-    return new Date().toLocaleDateString('it-IT').split('/').join('-');
+    return new Date().toISOString();
   }
 };
 
@@ -44,7 +41,7 @@ const validateNumericField = (value: any, fieldName: string, required: boolean =
     if (required) {
       throw new Error(`Il campo "${fieldName}" è obbligatorio e deve essere un numero da 1 a 5`);
     }
-    return 0; // Default value for non-required fields
+    return 0;
   }
   
   const numValue = Number(value);
@@ -98,38 +95,19 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       patologiaId = existingConditions[0].id;
     }
 
-    const diagnosisDifficulty = validateNumericField(row['Difficoltà diagnosi'], 'Difficoltà diagnosi');
-    const symptomsDiscomfort = validateNumericField(row['Fastidio sintomi'], 'Fastidio sintomi');
-    const medicationEffectiveness = validateNumericField(row['Efficacia farmaci'], 'Efficacia farmaci', true); // Required
-    const healingPossibility = validateNumericField(row['Possibilità guarigione'], 'Possibilità guarigione');
-    const socialDiscomfort = validateNumericField(row['Disagio sociale'], 'Disagio sociale', true); // Required
-
-    console.log('Valori numerici letti dal file Excel:', {
-      'Difficoltà diagnosi': row['Difficoltà diagnosi'],
-      'Fastidio sintomi': row['Fastidio sintomi'],
-      'Efficacia farmaci': row['Efficacia farmaci'],
-      'Possibilità guarigione': row['Possibilità guarigione'],
-      'Disagio sociale': row['Disagio sociale']
-    });
-
-    console.log('Valori numerici dopo la validazione:', {
-      diagnosisDifficulty,
-      symptomsDiscomfort,
-      medicationEffectiveness,
-      healingPossibility,
-      socialDiscomfort
-    });
-
+    const hasMedication = row['Cura Farmacologica']?.toUpperCase() === 'Y';
+    
     return {
       condition: patologiaId,
       title: row['Titolo'] || '',
       symptoms: row['Sintomi'] || '',
       experience: row['Esperienza'],
-      diagnosisDifficulty,
-      symptomsDiscomfort,
-      medicationEffectiveness,
-      healingPossibility,
-      socialDiscomfort,
+      diagnosisDifficulty: validateNumericField(row['Difficoltà diagnosi'], 'Difficoltà diagnosi'),
+      symptomsDiscomfort: validateNumericField(row['Fastidio sintomi'], 'Fastidio sintomi'),
+      hasMedication,
+      medicationEffectiveness: validateNumericField(row['Efficacia farmaci'], 'Efficacia farmaci', true),
+      healingPossibility: validateNumericField(row['Possibilità guarigione'], 'Possibilità guarigione'),
+      socialDiscomfort: validateNumericField(row['Disagio sociale'], 'Disagio sociale', true),
       date: formatDate(row['Data']),
     };
   } catch (error) {
