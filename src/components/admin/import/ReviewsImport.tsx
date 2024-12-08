@@ -39,23 +39,24 @@ export const ReviewsImport = () => {
             console.log('Riga validata:', validatedRow);
             
             const reviewData = {
-              Patologia: validatedRow.condition,
-              Titolo: validatedRow.title || null,
-              Sintomi: validatedRow.symptoms || null,
-              Esperienza: validatedRow.experience,
-              "Difficoltà diagnosi": validatedRow.diagnosisDifficulty ? validatedRow.diagnosisDifficulty.toString() : null,
-              "Fastidio sintomi": validatedRow.symptomsDiscomfort ? validatedRow.symptomsDiscomfort.toString() : null,
-              "Efficacia farmaci": validatedRow.medicationEffectiveness.toString(), // Required
-              "Possibilità guarigione": validatedRow.healingPossibility ? validatedRow.healingPossibility.toString() : null,
-              "Disagio sociale": validatedRow.socialDiscomfort.toString(), // Required
-              Data: validatedRow.date,
-              Stato: 'approved'
+              condition_id: validatedRow.condition,
+              title: validatedRow.title || null,
+              symptoms: validatedRow.symptoms || null,
+              experience: validatedRow.experience,
+              diagnosis_difficulty: validatedRow.diagnosisDifficulty ? validatedRow.diagnosisDifficulty.toString() : null,
+              symptoms_severity: validatedRow.symptomsDiscomfort ? validatedRow.symptomsDiscomfort.toString() : null,
+              has_medication: validatedRow.hasMedication,
+              medication_effectiveness: validatedRow.medicationEffectiveness.toString(), // Required
+              healing_possibility: validatedRow.healingPossibility ? validatedRow.healingPossibility.toString() : null,
+              social_discomfort: validatedRow.socialDiscomfort.toString(), // Required
+              created_at: validatedRow.date,
+              status: 'approved'
             };
 
             console.log('Dati da inserire nel database:', reviewData);
 
             const { error: insertError } = await supabase
-              .from('RECENSIONI')
+              .from('Reviews')
               .insert(reviewData);
 
             if (insertError) {
@@ -96,9 +97,9 @@ export const ReviewsImport = () => {
   const handleClearImportedReviews = async () => {
     try {
       const { error } = await supabase
-        .from('RECENSIONI')
+        .from('Reviews')
         .delete()
-        .eq('Stato', 'approved');
+        .eq('status', 'approved');
 
       if (error) {
         throw error;

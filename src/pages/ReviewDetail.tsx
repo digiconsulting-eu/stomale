@@ -22,49 +22,33 @@ export default function ReviewDetail() {
     queryKey: ["review", normalizedCondition, normalizedTitle],
     queryFn: async () => {
       try {
-        console.log('Searching for condition:', normalizedCondition);
-        console.log('Searching for title:', normalizedTitle);
-        
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
           .select('id')
           .eq('Patologia', normalizedCondition)
           .single();
 
-        if (patologiaError) {
-          console.error('Patologia error:', patologiaError);
-          throw new Error('Patologia non trovata');
-        }
+        if (patologiaError) throw new Error('Patologia non trovata');
         if (!patologiaData) throw new Error('Patologia non trovata');
 
-        console.log('Found patologia:', patologiaData);
-
         const { data: reviews, error: reviewError } = await supabase
-          .from('RECENSIONI')
+          .from('Reviews')
           .select(`
             *,
             PATOLOGIE (
               Patologia
             )
           `)
-          .eq('Patologia', patologiaData.id);
+          .eq('condition_id', patologiaData.id);
 
-        if (reviewError) {
-          console.error('Review error:', reviewError);
-          throw new Error('Errore nel caricamento della recensione');
-        }
+        if (reviewError) throw new Error('Errore nel caricamento della recensione');
 
-        // Find the review with a case-insensitive title match
         const matchingReview = reviews?.find(r => 
-          r.Titolo.toLowerCase().trim() === normalizedTitle.toLowerCase().trim()
+          r.title.toLowerCase().trim() === normalizedTitle.toLowerCase().trim()
         );
 
-        if (!matchingReview) {
-          console.log('No matching review found. Available reviews:', reviews?.map(r => r.Titolo));
-          throw new Error('Recensione non trovata');
-        }
+        if (!matchingReview) throw new Error('Recensione non trovata');
 
-        console.log('Found matching review:', matchingReview);
         return matchingReview;
       } catch (error) {
         console.error('Error in review query:', error);
@@ -113,17 +97,17 @@ export default function ReviewDetail() {
       <div className="grid lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 lg:order-2">
           <ReviewContent
-            title={review.Titolo}
+            title={review.title}
             condition={condition || ''}
-            date={review.Data}
-            symptoms={review.Sintomi}
-            experience={review.Esperienza}
-            diagnosisDifficulty={Number(review["Difficoltà diagnosi"])}
-            symptomSeverity={Number(review["Fastidio sintomi"])}
-            hasMedication={review["Cura Farmacologica"]}
-            medicationEffectiveness={Number(review["Efficacia farmaci"])}
-            healingPossibility={Number(review["Possibilità guarigione"])}
-            socialDiscomfort={Number(review["Disagio sociale"])}
+            date={review.created_at}
+            symptoms={review.symptoms}
+            experience={review.experience}
+            diagnosisDifficulty={Number(review["diagnosis_difficulty"])}
+            symptomSeverity={Number(review["symptoms_severity"])}
+            hasMedication={review["has_medication"]}
+            medicationEffectiveness={Number(review["medication_effectiveness"])}
+            healingPossibility={Number(review["healing_possibility"])}
+            socialDiscomfort={Number(review["social_discomfort"])}
             reviewId={review.id}
           />
         </div>
@@ -133,12 +117,12 @@ export default function ReviewDetail() {
             <div className="card">
               <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
               <ReviewStats
-                diagnosisDifficulty={Number(review["Difficoltà diagnosi"])}
-                symptomSeverity={Number(review["Fastidio sintomi"])}
-                hasMedication={review["Cura Farmacologica"]}
-                medicationEffectiveness={Number(review["Efficacia farmaci"])}
-                healingPossibility={Number(review["Possibilità guarigione"])}
-                socialDiscomfort={Number(review["Disagio sociale"])}
+                diagnosisDifficulty={Number(review["diagnosis_difficulty"])}
+                symptomSeverity={Number(review["symptoms_severity"])}
+                hasMedication={review["has_medication"]}
+                medicationEffectiveness={Number(review["medication_effectiveness"])}
+                healingPossibility={Number(review["healing_possibility"])}
+                socialDiscomfort={Number(review["social_discomfort"])}
               />
             </div>
           </div>

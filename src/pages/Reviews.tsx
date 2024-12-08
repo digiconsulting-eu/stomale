@@ -21,15 +21,15 @@ const Reviews = () => {
     queryFn: async () => {
       console.log('Fetching reviews...');
       const { data, error } = await supabase
-        .from('RECENSIONI')
+        .from('Reviews')
         .select(`
           *,
           PATOLOGIE (
             Patologia
           )
         `)
-        .eq('Stato', 'approved')
-        .order('Data', { ascending: false });
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching reviews:', error);
@@ -72,10 +72,10 @@ const Reviews = () => {
           <ReviewCard 
             key={review.id}
             id={review.id}
-            title={review.Titolo}
+            title={review.title}
             condition={review.PATOLOGIE.Patologia}
-            preview={review.Esperienza}
-            date={review.Data}
+            preview={review.experience}
+            date={review.created_at}
           />
         ))}
       </div>
