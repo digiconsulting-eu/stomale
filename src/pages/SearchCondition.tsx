@@ -8,10 +8,11 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 const SearchCondition = () => {
   const [selectedLetter, setSelectedLetter] = useState("A");
 
-  const { data: conditions = [], isLoading } = useQuery({
+  const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions', selectedLetter],
     queryFn: async () => {
       console.log('Fetching conditions for letter:', selectedLetter);
+      
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('Patologia')
@@ -24,14 +25,26 @@ const SearchCondition = () => {
       }
       
       console.log('Fetched conditions:', data);
-      return data.map(row => row.Patologia);
+      return data?.map(row => row.Patologia) || [];
     }
   });
 
   const handleLetterChange = (letter: string) => {
+    console.log('Changing letter to:', letter);
     setSelectedLetter(letter);
     window.scrollTo(0, 0);
   };
+
+  if (error) {
+    console.error('Query error:', error);
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center text-red-500">
+          Si è verificato un errore nel caricamento delle patologie. Riprova più tardi.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
