@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LoginForm, type LoginFormValues } from "@/components/auth/LoginForm";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 
 export default function Login() {
-  const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -21,11 +20,13 @@ export default function Login() {
 
       if (signInError) {
         if (signInError.message === "Email not confirmed") {
-          toast({
-            title: "Email non confermata",
-            description: "Per favore controlla la tua email e clicca sul link di conferma prima di accedere. Se non hai ricevuto l'email, controlla la cartella spam.",
-            variant: "destructive",
-          });
+          toast.error(
+            "Per favore conferma la tua email",
+            {
+              description: "Controlla la tua casella email e clicca sul link di conferma. Se non hai ricevuto l'email, controlla la cartella spam.",
+              duration: 6000,
+            }
+          );
           return;
         }
         throw signInError;
@@ -41,20 +42,20 @@ export default function Login() {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('isAdmin', userData ? 'true' : 'false');
 
-        toast({
-          title: "Login effettuato con successo",
-          description: userData ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account",
-        });
+        toast.success(
+          userData ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
+        );
 
         navigate(userData ? '/admin' : '/dashboard');
       }
     } catch (error: any) {
       console.error('Error during login:', error);
-      toast({
-        title: "Errore di autenticazione",
-        description: "Email o password non corretti",
-        variant: "destructive",
-      });
+      toast.error(
+        "Errore di autenticazione",
+        {
+          description: "Email o password non corretti"
+        }
+      );
     } finally {
       setIsLoading(false);
     }
