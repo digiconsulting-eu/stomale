@@ -12,10 +12,40 @@ export default function Login() {
 
   const handleSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    console.log("Attempting login with email:", data.email);
+    console.log("Starting login process for:", data.email);
     
     try {
-      // First, attempt to sign in the user
+      // First check if this is an admin user
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin')
+        .select('email')
+        .eq('email', data.email)
+        .single();
+
+      if (adminError && !adminError.message.includes('No rows found')) {
+        console.error("Error checking admin status:", adminError);
+        throw adminError;
+      }
+
+      const isAdmin = !!adminData;
+      console.log("Admin check result:", { isAdmin, adminData });
+
+      if (isAdmin) {
+        // For admin users, try to sign up first if they don't exist
+        console.log("Attempting admin signup for:", data.email);
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
+        });
+
+        if (signUpError && !signUpError.message.includes('User already registered')) {
+          console.error("Admin signup error:", signUpError);
+          throw signUpError;
+        }
+      }
+
+      // Now attempt to sign in
+      console.log("Attempting login for:", data.email);
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
@@ -23,68 +53,16 @@ export default function Login() {
 
       if (signInError) {
         console.error("Login error:", signInError);
-        
-        // If the error indicates invalid credentials, check if they're in the admin table
-        if (signInError.message.includes("Invalid login credentials")) {
-          const { data: adminData } = await supabase
-            .from('admin')
-            .select('email')
-            .eq('email', data.email)
-            .single();
-
-          if (adminData) {
-            // If they're in admin table but can't log in, they need to sign up first
-            const { error: signUpError } = await supabase.auth.signUp({
-              email: data.email,
-              password: data.password,
-            });
-
-            if (signUpError) {
-              toast.error("Errore durante la registrazione", {
-                description: signUpError.message
-              });
-            } else {
-              toast.success("Account creato con successo", {
-                description: "Ora puoi effettuare il login"
-              });
-            }
-          } else {
-            toast.error("Credenziali non valide", {
-              description: "Email o password non corretti. Verifica le tue credenziali e riprova."
-            });
-          }
-        } else {
-          toast.error("Errore durante il login", {
-            description: signInError.message
-          });
-        }
-        return;
+        throw signInError;
       }
 
       if (!authData.user) {
         console.error("No user data received after successful login");
-        toast.error("Errore durante il login", {
-          description: "Non è stato possibile recuperare i dati utente"
-        });
-        return;
+        throw new Error("Non è stato possibile recuperare i dati utente");
       }
 
       console.log("User authenticated successfully:", authData.user.email);
       
-      // Check if user is admin
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin')
-        .select('email')
-        .eq('email', authData.user.email)
-        .single();
-
-      if (adminError && adminError.code !== 'PGRST116') {
-        console.error("Error checking admin status:", adminError);
-      }
-
-      const isAdmin = !!adminData;
-      console.log("Admin check result:", { isAdmin, adminData });
-
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
 
@@ -92,14 +70,24 @@ export default function Login() {
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
 
-      // Redirect based on user role
       navigate(isAdmin ? '/admin' : '/dashboard');
       
     } catch (error: any) {
-      console.error('Unexpected error during login:', error);
-      toast.error("Errore durante il login", {
-        description: "Si è verificato un errore imprevisto durante il login"
-      });
+      console.error('Error during login process:', error);
+      
+      if (error.message.includes('Invalid login credentials')) {
+        toast.error("Credenziali non valide", {
+          description: "Email o password non corretti. Verifica le tue credenziali e riprova."
+        });
+      } else if (error.message.includes('Email not confirmed')) {
+        toast.error("Email non confermata", {
+          description: "Per favore controlla la tua casella email e clicca sul link di conferma"
+        });
+      } else {
+        toast.error("Errore durante il login", {
+          description: error.message
+        });
+      }
     } finally {
       setIsLoading(false);
     }
