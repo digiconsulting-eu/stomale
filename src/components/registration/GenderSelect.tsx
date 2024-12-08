@@ -9,15 +9,16 @@ import {
 interface GenderSelectProps {
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }
 
-export const GenderSelect = ({ value, onChange }: GenderSelectProps) => {
+export const GenderSelect = ({ value, onChange, disabled }: GenderSelectProps) => {
   return (
     <div className="space-y-2">
       <label htmlFor="gender" className="text-sm font-medium">
         Sesso
       </label>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Seleziona sesso" />
         </SelectTrigger>
