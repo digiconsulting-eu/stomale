@@ -69,6 +69,7 @@ const App = () => (
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/recensione/:id" element={<ReviewDetail />} />
               <Route path="/patologia/:condition/esperienza/:title" element={<ReviewDetail />} />
               <Route path="/recensioni" element={<Reviews />} />
               <Route path="/nuova-recensione" element={<NewReview />} />

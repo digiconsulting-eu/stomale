@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client"; // Added this import
+import { supabase } from "@/integrations/supabase/client";
 
 interface ReviewCardProps {
   id: string;
@@ -20,9 +20,6 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const isAdmin = localStorage.getItem("isAdmin") === "true";
   
-  const conditionSlug = condition.toLowerCase().replace(/\s+/g, '-');
-  const titleSlug = (title || 'untitled').toLowerCase().replace(/\s+/g, '-');
-
   const handleDelete = async () => {
     try {
       const { error } = await supabase
