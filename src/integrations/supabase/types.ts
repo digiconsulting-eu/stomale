@@ -67,7 +67,7 @@ export type Database = {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -87,33 +87,6 @@ export type Database = {
           Descrizione?: string | null
           id?: number
           Patologia?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          birth_year: string | null
-          created_at: string
-          email: string | null
-          gender: string | null
-          id: string
-          username: string
-        }
-        Insert: {
-          birth_year?: string | null
-          created_at?: string
-          email?: string | null
-          gender?: string | null
-          id: string
-          username: string
-        }
-        Update: {
-          birth_year?: string | null
-          created_at?: string
-          email?: string | null
-          gender?: string | null
-          id?: string
-          username?: string
         }
         Relationships: []
       }
@@ -181,10 +154,37 @@ export type Database = {
             foreignKeyName: "reviews_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
+      }
+      users: {
+        Row: {
+          birth_year: string | null
+          created_at: string
+          email: string | null
+          gender: string | null
+          id: string
+          username: string
+        }
+        Insert: {
+          birth_year?: string | null
+          created_at?: string
+          email?: string | null
+          gender?: string | null
+          id: string
+          username: string
+        }
+        Update: {
+          birth_year?: string | null
+          created_at?: string
+          email?: string | null
+          gender?: string | null
+          id?: string
+          username?: string
+        }
+        Relationships: []
       }
     }
     Views: {
