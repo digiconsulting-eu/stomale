@@ -24,14 +24,35 @@ export default function Login() {
       if (signInError) {
         console.error("Login error:", signInError);
         
+        // If the error indicates invalid credentials, check if they're in the admin table
         if (signInError.message.includes("Invalid login credentials")) {
-          toast.error("Credenziali non valide", {
-            description: "Email o password non corretti. Verifica le tue credenziali e riprova."
-          });
-        } else if (signInError.message.includes("Email not confirmed")) {
-          toast.error("Email non confermata", {
-            description: "Per favore controlla la tua casella email e clicca sul link di conferma"
-          });
+          const { data: adminData } = await supabase
+            .from('admin')
+            .select('email')
+            .eq('email', data.email)
+            .single();
+
+          if (adminData) {
+            // If they're in admin table but can't log in, they need to sign up first
+            const { error: signUpError } = await supabase.auth.signUp({
+              email: data.email,
+              password: data.password,
+            });
+
+            if (signUpError) {
+              toast.error("Errore durante la registrazione", {
+                description: signUpError.message
+              });
+            } else {
+              toast.success("Account creato con successo", {
+                description: "Ora puoi effettuare il login"
+              });
+            }
+          } else {
+            toast.error("Credenziali non valide", {
+              description: "Email o password non corretti. Verifica le tue credenziali e riprova."
+            });
+          }
         } else {
           toast.error("Errore durante il login", {
             description: signInError.message
