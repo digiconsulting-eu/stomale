@@ -17,6 +17,7 @@ export const ReviewsImport = () => {
     if (!file) return;
 
     setIsLoading(true);
+    console.log('Starting file upload process...');
 
     try {
       const data = await file.arrayBuffer();
@@ -29,13 +30,17 @@ export const ReviewsImport = () => {
         return;
       }
 
+      console.log(`Processing ${jsonData.length} rows...`);
       const validReviews = [];
       const errors = [];
 
       for (const [index, row] of jsonData.entries()) {
         try {
+          console.log(`Validating row ${index + 1}:`, row);
           const validatedRow = await validateRow(row);
+          
           if (validatedRow) {
+            console.log(`Inserting review for condition ID ${validatedRow.condition_id}`);
             const { error: insertError } = await supabase
               .from('reviews')
               .insert({
@@ -58,15 +63,17 @@ export const ReviewsImport = () => {
               errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
             } else {
               validReviews.push(validatedRow);
+              console.log(`Successfully inserted review for row ${index + 1}`);
             }
           }
         } catch (error) {
+          console.error(`Error processing row ${index + 1}:`, error);
           errors.push(`Riga ${index + 2}: ${(error as Error).message}`);
         }
       }
 
       if (errors.length > 0) {
-        console.error('Errori di validazione:', errors);
+        console.error('Validation errors:', errors);
         errors.forEach(error => toast.error(error));
       }
 
@@ -90,18 +97,21 @@ export const ReviewsImport = () => {
 
   const handleClearImportedReviews = async () => {
     try {
+      console.log('Attempting to clear imported reviews...');
       const { error } = await supabase
         .from('reviews')
         .delete()
         .eq('status', 'approved');
 
       if (error) {
+        console.error('Error clearing reviews:', error);
         throw error;
       }
 
+      console.log('Successfully cleared imported reviews');
       toast.success("Tutte le recensioni importate sono state eliminate con successo");
     } catch (error) {
-      console.error('Errore durante l\'eliminazione:', error);
+      console.error('Error during deletion:', error);
       toast.error("Si è verificato un errore durante l'eliminazione delle recensioni");
     }
     setShowDeleteDialog(false);

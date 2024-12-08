@@ -53,6 +53,8 @@ const validateNumericField = (value: any, fieldName: string, required: boolean =
 };
 
 export const validateRow = async (row: any): Promise<ImportedReview | null> => {
+  console.log('Validating row:', row);
+  
   if (!row['Patologia'] || !row['Esperienza']) {
     throw new Error('Campi obbligatori mancanti: Patologia e Esperienza sono richiesti');
   }
@@ -63,6 +65,8 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 
+  console.log('Normalized condition:', normalizedCondition);
+
   try {
     const { data: existingConditions, error: searchError } = await supabase
       .from('PATOLOGIE')
@@ -70,13 +74,17 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       .eq('Patologia', normalizedCondition);
 
     if (searchError) {
-      console.error('Errore durante la ricerca della patologia:', searchError);
+      console.error('Error searching for condition:', searchError);
       throw searchError;
     }
+
+    console.log('Existing conditions:', existingConditions);
 
     let patologiaId: number;
 
     if (!existingConditions || existingConditions.length === 0) {
+      console.log('Condition not found, creating new one:', normalizedCondition);
+      
       const { data: newCondition, error: insertError } = await supabase
         .from('PATOLOGIE')
         .insert([{ 
@@ -87,18 +95,20 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
         .single();
 
       if (insertError || !newCondition) {
-        console.error('Errore durante inserimento patologia:', insertError);
+        console.error('Error inserting condition:', insertError);
         throw new Error(`Errore durante l'inserimento della patologia: ${insertError?.message || 'Unknown error'}`);
       }
       
       patologiaId = newCondition.id;
+      console.log('Created new condition with ID:', patologiaId);
     } else {
       patologiaId = existingConditions[0].id;
+      console.log('Found existing condition with ID:', patologiaId);
     }
 
     const hasMedication = row['Cura Farmacologica']?.toUpperCase() === 'Y';
     
-    return {
+    const validatedRow: ImportedReview = {
       condition_id: patologiaId,
       title: row['Titolo'] || '',
       symptoms: row['Sintomi'] || '',
@@ -112,6 +122,9 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       created_at: formatDate(row['Data']),
       status: 'approved'
     };
+
+    console.log('Validated row:', validatedRow);
+    return validatedRow;
   } catch (error) {
     console.error('Error in validateRow:', error);
     throw error;
