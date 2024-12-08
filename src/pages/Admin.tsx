@@ -7,6 +7,7 @@ import { NotificationsTab } from "@/components/admin/NotificationsTab";
 import { ReviewsTab } from "@/components/admin/ReviewsTab";
 import { CommentsTab } from "@/components/admin/CommentsTab";
 import { AdminsTab } from "@/components/admin/AdminsTab";
+import { UsersTab } from "@/components/admin/UsersTab";
 import ImportTab from "@/components/admin/ImportTab";
 import { Link } from "react-router-dom";
 import { Users, ClipboardList } from "lucide-react";
@@ -166,6 +167,9 @@ const Admin = () => {
           <TabsTrigger value="comments" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
             Commenti
           </TabsTrigger>
+          <TabsTrigger value="users" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
+            Utenti
+          </TabsTrigger>
           <TabsTrigger value="admins" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
             Amministratori
           </TabsTrigger>
@@ -194,6 +198,10 @@ const Admin = () => {
               comments={comments}
               handleCommentAction={handleCommentAction}
             />
+          </TabsContent>
+
+          <TabsContent value="users" className="m-0">
+            <UsersTab />
           </TabsContent>
 
           <TabsContent value="admins" className="m-0">
