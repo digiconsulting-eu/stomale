@@ -38,11 +38,8 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
   };
 
   const reviewTitle = title || `Esperienza con ${capitalizeFirstLetter(condition)}`;
-  const urlTitle = reviewTitle
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '') // Remove all special characters
-    .trim()
-    .replace(/\s+/g, '-'); // Replace spaces with single dashes
+  // Create URL-friendly title by encoding the original title
+  const urlTitle = encodeURIComponent(reviewTitle.toLowerCase());
 
   return (
     <div className="block group">
