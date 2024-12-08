@@ -38,8 +38,8 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
   };
 
   const reviewTitle = title || `Esperienza con ${capitalizeFirstLetter(condition)}`;
-  // Create URL-friendly title by encoding the original title
-  const urlTitle = encodeURIComponent(reviewTitle.toLowerCase());
+  // Create URL-friendly title by trimming and encoding
+  const urlTitle = encodeURIComponent(reviewTitle.trim());
 
   return (
     <div className="block group">

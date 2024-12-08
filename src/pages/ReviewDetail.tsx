@@ -18,8 +18,8 @@ export default function ReviewDetail() {
 
         console.log('Fetching review with condition:', condition, 'and title:', title);
         
-        // Decode the URL-encoded title
-        const decodedTitle = decodeURIComponent(title);
+        // Decode and trim the URL-encoded title
+        const decodedTitle = decodeURIComponent(title).trim();
         console.log('Decoded title:', decodedTitle);
         
         // First get the condition ID
@@ -51,7 +51,7 @@ export default function ReviewDetail() {
             )
           `)
           .eq('condition_id', patologiaData.id)
-          .eq('title', decodedTitle)
+          .ilike('title', decodedTitle)
           .maybeSingle();
 
         if (reviewError) {
