@@ -1,17 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ReviewCard } from "@/components/ReviewCard";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Heart } from "lucide-react";
-import { toast } from "sonner";
 import { useState, useEffect } from "react";
-import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ConditionOverview } from "@/components/condition/ConditionOverview";
 import { supabase } from "@/integrations/supabase/client";
+import { ConditionHeader } from "@/components/condition/ConditionHeader";
+import { ConditionActions } from "@/components/condition/ConditionActions";
+import { ConditionReviews } from "@/components/condition/ConditionReviews";
+import { toast } from "sonner";
 
 const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
   <div>
@@ -36,7 +33,6 @@ export default function ConditionDetail() {
   const { condition } = useParams();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
-  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteConditions') || '[]');
@@ -86,65 +82,32 @@ export default function ConditionDetail() {
     enabled: !!patologiaData?.id,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('RECENSIONI')
+        .from('reviews')
         .select('*')
-        .eq('Patologia', patologiaData.id);
+        .eq('condition_id', patologiaData.id);
       
       if (error) throw error;
       return data;
     }
   });
 
-  const calculateStats = () => {
-    if (!reviews || reviews.length === 0) {
-      return {
-        diagnosisDifficulty: 0,
-        symptomsDiscomfort: 0,
-        medicationEffectiveness: 0,
-        healingPossibility: 0,
-        socialDiscomfort: 0
-      };
-    }
-
-    const sum = reviews.reduce((acc, review) => ({
-      diagnosisDifficulty: acc.diagnosisDifficulty + (Number(review["Difficoltà diagnosi"]) || 0),
-      symptomsDiscomfort: acc.symptomsDiscomfort + (Number(review["Fastidio sintomi"]) || 0),
-      medicationEffectiveness: acc.medicationEffectiveness + (Number(review["Efficacia farmaci"]) || 0),
-      healingPossibility: acc.healingPossibility + (Number(review["Possibilità guarigione"]) || 0),
-      socialDiscomfort: acc.socialDiscomfort + (Number(review["Disagio sociale"]) || 0)
-    }), {
-      diagnosisDifficulty: 0,
-      symptomsDiscomfort: 0,
-      medicationEffectiveness: 0,
-      healingPossibility: 0,
-      socialDiscomfort: 0
-    });
-
-    const count = reviews.length;
-    return {
-      diagnosisDifficulty: sum.diagnosisDifficulty / count,
-      symptomsDiscomfort: sum.symptomsDiscomfort / count,
-      medicationEffectiveness: sum.medicationEffectiveness / count,
-      healingPossibility: sum.healingPossibility / count,
-      socialDiscomfort: sum.socialDiscomfort / count
-    };
+  const handleNavigate = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const stats = calculateStats();
+  const handleNewReview = () => {
+    navigate(`/nuova-recensione?patologia=${condition}`);
+  };
+
+  const stats = calculateStats(reviews || []);
 
   return (
     <div className="container py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-primary">{capitalizeFirstLetter(condition || '')}</h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleFavorite}
-          className={`${isFavorite ? 'text-primary' : 'text-gray-400'} hover:text-primary`}
-        >
-          <Heart className={`h-6 w-6 ${isFavorite ? 'fill-current' : ''}`} />
-        </Button>
-      </div>
+      <ConditionHeader 
+        condition={condition || ''} 
+        isFavorite={isFavorite}
+        onToggleFavorite={toggleFavorite}
+      />
 
       <div className="grid md:grid-cols-12 gap-6">
         <div className="md:col-span-4">
@@ -181,54 +144,25 @@ export default function ConditionDetail() {
         </div>
 
         <div className="md:col-span-8">
-          <div className="grid gap-4">
-            <Button 
-              className="w-full text-lg py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
-              onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              Panoramica
-            </Button>
-            
-            <Button 
-              className="w-full text-lg py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
-              onClick={() => document.getElementById('experiences')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              Leggi Esperienze
-            </Button>
-            
-            <Button 
-              className="w-full text-lg py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
-              onClick={() => navigate(`/nuova-recensione?patologia=${condition}`)}
-            >
-              Racconta la tua Esperienza
-            </Button>
-          </div>
+          <ConditionActions
+            condition={condition || ''}
+            onNavigate={handleNavigate}
+            onNewReview={handleNewReview}
+          />
 
           <div id="overview" className="mt-8">
-            <ConditionOverview condition={condition || ''} isAdmin={isAdmin} />
+            <ConditionOverview condition={condition || ''} />
           </div>
 
           <div id="experiences" className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Esperienze ({reviews?.length || 0})</h2>
-            <div className="space-y-4">
-              {isLoading ? (
-                <>
-                  <Skeleton className="h-[200px] w-full" />
-                  <Skeleton className="h-[200px] w-full" />
-                </>
-              ) : (
-                reviews?.map((review) => (
-                  <ReviewCard 
-                    key={review.id}
-                    id={review.id}
-                    title={review.Titolo}
-                    date={review.Data}
-                    preview={review.Esperienza}
-                    condition={condition || ''}
-                  />
-                ))
-              )}
-            </div>
+            <h2 className="text-2xl font-bold mb-4">
+              Esperienze ({reviews?.length || 0})
+            </h2>
+            <ConditionReviews
+              reviews={reviews}
+              isLoading={isLoading}
+              condition={condition || ''}
+            />
           </div>
         </div>
       </div>
