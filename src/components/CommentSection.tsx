@@ -39,10 +39,10 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ reviewId }) => {
 
     try {
       const { error } = await supabase
-        .from('COMMENTI')
+        .from('comments')
         .insert({
-          ReviewId: reviewId,
-          Testo: comment,
+          review_id: reviewId,
+          content: comment,
         });
 
       if (error) throw error;
@@ -97,8 +97,6 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ reviewId }) => {
           </div>
         </form>
       )}
-      
-      {/* Future: Add a list of existing comments here */}
     </div>
   );
 };

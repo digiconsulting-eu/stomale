@@ -22,11 +22,11 @@ export const ReviewManagementTable = () => {
     queryKey: ['reviews'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('Reviews')
+        .from('reviews')
         .select(`
           *,
-          profiles:user_id (username),
-          PATOLOGIE:condition_id (Patologia)
+          profiles (username),
+          PATOLOGIE (Patologia)
         `)
         .order('created_at', { ascending: false });
 
@@ -38,7 +38,7 @@ export const ReviewManagementTable = () => {
   const updateReviewStatus = useMutation({
     mutationFn: async ({ reviewId, status }: { reviewId: number, status: string }) => {
       const { error } = await supabase
-        .from('Reviews')
+        .from('reviews')
         .update({ status })
         .eq('id', reviewId);
 
