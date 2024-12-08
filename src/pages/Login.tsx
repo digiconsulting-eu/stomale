@@ -12,62 +12,74 @@ export default function Login() {
 
   const handleSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
+    console.log("Attempting login with email:", data.email);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
+      console.log("Auth response:", { data: authData, error });
+
       if (error) {
-        if (error.message === "Invalid login credentials") {
-          toast.error(
-            "Credenziali non valide",
-            {
-              description: "Email o password non corretti"
-            }
-          );
-        } else if (error.message === "Email not confirmed") {
-          toast.error(
-            "Email non confermata",
-            {
-              description: "Per favore controlla la tua casella email e clicca sul link di conferma"
-            }
-          );
+        console.error("Login error details:", error);
+        
+        // Handle specific error cases
+        if (error.message.includes("Invalid login credentials")) {
+          toast.error("Credenziali non valide", {
+            description: "Email o password non corretti. Verifica le tue credenziali e riprova."
+          });
+        } else if (error.message.includes("Email not confirmed")) {
+          toast.error("Email non confermata", {
+            description: "Per favore controlla la tua casella email e clicca sul link di conferma"
+          });
         } else {
-          toast.error(
-            "Errore durante il login",
-            {
-              description: error.message
-            }
-          );
+          toast.error("Errore durante il login", {
+            description: error.message
+          });
         }
         return;
       }
 
-      // If we get here, login was successful
-      const { data: adminData } = await supabase
+      if (!authData.user) {
+        console.error("No user data received after successful login");
+        toast.error("Errore durante il login", {
+          description: "Non è stato possibile recuperare i dati utente"
+        });
+        return;
+      }
+
+      console.log("Checking admin status for:", authData.user.email);
+      
+      // Check if user is admin
+      const { data: adminData, error: adminError } = await supabase
         .from('admin')
         .select('email')
-        .eq('email', data.email)
+        .eq('email', authData.user.email)
         .single();
 
+      if (adminError && adminError.code !== 'PGRST116') {
+        console.error("Error checking admin status:", adminError);
+      }
+
+      const isAdmin = !!adminData;
+      console.log("Admin check result:", { isAdmin, adminData });
+
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('isAdmin', adminData ? 'true' : 'false');
+      localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
 
       toast.success(
-        adminData ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
+        isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
 
-      navigate(adminData ? '/admin' : '/dashboard');
+      navigate(isAdmin ? '/admin' : '/dashboard');
+      
     } catch (error: any) {
-      console.error('Error during login:', error);
-      toast.error(
-        "Errore durante il login",
-        {
-          description: "Si è verificato un errore imprevisto"
-        }
-      );
+      console.error('Unexpected error during login:', error);
+      toast.error("Errore durante il login", {
+        description: "Si è verificato un errore imprevisto durante il login"
+      });
     } finally {
       setIsLoading(false);
     }
