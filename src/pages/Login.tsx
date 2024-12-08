@@ -15,28 +15,26 @@ export default function Login() {
     console.log("Attempting login with email:", data.email);
     
     try {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
+      // First, attempt to sign in the user
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
-      console.log("Auth response:", { data: authData, error });
-
-      if (error) {
-        console.error("Login error details:", error);
+      if (signInError) {
+        console.error("Login error:", signInError);
         
-        // Handle specific error cases
-        if (error.message.includes("Invalid login credentials")) {
+        if (signInError.message.includes("Invalid login credentials")) {
           toast.error("Credenziali non valide", {
             description: "Email o password non corretti. Verifica le tue credenziali e riprova."
           });
-        } else if (error.message.includes("Email not confirmed")) {
+        } else if (signInError.message.includes("Email not confirmed")) {
           toast.error("Email non confermata", {
             description: "Per favore controlla la tua casella email e clicca sul link di conferma"
           });
         } else {
           toast.error("Errore durante il login", {
-            description: error.message
+            description: signInError.message
           });
         }
         return;
@@ -50,7 +48,7 @@ export default function Login() {
         return;
       }
 
-      console.log("Checking admin status for:", authData.user.email);
+      console.log("User authenticated successfully:", authData.user.email);
       
       // Check if user is admin
       const { data: adminData, error: adminError } = await supabase
@@ -73,6 +71,7 @@ export default function Login() {
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
 
+      // Redirect based on user role
       navigate(isAdmin ? '/admin' : '/dashboard');
       
     } catch (error: any) {
