@@ -21,14 +21,25 @@ export default function ReviewDetail() {
     queryKey: ["review", normalizedCondition, normalizedTitle],
     queryFn: async () => {
       try {
+        console.log('Fetching review with condition:', normalizedCondition, 'and title:', normalizedTitle);
+        
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
           .select('id')
           .eq('Patologia', normalizedCondition)
           .single();
 
-        if (patologiaError) throw new Error('Patologia non trovata');
-        if (!patologiaData) throw new Error('Patologia non trovata');
+        if (patologiaError) {
+          console.error('Error fetching patologia:', patologiaError);
+          throw new Error('Patologia non trovata');
+        }
+        
+        if (!patologiaData) {
+          console.error('No patologia found for:', normalizedCondition);
+          throw new Error('Patologia non trovata');
+        }
+
+        console.log('Found patologia with ID:', patologiaData.id);
 
         const { data: reviews, error: reviewError } = await supabase
           .from('reviews')
@@ -39,13 +50,20 @@ export default function ReviewDetail() {
             )
           `)
           .eq('condition_id', patologiaData.id)
-          .eq('title', normalizedTitle)
-          .single();
+          .eq('title', normalizedTitle);
 
-        if (reviewError) throw new Error('Errore nel caricamento della recensione');
-        if (!reviews) throw new Error('Recensione non trovata');
+        if (reviewError) {
+          console.error('Error fetching review:', reviewError);
+          throw new Error('Errore nel caricamento della recensione');
+        }
 
-        return reviews;
+        if (!reviews || reviews.length === 0) {
+          console.error('No review found with title:', normalizedTitle);
+          throw new Error('Recensione non trovata');
+        }
+
+        console.log('Found review:', reviews[0]);
+        return reviews[0];
       } catch (error) {
         console.error('Error in review query:', error);
         throw error;
@@ -95,7 +113,7 @@ export default function ReviewDetail() {
           <ReviewContent
             title={review.title}
             condition={condition || ''}
-            date={review.created_at}
+            date={new Date(review.created_at).toLocaleDateString('it-IT')}
             symptoms={review.symptoms}
             experience={review.experience}
             diagnosisDifficulty={Number(review.diagnosis_difficulty)}
