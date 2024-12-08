@@ -12,52 +12,60 @@ export default function Login() {
 
   const handleSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
+    
     try {
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
-      if (signInError) {
-        console.log("Login error:", signInError); // Add logging for debugging
-        
-        if (signInError.message === "Email not confirmed") {
+      if (error) {
+        if (error.message === "Invalid login credentials") {
+          toast.error(
+            "Credenziali non valide",
+            {
+              description: "Email o password non corretti"
+            }
+          );
+        } else if (error.message === "Email not confirmed") {
           toast.error(
             "Email non confermata",
             {
-              description: "Per favore controlla la tua casella email e clicca sul link di conferma. Se non hai ricevuto l'email, controlla la cartella spam.",
-              duration: 6000,
+              description: "Per favore controlla la tua casella email e clicca sul link di conferma"
             }
           );
-          return;
+        } else {
+          toast.error(
+            "Errore durante il login",
+            {
+              description: error.message
+            }
+          );
         }
-
-        // Handle other errors
-        throw signInError;
+        return;
       }
 
-      if (authData.user) {
-        const { data: userData } = await supabase
-          .from('admin')
-          .select('email')
-          .eq('email', data.email)
-          .single();
+      // If we get here, login was successful
+      const { data: adminData } = await supabase
+        .from('admin')
+        .select('email')
+        .eq('email', data.email)
+        .single();
 
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('isAdmin', userData ? 'true' : 'false');
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('isAdmin', adminData ? 'true' : 'false');
 
-        toast.success(
-          userData ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
-        );
+      toast.success(
+        adminData ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
+      );
 
-        navigate(userData ? '/admin' : '/dashboard');
-      }
+      navigate(adminData ? '/admin' : '/dashboard');
     } catch (error: any) {
       console.error('Error during login:', error);
       toast.error(
-        "Errore di autenticazione",
+        "Errore durante il login",
         {
-          description: "Email o password non corretti"
+          description: "Si è verificato un errore imprevisto"
         }
       );
     } finally {
