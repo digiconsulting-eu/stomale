@@ -29,7 +29,12 @@ interface DatabaseReview {
   } | null;
 }
 
-interface Review extends Omit<DatabaseReview, 'profiles' | 'PATOLOGIE'> {
+interface Review {
+  id: number;
+  title: string;
+  status: string;
+  created_at: string;
+  condition_id: number;
   username: string;
   patologia: string;
 }
@@ -52,7 +57,7 @@ export const ReviewManagementTable = () => {
       if (error) throw error;
 
       // Transform the data to match our Review interface
-      return (data as DatabaseReview[]).map(review => ({
+      const transformedData = (data as unknown as DatabaseReview[]).map(review => ({
         id: review.id,
         title: review.title,
         status: review.status,
@@ -61,6 +66,8 @@ export const ReviewManagementTable = () => {
         username: review.profiles?.username || 'Utente Anonimo',
         patologia: review.PATOLOGIE?.Patologia || 'Sconosciuta'
       }));
+
+      return transformedData;
     },
   });
 
