@@ -24,11 +24,17 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
 
   const handleDelete = async () => {
     try {
-      // Here you would make an API call to delete the review
-      // For now, we'll just show a success message
+      const { error } = await supabase
+        .from('reviews')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
       toast.success("Recensione eliminata con successo");
       setShowDeleteDialog(false);
     } catch (error) {
+      console.error('Error deleting review:', error);
       toast.error("Errore durante l'eliminazione della recensione");
     }
   };
@@ -77,7 +83,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
             asChild
             className="text-primary hover:text-primary-dark"
           >
-            <Link to={`/patologia/${conditionSlug}/esperienza/${titleSlug}`}>
+            <Link to={`/recensione/${id}`}>
               Leggi Esperienza
             </Link>
           </Button>

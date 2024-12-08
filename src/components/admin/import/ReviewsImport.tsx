@@ -55,7 +55,8 @@ export const ReviewsImport = () => {
                 healing_possibility: validatedRow.healing_possibility,
                 social_discomfort: validatedRow.social_discomfort,
                 created_at: validatedRow.created_at,
-                status: 'approved'
+                status: validatedRow.status,
+                user_id: validatedRow.user_id
               });
 
             if (insertError) {

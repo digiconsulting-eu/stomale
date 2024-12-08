@@ -13,7 +13,7 @@ interface ImportedReview {
   social_discomfort?: number;
   created_at?: string;
   status?: string;
-  user_id?: string;
+  user_id: string;
 }
 
 const formatDate = (dateInput: any): string => {
@@ -23,7 +23,6 @@ const formatDate = (dateInput: any): string => {
 
   try {
     if (typeof dateInput === 'number') {
-      // Convert Excel date number to JavaScript date
       const excelEpoch = new Date(1899, 11, 30);
       const date = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000);
       return date.toISOString();
@@ -57,9 +56,9 @@ const validateNumericField = (value: any, fieldName: string, required: boolean =
 export const validateRow = async (row: any): Promise<ImportedReview | null> => {
   console.log('Validating row:', row);
 
-  // Check if either patologia or Patologia is present
   const condition = row['patologia'] || row['Patologia'];
   const experience = row['experience'] || row['Esperienza'];
+  const userId = row['user_id'] || row['User ID'];
   
   if (!condition || !experience) {
     console.error('Missing required fields:', { condition, experience });
@@ -75,10 +74,15 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
   console.log('Normalized condition:', normalizedCondition);
 
   try {
-    // Get the current user's ID
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      throw new Error('User not authenticated');
+    let finalUserId: string;
+    if (!userId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      finalUserId = user.id;
+    } else {
+      finalUserId = userId;
     }
 
     const { data: existingConditions, error: searchError } = await supabase
@@ -119,7 +123,6 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       console.log('Found existing condition with ID:', patologiaId);
     }
 
-    // Handle both Italian and English column names
     const title = row['title'] || row['Titolo'] || '';
     const symptoms = row['symptoms'] || row['Sintomi'] || '';
     const hasMedication = row['has_medication'] || row['Cura Farmacologica']?.toUpperCase() === 'Y';
@@ -152,7 +155,7 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       ),
       created_at: formatDate(row['created_at'] || row['Data']),
       status: 'approved',
-      user_id: user.id
+      user_id: finalUserId
     };
 
     console.log('Validated row:', validatedRow);
