@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Facebook, Linkedin } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email("Inserisci un indirizzo email valido"),
@@ -24,9 +25,6 @@ const loginSchema = z.object({
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
-
-const ADMIN_EMAIL = "franca.castelli@jobreference.it";
-const ADMIN_PASSWORD = "123456";
 
 export default function Login() {
   const { toast } = useToast();
@@ -44,28 +42,37 @@ export default function Login() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (data.email === ADMIN_EMAIL && data.password === ADMIN_PASSWORD) {
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (authData.user) {
+        const { data: userData } = await supabase
+          .from('admin')
+          .select('email')
+          .eq('email', data.email)
+          .single();
+
         localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('isAdmin', 'true');
+        localStorage.setItem('isAdmin', userData ? 'true' : 'false');
+
         toast({
           title: "Login effettuato con successo",
-          description: "Benvenuto nell'area amministrazione",
+          description: userData ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account",
         });
-        navigate('/admin');
-      } else {
-        toast({
-          title: "Errore di autenticazione",
-          description: "Email o password non corretti",
-          variant: "destructive",
-        });
+
+        navigate(userData ? '/admin' : '/dashboard');
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error during login:', error);
       toast({
-        title: "Errore",
-        description: "Si è verificato un errore durante il login",
+        title: "Errore di autenticazione",
+        description: "Email o password non corretti",
         variant: "destructive",
       });
     } finally {
