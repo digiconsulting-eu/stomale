@@ -15,10 +15,23 @@ import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+interface Review {
+  id: number;
+  title: string;
+  status: string;
+  created_at: string;
+  profiles?: {
+    username: string;
+  };
+  PATOLOGIE?: {
+    Patologia: string;
+  };
+}
+
 export const ReviewManagementTable = () => {
   const queryClient = useQueryClient();
   
-  const { data: reviews, isLoading } = useQuery({
+  const { data: reviews, isLoading } = useQuery<Review[]>({
     queryKey: ['reviews'],
     queryFn: async () => {
       const { data, error } = await supabase

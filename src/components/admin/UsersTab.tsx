@@ -11,12 +11,21 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
+interface User {
+  id: string;
+  username: string;
+  email: string | null;
+  birth_year: string | null;
+  gender: string | null;
+  created_at: string;
+}
+
 export const UsersTab = () => {
-  const { data: users, isLoading } = useQuery({
-    queryKey: ['profiles'],
+  const { data: users, isLoading } = useQuery<User[]>({
+    queryKey: ['users'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('users')
         .select('*')
         .order('created_at', { ascending: false });
       
