@@ -71,13 +71,12 @@ const Register = () => {
         localStorage.setItem('isLoggedIn', 'true');
         
         // Check if user is admin
-        const { data: adminData } = await supabase
+        const { data: adminData, error: adminError } = await supabase
           .from('admin')
           .select('email')
-          .eq('email', email)
-          .single();
+          .eq('email', email);
           
-        if (adminData) {
+        if (!adminError && adminData && adminData.length > 0) {
           localStorage.setItem('isAdmin', 'true');
         }
 
