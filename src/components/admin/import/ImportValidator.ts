@@ -22,6 +22,7 @@ const formatDate = (dateInput: any): string => {
 
   try {
     if (typeof dateInput === 'number') {
+      // Convert Excel date number to JavaScript date
       const excelEpoch = new Date(1899, 11, 30);
       const date = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000);
       return date.toISOString();
@@ -54,12 +55,17 @@ const validateNumericField = (value: any, fieldName: string, required: boolean =
 
 export const validateRow = async (row: any): Promise<ImportedReview | null> => {
   console.log('Validating row:', row);
+
+  // Check if either patologia or Patologia is present
+  const condition = row['patologia'] || row['Patologia'];
+  const experience = row['experience'] || row['Esperienza'];
   
-  if (!row['Patologia'] || !row['Esperienza']) {
+  if (!condition || !experience) {
+    console.error('Missing required fields:', { condition, experience });
     throw new Error('Campi obbligatori mancanti: Patologia e Esperienza sono richiesti');
   }
 
-  const normalizedCondition = row['Patologia']
+  const normalizedCondition = condition
     .toUpperCase()
     .trim()
     .normalize("NFD")
@@ -106,20 +112,38 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
       console.log('Found existing condition with ID:', patologiaId);
     }
 
-    const hasMedication = row['Cura Farmacologica']?.toUpperCase() === 'Y';
+    // Handle both Italian and English column names
+    const title = row['title'] || row['Titolo'] || '';
+    const symptoms = row['symptoms'] || row['Sintomi'] || '';
+    const hasMedication = row['has_medication'] || row['Cura Farmacologica']?.toUpperCase() === 'Y';
     
     const validatedRow: ImportedReview = {
       condition_id: patologiaId,
-      title: row['Titolo'] || '',
-      symptoms: row['Sintomi'] || '',
-      experience: row['Esperienza'],
-      diagnosis_difficulty: validateNumericField(row['Difficoltà diagnosi'], 'Difficoltà diagnosi'),
-      symptoms_severity: validateNumericField(row['Fastidio sintomi'], 'Fastidio sintomi'),
+      title: title,
+      symptoms: symptoms,
+      experience: experience,
+      diagnosis_difficulty: validateNumericField(
+        row['diagnosis_difficulty'] || row['Difficoltà diagnosi'], 
+        'Difficoltà diagnosi'
+      ),
+      symptoms_severity: validateNumericField(
+        row['symptoms_severity'] || row['Fastidio sintomi'], 
+        'Fastidio sintomi'
+      ),
       has_medication: hasMedication,
-      medication_effectiveness: validateNumericField(row['Efficacia farmaci'], 'Efficacia farmaci'),
-      healing_possibility: validateNumericField(row['Possibilità guarigione'], 'Possibilità guarigione'),
-      social_discomfort: validateNumericField(row['Disagio sociale'], 'Disagio sociale'),
-      created_at: formatDate(row['Data']),
+      medication_effectiveness: validateNumericField(
+        row['medication_effectiveness'] || row['Efficacia farmaci'], 
+        'Efficacia farmaci'
+      ),
+      healing_possibility: validateNumericField(
+        row['healing_possibility'] || row['Possibilità guarigione'], 
+        'Possibilità guarigione'
+      ),
+      social_discomfort: validateNumericField(
+        row['social_discomfort'] || row['Disagio sociale'], 
+        'Disagio sociale'
+      ),
+      created_at: formatDate(row['created_at'] || row['Data']),
       status: 'approved'
     };
 
