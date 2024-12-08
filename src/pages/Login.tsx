@@ -19,16 +19,20 @@ export default function Login() {
       });
 
       if (signInError) {
+        console.log("Login error:", signInError); // Add logging for debugging
+        
         if (signInError.message === "Email not confirmed") {
           toast.error(
-            "Per favore conferma la tua email",
+            "Email non confermata",
             {
-              description: "Controlla la tua casella email e clicca sul link di conferma. Se non hai ricevuto l'email, controlla la cartella spam.",
+              description: "Per favore controlla la tua casella email e clicca sul link di conferma. Se non hai ricevuto l'email, controlla la cartella spam.",
               duration: 6000,
             }
           );
           return;
         }
+
+        // Handle other errors
         throw signInError;
       }
 
