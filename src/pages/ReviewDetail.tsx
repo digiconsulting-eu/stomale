@@ -6,21 +6,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function ReviewDetail() {
-  const { condition, title } = useParams();
+  const { condition, title: reviewId } = useParams();
 
   const { data: review, isLoading, error } = useQuery({
-    queryKey: ["review", condition, title],
+    queryKey: ["review", condition, reviewId],
     queryFn: async () => {
       try {
-        if (!condition || !title) {
+        if (!condition || !reviewId) {
           throw new Error('Parametri mancanti');
         }
 
-        console.log('Fetching review with condition:', condition, 'and title:', title);
-        
-        // Decode and trim the URL-encoded title
-        const decodedTitle = decodeURIComponent(title).trim();
-        console.log('Decoded title:', decodedTitle);
+        console.log('Fetching review with condition:', condition, 'and ID:', reviewId);
         
         // First get the condition ID
         const { data: patologiaData, error: patologiaError } = await supabase
@@ -41,7 +37,7 @@ export default function ReviewDetail() {
 
         console.log('Found patologia with ID:', patologiaData.id);
 
-        // Then get the review using the condition ID and decoded title
+        // Then get the review using the condition ID and review ID
         const { data: reviewData, error: reviewError } = await supabase
           .from('reviews')
           .select(`
@@ -51,7 +47,7 @@ export default function ReviewDetail() {
             )
           `)
           .eq('condition_id', patologiaData.id)
-          .ilike('title', decodedTitle)
+          .eq('id', reviewId)
           .maybeSingle();
 
         if (reviewError) {
@@ -60,7 +56,7 @@ export default function ReviewDetail() {
         }
 
         if (!reviewData) {
-          console.error('No review found with title:', decodedTitle);
+          console.error('No review found with ID:', reviewId);
           throw new Error('Recensione non trovata');
         }
 

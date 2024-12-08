@@ -38,8 +38,6 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
   };
 
   const reviewTitle = title || `Esperienza con ${capitalizeFirstLetter(condition)}`;
-  // Create URL-friendly title by trimming and encoding
-  const urlTitle = encodeURIComponent(reviewTitle.trim());
 
   return (
     <div className="block group">
@@ -85,7 +83,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
             asChild
             className="text-primary hover:text-primary-dark"
           >
-            <Link to={`/patologia/${condition.toLowerCase()}/esperienza/${urlTitle}`}>
+            <Link to={`/patologia/${condition.toLowerCase()}/esperienza/${id}`}>
               Leggi Esperienza
             </Link>
           </Button>
