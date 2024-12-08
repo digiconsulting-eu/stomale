@@ -1,64 +1,33 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { Facebook, Linkedin } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-const loginSchema = z.object({
-  email: z.string().email("Inserisci un indirizzo email valido"),
-  password: z.string().min(6, "La password deve contenere almeno 6 caratteri"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { LoginForm, type LoginFormValues } from "@/components/auth/LoginForm";
+import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 
 export default function Login() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = async (data: LoginFormValues) => {
+  const handleSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      // First try to sign up the user if they don't exist
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-      });
-
-      if (signUpError && signUpError.message !== "User already registered") {
-        throw signUpError;
-      }
-
-      // Then try to sign in
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
       if (signInError) {
+        if (signInError.message === "Email not confirmed") {
+          toast({
+            title: "Email non confermata",
+            description: "Per favore controlla la tua email e clicca sul link di conferma prima di accedere. Se non hai ricevuto l'email, controlla la cartella spam.",
+            variant: "destructive",
+          });
+          return;
+        }
         throw signInError;
       }
 
@@ -83,9 +52,7 @@ export default function Login() {
       console.error('Error during login:', error);
       toast({
         title: "Errore di autenticazione",
-        description: error.message === "Email not confirmed" 
-          ? "Per favore conferma la tua email prima di accedere"
-          : "Email o password non corretti",
+        description: "Email o password non corretti",
         variant: "destructive",
       });
     } finally {
@@ -99,64 +66,7 @@ export default function Login() {
         <div className="card">
           <h1 className="text-2xl font-bold text-center mb-6">Accedi</h1>
           
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="nome@esempio.com"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-end">
-                <Link
-                  to="/recupera-password"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Hai dimenticato la password?
-                </Link>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full border border-primary"
-                disabled={isLoading}
-              >
-                {isLoading ? "Accesso in corso..." : "Accedi"}
-              </Button>
-            </form>
-          </Form>
+          <LoginForm onSubmit={handleSubmit} isLoading={isLoading} />
 
           <div className="mt-6">
             <div className="relative">
@@ -170,40 +80,29 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-3 gap-3">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {/* TODO: Implement Google login */}}
-              >
-                <FcGoogle className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {/* TODO: Implement Facebook login */}}
-              >
-                <Facebook className="h-5 w-5 text-blue-600" />
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {/* TODO: Implement LinkedIn login */}}
-              >
-                <Linkedin className="h-5 w-5 text-blue-700" />
-              </Button>
+            <div className="mt-6">
+              <SocialLoginButtons isLoading={isLoading} />
             </div>
           </div>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Non hai un account?{" "}
+          <div className="mt-6 flex flex-col space-y-2 text-center text-sm">
             <Link
-              to="/registrati"
+              to="/recupera-password"
               className="text-primary hover:underline"
             >
-              Registrati
+              Hai dimenticato la password?
             </Link>
-          </p>
+
+            <p className="text-muted-foreground">
+              Non hai un account?{" "}
+              <Link
+                to="/registrati"
+                className="text-primary hover:underline"
+              >
+                Registrati
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
