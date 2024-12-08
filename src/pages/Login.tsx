@@ -42,13 +42,24 @@ export default function Login() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
+      // First try to sign up the user if they don't exist
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
       });
 
-      if (error) {
-        throw error;
+      if (signUpError && signUpError.message !== "User already registered") {
+        throw signUpError;
+      }
+
+      // Then try to sign in
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (signInError) {
+        throw signInError;
       }
 
       if (authData.user) {
@@ -72,7 +83,9 @@ export default function Login() {
       console.error('Error during login:', error);
       toast({
         title: "Errore di autenticazione",
-        description: "Email o password non corretti",
+        description: error.message === "Email not confirmed" 
+          ? "Per favore conferma la tua email prima di accedere"
+          : "Email o password non corretti",
         variant: "destructive",
       });
     } finally {
