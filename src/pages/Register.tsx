@@ -1,43 +1,51 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
-import { BirthYearSelect } from "@/components/registration/BirthYearSelect";
-import { GenderSelect } from "@/components/registration/GenderSelect";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { RegistrationForm } from "@/components/auth/RegistrationForm";
+import { checkUserExists } from "@/utils/auth";
 
 const Register = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [birthYear, setBirthYear] = useState("");
-  const [gender, setGender] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const startCooldown = () => {
+    setCooldown(12);
+    const cooldownInterval = setInterval(() => {
+      setCooldown((prevCooldown) => {
+        if (prevCooldown <= 1) {
+          clearInterval(cooldownInterval);
+          return 0;
+        }
+        return prevCooldown - 1;
+      });
+    }, 1000);
+  };
+
+  const handleSubmit = async ({ email, password, birthYear, gender }: {
+    email: string;
+    password: string;
+    birthYear: string;
+    gender: string;
+  }) => {
     if (cooldown > 0) {
       toast.error(`Attendi ${cooldown} secondi prima di riprovare`);
       return;
     }
 
-    if (password !== confirmPassword) {
-      toast.error("Le password non coincidono");
-      return;
-    }
-
-    if (!email || !password || !birthYear || !gender) {
-      toast.error("Compila tutti i campi richiesti");
-      return;
-    }
-
     setIsLoading(true);
+    console.log("Starting registration process for:", email);
 
     try {
+      // Check if user exists first
+      const userExists = await checkUserExists(email);
+      if (userExists) {
+        toast.error("Un account con questa email esiste già. Prova ad accedere.");
+        navigate('/login');
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -50,6 +58,7 @@ const Register = () => {
       });
 
       if (error) {
+        console.error('Registration error:', error);
         if (error.message.includes("rate limit")) {
           startCooldown();
         }
@@ -68,93 +77,16 @@ const Register = () => {
     }
   };
 
-  const startCooldown = () => {
-    setCooldown(12);
-    const cooldownInterval = setInterval(() => {
-      setCooldown((prevCooldown) => {
-        if (prevCooldown <= 1) {
-          clearInterval(cooldownInterval);
-          return 0;
-        }
-        return prevCooldown - 1;
-      });
-    }, 1000);
-  };
-
   return (
     <div className="container max-w-md mx-auto px-4 py-8">
       <div className="card">
         <h1 className="text-2xl font-bold text-center mb-6">Registrati</h1>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="La tua email"
-              disabled={isLoading || cooldown > 0}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Scegli una password"
-              disabled={isLoading || cooldown > 0}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="text-sm font-medium">
-              Conferma Password
-            </label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              placeholder="Conferma la password"
-              disabled={isLoading || cooldown > 0}
-            />
-          </div>
-
-          <BirthYearSelect 
-            value={birthYear} 
-            onChange={setBirthYear} 
-            disabled={isLoading || cooldown > 0} 
-          />
-          
-          <GenderSelect 
-            value={gender} 
-            onChange={setGender} 
-            disabled={isLoading || cooldown > 0} 
-          />
-
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isLoading || cooldown > 0}
-          >
-            {cooldown > 0 
-              ? `Riprova tra ${cooldown} secondi` 
-              : (isLoading ? "Registrazione in corso..." : "Registrati")
-            }
-          </Button>
-        </form>
+        <RegistrationForm 
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          cooldown={cooldown}
+        />
 
         <div className="mt-6">
           <div className="relative">
