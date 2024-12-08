@@ -38,7 +38,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
   };
 
   const reviewTitle = title || `Esperienza con ${capitalizeFirstLetter(condition)}`;
-  const urlTitle = reviewTitle.toLowerCase().replace(/\s+/g, '-');
+  const urlTitle = reviewTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
   return (
     <div className="block group">

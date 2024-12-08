@@ -2,7 +2,6 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ReviewContent } from "@/components/review/ReviewContent";
-import { ReviewStats } from "@/components/ReviewStats";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -18,13 +17,6 @@ export default function ReviewDetail() {
         }
 
         console.log('Fetching review with condition:', condition, 'and title:', title);
-        
-        // Remove the leading and trailing dashes, then decode the URI component
-        const normalizedTitle = decodeURIComponent(title.replace(/^-|-$/g, ''))
-          .replace(/\+/g, ' ') // Replace + with spaces
-          .trim();
-
-        console.log('Normalized title:', normalizedTitle);
         
         // First get the condition ID
         const { data: patologiaData, error: patologiaError } = await supabase
@@ -45,7 +37,7 @@ export default function ReviewDetail() {
 
         console.log('Found patologia with ID:', patologiaData.id);
 
-        // Then get the review using the condition ID and normalized title
+        // Then get the review using the condition ID and title
         const { data: reviewData, error: reviewError } = await supabase
           .from('reviews')
           .select(`
@@ -55,7 +47,7 @@ export default function ReviewDetail() {
             )
           `)
           .eq('condition_id', patologiaData.id)
-          .eq('title', normalizedTitle)
+          .eq('title', title)
           .maybeSingle();
 
         if (reviewError) {
@@ -64,7 +56,7 @@ export default function ReviewDetail() {
         }
 
         if (!reviewData) {
-          console.error('No review found with title:', normalizedTitle);
+          console.error('No review found with title:', title);
           throw new Error('Recensione non trovata');
         }
 
@@ -132,22 +124,6 @@ export default function ReviewDetail() {
             socialDiscomfort={Number(review.social_discomfort)}
             reviewId={review.id.toString()}
           />
-        </div>
-
-        <div className="lg:col-span-4 lg:order-1">
-          <div className="lg:sticky lg:top-24 space-y-6">
-            <div className="card">
-              <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
-              <ReviewStats
-                diagnosisDifficulty={Number(review.diagnosis_difficulty)}
-                symptomSeverity={Number(review.symptoms_severity)}
-                hasMedication={review.has_medication}
-                medicationEffectiveness={Number(review.medication_effectiveness)}
-                healingPossibility={Number(review.healing_possibility)}
-                socialDiscomfort={Number(review.social_discomfort)}
-              />
-            </div>
-          </div>
         </div>
       </div>
     </div>
