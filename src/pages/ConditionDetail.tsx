@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Disclaimer } from "@/components/Disclaimer";
@@ -8,7 +9,67 @@ import { supabase } from "@/integrations/supabase/client";
 import { ConditionHeader } from "@/components/condition/ConditionHeader";
 import { ConditionActions } from "@/components/condition/ConditionActions";
 import { ConditionReviews } from "@/components/condition/ConditionReviews";
+import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { toast } from "sonner";
+
+interface Review {
+  id: number;
+  title: string;
+  experience: string;
+  created_at: string;
+  condition: string;
+  symptoms: string;
+  diagnosis_difficulty: number;
+  symptoms_severity: number;
+  has_medication: boolean;
+  medication_effectiveness: number;
+  healing_possibility: number;
+  social_discomfort: number;
+}
+
+interface Stats {
+  diagnosisDifficulty: number;
+  symptomsDiscomfort: number;
+  medicationEffectiveness: number;
+  healingPossibility: number;
+  socialDiscomfort: number;
+}
+
+const calculateStats = (reviews: Review[]): Stats => {
+  if (!reviews.length) {
+    return {
+      diagnosisDifficulty: 0,
+      symptomsDiscomfort: 0,
+      medicationEffectiveness: 0,
+      healingPossibility: 0,
+      socialDiscomfort: 0
+    };
+  }
+
+  const sum = reviews.reduce((acc, review) => ({
+    diagnosisDifficulty: acc.diagnosisDifficulty + review.diagnosis_difficulty,
+    symptomsDiscomfort: acc.symptomsDiscomfort + review.symptoms_severity,
+    medicationEffectiveness: acc.medicationEffectiveness + (review.has_medication ? review.medication_effectiveness : 0),
+    healingPossibility: acc.healingPossibility + review.healing_possibility,
+    socialDiscomfort: acc.socialDiscomfort + review.social_discomfort
+  }), {
+    diagnosisDifficulty: 0,
+    symptomsDiscomfort: 0,
+    medicationEffectiveness: 0,
+    healingPossibility: 0,
+    socialDiscomfort: 0
+  });
+
+  const medicatedReviews = reviews.filter(r => r.has_medication).length;
+
+  return {
+    diagnosisDifficulty: sum.diagnosisDifficulty / reviews.length,
+    symptomsDiscomfort: sum.symptomsDiscomfort / reviews.length,
+    medicationEffectiveness: medicatedReviews ? sum.medicationEffectiveness / medicatedReviews : 0,
+    healingPossibility: sum.healingPossibility / reviews.length,
+    socialDiscomfort: sum.socialDiscomfort / reviews.length
+  };
+};
 
 const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
   <div>
@@ -33,6 +94,7 @@ export default function ConditionDetail() {
   const { condition } = useParams();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteConditions') || '[]');
@@ -77,7 +139,7 @@ export default function ConditionDetail() {
   });
 
   // Query per ottenere le recensioni
-  const { data: reviews, isLoading } = useQuery({
+  const { data: reviewsData, isLoading } = useQuery({
     queryKey: ["reviews", patologiaData?.id],
     enabled: !!patologiaData?.id,
     queryFn: async () => {
@@ -87,7 +149,7 @@ export default function ConditionDetail() {
         .eq('condition_id', patologiaData.id);
       
       if (error) throw error;
-      return data;
+      return data as Review[];
     }
   });
 
@@ -99,7 +161,12 @@ export default function ConditionDetail() {
     navigate(`/nuova-recensione?patologia=${condition}`);
   };
 
-  const stats = calculateStats(reviews || []);
+  const reviews = reviewsData?.map(review => ({
+    ...review,
+    condition: condition || ''
+  })) || [];
+
+  const stats = calculateStats(reviews);
 
   return (
     <div className="container py-8">
@@ -151,7 +218,10 @@ export default function ConditionDetail() {
           />
 
           <div id="overview" className="mt-8">
-            <ConditionOverview condition={condition || ''} />
+            <ConditionOverview 
+              condition={condition || ''} 
+              isAdmin={isAdmin}
+            />
           </div>
 
           <div id="experiences" className="mt-8">
