@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { Disclaimer } from "@/components/Disclaimer";
-import { ReviewStats } from "@/components/ReviewStats";
 import { CommentSection } from "@/components/CommentSection";
 
 interface ReviewContentProps {
@@ -26,12 +25,6 @@ export const ReviewContent = ({
   date, 
   symptoms, 
   experience,
-  diagnosisDifficulty,
-  symptomSeverity,
-  hasMedication,
-  medicationEffectiveness,
-  healingPossibility,
-  socialDiscomfort,
   reviewId
 }: ReviewContentProps) => {
   const conditionName = capitalizeFirstLetter(condition);
@@ -74,17 +67,6 @@ export const ReviewContent = ({
 
         <h2 className="text-xl font-semibold mb-4">Esperienza</h2>
         <p className="whitespace-pre-wrap mb-8">{experience}</p>
-      </div>
-
-      <div className="mb-8">
-        <ReviewStats
-          diagnosisDifficulty={diagnosisDifficulty}
-          symptomSeverity={symptomSeverity}
-          hasMedication={hasMedication}
-          medicationEffectiveness={medicationEffectiveness}
-          healingPossibility={healingPossibility}
-          socialDiscomfort={socialDiscomfort}
-        />
       </div>
 
       <div className="mb-8">

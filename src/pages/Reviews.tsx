@@ -7,31 +7,61 @@ import {
   PaginationNext, 
   PaginationPrevious 
 } from "@/components/ui/pagination";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [reviews, setReviews] = useState<any[]>([]);
   const reviewsPerPage = 20;
 
-  useEffect(() => {
-    const storedReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    // Sort reviews by date in descending order
-    const sortedReviews = storedReviews.sort((a: any, b: any) => {
-      const dateA = new Date(a.date.split('-').reverse().join('-'));
-      const dateB = new Date(b.date.split('-').reverse().join('-'));
-      return dateB.getTime() - dateA.getTime();
-    });
-    setReviews(sortedReviews);
-  }, []);
+  const { data: reviews, isLoading } = useQuery({
+    queryKey: ['reviews'],
+    queryFn: async () => {
+      console.log('Fetching reviews...');
+      const { data, error } = await supabase
+        .from('RECENSIONI')
+        .select(`
+          *,
+          PATOLOGIE (
+            Patologia
+          )
+        `)
+        .eq('Stato', 'approved')
+        .order('Data', { ascending: false });
 
-  const totalPages = Math.ceil(reviews.length / reviewsPerPage);
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        throw error;
+      }
+
+      console.log('Fetched reviews:', data);
+      return data;
+    }
+  });
+
+  const totalPages = Math.ceil((reviews?.length || 0) / reviewsPerPage);
 
   const getCurrentPageReviews = () => {
+    if (!reviews) return [];
     const startIndex = (currentPage - 1) * reviewsPerPage;
     const endIndex = startIndex + reviewsPerPage;
     return reviews.slice(startIndex, endIndex);
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} className="h-[200px]" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -40,13 +70,12 @@ const Reviews = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {getCurrentPageReviews().map((review) => (
           <ReviewCard 
-            key={review.id || `${review.title}-${review.date}`}
-            id={review.id || `${review.title}-${review.date}`}
-            title={review.title}
-            condition={review.condition}
-            preview={review.experience}
-            date={review.date}
-            username={review.username}
+            key={review.id}
+            id={review.id}
+            title={review.Titolo}
+            condition={review.PATOLOGIE.Patologia}
+            preview={review.Esperienza}
+            date={review.Data}
           />
         ))}
       </div>
