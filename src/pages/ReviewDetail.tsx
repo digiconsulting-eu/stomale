@@ -7,63 +7,97 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function ReviewDetail() {
-  const { condition, title } = useParams();
-  const decodedTitle = decodeURIComponent(title || '');
-  const normalizedTitle = decodedTitle
-    .replace(/^-+|-+$/g, '')
-    .replace(/-/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  
-  const normalizedCondition = condition?.toUpperCase().replace(/-/g, ' ');
+  const { id, condition, title } = useParams();
 
+  // If we have an ID, fetch directly by ID
   const { data: review, isLoading, error } = useQuery({
-    queryKey: ["review", normalizedCondition, normalizedTitle],
+    queryKey: ["review", id, condition, title],
     queryFn: async () => {
       try {
-        console.log('Fetching review with condition:', normalizedCondition, 'and title:', normalizedTitle);
+        console.log('Fetching review with ID:', id);
         
-        const { data: patologiaData, error: patologiaError } = await supabase
-          .from('PATOLOGIE')
-          .select('id')
-          .eq('Patologia', normalizedCondition)
-          .single();
+        if (id) {
+          // Direct ID lookup
+          const { data: reviews, error: reviewError } = await supabase
+            .from('reviews')
+            .select(`
+              *,
+              PATOLOGIE (
+                Patologia
+              )
+            `)
+            .eq('id', id)
+            .single();
 
-        if (patologiaError) {
-          console.error('Error fetching patologia:', patologiaError);
-          throw new Error('Patologia non trovata');
+          if (reviewError) {
+            console.error('Error fetching review by ID:', reviewError);
+            throw new Error('Errore nel caricamento della recensione');
+          }
+
+          if (!reviews) {
+            console.error('No review found with ID:', id);
+            throw new Error('Recensione non trovata');
+          }
+
+          console.log('Found review by ID:', reviews);
+          return reviews;
+        } else if (condition && title) {
+          // Legacy URL format lookup
+          console.log('Fetching review with condition:', condition, 'and title:', title);
+          
+          const normalizedTitle = decodeURIComponent(title)
+            .replace(/^-+|-+$/g, '')
+            .replace(/-/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          const normalizedCondition = condition.toUpperCase().replace(/-/g, ' ');
+
+          const { data: patologiaData, error: patologiaError } = await supabase
+            .from('PATOLOGIE')
+            .select('id')
+            .eq('Patologia', normalizedCondition)
+            .single();
+
+          if (patologiaError) {
+            console.error('Error fetching patologia:', patologiaError);
+            throw new Error('Patologia non trovata');
+          }
+          
+          if (!patologiaData) {
+            console.error('No patologia found for:', normalizedCondition);
+            throw new Error('Patologia non trovata');
+          }
+
+          console.log('Found patologia with ID:', patologiaData.id);
+
+          const { data: reviews, error: reviewError } = await supabase
+            .from('reviews')
+            .select(`
+              *,
+              PATOLOGIE (
+                Patologia
+              )
+            `)
+            .eq('condition_id', patologiaData.id)
+            .eq('title', normalizedTitle)
+            .single();
+
+          if (reviewError) {
+            console.error('Error fetching review:', reviewError);
+            throw new Error('Errore nel caricamento della recensione');
+          }
+
+          if (!reviews) {
+            console.error('No review found with title:', normalizedTitle);
+            throw new Error('Recensione non trovata');
+          }
+
+          console.log('Found review:', reviews);
+          return reviews;
+        } else {
+          throw new Error('ID o parametri mancanti');
         }
-        
-        if (!patologiaData) {
-          console.error('No patologia found for:', normalizedCondition);
-          throw new Error('Patologia non trovata');
-        }
-
-        console.log('Found patologia with ID:', patologiaData.id);
-
-        const { data: reviews, error: reviewError } = await supabase
-          .from('reviews')
-          .select(`
-            *,
-            PATOLOGIE (
-              Patologia
-            )
-          `)
-          .eq('condition_id', patologiaData.id)
-          .eq('title', normalizedTitle);
-
-        if (reviewError) {
-          console.error('Error fetching review:', reviewError);
-          throw new Error('Errore nel caricamento della recensione');
-        }
-
-        if (!reviews || reviews.length === 0) {
-          console.error('No review found with title:', normalizedTitle);
-          throw new Error('Recensione non trovata');
-        }
-
-        console.log('Found review:', reviews[0]);
-        return reviews[0];
       } catch (error) {
         console.error('Error in review query:', error);
         throw error;
@@ -80,12 +114,14 @@ export default function ReviewDetail() {
           <p className="text-text-light">
             La recensione che stai cercando non esiste o potrebbe essere stata rimossa.
           </p>
-          <a 
-            href={`/patologia/${condition}`}
-            className="text-primary hover:underline inline-block mt-4"
-          >
-            ← Torna a {condition}
-          </a>
+          {condition && (
+            <a 
+              href={`/patologia/${condition}`}
+              className="text-primary hover:underline inline-block mt-4"
+            >
+              ← Torna a {condition}
+            </a>
+          )}
         </div>
       </div>
     );
@@ -112,7 +148,7 @@ export default function ReviewDetail() {
         <div className="lg:col-span-8 lg:order-2">
           <ReviewContent
             title={review.title}
-            condition={condition || ''}
+            condition={review.PATOLOGIE?.Patologia.toLowerCase() || ''}
             date={new Date(review.created_at).toLocaleDateString('it-IT')}
             symptoms={review.symptoms}
             experience={review.experience}
