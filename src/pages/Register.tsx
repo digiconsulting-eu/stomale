@@ -15,10 +15,16 @@ const Register = () => {
   const [birthYear, setBirthYear] = useState("");
   const [gender, setGender] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (cooldown > 0) {
+      toast.error(`Attendi ${cooldown} secondi prima di riprovare`);
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error("Le password non coincidono");
       return;
@@ -43,7 +49,12 @@ const Register = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes("rate limit")) {
+          startCooldown();
+        }
+        throw error;
+      }
 
       if (data.user) {
         toast.success("Registrazione completata con successo!");
@@ -55,6 +66,19 @@ const Register = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const startCooldown = () => {
+    setCooldown(12);
+    const cooldownInterval = setInterval(() => {
+      setCooldown((prevCooldown) => {
+        if (prevCooldown <= 1) {
+          clearInterval(cooldownInterval);
+          return 0;
+        }
+        return prevCooldown - 1;
+      });
+    }, 1000);
   };
 
   return (
@@ -74,7 +98,7 @@ const Register = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="La tua email"
-              disabled={isLoading}
+              disabled={isLoading || cooldown > 0}
             />
           </div>
 
@@ -89,7 +113,7 @@ const Register = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Scegli una password"
-              disabled={isLoading}
+              disabled={isLoading || cooldown > 0}
             />
           </div>
 
@@ -104,15 +128,30 @@ const Register = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               placeholder="Conferma la password"
-              disabled={isLoading}
+              disabled={isLoading || cooldown > 0}
             />
           </div>
 
-          <BirthYearSelect value={birthYear} onChange={setBirthYear} />
-          <GenderSelect value={gender} onChange={setGender} />
+          <BirthYearSelect 
+            value={birthYear} 
+            onChange={setBirthYear} 
+            disabled={isLoading || cooldown > 0} 
+          />
+          <GenderSelect 
+            value={gender} 
+            onChange={setGender} 
+            disabled={isLoading || cooldown > 0} 
+          />
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Registrazione in corso..." : "Registrati"}
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isLoading || cooldown > 0}
+          >
+            {cooldown > 0 
+              ? `Riprova tra ${cooldown} secondi` 
+              : (isLoading ? "Registrazione in corso..." : "Registrati")
+            }
           </Button>
         </form>
 
