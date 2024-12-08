@@ -15,17 +15,23 @@ import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-interface Review {
+interface DatabaseReview {
   id: number;
   title: string;
   status: string;
   created_at: string;
-  profiles?: {
+  condition_id: number;
+  profiles: {
     username: string;
-  };
-  PATOLOGIE?: {
+  } | null;
+  PATOLOGIE: {
     Patologia: string;
-  };
+  } | null;
+}
+
+interface Review extends Omit<DatabaseReview, 'profiles' | 'PATOLOGIE'> {
+  username: string;
+  patologia: string;
 }
 
 export const ReviewManagementTable = () => {
@@ -44,7 +50,17 @@ export const ReviewManagementTable = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+
+      // Transform the data to match our Review interface
+      return (data as DatabaseReview[]).map(review => ({
+        id: review.id,
+        title: review.title,
+        status: review.status,
+        created_at: review.created_at,
+        condition_id: review.condition_id,
+        username: review.profiles?.username || 'Utente Anonimo',
+        patologia: review.PATOLOGIE?.Patologia || 'Sconosciuta'
+      }));
     },
   });
 
@@ -103,14 +119,14 @@ export const ReviewManagementTable = () => {
             <TableRow key={review.id}>
               <TableCell>
                 <Link 
-                  to={`/patologia/${review.PATOLOGIE?.Patologia.toLowerCase()}/esperienza/${review.title.toLowerCase().replace(/\s+/g, '-')}`}
+                  to={`/patologia/${review.patologia.toLowerCase()}/esperienza/${review.title.toLowerCase().replace(/\s+/g, '-')}`}
                   className="text-primary hover:underline"
                 >
                   {review.title}
                 </Link>
               </TableCell>
-              <TableCell>{review.profiles?.username}</TableCell>
-              <TableCell>{review.PATOLOGIE?.Patologia}</TableCell>
+              <TableCell>{review.username}</TableCell>
+              <TableCell>{review.patologia}</TableCell>
               <TableCell>{new Date(review.created_at).toLocaleDateString('it-IT')}</TableCell>
               <TableCell>{getStatusBadge(review.status)}</TableCell>
               <TableCell>
