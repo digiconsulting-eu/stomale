@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -8,16 +8,22 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 const SearchCondition = () => {
   const [selectedLetter, setSelectedLetter] = useState("A");
 
-  const { data: conditions = [] } = useQuery({
+  const { data: conditions = [], isLoading } = useQuery({
     queryKey: ['conditions', selectedLetter],
     queryFn: async () => {
+      console.log('Fetching conditions for letter:', selectedLetter);
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('Patologia')
         .ilike('Patologia', `${selectedLetter}%`)
         .order('Patologia');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching conditions:', error);
+        throw error;
+      }
+      
+      console.log('Fetched conditions:', data);
       return data.map(row => row.Patologia);
     }
   });
@@ -58,19 +64,27 @@ const SearchCondition = () => {
             <span className="text-text-light font-normal text-xl">Patologie</span>
           </h2>
 
-          <div className="grid gap-3">
-            {conditions.map((condition) => (
-              <Link
-                key={condition}
-                to={`/patologia/${encodeURIComponent(condition.toLowerCase())}`}
-                className="card group hover:border-primary/20 transition-all"
-              >
-                <h3 className="text-lg font-medium text-text group-hover:text-primary transition-colors">
-                  {condition}
-                </h3>
-              </Link>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="text-center py-8">Caricamento...</div>
+          ) : conditions.length > 0 ? (
+            <div className="grid gap-3">
+              {conditions.map((condition) => (
+                <Link
+                  key={condition}
+                  to={`/patologia/${encodeURIComponent(condition.toLowerCase())}`}
+                  className="card group hover:border-primary/20 transition-all"
+                >
+                  <h3 className="text-lg font-medium text-text group-hover:text-primary transition-colors">
+                    {condition}
+                  </h3>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-text-light">
+              Nessuna patologia trovata per la lettera {selectedLetter}
+            </div>
+          )}
         </div>
 
         <div className="text-center">
