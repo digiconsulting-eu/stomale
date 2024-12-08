@@ -37,12 +37,15 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
     }
   };
 
+  const reviewTitle = title || `Esperienza con ${capitalizeFirstLetter(condition)}`;
+  const urlTitle = reviewTitle.toLowerCase().replace(/\s+/g, '-');
+
   return (
     <div className="block group">
       <div className="card animate-fade-in group-hover:scale-[1.02] transition-all duration-300">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold text-text group-hover:text-primary transition-colors">
-            {title || `Esperienza con ${capitalizeFirstLetter(condition)}`}
+            {reviewTitle}
           </h3>
           {isAdmin && (
             <div className="flex items-center gap-2 ml-4">
@@ -81,7 +84,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
             asChild
             className="text-primary hover:text-primary-dark"
           >
-            <Link to={`/recensione/${id}`}>
+            <Link to={`/patologia/${condition.toLowerCase()}/esperienza/${urlTitle}`}>
               Leggi Esperienza
             </Link>
           </Button>
