@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
 
 const InsertCondition = () => {
   const navigate = useNavigate();
@@ -16,12 +17,21 @@ const InsertCondition = () => {
     "Non trovi la patologia che stai cercando? Inseriscila qui e sarà aggiunta all'elenco dopo l'approvazione."
   );
   const [editedDescription, setEditedDescription] = useState(description);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const checkIfConditionExists = (condition: string) => {
-    const pendingConditions = JSON.parse(localStorage.getItem('pendingConditions') || '[]');
-    return pendingConditions.some((existingCondition: string) => 
-      existingCondition.toLowerCase() === condition.trim().toLowerCase()
-    );
+  const checkIfConditionExists = async (condition: string) => {
+    const { data, error } = await supabase
+      .from('PATOLOGIE')
+      .select('Patologia')
+      .ilike('Patologia', condition.trim())
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error checking condition:', error);
+      return false;
+    }
+
+    return !!data;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,33 +42,38 @@ const InsertCondition = () => {
       return;
     }
 
-    if (checkIfConditionExists(newCondition)) {
-      toast.error("Questa patologia è già presente nell'elenco");
-      return;
+    setIsSubmitting(true);
+
+    try {
+      const exists = await checkIfConditionExists(newCondition);
+      
+      if (exists) {
+        toast.error("Questa patologia è già presente nell'elenco");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { error } = await supabase
+        .from('PATOLOGIE')
+        .insert([
+          { 
+            Patologia: newCondition.trim().toUpperCase(),
+            Descrizione: '' 
+          }
+        ]);
+
+      if (error) throw error;
+
+      // Reset form and show success message
+      setNewCondition("");
+      toast.success("Patologia inserita con successo!");
+      navigate("/cerca-patologia");
+    } catch (error) {
+      console.error('Error inserting condition:', error);
+      toast.error("Si è verificato un errore durante l'inserimento della patologia");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Save the new condition to pendingConditions in localStorage
-    const pendingConditions = JSON.parse(localStorage.getItem('pendingConditions') || '[]');
-    pendingConditions.push(newCondition.trim().toUpperCase());
-    localStorage.setItem('pendingConditions', JSON.stringify(pendingConditions));
-
-    // Create a notification for admin
-    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-    const notification = {
-      id: Date.now().toString(),
-      type: "new_condition",
-      title: "Nuova patologia inserita",
-      content: `Un utente ha inserito una nuova patologia: ${newCondition.toUpperCase()}`,
-      date: new Date().toISOString(),
-      read: false,
-    };
-    notifications.push(notification);
-    localStorage.setItem('notifications', JSON.stringify(notifications));
-
-    // Reset form and redirect
-    setNewCondition("");
-    toast.success("Patologia inserita con successo! Sarà visibile dopo l'approvazione dell'amministratore.");
-    navigate("/cerca-patologia");
   };
 
   const handleSaveDescription = () => {
@@ -136,10 +151,15 @@ const InsertCondition = () => {
                 value={newCondition}
                 onChange={(e) => setNewCondition(e.target.value)}
                 className="w-full"
+                disabled={isSubmitting}
               />
             </div>
-            <Button type="submit" className="w-full">
-              Inserisci Patologia
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Inserimento in corso..." : "Inserisci Patologia"}
             </Button>
           </form>
         </CardContent>
