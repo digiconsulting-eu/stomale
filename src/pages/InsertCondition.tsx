@@ -20,18 +20,22 @@ const InsertCondition = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const checkIfConditionExists = async (condition: string) => {
-    const { data, error } = await supabase
-      .from('PATOLOGIE')
-      .select('Patologia')
-      .ilike('Patologia', condition.trim())
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('Patologia')
+        .ilike('Patologia', condition.trim());
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error checking condition:', error);
+      if (error) {
+        console.error('Error checking condition:', error);
+        return false;
+      }
+
+      return data && data.length > 0;
+    } catch (error) {
+      console.error('Error in checkIfConditionExists:', error);
       return false;
     }
-
-    return !!data;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,16 +57,26 @@ const InsertCondition = () => {
         return;
       }
 
+      const normalizedCondition = newCondition.trim().toUpperCase();
+
       const { error } = await supabase
         .from('PATOLOGIE')
         .insert([
           { 
-            Patologia: newCondition.trim().toUpperCase(),
+            Patologia: normalizedCondition,
             Descrizione: '' 
           }
         ]);
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          toast.error("Questa patologia è già presente nell'elenco");
+        } else {
+          console.error('Error inserting condition:', error);
+          toast.error("Si è verificato un errore durante l'inserimento della patologia");
+        }
+        return;
+      }
 
       // Reset form and show success message
       setNewCondition("");
