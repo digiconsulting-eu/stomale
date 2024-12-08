@@ -83,7 +83,7 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
             asChild
             className="text-primary hover:text-primary-dark"
           >
-            <Link to={`/patologia/${condition.toLowerCase()}/esperienza/${id}`}>
+            <Link to={`/patologia/${condition.toLowerCase()}/recensione/${id}`}>
               Leggi Esperienza
             </Link>
           </Button>

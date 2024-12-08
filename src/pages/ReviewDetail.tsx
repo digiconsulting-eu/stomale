@@ -6,17 +6,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function ReviewDetail() {
-  const { condition, title: reviewId } = useParams();
+  const { condition, id } = useParams();
 
   const { data: review, isLoading, error } = useQuery({
-    queryKey: ["review", condition, reviewId],
+    queryKey: ["review", condition, id],
     queryFn: async () => {
       try {
-        if (!condition || !reviewId) {
+        if (!condition || !id) {
           throw new Error('Parametri mancanti');
         }
 
-        console.log('Fetching review with condition:', condition, 'and ID:', reviewId);
+        console.log('Fetching review with condition:', condition, 'and ID:', id);
         
         // First get the condition ID
         const { data: patologiaData, error: patologiaError } = await supabase
@@ -47,7 +47,7 @@ export default function ReviewDetail() {
             )
           `)
           .eq('condition_id', patologiaData.id)
-          .eq('id', reviewId)
+          .eq('id', id)
           .maybeSingle();
 
         if (reviewError) {
@@ -56,7 +56,7 @@ export default function ReviewDetail() {
         }
 
         if (!reviewData) {
-          console.error('No review found with ID:', reviewId);
+          console.error('No review found with ID:', id);
           throw new Error('Recensione non trovata');
         }
 
