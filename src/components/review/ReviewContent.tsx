@@ -40,7 +40,7 @@ export const ReviewContent = ({
     <div>
       <div className="flex justify-between items-start mb-6">
         <a 
-          href={`/recensioni`}
+          href={`/patologia/${condition}`}
           className="text-primary hover:underline"
         >
           ← Leggi tutte le recensioni su {conditionName}
@@ -77,10 +77,6 @@ export const ReviewContent = ({
       </div>
 
       <div className="mb-8">
-        <CommentSection reviewId={reviewId} />
-      </div>
-
-      <div className="mb-8">
         <ReviewStats
           diagnosisDifficulty={diagnosisDifficulty}
           symptomSeverity={symptomSeverity}
@@ -89,6 +85,10 @@ export const ReviewContent = ({
           healingPossibility={healingPossibility}
           socialDiscomfort={socialDiscomfort}
         />
+      </div>
+
+      <div className="mb-8">
+        <CommentSection reviewId={reviewId} />
       </div>
 
       <Disclaimer condition={conditionName} />
