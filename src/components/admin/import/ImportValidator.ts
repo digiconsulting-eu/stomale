@@ -13,6 +13,7 @@ interface ImportedReview {
   social_discomfort?: number;
   created_at?: string;
   status?: string;
+  user_id?: string;
 }
 
 const formatDate = (dateInput: any): string => {
@@ -74,6 +75,12 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
   console.log('Normalized condition:', normalizedCondition);
 
   try {
+    // Get the current user's ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
     const { data: existingConditions, error: searchError } = await supabase
       .from('PATOLOGIE')
       .select('id')
@@ -144,7 +151,8 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
         'Disagio sociale'
       ),
       created_at: formatDate(row['created_at'] || row['Data']),
-      status: 'approved'
+      status: 'approved',
+      user_id: user.id
     };
 
     console.log('Validated row:', validatedRow);
