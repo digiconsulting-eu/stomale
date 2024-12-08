@@ -77,6 +77,10 @@ export const ReviewContent = ({
       </div>
 
       <div className="mb-8">
+        <CommentSection reviewId={reviewId} />
+      </div>
+
+      <div className="mb-8">
         <ReviewStats
           diagnosisDifficulty={diagnosisDifficulty}
           symptomSeverity={symptomSeverity}
@@ -85,10 +89,6 @@ export const ReviewContent = ({
           healingPossibility={healingPossibility}
           socialDiscomfort={socialDiscomfort}
         />
-      </div>
-
-      <div className="mb-8">
-        <CommentSection reviewId={reviewId} />
       </div>
 
       <Disclaimer condition={conditionName} />
