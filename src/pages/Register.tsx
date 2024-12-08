@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { RegistrationForm } from "@/components/auth/RegistrationForm";
 import { checkUserExists } from "@/utils/auth";
+import { Button } from "@/components/ui/button";
 
 const Register = () => {
   const navigate = useNavigate();
