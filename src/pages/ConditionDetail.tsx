@@ -12,12 +12,12 @@ import { ConditionReviews } from "@/components/condition/ConditionReviews";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { toast } from "sonner";
 
-interface Review {
+interface DatabaseReview {
   id: number;
+  condition_id: number;
   title: string;
   experience: string;
   created_at: string;
-  condition: string;
   symptoms: string;
   diagnosis_difficulty: number;
   symptoms_severity: number;
@@ -25,6 +25,11 @@ interface Review {
   medication_effectiveness: number;
   healing_possibility: number;
   social_discomfort: number;
+  user_id: string;
+}
+
+interface Review extends Omit<DatabaseReview, 'condition_id'> {
+  condition: string;
 }
 
 interface Stats {
@@ -149,7 +154,7 @@ export default function ConditionDetail() {
         .eq('condition_id', patologiaData.id);
       
       if (error) throw error;
-      return data as Review[];
+      return data as DatabaseReview[];
     }
   });
 
