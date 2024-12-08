@@ -67,6 +67,20 @@ const Register = () => {
       }
 
       if (data.user) {
+        // Set local storage items after successful registration
+        localStorage.setItem('isLoggedIn', 'true');
+        
+        // Check if user is admin
+        const { data: adminData } = await supabase
+          .from('admin')
+          .select('email')
+          .eq('email', email)
+          .single();
+          
+        if (adminData) {
+          localStorage.setItem('isAdmin', 'true');
+        }
+
         toast.success("Registrazione completata con successo!");
         navigate('/dashboard');
       }
