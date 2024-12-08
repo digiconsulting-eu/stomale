@@ -42,8 +42,9 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with dash
-    .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
+    .replace(/[^a-z0-9\s]+/g, '') // Remove special characters
+    .trim()
+    .replace(/\s+/g, '-'); // Replace spaces with dashes
 
   return (
     <div className="block group">
