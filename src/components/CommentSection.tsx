@@ -41,8 +41,9 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ reviewId }) => {
       const { error } = await supabase
         .from('comments')
         .insert({
-          review_id: reviewId,
+          review_id: parseInt(reviewId),
           content: comment,
+          user_id: (await supabase.auth.getSession()).data.session?.user.id
         });
 
       if (error) throw error;

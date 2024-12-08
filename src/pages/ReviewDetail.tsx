@@ -9,12 +9,11 @@ import { toast } from "sonner";
 export default function ReviewDetail() {
   const { condition, title } = useParams();
   const decodedTitle = decodeURIComponent(title || '');
-  // Remove leading/trailing hyphens and normalize internal spaces
   const normalizedTitle = decodedTitle
-    .replace(/^-+|-+$/g, '')  // Remove leading/trailing hyphens
-    .replace(/-/g, ' ')       // Replace remaining hyphens with spaces
-    .replace(/\s+/g, ' ')     // Normalize multiple spaces to single space
-    .trim();                  // Remove leading/trailing spaces
+    .replace(/^-+|-+$/g, '')
+    .replace(/-/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   
   const normalizedCondition = condition?.toUpperCase().replace(/-/g, ' ');
 
@@ -32,24 +31,21 @@ export default function ReviewDetail() {
         if (!patologiaData) throw new Error('Patologia non trovata');
 
         const { data: reviews, error: reviewError } = await supabase
-          .from('Reviews')
+          .from('reviews')
           .select(`
             *,
             PATOLOGIE (
               Patologia
             )
           `)
-          .eq('condition_id', patologiaData.id);
+          .eq('condition_id', patologiaData.id)
+          .eq('title', normalizedTitle)
+          .single();
 
         if (reviewError) throw new Error('Errore nel caricamento della recensione');
+        if (!reviews) throw new Error('Recensione non trovata');
 
-        const matchingReview = reviews?.find(r => 
-          r.title.toLowerCase().trim() === normalizedTitle.toLowerCase().trim()
-        );
-
-        if (!matchingReview) throw new Error('Recensione non trovata');
-
-        return matchingReview;
+        return reviews;
       } catch (error) {
         console.error('Error in review query:', error);
         throw error;
@@ -102,13 +98,13 @@ export default function ReviewDetail() {
             date={review.created_at}
             symptoms={review.symptoms}
             experience={review.experience}
-            diagnosisDifficulty={Number(review["diagnosis_difficulty"])}
-            symptomSeverity={Number(review["symptoms_severity"])}
-            hasMedication={review["has_medication"]}
-            medicationEffectiveness={Number(review["medication_effectiveness"])}
-            healingPossibility={Number(review["healing_possibility"])}
-            socialDiscomfort={Number(review["social_discomfort"])}
-            reviewId={review.id}
+            diagnosisDifficulty={Number(review.diagnosis_difficulty)}
+            symptomSeverity={Number(review.symptoms_severity)}
+            hasMedication={review.has_medication}
+            medicationEffectiveness={Number(review.medication_effectiveness)}
+            healingPossibility={Number(review.healing_possibility)}
+            socialDiscomfort={Number(review.social_discomfort)}
+            reviewId={review.id.toString()}
           />
         </div>
 
@@ -117,12 +113,12 @@ export default function ReviewDetail() {
             <div className="card">
               <h2 className="text-xl font-semibold mb-6">Valutazioni</h2>
               <ReviewStats
-                diagnosisDifficulty={Number(review["diagnosis_difficulty"])}
-                symptomSeverity={Number(review["symptoms_severity"])}
-                hasMedication={review["has_medication"]}
-                medicationEffectiveness={Number(review["medication_effectiveness"])}
-                healingPossibility={Number(review["healing_possibility"])}
-                socialDiscomfort={Number(review["social_discomfort"])}
+                diagnosisDifficulty={Number(review.diagnosis_difficulty)}
+                symptomSeverity={Number(review.symptoms_severity)}
+                hasMedication={review.has_medication}
+                medicationEffectiveness={Number(review.medication_effectiveness)}
+                healingPossibility={Number(review.healing_possibility)}
+                socialDiscomfort={Number(review.social_discomfort)}
               />
             </div>
           </div>

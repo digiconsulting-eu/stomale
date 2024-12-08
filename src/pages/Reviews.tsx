@@ -21,9 +21,12 @@ const Reviews = () => {
     queryFn: async () => {
       console.log('Fetching reviews...');
       const { data, error } = await supabase
-        .from('Reviews')
+        .from('reviews')
         .select(`
-          *,
+          id,
+          title,
+          experience,
+          created_at,
           PATOLOGIE (
             Patologia
           )
@@ -71,11 +74,11 @@ const Reviews = () => {
         {getCurrentPageReviews().map((review) => (
           <ReviewCard 
             key={review.id}
-            id={review.id}
+            id={review.id.toString()}
             title={review.title}
-            condition={review.PATOLOGIE.Patologia}
+            condition={review.PATOLOGIE?.Patologia || ''}
             preview={review.experience}
-            date={review.created_at}
+            date={new Date(review.created_at).toLocaleDateString('it-IT')}
           />
         ))}
       </div>

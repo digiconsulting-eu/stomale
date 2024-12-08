@@ -7,10 +7,15 @@ export default function Index() {
     queryKey: ['latestReviews'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('Reviews')
+        .from('reviews')
         .select(`
-          *,
-          PATOLOGIE (Patologia)
+          id,
+          title,
+          experience,
+          created_at,
+          PATOLOGIE (
+            Patologia
+          )
         `)
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
@@ -30,7 +35,7 @@ export default function Index() {
             key={review.id}
             id={review.id.toString()}
             title={review.title}
-            condition={review.PATOLOGIE.Patologia}
+            condition={review.PATOLOGIE?.Patologia || ''}
             preview={review.experience}
             date={new Date(review.created_at).toLocaleDateString('it-IT')}
           />
