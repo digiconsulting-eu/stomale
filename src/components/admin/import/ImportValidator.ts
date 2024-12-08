@@ -1,17 +1,18 @@
 import { supabase } from "@/integrations/supabase/client";
 
 interface ImportedReview {
-  condition: number;
-  title?: string;
-  symptoms?: string;
+  condition_id: number;
+  title: string;
+  symptoms: string;
   experience: string;
-  diagnosisDifficulty?: number;
-  symptomsDiscomfort?: number;
-  hasMedication?: boolean;
-  medicationEffectiveness: number;
-  healingPossibility?: number;
-  socialDiscomfort: number;
-  date?: string;
+  diagnosis_difficulty?: number;
+  symptoms_severity?: number;
+  has_medication?: boolean;
+  medication_effectiveness?: number;
+  healing_possibility?: number;
+  social_discomfort?: number;
+  created_at?: string;
+  status?: string;
 }
 
 const formatDate = (dateInput: any): string => {
@@ -36,12 +37,12 @@ const formatDate = (dateInput: any): string => {
   }
 };
 
-const validateNumericField = (value: any, fieldName: string, required: boolean = false): number => {
+const validateNumericField = (value: any, fieldName: string, required: boolean = false): number | null => {
   if (value === undefined || value === null || value === '') {
     if (required) {
       throw new Error(`Il campo "${fieldName}" è obbligatorio e deve essere un numero da 1 a 5`);
     }
-    return 0;
+    return null;
   }
   
   const numValue = Number(value);
@@ -98,17 +99,18 @@ export const validateRow = async (row: any): Promise<ImportedReview | null> => {
     const hasMedication = row['Cura Farmacologica']?.toUpperCase() === 'Y';
     
     return {
-      condition: patologiaId,
+      condition_id: patologiaId,
       title: row['Titolo'] || '',
       symptoms: row['Sintomi'] || '',
       experience: row['Esperienza'],
-      diagnosisDifficulty: validateNumericField(row['Difficoltà diagnosi'], 'Difficoltà diagnosi'),
-      symptomsDiscomfort: validateNumericField(row['Fastidio sintomi'], 'Fastidio sintomi'),
-      hasMedication,
-      medicationEffectiveness: validateNumericField(row['Efficacia farmaci'], 'Efficacia farmaci', true),
-      healingPossibility: validateNumericField(row['Possibilità guarigione'], 'Possibilità guarigione'),
-      socialDiscomfort: validateNumericField(row['Disagio sociale'], 'Disagio sociale', true),
-      date: formatDate(row['Data']),
+      diagnosis_difficulty: validateNumericField(row['Difficoltà diagnosi'], 'Difficoltà diagnosi'),
+      symptoms_severity: validateNumericField(row['Fastidio sintomi'], 'Fastidio sintomi'),
+      has_medication: hasMedication,
+      medication_effectiveness: validateNumericField(row['Efficacia farmaci'], 'Efficacia farmaci'),
+      healing_possibility: validateNumericField(row['Possibilità guarigione'], 'Possibilità guarigione'),
+      social_discomfort: validateNumericField(row['Disagio sociale'], 'Disagio sociale'),
+      created_at: formatDate(row['Data']),
+      status: 'approved'
     };
   } catch (error) {
     console.error('Error in validateRow:', error);

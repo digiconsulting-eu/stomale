@@ -36,30 +36,28 @@ export const ReviewsImport = () => {
         try {
           const validatedRow = await validateRow(row);
           if (validatedRow) {
-            const reviewData = {
-              condition_id: validatedRow.condition,
-              title: validatedRow.title || null,
-              symptoms: validatedRow.symptoms || null,
-              experience: validatedRow.experience,
-              diagnosis_difficulty: validatedRow.diagnosisDifficulty || null,
-              symptoms_severity: validatedRow.symptomsDiscomfort || null,
-              has_medication: validatedRow.hasMedication || false,
-              medication_effectiveness: validatedRow.medicationEffectiveness || null,
-              healing_possibility: validatedRow.healingPossibility || null,
-              social_discomfort: validatedRow.socialDiscomfort || null,
-              created_at: validatedRow.date,
-              status: 'approved'
-            };
-
             const { error: insertError } = await supabase
               .from('reviews')
-              .insert(reviewData);
+              .insert({
+                condition_id: validatedRow.condition_id,
+                title: validatedRow.title,
+                symptoms: validatedRow.symptoms,
+                experience: validatedRow.experience,
+                diagnosis_difficulty: validatedRow.diagnosis_difficulty,
+                symptoms_severity: validatedRow.symptoms_severity,
+                has_medication: validatedRow.has_medication,
+                medication_effectiveness: validatedRow.medication_effectiveness,
+                healing_possibility: validatedRow.healing_possibility,
+                social_discomfort: validatedRow.social_discomfort,
+                created_at: validatedRow.created_at,
+                status: 'approved'
+              });
 
             if (insertError) {
               console.error('Errore di inserimento:', insertError);
               errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
             } else {
-              validReviews.push(reviewData);
+              validReviews.push(validatedRow);
             }
           }
         } catch (error) {
