@@ -137,6 +137,7 @@ const Register = () => {
             onChange={setBirthYear} 
             disabled={isLoading || cooldown > 0} 
           />
+          
           <GenderSelect 
             value={gender} 
             onChange={setGender} 
