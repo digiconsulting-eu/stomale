@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client"; // Added this import
 
 interface ReviewCardProps {
   id: string;
