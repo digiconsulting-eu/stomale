@@ -40,11 +40,9 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
   const reviewTitle = title || `Esperienza con ${capitalizeFirstLetter(condition)}`;
   const urlTitle = reviewTitle
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-    .replace(/[^a-z0-9\s]+/g, '') // Remove special characters
+    .replace(/[^a-z0-9\s]/g, '') // Remove all special characters
     .trim()
-    .replace(/\s+/g, '-'); // Replace spaces with dashes
+    .replace(/\s+/g, '-'); // Replace spaces with single dashes
 
   return (
     <div className="block group">

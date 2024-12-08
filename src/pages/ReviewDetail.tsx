@@ -21,9 +21,6 @@ export default function ReviewDetail() {
         // Convert URL-friendly title back to original format
         const normalizedTitle = decodeURIComponent(title)
           .replace(/-/g, ' ') // Replace dashes with spaces
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '') // Remove any remaining diacritics
-          .replace(/[^a-z0-9\s]+/g, '') // Remove special characters
           .trim();
 
         console.log('Normalized title:', normalizedTitle);
@@ -57,9 +54,7 @@ export default function ReviewDetail() {
             )
           `)
           .eq('condition_id', patologiaData.id)
-          .textSearch('title', normalizedTitle, {
-            config: 'simple'
-          })
+          .ilike('title', normalizedTitle)
           .maybeSingle();
 
         if (reviewError) {
