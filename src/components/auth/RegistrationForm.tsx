@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { BirthYearSelect } from "@/components/registration/BirthYearSelect";
 import { GenderSelect } from "@/components/registration/GenderSelect";
+import { Link } from "react-router-dom";
 
 interface RegistrationFormProps {
   onSubmit: (data: {
@@ -10,6 +12,7 @@ interface RegistrationFormProps {
     password: string;
     birthYear: string;
     gender: string;
+    gdprConsent: boolean;
   }) => Promise<void>;
   isLoading: boolean;
   cooldown: number;
@@ -21,6 +24,7 @@ export const RegistrationForm = ({ onSubmit, isLoading, cooldown }: Registration
   const [confirmPassword, setConfirmPassword] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [gender, setGender] = useState("");
+  const [gdprConsent, setGdprConsent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +37,11 @@ export const RegistrationForm = ({ onSubmit, isLoading, cooldown }: Registration
       throw new Error("Compila tutti i campi richiesti");
     }
 
-    await onSubmit({ email, password, birthYear, gender });
+    if (!gdprConsent) {
+      throw new Error("Devi accettare i termini e le condizioni d'uso");
+    }
+
+    await onSubmit({ email, password, birthYear, gender, gdprConsent });
   };
 
   return (
@@ -95,10 +103,28 @@ export const RegistrationForm = ({ onSubmit, isLoading, cooldown }: Registration
         disabled={isLoading || cooldown > 0} 
       />
 
+      <div className="flex items-center space-x-2">
+        <Checkbox 
+          id="gdpr" 
+          checked={gdprConsent}
+          onCheckedChange={(checked) => setGdprConsent(checked as boolean)}
+          disabled={isLoading || cooldown > 0}
+        />
+        <label
+          htmlFor="gdpr"
+          className="text-sm text-muted-foreground"
+        >
+          Acconsento al trattamento dei dati personali da parte dei Titolari, per finalità di profilazione a scopi commerciali.{" "}
+          <Link to="/privacy-policy" className="text-primary hover:underline" target="_blank">
+            Privacy Policy
+          </Link>
+        </label>
+      </div>
+
       <Button 
         type="submit" 
         className="w-full" 
-        disabled={isLoading || cooldown > 0}
+        disabled={isLoading || cooldown > 0 || !gdprConsent}
       >
         {cooldown > 0 
           ? `Riprova tra ${cooldown} secondi` 

@@ -164,6 +164,8 @@ export type Database = {
           birth_year: string | null
           created_at: string
           email: string | null
+          gdpr_consent: boolean | null
+          gdpr_consent_date: string | null
           gender: string | null
           id: string
           username: string
@@ -172,6 +174,8 @@ export type Database = {
           birth_year?: string | null
           created_at?: string
           email?: string | null
+          gdpr_consent?: boolean | null
+          gdpr_consent_date?: string | null
           gender?: string | null
           id: string
           username: string
@@ -180,6 +184,8 @@ export type Database = {
           birth_year?: string | null
           created_at?: string
           email?: string | null
+          gdpr_consent?: boolean | null
+          gdpr_consent_date?: string | null
           gender?: string | null
           id?: string
           username?: string

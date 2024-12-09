@@ -24,11 +24,18 @@ const Register = () => {
     }, 1000);
   };
 
-  const handleSubmit = async ({ email, password, birthYear, gender }: {
+  const handleSubmit = async ({ 
+    email, 
+    password, 
+    birthYear, 
+    gender,
+    gdprConsent 
+  }: {
     email: string;
     password: string;
     birthYear: string;
     gender: string;
+    gdprConsent: boolean;
   }) => {
     if (cooldown > 0) {
       toast.error(`Attendi ${cooldown} secondi prima di riprovare`);
@@ -39,7 +46,6 @@ const Register = () => {
     console.log("Starting registration process for:", email);
 
     try {
-      // Check if user exists first
       const userExists = await checkUserExists(email);
       if (userExists) {
         toast.error("Un account con questa email esiste già. Prova ad accedere.");
@@ -67,10 +73,23 @@ const Register = () => {
       }
 
       if (data.user) {
-        // Set local storage items after successful registration
+        // Update GDPR consent in the users table
+        const { error: updateError } = await supabase
+          .from('users')
+          .update({ 
+            gdpr_consent: gdprConsent,
+            gdpr_consent_date: new Date().toISOString()
+          })
+          .eq('id', data.user.id);
+
+        if (updateError) {
+          console.error('Error updating GDPR consent:', updateError);
+          toast.error("Errore nell'aggiornamento del consenso GDPR");
+          return;
+        }
+
         localStorage.setItem('isLoggedIn', 'true');
         
-        // Check if user is admin
         const { data: adminData, error: adminError } = await supabase
           .from('admin')
           .select('email')
