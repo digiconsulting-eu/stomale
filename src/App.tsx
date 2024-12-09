@@ -27,6 +27,8 @@ import CookiePolicy from "./pages/CookiePolicy";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import { CookieConsent } from "./components/CookieConsent";
+import RecoverPassword from "./pages/RecoverPassword";
+import UpdatePassword from "./pages/UpdatePassword";
 
 const ScrollToTop = () => {
   const location = useLocation();
@@ -95,7 +97,8 @@ const App = () => (
               <Route path="/blog/articolo/:id" element={<ArticleDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/registrati" element={<Register />} />
-              <Route path="/recupera-password" element={<div>Recupera Password Page</div>} />
+              <Route path="/recupera-password" element={<RecoverPassword />} />
+              <Route path="/update-password" element={<UpdatePassword />} />
               <Route path="/patologia/:condition" element={<ConditionDetail />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/recensioni" element={<ReviewManagement />} />
