@@ -18,6 +18,7 @@ interface ReviewContentProps {
   healingPossibility: number;
   socialDiscomfort: number;
   reviewId: string;
+  username?: string;
 }
 
 export const ReviewContent = ({ 
@@ -32,7 +33,8 @@ export const ReviewContent = ({
   medicationEffectiveness,
   healingPossibility,
   socialDiscomfort,
-  reviewId
+  reviewId,
+  username
 }: ReviewContentProps) => {
   const conditionName = capitalizeFirstLetter(condition);
   
@@ -50,6 +52,12 @@ export const ReviewContent = ({
       <h1 className="text-3xl font-bold text-primary mb-2">
         {title || `Esperienza con ${conditionName}`}
       </h1>
+
+      {username && (
+        <p className="text-text-light mb-4">
+          Scritta da {username}
+        </p>
+      )}
       
       <a 
         href={`/patologia/${condition}`}

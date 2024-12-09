@@ -16,7 +16,7 @@ interface ReviewCardProps {
   username?: string;
 }
 
-export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardProps) => {
+export const ReviewCard = ({ id, title, condition, preview, date, username }: ReviewCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const isAdmin = localStorage.getItem("isAdmin") === "true";
   
@@ -43,9 +43,16 @@ export const ReviewCard = ({ id, title, condition, preview, date }: ReviewCardPr
     <div className="block group">
       <div className="card animate-fade-in group-hover:scale-[1.02] transition-all duration-300">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-lg font-semibold text-text group-hover:text-primary transition-colors">
-            {reviewTitle}
-          </h3>
+          <div>
+            <h3 className="text-lg font-semibold text-text group-hover:text-primary transition-colors">
+              {reviewTitle}
+            </h3>
+            {username && (
+              <p className="text-sm text-text-light mt-1">
+                Scritta da {username}
+              </p>
+            )}
+          </div>
           {isAdmin && (
             <div className="flex items-center gap-2 ml-4">
               <Button

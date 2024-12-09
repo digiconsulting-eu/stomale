@@ -44,6 +44,9 @@ export default function ReviewDetail() {
             *,
             PATOLOGIE (
               Patologia
+            ),
+            users (
+              username
             )
           `)
           .eq('condition_id', patologiaData.id)
@@ -123,6 +126,7 @@ export default function ReviewDetail() {
             healingPossibility={Number(review.healing_possibility)}
             socialDiscomfort={Number(review.social_discomfort)}
             reviewId={review.id.toString()}
+            username={review.users?.username}
           />
         </div>
       </div>
