@@ -1,16 +1,7 @@
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { NotificationsTab } from "@/components/admin/NotificationsTab";
-import { ReviewsTab } from "@/components/admin/ReviewsTab";
-import { CommentsTab } from "@/components/admin/CommentsTab";
-import { AdminsTab } from "@/components/admin/AdminsTab";
-import { UsersTab } from "@/components/admin/UsersTab";
-import ImportTab from "@/components/admin/ImportTab";
-import { Link } from "react-router-dom";
-import { Users, ClipboardList } from "lucide-react";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminTabs } from "@/components/admin/AdminTabs";
 
 // Temporary mock data
 const MOCK_REVIEWS = [
@@ -133,91 +124,19 @@ const Admin = () => {
 
   return (
     <div className="container mx-auto px-4 py-4 md:py-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold">Area Amministrazione</h1>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button asChild className="gap-2">
-            <Link to="/admin/recensioni">
-              <ClipboardList className="h-4 w-4" />
-              Gestione Recensioni
-            </Link>
-          </Button>
-          <Button asChild className="gap-2">
-            <Link to="/admin/utenti">
-              <Users className="h-4 w-4" />
-              Gestione Utenti
-            </Link>
-          </Button>
-        </div>
-      </div>
-      
-      <Tabs defaultValue="notifications" className="w-full space-y-6">
-        <TabsList className="w-full flex flex-wrap gap-2 h-auto">
-          <TabsTrigger value="notifications" className="relative flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
-            Notifiche
-            {notifications.some(n => !n.read) && (
-              <Badge variant="destructive" className="ml-2">
-                {notifications.filter(n => !n.read).length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="reviews" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
-            Recensioni
-          </TabsTrigger>
-          <TabsTrigger value="comments" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
-            Commenti
-          </TabsTrigger>
-          <TabsTrigger value="users" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
-            Utenti
-          </TabsTrigger>
-          <TabsTrigger value="admins" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
-            Amministratori
-          </TabsTrigger>
-          <TabsTrigger value="import" className="flex-grow basis-[calc(50%-0.25rem)] md:flex-grow-0">
-            Import
-          </TabsTrigger>
-        </TabsList>
-
-        <div className="mt-4">
-          <TabsContent value="notifications" className="m-0">
-            <NotificationsTab 
-              notifications={notifications}
-              markNotificationAsRead={markNotificationAsRead}
-            />
-          </TabsContent>
-
-          <TabsContent value="reviews" className="m-0">
-            <ReviewsTab 
-              reviews={reviews}
-              handleReviewAction={handleReviewAction}
-            />
-          </TabsContent>
-
-          <TabsContent value="comments" className="m-0">
-            <CommentsTab 
-              comments={comments}
-              handleCommentAction={handleCommentAction}
-            />
-          </TabsContent>
-
-          <TabsContent value="users" className="m-0">
-            <UsersTab />
-          </TabsContent>
-
-          <TabsContent value="admins" className="m-0">
-            <AdminsTab 
-              admins={admins}
-              newAdminEmail={newAdminEmail}
-              setNewAdminEmail={setNewAdminEmail}
-              handleAddAdmin={handleAddAdmin}
-            />
-          </TabsContent>
-
-          <TabsContent value="import" className="m-0">
-            <ImportTab />
-          </TabsContent>
-        </div>
-      </Tabs>
+      <AdminHeader />
+      <AdminTabs
+        notifications={notifications}
+        reviews={reviews}
+        comments={comments}
+        admins={admins}
+        newAdminEmail={newAdminEmail}
+        setNewAdminEmail={setNewAdminEmail}
+        handleAddAdmin={handleAddAdmin}
+        handleReviewAction={handleReviewAction}
+        handleCommentAction={handleCommentAction}
+        markNotificationAsRead={markNotificationAsRead}
+      />
     </div>
   );
 };
