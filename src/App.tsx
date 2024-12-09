@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import ReviewDetail from "./pages/ReviewDetail";
 import Register from "./pages/Register";
@@ -103,7 +104,14 @@ const App = () => (
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/recensioni" element={<ReviewManagement />} />
               <Route path="/admin/utenti" element={<UserManagement />} />
-              <Route path="/dashboard" element={<UserDashboard />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <UserDashboard />
+                  </ProtectedRoute>
+                } 
+              />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<Terms />} />
