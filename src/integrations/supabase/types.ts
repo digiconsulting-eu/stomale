@@ -72,6 +72,74 @@ export type Database = {
           },
         ]
       }
+      condition_follows: {
+        Row: {
+          condition_id: number | null
+          created_at: string | null
+          id: number
+          last_checked_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          condition_id?: number | null
+          created_at?: string | null
+          id?: number
+          last_checked_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          condition_id?: number | null
+          created_at?: string | null
+          id?: number
+          last_checked_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condition_follows_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "PATOLOGIE"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "condition_follows_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      condition_updates: {
+        Row: {
+          condition_id: number | null
+          created_at: string | null
+          id: number
+          update_type: string
+        }
+        Insert: {
+          condition_id?: number | null
+          created_at?: string | null
+          id?: number
+          update_type: string
+        }
+        Update: {
+          condition_id?: number | null
+          created_at?: string | null
+          id?: number
+          update_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condition_updates_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "PATOLOGIE"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       PATOLOGIE: {
         Row: {
           Descrizione: string | null

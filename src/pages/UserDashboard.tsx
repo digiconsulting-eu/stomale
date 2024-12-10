@@ -1,22 +1,38 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ReviewCard } from "@/components/ReviewCard";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Search } from "lucide-react";
+import { MessageSquare, Search, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
+import { NotificationsTab } from "@/components/dashboard/NotificationsTab";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const UserDashboard = () => {
-  const [reviews, setReviews] = useState([]);
+  const { data: reviews } = useQuery({
+    queryKey: ['user-reviews'],
+    queryFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) return [];
 
-  const fetchReviews = async () => {
-    const response = await fetch('/api/reviews');
-    const data = await response.json();
-    setReviews(data);
-  };
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          title,
+          experience,
+          created_at,
+          condition:PATOLOGIE (
+            Patologia
+          )
+        `)
+        .eq('user_id', session.session.user.id)
+        .order('created_at', { ascending: false });
 
-  useEffect(() => {
-    fetchReviews();
-  }, []);
+      if (error) throw error;
+      return data;
+    }
+  });
 
   return (
     <div className="container mx-auto px-4 py-4 md:py-8">
@@ -44,18 +60,34 @@ const UserDashboard = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {reviews.map((review) => (
-          <ReviewCard
-            key={review.id}
-            id={review.id}
-            title={review.title}
-            condition={review.condition}
-            preview={review.preview}
-            date={review.date}
-          />
-        ))}
-      </div>
+      <Tabs defaultValue="notifications" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            Notifiche
+          </TabsTrigger>
+          <TabsTrigger value="reviews">Le mie Recensioni</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="notifications">
+          <NotificationsTab />
+        </TabsContent>
+
+        <TabsContent value="reviews">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {reviews?.map((review) => (
+              <ReviewCard
+                key={review.id}
+                id={review.id}
+                title={review.title}
+                condition={review.condition.Patologia.toLowerCase()}
+                preview={review.experience}
+                date={new Date(review.created_at).toLocaleDateString('it-IT')}
+              />
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

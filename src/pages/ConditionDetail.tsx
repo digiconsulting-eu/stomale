@@ -177,8 +177,7 @@ export default function ConditionDetail() {
     <div className="container py-8">
       <ConditionHeader 
         condition={condition || ''} 
-        isFavorite={isFavorite}
-        onToggleFavorite={toggleFavorite}
+        conditionId={patologiaData?.id || 0}
       />
 
       <div className="grid md:grid-cols-12 gap-6">
