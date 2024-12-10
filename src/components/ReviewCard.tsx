@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ReviewCardProps {
-  id: string;
+  id: string | number;
   title?: string;
   condition: string;
   preview: string;
