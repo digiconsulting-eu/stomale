@@ -1,109 +1,86 @@
 import { Link } from "react-router-dom";
-import { Calendar, Pencil, Trash2 } from "lucide-react";
-import { capitalizeFirstLetter } from "@/utils/textUtils";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { ConfirmDialog } from "./ConfirmDialog";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { StarRating } from "@/components/StarRating";
 
 interface ReviewCardProps {
-  id: string | number;
-  title?: string;
+  id: string | number; // Updated to accept both string and number
+  title: string;
   condition: string;
-  preview: string;
-  date: string;
-  username?: string;
+  symptoms: string;
+  diagnosisDifficulty?: number;
+  symptomsSeverity?: number;
+  hasMedication?: boolean;
+  medicationEffectiveness?: number;
+  healingPossibility?: number;
+  socialDiscomfort?: number;
 }
 
-export const ReviewCard = ({ id, title, condition, preview, date, username }: ReviewCardProps) => {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const isAdmin = localStorage.getItem("isAdmin") === "true";
-  
-  const handleDelete = async () => {
-    try {
-      const { error } = await supabase
-        .from('reviews')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast.success("Recensione eliminata con successo");
-      setShowDeleteDialog(false);
-    } catch (error) {
-      console.error('Error deleting review:', error);
-      toast.error("Errore durante l'eliminazione della recensione");
-    }
-  };
-
-  const reviewTitle = title || `Esperienza con ${capitalizeFirstLetter(condition)}`;
-
+export const ReviewCard = ({
+  id,
+  title,
+  condition,
+  symptoms,
+  diagnosisDifficulty,
+  symptomsSeverity,
+  hasMedication,
+  medicationEffectiveness,
+  healingPossibility,
+  socialDiscomfort,
+}: ReviewCardProps) => {
   return (
-    <div className="block group">
-      <div className="card animate-fade-in group-hover:scale-[1.02] transition-all duration-300">
-        <div className="flex justify-between items-start mb-4">
+    <Link to={`/patologia/${condition}/recensione/${id}`}>
+      <Card className="p-6 hover:shadow-lg transition-shadow">
+        <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold text-text group-hover:text-primary transition-colors">
-              {reviewTitle}
-            </h3>
-            {username && (
-              <p className="text-sm text-text-light mt-1">
-                Scritta da {username}
-              </p>
+            <h3 className="text-xl font-semibold mb-2">{title}</h3>
+            <Badge variant="outline" className="mb-4">
+              {condition}
+            </Badge>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Sintomi:</span> {symptoms}
+            </p>
+
+            {diagnosisDifficulty !== undefined && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Difficoltà diagnosi:</span>
+                <StarRating value={diagnosisDifficulty} readonly />
+              </div>
+            )}
+
+            {symptomsSeverity !== undefined && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Gravità sintomi:</span>
+                <StarRating value={symptomsSeverity} readonly />
+              </div>
+            )}
+
+            {hasMedication !== undefined && medicationEffectiveness !== undefined && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Efficacia terapia:</span>
+                <StarRating value={medicationEffectiveness} readonly />
+              </div>
+            )}
+
+            {healingPossibility !== undefined && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Possibilità guarigione:</span>
+                <StarRating value={healingPossibility} readonly />
+              </div>
+            )}
+
+            {socialDiscomfort !== undefined && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Disagio sociale:</span>
+                <StarRating value={socialDiscomfort} readonly />
+              </div>
             )}
           </div>
-          {isAdmin && (
-            <div className="flex items-center gap-2 ml-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                asChild
-              >
-                <Link to={`/recensione/modifica/${id}`}>
-                  <Pencil className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
-          )}
         </div>
-        <div className="flex justify-between items-center mb-4">
-          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
-            {capitalizeFirstLetter(condition)}
-          </span>
-          <div className="flex items-center text-text-light space-x-1">
-            <Calendar size={14} />
-            <span className="text-sm">{date}</span>
-          </div>
-        </div>
-        <p className="text-text-light line-clamp-2 leading-relaxed mb-4">{preview}</p>
-        <div className="flex justify-end">
-          <Button 
-            variant="outline"
-            asChild
-            className="text-primary hover:text-primary-dark"
-          >
-            <Link to={`/patologia/${condition.toLowerCase()}/recensione/${id}`}>
-              Leggi Esperienza
-            </Link>
-          </Button>
-        </div>
-      </div>
-
-      <ConfirmDialog
-        isOpen={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
-        onConfirm={handleDelete}
-        title="Elimina recensione"
-        description="Sei sicuro di voler eliminare questa recensione? Questa azione non può essere annullata."
-      />
-    </div>
+      </Card>
+    </Link>
   );
 };

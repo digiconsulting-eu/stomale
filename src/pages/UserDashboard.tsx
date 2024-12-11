@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { ReviewCard } from "@/components/ReviewCard";
-import { Button } from "@/components/ui/button";
-import { MessageSquare, Search, Bell } from "lucide-react";
-import { Link } from "react-router-dom";
-import { NotificationsTab } from "@/components/dashboard/NotificationsTab";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ReviewCard } from "@/components/ReviewCard";
+import { NotificationsTab } from "@/components/dashboard/NotificationsTab";
 
 const UserDashboard = () => {
+  const [activeTab, setActiveTab] = useState("reviews");
+
   const { data: reviews } = useQuery({
     queryKey: ['user-reviews'],
     queryFn: async () => {
@@ -20,13 +19,19 @@ const UserDashboard = () => {
         .select(`
           id,
           title,
-          experience,
-          created_at,
+          symptoms,
+          diagnosis_difficulty,
+          symptoms_severity,
+          has_medication,
+          medication_effectiveness,
+          healing_possibility,
+          social_discomfort,
           condition:PATOLOGIE (
             Patologia
           )
         `)
         .eq('user_id', session.session.user.id)
+        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -35,57 +40,41 @@ const UserDashboard = () => {
   });
 
   return (
-    <div className="container mx-auto px-4 py-4 md:py-8">
-      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8">Dashboard</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <Button 
-          asChild 
-          className="h-auto py-6 text-lg flex gap-2 bg-primary hover:bg-primary/90"
-        >
-          <Link to="/nuova-recensione">
-            <MessageSquare className="w-5 h-5" />
-            Racconta la tua Esperienza
-          </Link>
-        </Button>
-        
-        <Button 
-          asChild 
-          className="h-auto py-6 text-lg flex gap-2 bg-secondary hover:bg-secondary/90 text-primary"
-        >
-          <Link to="/cerca-patologia">
-            <Search className="w-5 h-5" />
-            Cerca Patologia
-          </Link>
-        </Button>
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
 
-      <Tabs defaultValue="notifications" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            Notifiche
-          </TabsTrigger>
-          <TabsTrigger value="reviews">Le mie Recensioni</TabsTrigger>
+          <TabsTrigger value="reviews">Le mie recensioni</TabsTrigger>
+          <TabsTrigger value="notifications">Notifiche</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="reviews" className="space-y-6">
+          {reviews?.length === 0 ? (
+            <p className="text-gray-500">Non hai ancora scritto recensioni.</p>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {reviews?.map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  id={review.id.toString()} // Convert number to string
+                  title={review.title}
+                  condition={review.condition.Patologia}
+                  symptoms={review.symptoms}
+                  diagnosisDifficulty={review.diagnosis_difficulty}
+                  symptomsSeverity={review.symptoms_severity}
+                  hasMedication={review.has_medication}
+                  medicationEffectiveness={review.medication_effectiveness}
+                  healingPossibility={review.healing_possibility}
+                  socialDiscomfort={review.social_discomfort}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
 
         <TabsContent value="notifications">
           <NotificationsTab />
-        </TabsContent>
-
-        <TabsContent value="reviews">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {reviews?.map((review) => (
-              <ReviewCard
-                key={review.id}
-                id={review.id}
-                title={review.title}
-                condition={review.condition.Patologia.toLowerCase()}
-                preview={review.experience}
-                date={new Date(review.created_at).toLocaleDateString('it-IT')}
-              />
-            ))}
-          </div>
         </TabsContent>
       </Tabs>
     </div>
