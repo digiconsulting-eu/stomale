@@ -73,6 +73,34 @@ export const ReviewManagementTable = () => {
 
   const updateReviewStatus = useMutation({
     mutationFn: async ({ reviewId, status }: { reviewId: number, status: string }) => {
+      // First check if the review exists and get its user_id
+      const { data: reviewData, error: reviewError } = await supabase
+        .from('reviews')
+        .select('user_id')
+        .eq('id', reviewId)
+        .single();
+
+      if (reviewError) throw reviewError;
+
+      // If there's no user_id, create a default user
+      if (!reviewData.user_id) {
+        const { data: userData, error: userError } = await supabase.auth.signUp({
+          email: `anonymous${Date.now()}@example.com`,
+          password: Math.random().toString(36).slice(-8),
+        });
+
+        if (userError) throw userError;
+
+        // Update the review with the new user_id
+        const { error: updateUserError } = await supabase
+          .from('reviews')
+          .update({ user_id: userData.user?.id })
+          .eq('id', reviewId);
+
+        if (updateUserError) throw updateUserError;
+      }
+
+      // Now update the status
       const { error } = await supabase
         .from('reviews')
         .update({ status })
@@ -84,7 +112,8 @@ export const ReviewManagementTable = () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
       toast.success("Stato della recensione aggiornato con successo");
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error updating review status:', error);
       toast.error("Errore durante l'aggiornamento dello stato della recensione");
     },
   });
