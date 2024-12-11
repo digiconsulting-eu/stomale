@@ -22,31 +22,31 @@ const CookiePolicy = () => {
     const fetchContent = async () => {
       const { data, error } = await supabase
         .from('site_content')
-        .select('*')
+        .select('content')
         .eq('type', 'cookie_policy')
-        .maybeSingle();
+        .single();
       
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching cookie policy:', error);
+        toast.error("Errore durante il caricamento della cookie policy");
         return;
       }
 
-      // If no data exists, create default cookie policy
-      if (!data) {
+      if (data?.content) {
+        setContent(data.content);
+      } else {
+        // If no content exists, create default content
         const { error: insertError } = await supabase
           .from('site_content')
           .insert({
             type: 'cookie_policy',
-            content: content,
+            content: content
           });
 
         if (insertError) {
           console.error('Error inserting default cookie policy:', insertError);
           toast.error("Errore durante l'inizializzazione della cookie policy");
-          return;
         }
-      } else if (data?.content) {
-        setContent(data.content);
       }
     };
 
@@ -59,9 +59,11 @@ const CookiePolicy = () => {
       .upsert({
         type: 'cookie_policy',
         content: content,
+        updated_at: new Date().toISOString()
       });
 
     if (error) {
+      console.error('Error saving cookie policy:', error);
       toast.error("Errore durante il salvataggio");
       return;
     }
