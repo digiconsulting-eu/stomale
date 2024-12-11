@@ -10,15 +10,9 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { Database } from "@/integrations/supabase/types";
 
-interface User {
-  id: string;
-  username: string;
-  email: string | null;
-  birth_year: string | null;
-  gender: string | null;
-  created_at: string;
-}
+type User = Database["public"]["Tables"]["users"]["Row"];
 
 export const UsersTab = () => {
   const { data: users, isLoading } = useQuery<User[]>({

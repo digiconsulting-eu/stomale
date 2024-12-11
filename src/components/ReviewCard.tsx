@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/StarRating";
 
 interface ReviewCardProps {
-  id: string | number; // Updated to accept both string and number
+  id: string | number;
   title: string;
   condition: string;
   symptoms: string;
@@ -47,35 +47,35 @@ export const ReviewCard = ({
             {diagnosisDifficulty !== undefined && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">Difficoltà diagnosi:</span>
-                <StarRating value={diagnosisDifficulty} readonly />
+                <StarRating value={diagnosisDifficulty} readOnly />
               </div>
             )}
 
             {symptomsSeverity !== undefined && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">Gravità sintomi:</span>
-                <StarRating value={symptomsSeverity} readonly />
+                <StarRating value={symptomsSeverity} readOnly />
               </div>
             )}
 
             {hasMedication !== undefined && medicationEffectiveness !== undefined && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">Efficacia terapia:</span>
-                <StarRating value={medicationEffectiveness} readonly />
+                <StarRating value={medicationEffectiveness} readOnly />
               </div>
             )}
 
             {healingPossibility !== undefined && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">Possibilità guarigione:</span>
-                <StarRating value={healingPossibility} readonly />
+                <StarRating value={healingPossibility} readOnly />
               </div>
             )}
 
             {socialDiscomfort !== undefined && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">Disagio sociale:</span>
-                <StarRating value={socialDiscomfort} readonly />
+                <StarRating value={socialDiscomfort} readOnly />
               </div>
             )}
           </div>

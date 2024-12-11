@@ -4,9 +4,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface Review {
   id: number;
   title: string;
-  experience: string;
-  created_at: string;
+  symptoms: string;
   condition: string;
+  diagnosis_difficulty?: number;
+  symptoms_severity?: number;
+  has_medication?: boolean;
+  medication_effectiveness?: number;
+  healing_possibility?: number;
+  social_discomfort?: number;
 }
 
 interface ConditionReviewsProps {
@@ -30,11 +35,16 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
       {reviews?.map((review) => (
         <ReviewCard 
           key={review.id}
-          id={review.id.toString()}
+          id={review.id}
           title={review.title}
-          date={new Date(review.created_at).toLocaleDateString('it-IT')}
-          preview={review.experience}
+          symptoms={review.symptoms}
           condition={condition}
+          diagnosisDifficulty={review.diagnosis_difficulty}
+          symptomsSeverity={review.symptoms_severity}
+          hasMedication={review.has_medication}
+          medicationEffectiveness={review.medication_effectiveness}
+          healingPossibility={review.healing_possibility}
+          socialDiscomfort={review.social_discomfort}
         />
       ))}
     </div>
