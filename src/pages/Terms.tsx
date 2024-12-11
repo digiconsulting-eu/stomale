@@ -31,7 +31,7 @@ const Terms = () => {
         return;
       }
 
-      if (data) {
+      if (data?.content) {
         setContent(data.content);
       }
     };

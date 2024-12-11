@@ -29,7 +29,7 @@ const Footer = () => {
         return;
       }
 
-      if (data) {
+      if (data?.content) {
         setCompanyInfo(JSON.parse(data.content));
       }
     };

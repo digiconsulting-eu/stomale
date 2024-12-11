@@ -31,7 +31,7 @@ const CookiePolicy = () => {
         return;
       }
 
-      if (data) {
+      if (data?.content) {
         setContent(data.content);
       }
     };
