@@ -19,7 +19,7 @@ const UserDashboard = () => {
         .select(`
           id,
           title,
-          symptoms,
+          experience,
           diagnosis_difficulty,
           symptoms_severity,
           has_medication,
@@ -57,10 +57,10 @@ const UserDashboard = () => {
               {reviews?.map((review) => (
                 <ReviewCard
                   key={review.id}
-                  id={review.id.toString()} // Convert number to string
+                  id={review.id.toString()}
                   title={review.title}
                   condition={review.condition.Patologia}
-                  symptoms={review.symptoms}
+                  experience={review.experience}
                   diagnosisDifficulty={review.diagnosis_difficulty}
                   symptomsSeverity={review.symptoms_severity}
                   hasMedication={review.has_medication}

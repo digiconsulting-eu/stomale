@@ -4,8 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface Review {
   id: number;
   title: string;
-  symptoms: string;
   condition: string;
+  experience: string;
   diagnosis_difficulty?: number;
   symptoms_severity?: number;
   has_medication?: boolean;
@@ -37,7 +37,7 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
           key={review.id}
           id={review.id}
           title={review.title}
-          symptoms={review.symptoms}
+          experience={review.experience}
           condition={condition}
           diagnosisDifficulty={review.diagnosis_difficulty}
           symptomsSeverity={review.symptoms_severity}
