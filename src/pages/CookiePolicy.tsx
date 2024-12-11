@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const CookiePolicy = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -18,14 +19,39 @@ const CookiePolicy = () => {
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   useEffect(() => {
-    const savedContent = localStorage.getItem("cookiePolicyContent");
-    if (savedContent) {
-      setContent(savedContent);
-    }
+    const fetchContent = async () => {
+      const { data, error } = await supabase
+        .from('site_content')
+        .select('*')
+        .eq('type', 'cookie_policy')
+        .single();
+      
+      if (error) {
+        console.error('Error fetching cookie policy:', error);
+        return;
+      }
+
+      if (data) {
+        setContent(data.content);
+      }
+    };
+
+    fetchContent();
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem("cookiePolicyContent", content);
+  const handleSave = async () => {
+    const { error } = await supabase
+      .from('site_content')
+      .upsert({
+        type: 'cookie_policy',
+        content: content,
+      });
+
+    if (error) {
+      toast.error("Errore durante il salvataggio");
+      return;
+    }
+
     setIsEditing(false);
     toast.success("Contenuto salvato con successo");
   };

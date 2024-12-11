@@ -4,6 +4,7 @@ import { Pencil } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Footer = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -16,14 +17,39 @@ const Footer = () => {
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   useEffect(() => {
-    const savedInfo = localStorage.getItem("companyInfo");
-    if (savedInfo) {
-      setCompanyInfo(JSON.parse(savedInfo));
-    }
+    const fetchCompanyInfo = async () => {
+      const { data, error } = await supabase
+        .from('site_content')
+        .select('*')
+        .eq('type', 'company_info')
+        .single();
+      
+      if (error) {
+        console.error('Error fetching company info:', error);
+        return;
+      }
+
+      if (data) {
+        setCompanyInfo(JSON.parse(data.content));
+      }
+    };
+
+    fetchCompanyInfo();
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem("companyInfo", JSON.stringify(companyInfo));
+  const handleSave = async () => {
+    const { error } = await supabase
+      .from('site_content')
+      .upsert({
+        type: 'company_info',
+        content: JSON.stringify(companyInfo),
+      });
+
+    if (error) {
+      toast.error("Errore durante il salvataggio");
+      return;
+    }
+
     setIsEditing(false);
     toast.success("Informazioni aziendali aggiornate");
   };

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Terms = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -18,14 +19,39 @@ const Terms = () => {
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   useEffect(() => {
-    const savedContent = localStorage.getItem("termsContent");
-    if (savedContent) {
-      setContent(savedContent);
-    }
+    const fetchContent = async () => {
+      const { data, error } = await supabase
+        .from('site_content')
+        .select('*')
+        .eq('type', 'terms')
+        .single();
+      
+      if (error) {
+        console.error('Error fetching terms:', error);
+        return;
+      }
+
+      if (data) {
+        setContent(data.content);
+      }
+    };
+
+    fetchContent();
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem("termsContent", content);
+  const handleSave = async () => {
+    const { error } = await supabase
+      .from('site_content')
+      .upsert({
+        type: 'terms',
+        content: content,
+      });
+
+    if (error) {
+      toast.error("Errore durante il salvataggio");
+      return;
+    }
+
     setIsEditing(false);
     toast.success("Contenuto salvato con successo");
   };
