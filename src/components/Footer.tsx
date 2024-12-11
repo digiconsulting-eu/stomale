@@ -18,18 +18,33 @@ const Footer = () => {
 
   useEffect(() => {
     const fetchCompanyInfo = async () => {
+      // First try to fetch existing company info
       const { data, error } = await supabase
         .from('site_content')
         .select('*')
         .eq('type', 'company_info')
-        .single();
+        .maybeSingle(); // Use maybeSingle() instead of single()
       
       if (error) {
         console.error('Error fetching company info:', error);
         return;
       }
 
-      if (data?.content) {
+      // If no data exists, create default company info
+      if (!data) {
+        const { error: insertError } = await supabase
+          .from('site_content')
+          .insert({
+            type: 'company_info',
+            content: JSON.stringify(companyInfo),
+          });
+
+        if (insertError) {
+          console.error('Error inserting default company info:', insertError);
+          toast.error("Errore durante l'inizializzazione delle informazioni aziendali");
+          return;
+        }
+      } else if (data?.content) {
         setCompanyInfo(JSON.parse(data.content));
       }
     };
