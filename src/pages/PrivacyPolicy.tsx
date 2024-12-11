@@ -24,14 +24,29 @@ const PrivacyPolicy = () => {
         .from('site_content')
         .select('*')
         .eq('type', 'privacy_policy')
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error fetching privacy policy:', error);
+        toast.error("Errore durante il caricamento della privacy policy");
         return;
       }
 
-      if (data?.content) {
+      // If no data exists, create default privacy policy
+      if (!data) {
+        const { error: insertError } = await supabase
+          .from('site_content')
+          .insert({
+            type: 'privacy_policy',
+            content: content,
+          });
+
+        if (insertError) {
+          console.error('Error inserting default privacy policy:', insertError);
+          toast.error("Errore durante l'inizializzazione della privacy policy");
+          return;
+        }
+      } else if (data?.content) {
         setContent(data.content);
       }
     };
