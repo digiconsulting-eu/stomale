@@ -30,21 +30,7 @@ export default function Login() {
       const isAdmin = !!adminData;
       console.log("Admin check result:", { isAdmin, adminData });
 
-      if (isAdmin) {
-        // For admin users, try to sign up first if they don't exist
-        console.log("Attempting admin signup for:", data.email);
-        const { error: signUpError } = await supabase.auth.signUp({
-          email: data.email,
-          password: data.password,
-        });
-
-        if (signUpError && !signUpError.message.includes('User already registered')) {
-          console.error("Admin signup error:", signUpError);
-          throw signUpError;
-        }
-      }
-
-      // Now attempt to sign in
+      // Attempt to sign in directly without trying to sign up
       console.log("Attempting login for:", data.email);
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
