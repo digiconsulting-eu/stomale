@@ -50,7 +50,7 @@ export const ReviewManagementTable = () => {
               <Badge
                 variant={
                   review.status === 'approved'
-                    ? 'success'
+                    ? 'secondary'
                     : review.status === 'rejected'
                     ? 'destructive'
                     : 'default'
