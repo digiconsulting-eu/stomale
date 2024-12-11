@@ -25,7 +25,14 @@ const Reviews = () => {
         .select(`
           id,
           title,
+          symptoms,
           experience,
+          diagnosis_difficulty,
+          symptoms_severity,
+          has_medication,
+          medication_effectiveness,
+          healing_possibility,
+          social_discomfort,
           created_at,
           PATOLOGIE (
             Patologia
@@ -74,11 +81,16 @@ const Reviews = () => {
         {getCurrentPageReviews().map((review) => (
           <ReviewCard 
             key={review.id}
-            id={review.id.toString()}
+            id={review.id}
             title={review.title}
             condition={review.PATOLOGIE?.Patologia || ''}
-            preview={review.experience}
-            date={new Date(review.created_at).toLocaleDateString('it-IT')}
+            symptoms={review.symptoms}
+            diagnosisDifficulty={review.diagnosis_difficulty}
+            symptomsSeverity={review.symptoms_severity}
+            hasMedication={review.has_medication}
+            medicationEffectiveness={review.medication_effectiveness}
+            healingPossibility={review.healing_possibility}
+            socialDiscomfort={review.social_discomfort}
           />
         ))}
       </div>
