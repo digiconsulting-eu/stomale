@@ -24,14 +24,28 @@ const CookiePolicy = () => {
         .from('site_content')
         .select('*')
         .eq('type', 'cookie_policy')
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error fetching cookie policy:', error);
         return;
       }
 
-      if (data?.content) {
+      // If no data exists, create default cookie policy
+      if (!data) {
+        const { error: insertError } = await supabase
+          .from('site_content')
+          .insert({
+            type: 'cookie_policy',
+            content: content,
+          });
+
+        if (insertError) {
+          console.error('Error inserting default cookie policy:', insertError);
+          toast.error("Errore durante l'inizializzazione della cookie policy");
+          return;
+        }
+      } else if (data?.content) {
         setContent(data.content);
       }
     };
