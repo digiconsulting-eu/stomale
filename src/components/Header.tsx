@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "/logo.png";
+import logo from "../assets/logo.png"; // Updated import path
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,11 +60,12 @@ export const Header = () => {
     <header className="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2 hover:opacity-90 transition-opacity">
+          <Link to="/" className="flex items-center space-x-2">
             <img 
               src={logo} 
-              alt="StoMale.info" 
-              className="h-12 w-auto object-contain"
+              alt="StoMale.info Logo" 
+              className="h-12 w-auto"
+              style={{ objectFit: 'contain' }}
             />
           </Link>
 
