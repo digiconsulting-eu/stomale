@@ -61,7 +61,11 @@ export const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2 hover:opacity-90 transition-opacity">
-            <img src={logo} alt="StoMale.info" className="h-8" />
+            <img 
+              src={logo} 
+              alt="StoMale.info" 
+              className="h-12 w-auto object-contain"
+            />
           </Link>
 
           <button
