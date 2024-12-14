@@ -35,18 +35,19 @@ export default function Login() {
       console.log("User authenticated successfully:", authData.user.email);
 
       // Check if user is admin after successful login
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin')
-        .select('email')
-        .eq('email', data.email)
-        .single();
-
-      if (adminError && !adminError.message.includes('No rows found')) {
+      let isAdmin = false;
+      try {
+        const { data: adminData } = await supabase
+          .from('admin')
+          .select('email')
+          .eq('email', data.email);
+        
+        isAdmin = Array.isArray(adminData) && adminData.length > 0;
+        console.log("Admin check result:", { isAdmin, adminData });
+      } catch (adminError) {
         console.error("Error checking admin status:", adminError);
+        // Continue with non-admin login if admin check fails
       }
-
-      const isAdmin = !!adminData;
-      console.log("Admin check result:", { isAdmin, adminData });
       
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
