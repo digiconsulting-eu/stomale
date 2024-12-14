@@ -15,22 +15,7 @@ export default function Login() {
     console.log("Starting login process for:", data.email);
     
     try {
-      // First check if this is an admin user
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin')
-        .select('email')
-        .eq('email', data.email)
-        .single();
-
-      if (adminError && !adminError.message.includes('No rows found')) {
-        console.error("Error checking admin status:", adminError);
-        throw adminError;
-      }
-
-      const isAdmin = !!adminData;
-      console.log("Admin check result:", { isAdmin, adminData });
-
-      // Attempt to sign in directly without trying to sign up
+      // First attempt to sign in
       console.log("Attempting login for:", data.email);
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
@@ -48,6 +33,20 @@ export default function Login() {
       }
 
       console.log("User authenticated successfully:", authData.user.email);
+
+      // Check if user is admin after successful login
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin')
+        .select('email')
+        .eq('email', data.email)
+        .single();
+
+      if (adminError && !adminError.message.includes('No rows found')) {
+        console.error("Error checking admin status:", adminError);
+      }
+
+      const isAdmin = !!adminData;
+      console.log("Admin check result:", { isAdmin, adminData });
       
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
@@ -56,7 +55,10 @@ export default function Login() {
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
 
-      navigate(isAdmin ? '/admin' : '/dashboard');
+      // Add a small delay before navigation to ensure state is properly set
+      setTimeout(() => {
+        navigate(isAdmin ? '/admin' : '/dashboard');
+      }, 100);
       
     } catch (error: any) {
       console.error('Error during login process:', error);
