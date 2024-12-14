@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { User, ShieldCheck } from "lucide-react";
 
 interface AuthButtonsProps {
   isLoggedIn: boolean;
@@ -10,34 +9,24 @@ interface AuthButtonsProps {
 }
 
 export const AuthButtons = ({ isLoggedIn, isAdmin, onLogout, isMobile = false }: AuthButtonsProps) => {
+  const buttonClass = isMobile ? "w-full justify-center" : "";
+
   if (isLoggedIn) {
     return (
-      <div className={`${isMobile ? 'flex flex-col space-y-4' : 'flex items-center space-x-2'}`}>
+      <div className={`${isMobile ? 'flex flex-col space-y-2 mt-4' : 'hidden md:flex items-center space-x-4'}`}>
         {isAdmin && (
-          <Button 
-            asChild 
-            variant="outline" 
-            size="sm" 
-            className={`${isMobile ? 'flex' : 'hidden md:flex'} items-center gap-2`}
-          >
-            <Link to="/admin">
-              <ShieldCheck className="h-4 w-4" />
-              Admin
-            </Link>
+          <Button asChild variant="ghost" className={buttonClass}>
+            <Link to="/admin">Admin</Link>
           </Button>
         )}
-        <Button 
-          asChild 
-          variant="outline" 
-          size="sm" 
-          className={`${isMobile ? 'flex' : 'hidden md:flex'} items-center gap-2`}
-        >
-          <Link to="/dashboard">
-            <User className="h-4 w-4" />
-            Dashboard
-          </Link>
+        <Button asChild variant="ghost" className={buttonClass}>
+          <Link to="/dashboard">Dashboard</Link>
         </Button>
-        <Button variant="outline" size="sm" onClick={onLogout}>
+        <Button 
+          variant="outline" 
+          onClick={onLogout}
+          className={buttonClass}
+        >
           Esci
         </Button>
       </div>
@@ -45,11 +34,11 @@ export const AuthButtons = ({ isLoggedIn, isAdmin, onLogout, isMobile = false }:
   }
 
   return (
-    <div className={`${isMobile ? 'flex flex-col space-y-4' : 'hidden md:flex items-center space-x-2'}`}>
-      <Button asChild variant="outline" size="sm">
+    <div className={`${isMobile ? 'flex flex-col space-y-2 mt-4' : 'hidden md:flex items-center space-x-4'}`}>
+      <Button asChild variant="ghost" className={buttonClass}>
         <Link to="/login">Accedi</Link>
       </Button>
-      <Button asChild size="sm">
+      <Button asChild className={buttonClass}>
         <Link to="/registrati">Registrati</Link>
       </Button>
     </div>

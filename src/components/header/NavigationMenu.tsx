@@ -15,13 +15,16 @@ export const NavigationMenu = ({ isMobile = false, onItemClick }: NavigationMenu
     { to: "/blog", label: "Blog" },
   ];
 
+  const baseClasses = "text-gray-600 hover:text-primary transition-colors";
+  const mobileClasses = "block py-2";
+
   return (
-    <nav className={`${isMobile ? 'flex flex-col space-y-4' : 'hidden md:flex space-x-4'}`}>
+    <nav className={`${isMobile ? 'flex flex-col space-y-2' : 'hidden md:flex space-x-6'}`}>
       {menuItems.map((item) => (
         <Link
           key={item.to}
           to={item.to}
-          className="text-gray-600 hover:text-primary transition-colors"
+          className={`${baseClasses} ${isMobile ? mobileClasses : ''}`}
           onClick={onItemClick}
         >
           {item.label}
