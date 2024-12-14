@@ -30,7 +30,9 @@ export const Header = () => {
 
   const menuItems = [
     { to: "/recensioni", label: "Recensioni" },
+    { to: "/nuova-recensione", label: "Racconta la tua esperienza" },
     { to: "/cerca-patologia", label: "Cerca Patologia" },
+    { to: "/inserisci-patologia", label: "Inserisci Patologia" },
     { to: "/cerca-sintomi", label: "Cerca Sintomi" },
     { to: "/blog", label: "Blog" },
   ];
