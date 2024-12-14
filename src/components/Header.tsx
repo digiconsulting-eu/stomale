@@ -3,7 +3,6 @@ import { Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "/logo.png";
 import { NavigationMenu } from "./header/NavigationMenu";
 import { AuthButtons } from "./header/AuthButtons";
 import { MobileMenu } from "./header/MobileMenu";
@@ -85,7 +84,7 @@ export const Header = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
             <img 
-              src={logo}
+              src="/logo.png"
               alt="StoMale.info Logo" 
               className="h-12 w-auto"
               style={{ objectFit: 'contain' }}
