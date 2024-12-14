@@ -1,21 +1,75 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "../assets/logo.png";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
-  const [isAdmin, setIsAdmin] = useState(localStorage.getItem('isAdmin') === 'true');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const isAuthenticated = !!session;
+      setIsLoggedIn(isAuthenticated);
+      
+      if (isAuthenticated) {
+        try {
+          const { data: adminData } = await supabase
+            .from('admin')
+            .select('email')
+            .eq('email', session.user.email);
+          
+          const isUserAdmin = Array.isArray(adminData) && adminData.length > 0;
+          setIsAdmin(isUserAdmin);
+          console.log("Admin check in header:", { isUserAdmin, email: session.user.email });
+        } catch (error) {
+          console.error("Error checking admin status:", error);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed in header:", event);
+      const isAuthenticated = !!session;
+      setIsLoggedIn(isAuthenticated);
+      
+      if (isAuthenticated && session) {
+        try {
+          const { data: adminData } = await supabase
+            .from('admin')
+            .select('email')
+            .eq('email', session.user.email);
+          
+          const isUserAdmin = Array.isArray(adminData) && adminData.length > 0;
+          setIsAdmin(isUserAdmin);
+          console.log("Admin status updated:", { isUserAdmin, email: session.user.email });
+        } catch (error) {
+          console.error("Error checking admin status:", error);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('isAdmin');
       setIsLoggedIn(false);
       setIsAdmin(false);
       navigate('/');
