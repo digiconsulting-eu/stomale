@@ -84,7 +84,7 @@ export const Header = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
             <img 
-              src="https://scontent.fblq4-1.fna.fbcdn.net/v/t39.30808-6/470187075_10160382915031898_4212083890884746748_n.jpg"
+              src="/logo.png"
               alt="StoMale.info Logo" 
               className="h-12 w-auto"
               style={{ objectFit: 'contain' }}
