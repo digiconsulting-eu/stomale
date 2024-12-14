@@ -3,7 +3,7 @@ import { Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "../assets/logo.png";
+import logo from "/logo.png";
 import { NavigationMenu } from "./header/NavigationMenu";
 import { AuthButtons } from "./header/AuthButtons";
 import { MobileMenu } from "./header/MobileMenu";
