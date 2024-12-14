@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { NavigationMenu } from "./header/NavigationMenu";
 import { AuthButtons } from "./header/AuthButtons";
 import { MobileMenu } from "./header/MobileMenu";
-import logo from "../assets/logo.png";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -85,7 +84,7 @@ export const Header = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
             <img 
-              src={logo}
+              src="https://scontent.fblq4-1.fna.fbcdn.net/v/t39.30808-6/470187075_10160382915031898_4212083890884746748_n.jpg"
               alt="StoMale.info Logo" 
               className="h-12 w-auto"
               style={{ objectFit: 'contain' }}
