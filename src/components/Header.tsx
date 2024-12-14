@@ -3,6 +3,7 @@ import { Menu, X, User, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import logo from "../assets/logo.png";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -76,7 +77,7 @@ export const Header = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
             <img 
-              src="/logo.png"
+              src={logo}
               alt="StoMale.info Logo" 
               className="h-12 w-auto"
               style={{ objectFit: 'contain' }}
