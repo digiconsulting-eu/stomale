@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
   CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
@@ -15,9 +16,34 @@ import {
   CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
 } from "@/components/conditions";
 
-const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'V', 'Z'];
+const alphabet = ['TUTTE', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'V', 'Z'];
+
+const getAllConditions = () => [
+  ...(CONDITIONS_A ?? []),
+  ...(CONDITIONS_B ?? []),
+  ...(CONDITIONS_C ?? []),
+  ...(CONDITIONS_D ?? []),
+  ...(CONDITIONS_E ?? []),
+  ...(CONDITIONS_F ?? []),
+  ...(CONDITIONS_G ?? []),
+  ...(CONDITIONS_H ?? []),
+  ...(CONDITIONS_I ?? []),
+  ...(CONDITIONS_L ?? []),
+  ...(CONDITIONS_M ?? []),
+  ...(CONDITIONS_N ?? []),
+  ...(CONDITIONS_O ?? []),
+  ...(CONDITIONS_P ?? []),
+  ...(CONDITIONS_R ?? []),
+  ...(CONDITIONS_S ?? []),
+  ...(CONDITIONS_T ?? []),
+  ...(CONDITIONS_U ?? []),
+  ...(CONDITIONS_V ?? []),
+  ...(CONDITIONS_Z ?? [])
+].filter(Boolean);
 
 const getConditionsByLetter = (letter: string) => {
+  if (letter === 'TUTTE') return getAllConditions();
+  
   switch (letter) {
     case 'A': return CONDITIONS_A;
     case 'B': return CONDITIONS_B;
@@ -45,7 +71,7 @@ const getConditionsByLetter = (letter: string) => {
 
 export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLetter, setSelectedLetter] = useState('A');
+  const [selectedLetter, setSelectedLetter] = useState('TUTTE');
 
   const { data: conditions, isLoading, error } = useQuery({
     queryKey: ['conditions'],
@@ -73,11 +99,15 @@ export default function SearchCondition() {
     toast.error("Errore nel caricamento delle patologie");
   }
 
-  const filteredConditions = conditions?.filter(condition =>
-    condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || getConditionsByLetter(selectedLetter).filter(condition =>
-    condition.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const allConditions = getAllConditions();
+  
+  const filteredConditions = searchTerm
+    ? allConditions.filter(condition =>
+        typeof condition === 'string'
+          ? condition.toLowerCase().includes(searchTerm.toLowerCase())
+          : condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : getConditionsByLetter(selectedLetter);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -91,11 +121,14 @@ export default function SearchCondition() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-8 justify-center">
         {alphabet.map((letter) => (
           <button
             key={letter}
-            onClick={() => setSelectedLetter(letter)}
+            onClick={() => {
+              setSelectedLetter(letter);
+              setSearchTerm("");
+            }}
             className={`px-4 py-2 rounded-lg ${
               selectedLetter === letter
                 ? "bg-primary text-white"
@@ -114,9 +147,17 @@ export default function SearchCondition() {
           ))}
         </div>
       ) : filteredConditions?.length === 0 ? (
-        <p className="text-center text-gray-500">
-          {searchTerm ? "Nessuna patologia trovata" : "Nessuna patologia disponibile"}
-        </p>
+        <div className="text-center">
+          <p className="text-gray-500 mb-4">
+            Nessuna patologia trovata
+          </p>
+          <Link 
+            to="/inserisci-patologia"
+            className="text-primary hover:underline"
+          >
+            Clicca qui per aggiungerla
+          </Link>
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredConditions?.map((condition, index) => (
@@ -124,18 +165,28 @@ export default function SearchCondition() {
               key={index}
               to={`/patologia/${typeof condition === 'string' ? condition.toLowerCase() : condition.Patologia.toLowerCase()}`}
             >
-              <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer">
-                <h2 className="font-semibold mb-2">
-                  {typeof condition === 'string' ? condition : condition.Patologia}
-                </h2>
-                {typeof condition !== 'string' && condition.Descrizione && (
-                  <p className="text-sm text-gray-600 line-clamp-2 mb-4">
-                    {condition.Descrizione}
-                  </p>
-                )}
-                <Badge variant="outline" className="mt-2">
-                  Scopri di più
-                </Badge>
+              <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer relative">
+                <div className="flex flex-col h-full">
+                  <h2 className="font-semibold mb-2">
+                    {typeof condition === 'string' ? condition : condition.Patologia}
+                  </h2>
+                  {typeof condition !== 'string' && condition.Descrizione && (
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-1">
+                      {condition.Descrizione}
+                    </p>
+                  )}
+                  <div className="mt-auto flex justify-between items-center">
+                    <Button 
+                      variant="default" 
+                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                      Leggi Esperienza
+                    </Button>
+                    <Badge variant="outline">
+                      Scopri di più
+                    </Badge>
+                  </div>
+                </div>
               </Card>
             </Link>
           ))}
