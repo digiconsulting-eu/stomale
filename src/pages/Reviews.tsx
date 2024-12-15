@@ -20,7 +20,7 @@ const Reviews = () => {
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
-      console.log('Fetching reviews...');
+      console.log('Reviews page: Starting to fetch reviews...');
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -48,13 +48,9 @@ const Reviews = () => {
 
       console.log('Fetched reviews:', data);
       return data;
-    },
-    meta: {
-      errorMessage: "Errore nel caricamento delle recensioni"
     }
   });
 
-  // Handle error with useEffect
   if (error) {
     toast.error("Errore nel caricamento delle recensioni");
   }
