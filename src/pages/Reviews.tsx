@@ -20,7 +20,7 @@ const Reviews = () => {
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
-      console.log('Fetching reviews...');
+      console.log('Fetching reviews from reviews table...');
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -46,16 +46,13 @@ const Reviews = () => {
         throw error;
       }
 
-      console.log('Fetched reviews:', data);
+      console.log('Successfully fetched reviews:', data?.length || 0, 'results');
       return data;
-    },
-    meta: {
-      errorMessage: "Errore nel caricamento delle recensioni"
     }
   });
 
-  // Handle error with useEffect
   if (error) {
+    console.error('Error in reviews query:', error);
     toast.error("Errore nel caricamento delle recensioni");
   }
 
@@ -81,57 +78,72 @@ const Reviews = () => {
     return reviews.slice(startIndex, endIndex);
   };
 
+  const currentReviews = getCurrentPageReviews();
+  console.log('Current page reviews:', currentReviews?.length || 0, 'results');
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {getCurrentPageReviews().map((review) => (
-          <ReviewCard 
-            key={review.id}
-            id={review.id}
-            title={review.title}
-            condition={review.PATOLOGIE?.Patologia || ''}
-            experience={review.experience}
-            diagnosisDifficulty={review.diagnosis_difficulty}
-            symptomsSeverity={review.symptoms_severity}
-            hasMedication={review.has_medication}
-            medicationEffectiveness={review.medication_effectiveness}
-            healingPossibility={review.healing_possibility}
-            socialDiscomfort={review.social_discomfort}
-          />
-        ))}
-      </div>
-
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious 
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+      {error ? (
+        <div className="text-center py-8 text-red-500">
+          Si è verificato un errore nel caricamento delle recensioni.
+        </div>
+      ) : reviews?.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Non ci sono ancora recensioni.</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {currentReviews.map((review) => (
+              <ReviewCard 
+                key={review.id}
+                id={review.id}
+                title={review.title}
+                condition={review.PATOLOGIE?.Patologia || ''}
+                experience={review.experience}
+                diagnosisDifficulty={review.diagnosis_difficulty}
+                symptomsSeverity={review.symptoms_severity}
+                hasMedication={review.has_medication}
+                medicationEffectiveness={review.medication_effectiveness}
+                healingPossibility={review.healing_possibility}
+                socialDiscomfort={review.social_discomfort}
               />
-            </PaginationItem>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  onClick={() => setCurrentPage(page)}
-                  isActive={currentPage === page}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
             ))}
-            
-            <PaginationItem>
-              <PaginationNext 
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+          </div>
+
+          {totalPages > 1 && (
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(page)}
+                      isActive={currentPage === page}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+        </>
       )}
 
       <div className="mt-12 bg-white rounded-lg p-6 text-sm text-text-light">
