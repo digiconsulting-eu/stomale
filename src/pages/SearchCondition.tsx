@@ -2,12 +2,10 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchBar } from "@/components/SearchBar";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { ConditionCard } from "@/components/condition/ConditionCard";
 import {
   CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
   CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
@@ -108,7 +106,11 @@ export default function SearchCondition() {
   const allConditions = getAllConditions();
   
   const filteredConditions = searchTerm
-    ? allConditions.filter(condition =>
+    ? allConditions.map(condition => 
+        typeof condition === 'string' 
+          ? condition 
+          : condition
+      ).filter(condition =>
         typeof condition === 'string'
           ? condition.toLowerCase().includes(searchTerm.toLowerCase())
           : condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
@@ -167,34 +169,7 @@ export default function SearchCondition() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredConditions?.map((condition, index) => (
-            <Link 
-              key={index}
-              to={`/patologia/${typeof condition === 'string' ? condition.toLowerCase() : condition.Patologia.toLowerCase()}`}
-            >
-              <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer relative">
-                <div className="flex flex-col h-full">
-                  <h2 className="font-semibold mb-2">
-                    {typeof condition === 'string' ? condition : condition.Patologia}
-                  </h2>
-                  {typeof condition !== 'string' && condition.Descrizione && (
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-1">
-                      {condition.Descrizione}
-                    </p>
-                  )}
-                  <div className="mt-auto flex justify-between items-center">
-                    <Button 
-                      variant="default" 
-                      className="bg-blue-500 hover:bg-blue-600 text-white"
-                    >
-                      Leggi Esperienza
-                    </Button>
-                    <Badge variant="outline">
-                      Scopri di più
-                    </Badge>
-                  </div>
-                </div>
-              </Card>
-            </Link>
+            <ConditionCard key={index} condition={condition} />
           ))}
         </div>
       )}
