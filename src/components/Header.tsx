@@ -69,7 +69,9 @@ export const Header = () => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
       setIsLoggedIn(false);
       setIsAdmin(false);
       navigate('/');
@@ -84,7 +86,7 @@ export const Header = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
             <img 
-              src="/logo.png"
+              src="/lovable-uploads/92055c77-766b-4e12-8cf9-d2959e377076.png"
               alt="StoMale.info Logo" 
               className="h-12 w-auto"
               style={{ objectFit: 'contain' }}
