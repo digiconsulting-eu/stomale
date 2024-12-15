@@ -22,34 +22,52 @@ const Reviews = () => {
     queryFn: async () => {
       console.log('Reviews page: Starting to fetch reviews...');
       
-      const { data, error, count } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          title,
-          experience,
-          diagnosis_difficulty,
-          symptoms_severity,
-          has_medication,
-          medication_effectiveness,
-          healing_possibility,
-          social_discomfort,
-          created_at,
-          PATOLOGIE (
-            Patologia
-          )
-        `, { count: 'exact' })
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error, count } = await supabase
+          .from('reviews')
+          .select(`
+            id,
+            title,
+            experience,
+            diagnosis_difficulty,
+            symptoms_severity,
+            has_medication,
+            medication_effectiveness,
+            healing_possibility,
+            social_discomfort,
+            created_at,
+            PATOLOGIE (
+              Patologia
+            )
+          `, { count: 'exact' })
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Reviews page: Error fetching reviews:', error);
-        throw error;
+        if (error) {
+          console.error('Reviews page: Error fetching reviews:', error);
+          throw error;
+        }
+
+        if (!data) {
+          console.log('Reviews page: No data returned from query');
+          return [];
+        }
+
+        console.log('Reviews page: Successfully fetched reviews:', { 
+          count, 
+          dataLength: data.length,
+          firstReview: data[0],
+          lastReview: data[data.length - 1]
+        });
+        
+        return data;
+      } catch (err) {
+        console.error('Reviews page: Unexpected error:', err);
+        throw err;
       }
-
-      console.log('Reviews page: Successfully fetched reviews:', { count, data });
-      return data;
-    }
+    },
+    retry: 1,
+    retryDelay: 1000
   });
 
   if (error) {
@@ -80,7 +98,13 @@ const Reviews = () => {
   };
 
   const currentReviews = getCurrentPageReviews();
-  console.log('Reviews page: Current page reviews:', currentReviews);
+  console.log('Reviews page: Current page reviews:', {
+    page: currentPage,
+    totalReviews: reviews?.length,
+    currentReviewsCount: currentReviews.length,
+    firstCurrentReview: currentReviews[0],
+    lastCurrentReview: currentReviews[currentReviews.length - 1]
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -91,9 +115,15 @@ const Reviews = () => {
           <p>Si è verificato un errore nel caricamento delle recensioni.</p>
           <p className="text-sm mt-2">Dettagli: {error.message}</p>
         </div>
-      ) : reviews?.length === 0 ? (
+      ) : isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} className="h-[200px]" />
+          ))}
+        </div>
+      ) : !reviews || reviews.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500">Non ci sono ancora recensioni.</p>
+          <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
         </div>
       ) : (
         <>
