@@ -20,9 +20,11 @@ type Condition = {
   Descrizione: string | null;
 };
 
+type ConditionType = string | Condition;
+
 const alphabet = ['TUTTE', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'V', 'Z'];
 
-const getAllConditions = () => [
+const getAllConditions = (): string[] => [
   ...(CONDITIONS_A ?? []),
   ...(CONDITIONS_B ?? []),
   ...(CONDITIONS_C ?? []),
@@ -45,30 +47,30 @@ const getAllConditions = () => [
   ...(CONDITIONS_Z ?? [])
 ].filter(Boolean);
 
-const getConditionsByLetter = (letter: string) => {
+const getConditionsByLetter = (letter: string): string[] => {
   if (letter === 'TUTTE') return getAllConditions();
   
   switch (letter) {
-    case 'A': return CONDITIONS_A;
-    case 'B': return CONDITIONS_B;
-    case 'C': return CONDITIONS_C;
-    case 'D': return CONDITIONS_D;
-    case 'E': return CONDITIONS_E;
-    case 'F': return CONDITIONS_F;
-    case 'G': return CONDITIONS_G;
-    case 'H': return CONDITIONS_H;
-    case 'I': return CONDITIONS_I;
-    case 'L': return CONDITIONS_L;
-    case 'M': return CONDITIONS_M;
-    case 'N': return CONDITIONS_N;
-    case 'O': return CONDITIONS_O;
-    case 'P': return CONDITIONS_P;
-    case 'R': return CONDITIONS_R;
-    case 'S': return CONDITIONS_S;
-    case 'T': return CONDITIONS_T;
-    case 'U': return CONDITIONS_U;
-    case 'V': return CONDITIONS_V;
-    case 'Z': return CONDITIONS_Z;
+    case 'A': return CONDITIONS_A ?? [];
+    case 'B': return CONDITIONS_B ?? [];
+    case 'C': return CONDITIONS_C ?? [];
+    case 'D': return CONDITIONS_D ?? [];
+    case 'E': return CONDITIONS_E ?? [];
+    case 'F': return CONDITIONS_F ?? [];
+    case 'G': return CONDITIONS_G ?? [];
+    case 'H': return CONDITIONS_H ?? [];
+    case 'I': return CONDITIONS_I ?? [];
+    case 'L': return CONDITIONS_L ?? [];
+    case 'M': return CONDITIONS_M ?? [];
+    case 'N': return CONDITIONS_N ?? [];
+    case 'O': return CONDITIONS_O ?? [];
+    case 'P': return CONDITIONS_P ?? [];
+    case 'R': return CONDITIONS_R ?? [];
+    case 'S': return CONDITIONS_S ?? [];
+    case 'T': return CONDITIONS_T ?? [];
+    case 'U': return CONDITIONS_U ?? [];
+    case 'V': return CONDITIONS_V ?? [];
+    case 'Z': return CONDITIONS_Z ?? [];
     default: return [];
   }
 };
@@ -105,15 +107,9 @@ export default function SearchCondition() {
 
   const allConditions = getAllConditions();
   
-  const filteredConditions = searchTerm
-    ? allConditions.map(condition => 
-        typeof condition === 'string' 
-          ? condition 
-          : condition
-      ).filter(condition =>
-        typeof condition === 'string'
-          ? condition.toLowerCase().includes(searchTerm.toLowerCase())
-          : condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredConditions: ConditionType[] = searchTerm
+    ? allConditions.filter(condition =>
+        condition.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : getConditionsByLetter(selectedLetter);
 
