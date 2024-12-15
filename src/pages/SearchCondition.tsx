@@ -16,6 +16,12 @@ import {
   CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
 } from "@/components/conditions";
 
+type Condition = {
+  id: number;
+  Patologia: string;
+  Descrizione: string | null;
+};
+
 const alphabet = ['TUTTE', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'V', 'Z'];
 
 const getAllConditions = () => [
@@ -73,7 +79,7 @@ export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState('TUTTE');
 
-  const { data: conditions, isLoading, error } = useQuery({
+  const { data: conditions, isLoading, error } = useQuery<Condition[]>({
     queryKey: ['conditions'],
     queryFn: async () => {
       console.log('Starting to fetch conditions from PATOLOGIE table...');
