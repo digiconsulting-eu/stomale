@@ -20,58 +20,42 @@ const Reviews = () => {
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
-      console.log('Reviews page: Starting to fetch reviews...');
-      
-      try {
-        const { data, error, count } = await supabase
-          .from('reviews')
-          .select(`
-            id,
-            title,
-            experience,
-            diagnosis_difficulty,
-            symptoms_severity,
-            has_medication,
-            medication_effectiveness,
-            healing_possibility,
-            social_discomfort,
-            created_at,
-            PATOLOGIE (
-              Patologia
-            )
-          `, { count: 'exact' })
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false });
+      console.log('Fetching reviews...');
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          title,
+          experience,
+          diagnosis_difficulty,
+          symptoms_severity,
+          has_medication,
+          medication_effectiveness,
+          healing_possibility,
+          social_discomfort,
+          created_at,
+          PATOLOGIE (
+            Patologia
+          )
+        `)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Reviews page: Error fetching reviews:', error);
-          throw error;
-        }
-
-        if (!data) {
-          console.log('Reviews page: No data returned from query');
-          return [];
-        }
-
-        console.log('Reviews page: Successfully fetched reviews:', { 
-          count, 
-          dataLength: data.length,
-          firstReview: data[0],
-          lastReview: data[data.length - 1]
-        });
-        
-        return data;
-      } catch (err) {
-        console.error('Reviews page: Unexpected error:', err);
-        throw err;
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        throw error;
       }
+
+      console.log('Fetched reviews:', data);
+      return data;
     },
-    retry: 1,
-    retryDelay: 1000
+    meta: {
+      errorMessage: "Errore nel caricamento delle recensioni"
+    }
   });
 
+  // Handle error with useEffect
   if (error) {
-    console.error('Reviews page: Error in reviews query:', error);
     toast.error("Errore nel caricamento delle recensioni");
   }
 
@@ -97,85 +81,57 @@ const Reviews = () => {
     return reviews.slice(startIndex, endIndex);
   };
 
-  const currentReviews = getCurrentPageReviews();
-  console.log('Reviews page: Current page reviews:', {
-    page: currentPage,
-    totalReviews: reviews?.length,
-    currentReviewsCount: currentReviews.length,
-    firstCurrentReview: currentReviews[0],
-    lastCurrentReview: currentReviews[currentReviews.length - 1]
-  });
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
       
-      {error ? (
-        <div className="text-center py-8 text-red-500">
-          <p>Si è verificato un errore nel caricamento delle recensioni.</p>
-          <p className="text-sm mt-2">Dettagli: {error.message}</p>
-        </div>
-      ) : isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-[200px]" />
-          ))}
-        </div>
-      ) : !reviews || reviews.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {currentReviews.map((review) => (
-              <ReviewCard 
-                key={review.id}
-                id={review.id}
-                title={review.title}
-                condition={review.PATOLOGIE?.Patologia || ''}
-                experience={review.experience}
-                diagnosisDifficulty={review.diagnosis_difficulty}
-                symptomsSeverity={review.symptoms_severity}
-                hasMedication={review.has_medication}
-                medicationEffectiveness={review.medication_effectiveness}
-                healingPossibility={review.healing_possibility}
-                socialDiscomfort={review.social_discomfort}
-              />
-            ))}
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {getCurrentPageReviews().map((review) => (
+          <ReviewCard 
+            key={review.id}
+            id={review.id}
+            title={review.title}
+            condition={review.PATOLOGIE?.Patologia || ''}
+            experience={review.experience}
+            diagnosisDifficulty={review.diagnosis_difficulty}
+            symptomsSeverity={review.symptoms_severity}
+            hasMedication={review.has_medication}
+            medicationEffectiveness={review.medication_effectiveness}
+            healingPossibility={review.healing_possibility}
+            socialDiscomfort={review.social_discomfort}
+          />
+        ))}
+      </div>
 
-          {totalPages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      onClick={() => setCurrentPage(page)}
-                      isActive={currentPage === page}
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-                
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
-        </>
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  onClick={() => setCurrentPage(page)}
+                  isActive={currentPage === page}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
 
       <div className="mt-12 bg-white rounded-lg p-6 text-sm text-text-light">

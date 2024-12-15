@@ -11,7 +11,6 @@ import { ConditionActions } from "@/components/condition/ConditionActions";
 import { ConditionReviews } from "@/components/condition/ConditionReviews";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { toast } from "sonner";
-import { setPageTitle } from "@/utils/pageTitle";
 
 interface DatabaseReview {
   id: number;
@@ -101,12 +100,6 @@ export default function ConditionDetail() {
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
   const isAdmin = localStorage.getItem("isAdmin") === "true";
-
-  useEffect(() => {
-    if (condition) {
-      setPageTitle(`${capitalizeFirstLetter(condition)} - StoMale.info`);
-    }
-  }, [condition]);
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteConditions') || '[]');

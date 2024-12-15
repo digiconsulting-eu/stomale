@@ -17,34 +17,29 @@ export default function SearchCondition() {
   const { data: conditions, isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('SearchCondition: Starting to fetch conditions...');
-      try {
-        const { data, error } = await supabase
-          .from('PATOLOGIE')
-          .select('*')
-          .order('Patologia');
+      console.log('Fetching conditions...');
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('*')
+        .order('Patologia');
 
-        if (error) {
-          console.error('SearchCondition: Error fetching conditions:', error);
-          toast.error("Errore nel caricamento delle patologie");
-          throw error;
-        }
-
-        console.log('SearchCondition: Successfully fetched conditions:', {
-          count: data?.length,
-          firstCondition: data?.[0],
-          lastCondition: data?.[data.length - 1]
-        });
-
-        return data || [];
-      } catch (err) {
-        console.error('SearchCondition: Unexpected error:', err);
-        throw err;
+      if (error) {
+        console.error('Error fetching conditions:', error);
+        throw error;
       }
+
+      console.log('Fetched conditions:', data);
+      return data;
     },
-    retry: 2,
-    retryDelay: 1000
+    meta: {
+      errorMessage: "Errore nel caricamento delle patologie"
+    }
   });
+
+  // Handle error with toast
+  if (error) {
+    toast.error("Errore nel caricamento delle patologie");
+  }
 
   const filteredConditions = conditions?.filter(condition => {
     const matchesSearch = searchTerm 
@@ -55,32 +50,6 @@ export default function SearchCondition() {
       : condition.Patologia.startsWith(selectedLetter);
     return matchesSearch && matchesLetter;
   });
-
-  console.log('SearchCondition: Filtered conditions:', {
-    total: conditions?.length,
-    filtered: filteredConditions?.length,
-    searchTerm,
-    selectedLetter
-  });
-
-  if (error) {
-    console.error('SearchCondition: Rendering error state:', error);
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-primary mb-8">Cerca una Patologia</h1>
-        <div className="text-center py-8 text-red-500">
-          <p>Si è verificato un errore nel caricamento delle patologie.</p>
-          <p className="text-sm mt-2">Dettagli: {error.message}</p>
-          <Button 
-            onClick={() => window.location.reload()} 
-            className="mt-4"
-          >
-            Riprova
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -97,6 +66,7 @@ export default function SearchCondition() {
         />
       </div>
 
+      {/* Alphabetical Index */}
       <div className="flex flex-wrap gap-2 mb-8">
         {LETTERS.map((letter) => (
           <Button
@@ -115,17 +85,6 @@ export default function SearchCondition() {
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="p-6 animate-pulse bg-gray-100" />
           ))}
-        </div>
-      ) : !conditions || conditions.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500 mb-4">Nessuna patologia trovata</p>
-          <Link 
-            to="/inserisci-patologia"
-            className="inline-flex items-center text-primary hover:text-primary/80"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Clicca qui per aggiungerla
-          </Link>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -152,6 +111,19 @@ export default function SearchCondition() {
               </div>
             </Card>
           ))}
+        </div>
+      )}
+
+      {filteredConditions?.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-500 mb-4">Nessuna patologia trovata</p>
+          <Link 
+            to="/inserisci-patologia"
+            className="inline-flex items-center text-primary hover:text-primary/80"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Clicca qui per aggiungerla
+          </Link>
         </div>
       )}
     </div>
