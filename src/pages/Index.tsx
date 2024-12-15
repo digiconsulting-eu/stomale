@@ -3,8 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewCard } from "@/components/ReviewCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { setPageTitle, getDefaultTitle } from "@/utils/pageTitle";
 
 export default function Index() {
+  useEffect(() => {
+    setPageTitle(getDefaultTitle());
+  }, []);
+
   const { data: latestReviews } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
