@@ -5,17 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { setPageTitle, getDefaultTitle } from "@/utils/pageTitle";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Index() {
   useEffect(() => {
     setPageTitle(getDefaultTitle());
   }, []);
 
-  const { data: latestReviews, error } = useQuery({
+  const { data: latestReviews, isLoading, error } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
       console.log('Index: Starting to fetch latest reviews...');
-      const { data, error } = await supabase
+      
+      const { data, error, count } = await supabase
         .from('reviews')
         .select(`
           id,
@@ -31,7 +33,7 @@ export default function Index() {
           PATOLOGIE (
             Patologia
           )
-        `)
+        `, { count: 'exact' })
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(6);
@@ -41,13 +43,61 @@ export default function Index() {
         throw error;
       }
 
-      console.log('Index: Successfully fetched reviews:', data);
-      return data;
-    }
+      console.log('Index: Successfully fetched reviews:', { 
+        count, 
+        reviews: data?.length,
+        firstReview: data?.[0]
+      });
+
+      return data || [];
+    },
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 1000 * 60 * 5 // Consider data fresh for 5 minutes
   });
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <section className="mb-16">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <Skeleton className="h-12 w-3/4 mx-auto mb-4" />
+            <Skeleton className="h-20 w-full mb-8" />
+            <div className="flex justify-center gap-4">
+              <Skeleton className="h-12 w-40" />
+              <Skeleton className="h-12 w-40" />
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div className="flex justify-between items-center mb-8">
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-10 w-24" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-[200px]" />
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   if (error) {
-    console.error('Index: Error in reviews query:', error);
+    console.error('Index: Error rendering reviews:', error);
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold text-red-500 mb-4">
+          Si è verificato un errore nel caricamento delle recensioni
+        </h1>
+        <p className="text-gray-600 mb-4">{error.message}</p>
+        <Button onClick={() => window.location.reload()}>
+          Riprova
+        </Button>
+      </div>
+    );
   }
 
   return (
@@ -79,18 +129,14 @@ export default function Index() {
             <Link to="/recensioni">Vedi tutte</Link>
           </Button>
         </div>
-        {error ? (
-          <div className="text-center py-8 text-red-500">
-            <p>Si è verificato un errore nel caricamento delle recensioni.</p>
-            <p className="text-sm mt-2">Dettagli: {error.message}</p>
-          </div>
-        ) : !latestReviews || latestReviews.length === 0 ? (
+        
+        {!latestReviews || latestReviews.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500">Non ci sono ancora recensioni.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {latestReviews?.map((review) => (
+            {latestReviews.map((review) => (
               <ReviewCard
                 key={review.id}
                 id={review.id}
