@@ -34,7 +34,6 @@ const Reviews = () => {
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
-            created_at,
             PATOLOGIE (
               Patologia
             )
@@ -58,20 +57,28 @@ const Reviews = () => {
     retry: 3
   });
 
-  if (error) {
-    console.error('Error loading reviews:', error);
-    toast.error("Errore nel caricamento delle recensioni");
-  }
-
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-[200px]" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('Error loading reviews:', error);
+    toast.error("Errore nel caricamento delle recensioni");
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
+        <p className="text-center text-red-500">
+          Si è verificato un errore nel caricamento delle recensioni. Riprova più tardi.
+        </p>
       </div>
     );
   }
