@@ -17,21 +17,33 @@ export default function SearchCondition() {
   const { data: conditions, isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('Starting to fetch conditions from PATOLOGIE table...');
-      const { data, error } = await supabase
-        .from('PATOLOGIE')
-        .select('*')
-        .order('Patologia');
+      console.log('SearchCondition: Starting to fetch conditions...');
+      try {
+        const { data, error } = await supabase
+          .from('PATOLOGIE')
+          .select('*')
+          .order('Patologia');
 
-      if (error) {
-        console.error('Error fetching conditions:', error);
-        toast.error("Errore nel caricamento delle patologie");
-        throw error;
+        if (error) {
+          console.error('SearchCondition: Error fetching conditions:', error);
+          toast.error("Errore nel caricamento delle patologie");
+          throw error;
+        }
+
+        console.log('SearchCondition: Successfully fetched conditions:', {
+          count: data?.length,
+          firstCondition: data?.[0],
+          lastCondition: data?.[data.length - 1]
+        });
+
+        return data || [];
+      } catch (err) {
+        console.error('SearchCondition: Unexpected error:', err);
+        throw err;
       }
-
-      console.log('Successfully fetched conditions:', data);
-      return data;
-    }
+    },
+    retry: 2,
+    retryDelay: 1000
   });
 
   const filteredConditions = conditions?.filter(condition => {
@@ -44,7 +56,31 @@ export default function SearchCondition() {
     return matchesSearch && matchesLetter;
   });
 
-  console.log('Filtered conditions:', filteredConditions);
+  console.log('SearchCondition: Filtered conditions:', {
+    total: conditions?.length,
+    filtered: filteredConditions?.length,
+    searchTerm,
+    selectedLetter
+  });
+
+  if (error) {
+    console.error('SearchCondition: Rendering error state:', error);
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-primary mb-8">Cerca una Patologia</h1>
+        <div className="text-center py-8 text-red-500">
+          <p>Si è verificato un errore nel caricamento delle patologie.</p>
+          <p className="text-sm mt-2">Dettagli: {error.message}</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="mt-4"
+          >
+            Riprova
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -80,12 +116,7 @@ export default function SearchCondition() {
             <Card key={i} className="p-6 animate-pulse bg-gray-100" />
           ))}
         </div>
-      ) : error ? (
-        <div className="text-center py-8 text-red-500">
-          <p>Si è verificato un errore nel caricamento delle patologie.</p>
-          <p className="text-sm mt-2">Dettagli: {error.message}</p>
-        </div>
-      ) : filteredConditions?.length === 0 ? (
+      ) : !conditions || conditions.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-gray-500 mb-4">Nessuna patologia trovata</p>
           <Link 
