@@ -20,9 +20,9 @@ const Reviews = () => {
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
-      console.log('Starting to fetch reviews...');
+      console.log('Reviews page: Starting to fetch reviews...');
       
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from('reviews')
         .select(`
           id,
@@ -38,22 +38,22 @@ const Reviews = () => {
           PATOLOGIE (
             Patologia
           )
-        `)
+        `, { count: 'exact' })
         .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching reviews:', error);
+        console.error('Reviews page: Error fetching reviews:', error);
         throw error;
       }
 
-      console.log('Successfully fetched reviews:', data);
+      console.log('Reviews page: Successfully fetched reviews:', { count, data });
       return data;
     }
   });
 
   if (error) {
-    console.error('Error in reviews query:', error);
+    console.error('Reviews page: Error in reviews query:', error);
     toast.error("Errore nel caricamento delle recensioni");
   }
 
@@ -80,7 +80,7 @@ const Reviews = () => {
   };
 
   const currentReviews = getCurrentPageReviews();
-  console.log('Current page reviews:', currentReviews);
+  console.log('Reviews page: Current page reviews:', currentReviews);
 
   return (
     <div className="container mx-auto px-4 py-8">
