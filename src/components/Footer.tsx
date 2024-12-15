@@ -10,8 +10,8 @@ const Footer = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
     line1: "StoMale.info",
-    line2: "Via Example 123, 12345 City",
-    line3: "P.IVA 12345678901",
+    line2: "Gestito da DigiConsulting",
+    line3: "P.IVA IT03720290364",
   });
 
   const isAdmin = localStorage.getItem("isAdmin") === "true";
