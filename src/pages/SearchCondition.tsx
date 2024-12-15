@@ -17,7 +17,7 @@ export default function SearchCondition() {
   const { data: conditions, isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('Fetching conditions from PATOLOGIE table...');
+      console.log('Starting to fetch conditions from PATOLOGIE table...');
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('*')
@@ -25,22 +25,14 @@ export default function SearchCondition() {
 
       if (error) {
         console.error('Error fetching conditions:', error);
+        toast.error("Errore nel caricamento delle patologie");
         throw error;
       }
 
-      console.log('Successfully fetched conditions:', data?.length || 0, 'results');
+      console.log('Successfully fetched conditions:', data);
       return data;
-    },
-    meta: {
-      errorMessage: "Errore nel caricamento delle patologie"
     }
   });
-
-  // Handle error with toast
-  if (error) {
-    console.error('Error in conditions query:', error);
-    toast.error("Errore nel caricamento delle patologie");
-  }
 
   const filteredConditions = conditions?.filter(condition => {
     const matchesSearch = searchTerm 
@@ -52,7 +44,7 @@ export default function SearchCondition() {
     return matchesSearch && matchesLetter;
   });
 
-  console.log('Filtered conditions:', filteredConditions?.length || 0, 'results');
+  console.log('Filtered conditions:', filteredConditions);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -69,7 +61,6 @@ export default function SearchCondition() {
         />
       </div>
 
-      {/* Alphabetical Index */}
       <div className="flex flex-wrap gap-2 mb-8">
         {LETTERS.map((letter) => (
           <Button
@@ -91,7 +82,8 @@ export default function SearchCondition() {
         </div>
       ) : error ? (
         <div className="text-center py-8 text-red-500">
-          Si è verificato un errore nel caricamento delle patologie.
+          <p>Si è verificato un errore nel caricamento delle patologie.</p>
+          <p className="text-sm mt-2">Dettagli: {error.message}</p>
         </div>
       ) : filteredConditions?.length === 0 ? (
         <div className="text-center py-8">
