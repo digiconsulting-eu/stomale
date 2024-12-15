@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, BookOpen } from "lucide-react";
+import { Search, BookOpen, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 const LETTERS = ["Tutte", "A", "B", "C", "D", "E", "F", "G", "H", "I", "L", "M", "N", "O", "P", "R", "S", "T", "U", "V", "Z"];
@@ -42,8 +42,12 @@ export default function SearchCondition() {
   }
 
   const filteredConditions = conditions?.filter(condition => {
-    const matchesSearch = condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLetter = selectedLetter === "Tutte" || condition.Patologia.startsWith(selectedLetter);
+    const matchesSearch = searchTerm 
+      ? condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
+      : true;
+    const matchesLetter = selectedLetter === "Tutte" 
+      ? true 
+      : condition.Patologia.startsWith(selectedLetter);
     return matchesSearch && matchesLetter;
   });
 
@@ -112,7 +116,14 @@ export default function SearchCondition() {
 
       {filteredConditions?.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-500">Nessuna patologia trovata</p>
+          <p className="text-gray-500 mb-4">Nessuna patologia trovata</p>
+          <Link 
+            to="/inserisci-patologia"
+            className="inline-flex items-center text-primary hover:text-primary/80"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Clicca qui per aggiungerla
+          </Link>
         </div>
       )}
     </div>
