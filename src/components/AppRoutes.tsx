@@ -11,9 +11,6 @@ import Login from "@/pages/Login";
 import UserDashboard from "@/pages/UserDashboard";
 import Reviews from "@/pages/Reviews";
 import InsertCondition from "@/pages/InsertCondition";
-import Blog from "@/pages/Blog";
-import AddArticle from "@/pages/AddArticle";
-import ArticleDetail from "@/pages/ArticleDetail";
 import ReviewManagement from "@/pages/ReviewManagement";
 import UserManagement from "@/pages/UserManagement";
 import CookiePolicy from "@/pages/CookiePolicy";
@@ -32,9 +29,6 @@ export const AppRoutes = () => {
       <Route path="/cerca-patologia" element={<SearchCondition />} />
       <Route path="/cerca-sintomi" element={<div>Cerca Sintomi Page</div>} />
       <Route path="/inserisci-patologia" element={<InsertCondition />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/blog/nuovo" element={<AddArticle />} />
-      <Route path="/blog/articolo/:id" element={<ArticleDetail />} />
       <Route path="/login" element={<Login />} />
       <Route path="/registrati" element={<Register />} />
       <Route path="/recupera-password" element={<RecoverPassword />} />

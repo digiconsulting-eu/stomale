@@ -12,7 +12,6 @@ export const NavigationMenu = ({ isMobile = false, onItemClick }: NavigationMenu
     { to: "/cerca-patologia", label: "Cerca Patologia" },
     { to: "/inserisci-patologia", label: "Inserisci Patologia" },
     { to: "/cerca-sintomi", label: "Cerca Sintomi" },
-    { to: "/blog", label: "Blog" },
   ];
 
   const baseClasses = "text-gray-600 hover:text-primary transition-colors";

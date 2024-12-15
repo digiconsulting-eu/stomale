@@ -27,7 +27,6 @@ export const Header = () => {
             .eq('email', session.user.email);
           
           setIsAdmin(Array.isArray(adminData) && adminData.length > 0);
-          console.log("Admin check in header:", { isAdmin: adminData?.length > 0, email: session.user.email });
         } catch (error) {
           console.error("Error checking admin status:", error);
           setIsAdmin(false);
@@ -40,7 +39,6 @@ export const Header = () => {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed in header:", event);
       const isAuthenticated = !!session;
       setIsLoggedIn(isAuthenticated);
       
@@ -52,7 +50,6 @@ export const Header = () => {
             .eq('email', session.user.email);
           
           setIsAdmin(Array.isArray(adminData) && adminData.length > 0);
-          console.log("Admin status updated:", { isAdmin: adminData?.length > 0, email: session.user.email });
         } catch (error) {
           console.error("Error checking admin status:", error);
           setIsAdmin(false);
@@ -88,7 +85,7 @@ export const Header = () => {
             <img 
               src="/lovable-uploads/92055c77-766b-4e12-8cf9-d2959e377076.png"
               alt="StoMale.info Logo" 
-              className="h-12 w-auto"
+              className="h-16 w-auto"
               style={{ objectFit: 'contain' }}
             />
           </Link>
