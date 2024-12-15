@@ -20,7 +20,8 @@ const Reviews = () => {
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
-      console.log('Fetching reviews from reviews table...');
+      console.log('Starting to fetch reviews...');
+      
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -46,7 +47,7 @@ const Reviews = () => {
         throw error;
       }
 
-      console.log('Successfully fetched reviews:', data?.length || 0, 'results');
+      console.log('Successfully fetched reviews:', data);
       return data;
     }
   });
@@ -79,7 +80,7 @@ const Reviews = () => {
   };
 
   const currentReviews = getCurrentPageReviews();
-  console.log('Current page reviews:', currentReviews?.length || 0, 'results');
+  console.log('Current page reviews:', currentReviews);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -87,7 +88,8 @@ const Reviews = () => {
       
       {error ? (
         <div className="text-center py-8 text-red-500">
-          Si è verificato un errore nel caricamento delle recensioni.
+          <p>Si è verificato un errore nel caricamento delle recensioni.</p>
+          <p className="text-sm mt-2">Dettagli: {error.message}</p>
         </div>
       ) : reviews?.length === 0 ? (
         <div className="text-center py-8">
