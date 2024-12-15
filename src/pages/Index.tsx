@@ -46,10 +46,10 @@ export default function Index() {
             Le tue esperienze possono fare la differenza.
           </p>
           <div className="flex justify-center gap-4">
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="bg-primary text-white hover:bg-primary-hover">
               <Link to="/nuova-recensione">Condividi la tua Storia</Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
+            <Button asChild size="lg" className="bg-primary text-white hover:bg-primary-hover">
               <Link to="/cerca-patologia">Cerca una Patologia</Link>
             </Button>
           </div>
