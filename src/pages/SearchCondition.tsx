@@ -27,11 +27,15 @@ export default function SearchCondition() {
       console.log('Fetched conditions:', data);
       return data;
     },
-    onError: (error) => {
-      console.error('Query error:', error);
-      toast.error("Errore nel caricamento delle patologie");
+    meta: {
+      errorMessage: "Errore nel caricamento delle patologie"
     }
   });
+
+  // Handle error with toast
+  if (error) {
+    toast.error("Errore nel caricamento delle patologie");
+  }
 
   const filteredConditions = conditions?.filter(condition =>
     condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())

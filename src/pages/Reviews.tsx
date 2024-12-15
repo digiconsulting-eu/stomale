@@ -49,35 +49,15 @@ const Reviews = () => {
       console.log('Fetched reviews:', data);
       return data;
     },
-    onError: (error) => {
-      console.error('Query error:', error);
-      toast.error("Errore nel caricamento delle recensioni");
+    meta: {
+      errorMessage: "Errore nel caricamento delle recensioni"
     }
   });
 
+  // Handle error with useEffect
   if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-500 mb-4">
-            Errore nel caricamento delle recensioni
-          </h1>
-          <p className="text-gray-600">
-            Si è verificato un errore durante il caricamento delle recensioni. Riprova più tardi.
-          </p>
-        </div>
-      </div>
-    );
+    toast.error("Errore nel caricamento delle recensioni");
   }
-
-  const totalPages = Math.ceil((reviews?.length || 0) / reviewsPerPage);
-
-  const getCurrentPageReviews = () => {
-    if (!reviews) return [];
-    const startIndex = (currentPage - 1) * reviewsPerPage;
-    const endIndex = startIndex + reviewsPerPage;
-    return reviews.slice(startIndex, endIndex);
-  };
 
   if (isLoading) {
     return (
@@ -91,6 +71,15 @@ const Reviews = () => {
       </div>
     );
   }
+
+  const totalPages = Math.ceil((reviews?.length || 0) / reviewsPerPage);
+
+  const getCurrentPageReviews = () => {
+    if (!reviews) return [];
+    const startIndex = (currentPage - 1) * reviewsPerPage;
+    const endIndex = startIndex + reviewsPerPage;
+    return reviews.slice(startIndex, endIndex);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
