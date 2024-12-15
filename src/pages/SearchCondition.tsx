@@ -4,11 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, BookOpen } from "lucide-react";
 import { toast } from "sonner";
+
+const LETTERS = ["Tutte", "A", "B", "C", "D", "E", "F", "G", "H", "I", "L", "M", "N", "O", "P", "R", "S", "T", "U", "V", "Z"];
 
 export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLetter, setSelectedLetter] = useState("Tutte");
 
   const { data: conditions, isLoading, error } = useQuery({
     queryKey: ['conditions'],
@@ -37,24 +41,11 @@ export default function SearchCondition() {
     toast.error("Errore nel caricamento delle patologie");
   }
 
-  const filteredConditions = conditions?.filter(condition =>
-    condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-500 mb-4">
-            Errore nel caricamento delle patologie
-          </h1>
-          <p className="text-gray-600">
-            Si è verificato un errore durante il caricamento delle patologie. Riprova più tardi.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const filteredConditions = conditions?.filter(condition => {
+    const matchesSearch = condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLetter = selectedLetter === "Tutte" || condition.Patologia.startsWith(selectedLetter);
+    return matchesSearch && matchesLetter;
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -71,6 +62,20 @@ export default function SearchCondition() {
         />
       </div>
 
+      {/* Alphabetical Index */}
+      <div className="flex flex-wrap gap-2 mb-8">
+        {LETTERS.map((letter) => (
+          <Button
+            key={letter}
+            variant={selectedLetter === letter ? "default" : "outline"}
+            className="min-w-[40px]"
+            onClick={() => setSelectedLetter(letter)}
+          >
+            {letter}
+          </Button>
+        ))}
+      </div>
+
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
@@ -80,21 +85,27 @@ export default function SearchCondition() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredConditions?.map((condition) => (
-            <Link 
-              key={condition.id} 
-              to={`/patologia/${condition.Patologia.toLowerCase()}`}
-            >
-              <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                <h2 className="text-xl font-semibold text-primary">
+            <Card key={condition.id} className="p-6">
+              <div className="flex flex-col h-full">
+                <h2 className="text-xl font-semibold text-primary mb-2">
                   {condition.Patologia}
                 </h2>
                 {condition.Descrizione && (
-                  <p className="mt-2 text-gray-600 line-clamp-2">
+                  <p className="text-gray-600 line-clamp-1 mb-4 flex-grow">
                     {condition.Descrizione}
                   </p>
                 )}
-              </Card>
-            </Link>
+                <Link 
+                  to={`/patologia/${condition.Patologia.toLowerCase()}`}
+                  className="w-full"
+                >
+                  <Button className="w-full" variant="outline">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    Leggi Esperienze
+                  </Button>
+                </Link>
+              </div>
+            </Card>
           ))}
         </div>
       )}
