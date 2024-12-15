@@ -11,12 +11,13 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const reviewsPerPage = 20;
 
-  const { data: reviews, isLoading } = useQuery({
+  const { data: reviews, isLoading, error } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
       console.log('Fetching reviews...');
@@ -47,8 +48,27 @@ const Reviews = () => {
 
       console.log('Fetched reviews:', data);
       return data;
+    },
+    onError: (error) => {
+      console.error('Query error:', error);
+      toast.error("Errore nel caricamento delle recensioni");
     }
   });
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-500 mb-4">
+            Errore nel caricamento delle recensioni
+          </h1>
+          <p className="text-gray-600">
+            Si è verificato un errore durante il caricamento delle recensioni. Riprova più tardi.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const totalPages = Math.ceil((reviews?.length || 0) / reviewsPerPage);
 
