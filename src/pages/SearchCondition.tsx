@@ -21,7 +21,7 @@ export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState("Tutte");
 
-  const { data: conditions, isLoading, error } = useQuery({
+  const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
       console.log('Starting to fetch conditions from PATOLOGIE table...');
@@ -36,13 +36,8 @@ export default function SearchCondition() {
         throw error;
       }
 
-      if (!data || data.length === 0) {
-        console.log('No conditions found in the database');
-        return [];
-      }
-
       console.log('Successfully fetched conditions:', data);
-      return data as Condition[];
+      return (data || []) as Condition[];
     },
     retry: 3,
     retryDelay: 1000,
@@ -56,9 +51,7 @@ export default function SearchCondition() {
     toast.error("Errore nel caricamento delle patologie. Riprova più tardi.");
   }
 
-  const filteredConditions = conditions?.filter(condition => {
-    if (!condition) return false;
-    
+  const filteredConditions = conditions.filter(condition => {
     const matchesSearch = searchTerm 
       ? condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
@@ -66,7 +59,7 @@ export default function SearchCondition() {
       ? true 
       : condition.Patologia.startsWith(selectedLetter);
     return matchesSearch && matchesLetter;
-  }) || [];
+  });
 
   console.log('Filtered conditions:', filteredConditions);
 
@@ -82,6 +75,11 @@ export default function SearchCondition() {
             className="pl-10 py-6 text-lg"
             disabled
           />
+        </div>
+        <div className="flex flex-wrap gap-2 mb-8">
+          {LETTERS.map((letter) => (
+            <Skeleton key={letter} className="h-10 w-10" />
+          ))}
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
@@ -128,7 +126,7 @@ export default function SearchCondition() {
                 {condition.Patologia}
               </h2>
               {condition.Descrizione && (
-                <p className="text-gray-600 line-clamp-1 mb-4 flex-grow">
+                <p className="text-gray-600 line-clamp-2 mb-4 flex-grow">
                   {condition.Descrizione}
                 </p>
               )}
