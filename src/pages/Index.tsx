@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Index() {
-  const { data: latestReviews, isLoading, isError } = useQuery({
+  const { data: latestReviews, isLoading, isError, error } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
       try {
@@ -39,28 +39,22 @@ export default function Index() {
           throw error;
         }
 
-        if (!data) {
-          console.log('No reviews found');
-          return [];
-        }
-
-        console.log('Fetched reviews successfully:', data.length);
-        return data;
+        console.log('Successfully fetched reviews:', data?.length || 0);
+        return data || [];
       } catch (error) {
         console.error('Error in query function:', error);
-        if (error.message?.includes('429')) {
-          toast.error("Troppe richieste. Per favore, attendi qualche secondo e riprova.");
-        } else {
-          toast.error("Errore nel caricamento delle recensioni");
-        }
-        return [];
+        throw error;
       }
     },
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  if (isError) {
+    console.error('Query error:', error);
+    toast.error("Si è verificato un errore nel caricamento delle recensioni");
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -97,10 +91,6 @@ export default function Index() {
             Array(6).fill(0).map((_, i) => (
               <Skeleton key={i} className="h-[200px]" />
             ))
-          ) : isError ? (
-            <div className="col-span-full text-center py-8">
-              <p className="text-red-500">Si è verificato un errore nel caricamento delle recensioni.</p>
-            </div>
           ) : latestReviews && latestReviews.length > 0 ? (
             latestReviews.map((review) => (
               <ReviewCard

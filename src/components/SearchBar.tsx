@@ -34,27 +34,16 @@ export const SearchBar = () => {
           throw error;
         }
 
-        if (!data) {
-          console.log('No conditions found');
-          return [];
-        }
-
-        console.log('Successfully fetched conditions:', data.length);
-        return data.map(row => row.Patologia);
+        console.log('Successfully fetched conditions:', data?.length || 0);
+        return data?.map(row => row.Patologia) || [];
       } catch (error) {
         console.error('Error in conditions query:', error);
-        if (error.message?.includes('429')) {
-          toast.error("Troppe richieste. Per favore, attendi qualche secondo e riprova.");
-        } else {
-          toast.error("Errore nel caricamento delle patologie");
-        }
-        return [];
+        throw error;
       }
     },
-    staleTime: 30000, // Cache data for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   if (isError) {
