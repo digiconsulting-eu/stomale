@@ -23,7 +23,7 @@ export const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
-      <Route path="/patologia/recensione/:id" element={<ReviewDetail />} />
+      <Route path="/patologia/:condition/recensione/:id" element={<ReviewDetail />} />
       <Route path="/recensioni" element={<Reviews />} />
       <Route path="/nuova-recensione" element={<NewReview />} />
       <Route path="/cerca-patologia" element={<SearchCondition />} />

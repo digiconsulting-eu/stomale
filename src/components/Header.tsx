@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { NavigationMenu } from "./header/NavigationMenu";
 import { AuthButtons } from "./header/AuthButtons";
 import { MobileMenu } from "./header/MobileMenu";
-import { toast } from "sonner";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -68,17 +67,13 @@ export const Header = () => {
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
       setIsLoggedIn(false);
       setIsAdmin(false);
-      toast.success("Logout effettuato con successo");
       navigate('/');
     } catch (error) {
       console.error('Error during logout:', error);
-      toast.error("Errore durante il logout");
     }
   };
 
