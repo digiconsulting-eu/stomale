@@ -11,11 +11,11 @@ import { CookieConsent } from "./components/CookieConsent";
 import { AppRoutes } from "./components/AppRoutes";
 
 const ScrollToTop = () => {
-  const location = useLocation();
+  const { pathname } = useLocation();
   
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [location]);
+  }, [pathname]);
 
   return null;
 };
@@ -49,6 +49,8 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 30000, // Cache data for 30 seconds
+      gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
     },
   },
 });
