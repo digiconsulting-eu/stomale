@@ -24,28 +24,22 @@ export default function SearchCondition() {
   const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      try {
-        console.log("Fetching conditions from PATOLOGIE table...");
-        const { data, error } = await supabase
-          .from('PATOLOGIE')
-          .select('*')
-          .order('Patologia');
-        
-        if (error) {
-          console.error('Error fetching conditions:', error);
-          throw error;
-        }
-
-        console.log(`Found ${data?.length || 0} conditions in PATOLOGIE table`);
-        return data as Condition[] || [];
-      } catch (err) {
-        console.error('Error in queryFn:', err);
-        throw err;
+      console.log("Fetching conditions from PATOLOGIE table...");
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('*')
+        .order('Patologia');
+      
+      if (error) {
+        console.error('Error fetching conditions:', error);
+        throw error;
       }
+
+      console.log(`Found ${data?.length || 0} conditions`);
+      return data as Condition[];
     },
     meta: {
-      onError: (error: Error) => {
-        console.error('Query error:', error);
+      onError: () => {
         toast.error("Errore nel caricamento delle patologie. Riprova più tardi.");
       }
     }
@@ -61,8 +55,11 @@ export default function SearchCondition() {
     return matchesSearch && matchesLetter;
   });
 
-  console.log("Total conditions:", conditions.length);
   console.log("Filtered conditions:", filteredConditions);
+
+  if (error) {
+    console.error('Query error:', error);
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
