@@ -20,44 +20,55 @@ const Reviews = () => {
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
-      console.log('Fetching reviews...');
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          title,
-          experience,
-          diagnosis_difficulty,
-          symptoms_severity,
-          has_medication,
-          medication_effectiveness,
-          healing_possibility,
-          social_discomfort,
-          created_at,
-          PATOLOGIE (
-            Patologia
-          )
-        `)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false });
+      try {
+        console.log('Fetching reviews...');
+        const { data, error } = await supabase
+          .from('reviews')
+          .select(`
+            id,
+            title,
+            experience,
+            diagnosis_difficulty,
+            symptoms_severity,
+            has_medication,
+            medication_effectiveness,
+            healing_possibility,
+            social_discomfort,
+            created_at,
+            PATOLOGIE (
+              Patologia
+            )
+          `)
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching reviews:', error);
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          throw error;
+        }
+
+        if (!data) {
+          console.log('No reviews found');
+          return [];
+        }
+
+        console.log('Successfully fetched reviews:', data.length);
+        return data;
+      } catch (error) {
+        console.error('Error in reviews query:', error);
+        if (error.message?.includes('429')) {
+          toast.error("Troppe richieste. Per favore, attendi qualche secondo e riprova.");
+        } else {
+          toast.error("Errore nel caricamento delle recensioni");
+        }
         throw error;
       }
-
-      console.log('Fetched reviews:', data);
-      return data;
     },
-    meta: {
-      errorMessage: "Errore nel caricamento delle recensioni"
-    }
+    staleTime: 30000, // Cache data for 30 seconds
+    cacheTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+    retry: 3, // Retry failed requests 3 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
-
-  // Handle error with useEffect
-  if (error) {
-    toast.error("Errore nel caricamento delle recensioni");
-  }
 
   if (isLoading) {
     return (
@@ -101,6 +112,12 @@ const Reviews = () => {
             socialDiscomfort={review.social_discomfort}
           />
         ))}
+
+        {reviews?.length === 0 && (
+          <div className="col-span-full text-center py-8">
+            <p className="text-gray-500">Nessuna recensione disponibile al momento.</p>
+          </div>
+        )}
       </div>
 
       {totalPages > 1 && (
