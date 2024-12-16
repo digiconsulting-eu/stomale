@@ -36,16 +36,18 @@ export default function SearchCondition() {
           throw error;
         }
 
-        console.log("Fetched conditions:", data);
-        return data as Condition[] || [];
+        console.log("Fetched conditions successfully:", data);
+        return data as Condition[];
       } catch (err) {
         console.error('Error in queryFn:', err);
         throw err;
       }
-    }
+    },
+    retry: 1
   });
 
   if (error) {
+    console.error('Query error:', error);
     toast.error("Errore nel caricamento delle patologie. Riprova più tardi.");
   }
 
@@ -58,6 +60,8 @@ export default function SearchCondition() {
       : condition.Patologia.startsWith(selectedLetter);
     return matchesSearch && matchesLetter;
   });
+
+  console.log("Filtered conditions:", filteredConditions);
 
   return (
     <div className="container mx-auto px-4 py-8">
