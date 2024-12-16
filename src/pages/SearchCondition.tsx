@@ -37,10 +37,13 @@ export default function SearchCondition() {
       }
 
       console.log('Successfully fetched conditions:', data);
-      return data || [];
+      return (data || []) as Condition[];
     },
     retry: 3,
-    retryDelay: 1000
+    retryDelay: 1000,
+    meta: {
+      errorMessage: "Errore nel caricamento delle patologie"
+    }
   });
 
   if (error) {
@@ -57,6 +60,8 @@ export default function SearchCondition() {
       : condition.Patologia.startsWith(selectedLetter);
     return matchesSearch && matchesLetter;
   });
+
+  console.log('Filtered conditions:', filteredConditions);
 
   if (isLoading) {
     return (
