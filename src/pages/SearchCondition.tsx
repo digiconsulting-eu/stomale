@@ -24,6 +24,7 @@ export default function SearchCondition() {
   const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
+      console.log("Starting to fetch conditions from PATOLOGIE table...");
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('*')
