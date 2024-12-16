@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Index() {
-  const { data: latestReviews, isLoading, error } = useQuery({
+  const { data: latestReviews, isLoading, isError } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
       try {
@@ -38,22 +39,28 @@ export default function Index() {
           throw error;
         }
 
-        console.log('Fetched reviews successfully:', data);
+        if (!data) {
+          console.log('No reviews found');
+          return [];
+        }
+
+        console.log('Fetched reviews successfully:', data.length);
         return data;
       } catch (error) {
         console.error('Error in query function:', error);
-        throw error;
+        if (error.message?.includes('429')) {
+          toast.error("Troppe richieste. Per favore, attendi qualche secondo e riprova.");
+        } else {
+          toast.error("Errore nel caricamento delle recensioni");
+        }
+        return [];
       }
     },
-    meta: {
-      errorMessage: "Errore nel caricamento delle recensioni"
-    }
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
-
-  if (error) {
-    console.error('Query error:', error);
-    toast.error("Errore nel caricamento delle recensioni");
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -87,7 +94,13 @@ export default function Index() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
-            <p>Caricamento recensioni...</p>
+            Array(6).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-[200px]" />
+            ))
+          ) : isError ? (
+            <div className="col-span-full text-center py-8">
+              <p className="text-red-500">Si è verificato un errore nel caricamento delle recensioni.</p>
+            </div>
           ) : latestReviews && latestReviews.length > 0 ? (
             latestReviews.map((review) => (
               <ReviewCard
@@ -105,7 +118,9 @@ export default function Index() {
               />
             ))
           ) : (
-            <p>Nessuna recensione disponibile al momento.</p>
+            <div className="col-span-full text-center py-8">
+              <p className="text-gray-500">Nessuna recensione disponibile al momento.</p>
+            </div>
           )}
         </div>
       </section>

@@ -19,7 +19,7 @@ export const SearchBar = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { data: conditions = [] } = useQuery({
+  const { data: conditions = [], isError } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
       try {
@@ -34,15 +34,32 @@ export const SearchBar = () => {
           throw error;
         }
 
-        console.log('Fetched conditions successfully:', data);
+        if (!data) {
+          console.log('No conditions found');
+          return [];
+        }
+
+        console.log('Successfully fetched conditions:', data.length);
         return data.map(row => row.Patologia);
       } catch (error) {
         console.error('Error in conditions query:', error);
-        toast.error("Errore nel caricamento delle patologie");
-        throw error;
+        if (error.message?.includes('429')) {
+          toast.error("Troppe richieste. Per favore, attendi qualche secondo e riprova.");
+        } else {
+          toast.error("Errore nel caricamento delle patologie");
+        }
+        return [];
       }
-    }
+    },
+    staleTime: 30000, // Cache data for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+
+  if (isError) {
+    toast.error("Errore nel caricamento delle patologie");
+  }
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
