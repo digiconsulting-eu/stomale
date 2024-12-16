@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { NavigationMenu } from "./header/NavigationMenu";
 import { AuthButtons } from "./header/AuthButtons";
 import { MobileMenu } from "./header/MobileMenu";
+import { toast } from "sonner";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,6 +40,7 @@ export const Header = () => {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
       const isAuthenticated = !!session;
       setIsLoggedIn(isAuthenticated);
       
@@ -67,13 +69,20 @@ export const Header = () => {
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      if (error) {
+        console.error('Error during logout:', error);
+        toast.error("Errore durante il logout");
+        return;
+      }
       
       setIsLoggedIn(false);
       setIsAdmin(false);
-      navigate('/');
+      setIsMenuOpen(false);
+      navigate('/', { replace: true });
+      toast.success("Logout effettuato con successo");
     } catch (error) {
       console.error('Error during logout:', error);
+      toast.error("Errore durante il logout");
     }
   };
 

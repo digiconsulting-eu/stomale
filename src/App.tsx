@@ -22,15 +22,20 @@ const ScrollToTop = () => {
 
 const AuthStateHandler = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session?.user?.email);
       
       if (event === 'SIGNED_IN') {
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       } else if (event === 'SIGNED_OUT') {
-        navigate('/');
+        // Only redirect to home if we're on a protected route
+        const protectedRoutes = ['/dashboard', '/admin'];
+        if (protectedRoutes.some(route => location.pathname.startsWith(route))) {
+          navigate('/', { replace: true });
+        }
       } else if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed successfully');
       }
@@ -39,7 +44,7 @@ const AuthStateHandler = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, location]);
 
   return null;
 };
@@ -49,8 +54,8 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 30000, // Cache data for 30 seconds
-      gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+      staleTime: 30000,
+      gcTime: 5 * 60 * 1000,
     },
   },
 });
