@@ -28,8 +28,7 @@ export default function SearchCondition() {
         console.log("Fetching conditions from PATOLOGIE table...");
         const { data, error } = await supabase
           .from('PATOLOGIE')
-          .select('*')
-          .order('Patologia');
+          .select('*');
         
         if (error) {
           console.error('Error fetching conditions:', error);
@@ -37,7 +36,7 @@ export default function SearchCondition() {
         }
 
         console.log("Fetched conditions:", data);
-        return data || [];
+        return data as Condition[] || [];
       } catch (err) {
         console.error('Error in queryFn:', err);
         throw err;
