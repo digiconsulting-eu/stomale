@@ -24,7 +24,8 @@ export default function SearchCondition() {
   const { data: conditions, isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('Fetching conditions from PATOLOGIE table...');
+      console.log('Starting to fetch conditions from PATOLOGIE table...');
+      
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('*')
@@ -35,19 +36,29 @@ export default function SearchCondition() {
         throw error;
       }
 
+      if (!data || data.length === 0) {
+        console.log('No conditions found in the database');
+        return [];
+      }
+
       console.log('Successfully fetched conditions:', data);
       return data as Condition[];
     },
+    retry: 3,
+    retryDelay: 1000,
     meta: {
       errorMessage: "Errore nel caricamento delle patologie"
     }
   });
 
   if (error) {
+    console.error('Query error:', error);
     toast.error("Errore nel caricamento delle patologie. Riprova più tardi.");
   }
 
   const filteredConditions = conditions?.filter(condition => {
+    if (!condition) return false;
+    
     const matchesSearch = searchTerm 
       ? condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
@@ -55,7 +66,9 @@ export default function SearchCondition() {
       ? true 
       : condition.Patologia.startsWith(selectedLetter);
     return matchesSearch && matchesLetter;
-  });
+  }) || [];
+
+  console.log('Filtered conditions:', filteredConditions);
 
   if (isLoading) {
     return (
@@ -108,7 +121,7 @@ export default function SearchCondition() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredConditions?.map((condition) => (
+        {filteredConditions.map((condition) => (
           <Card key={condition.id} className="p-6">
             <div className="flex flex-col h-full">
               <h2 className="text-xl font-semibold text-primary mb-2">
@@ -133,7 +146,7 @@ export default function SearchCondition() {
         ))}
       </div>
 
-      {filteredConditions?.length === 0 && (
+      {filteredConditions.length === 0 && (
         <div className="text-center py-8">
           <p className="text-gray-500 mb-4">Nessuna patologia trovata</p>
           <Link 
