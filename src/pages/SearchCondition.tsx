@@ -47,8 +47,8 @@ export default function SearchCondition() {
         return [];
       }
     },
-    staleTime: 30000, // Cache data for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
@@ -94,7 +94,7 @@ export default function SearchCondition() {
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array(6).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-[200px]" />
+            <Skeleton key={i} className="h-[100px]" />
           ))}
         </div>
       ) : error ? (
@@ -111,23 +111,20 @@ export default function SearchCondition() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredConditions?.map((condition) => (
-            <Card key={condition.id} className="p-6">
-              <div className="flex flex-col h-full">
-                <h2 className="text-xl font-semibold text-primary mb-2">
+            <Card key={condition.id} className="p-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-primary truncate mr-4">
                   {condition.Patologia}
                 </h2>
-                {condition.Descrizione && (
-                  <p className="text-gray-600 line-clamp-2 mb-4 flex-grow">
-                    {condition.Descrizione}
-                  </p>
-                )}
                 <Link 
                   to={`/patologia/${condition.Patologia.toLowerCase()}`}
-                  className="w-full"
+                  className="shrink-0"
                 >
-                  <Button className="w-full" variant="outline">
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    Leggi Esperienze
+                  <Button 
+                    size="sm" 
+                    className="bg-primary hover:bg-primary-hover text-white px-3 py-1 h-8"
+                  >
+                    <BookOpen className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>
