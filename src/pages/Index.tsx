@@ -3,11 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewCard } from "@/components/ReviewCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { SearchBar } from "@/components/SearchBar";
 
 export default function Index() {
-  const { data: latestReviews } = useQuery({
+  const { data: latestReviews, isLoading, error } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
+      console.log('Fetching latest reviews...');
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -29,8 +31,16 @@ export default function Index() {
         .order('created_at', { ascending: false })
         .limit(6);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        throw error;
+      }
+
+      console.log('Fetched reviews:', data);
       return data;
+    },
+    meta: {
+      errorMessage: "Errore nel caricamento delle recensioni"
     }
   });
 
@@ -45,7 +55,8 @@ export default function Index() {
             Aiuta altre persone a capire meglio la loro condizione condividendo la tua storia.
             Le tue esperienze possono fare la differenza.
           </p>
-          <div className="flex justify-center gap-4">
+          <SearchBar />
+          <div className="flex justify-center gap-4 mt-8">
             <Button asChild size="lg" className="bg-primary text-white hover:bg-primary-hover">
               <Link to="/nuova-recensione">Condividi la tua Storia</Link>
             </Button>
