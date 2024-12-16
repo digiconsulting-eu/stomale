@@ -24,8 +24,6 @@ export default function SearchCondition() {
   const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('Starting to fetch conditions from PATOLOGIE table...');
-      
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('*')
@@ -36,18 +34,11 @@ export default function SearchCondition() {
         throw error;
       }
 
-      console.log('Successfully fetched conditions:', data);
       return (data || []) as Condition[];
-    },
-    retry: 3,
-    retryDelay: 1000,
-    meta: {
-      errorMessage: "Errore nel caricamento delle patologie"
     }
   });
 
   if (error) {
-    console.error('Query error:', error);
     toast.error("Errore nel caricamento delle patologie. Riprova più tardi.");
   }
 
@@ -60,8 +51,6 @@ export default function SearchCondition() {
       : condition.Patologia.startsWith(selectedLetter);
     return matchesSearch && matchesLetter;
   });
-
-  console.log('Filtered conditions:', filteredConditions);
 
   if (isLoading) {
     return (
