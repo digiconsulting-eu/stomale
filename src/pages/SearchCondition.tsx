@@ -37,7 +37,7 @@ export default function SearchCondition() {
       }
 
       console.log('Successfully fetched conditions:', data);
-      return (data || []) as Condition[];
+      return data as Condition[];
     },
     retry: 3,
     retryDelay: 1000,
