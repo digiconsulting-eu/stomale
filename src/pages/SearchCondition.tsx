@@ -1,88 +1,23 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { SearchBar } from "@/components/SearchBar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, BookOpen, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { ConditionCard } from "@/components/condition/ConditionCard";
-import {
-  CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
-  CONDITIONS_E, CONDITIONS_F, CONDITIONS_G, CONDITIONS_H,
-  CONDITIONS_I, CONDITIONS_L, CONDITIONS_M, CONDITIONS_N,
-  CONDITIONS_O, CONDITIONS_P, CONDITIONS_R, CONDITIONS_S,
-  CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
-} from "@/components/conditions";
 
-type Condition = {
-  id: number;
-  Patologia: string;
-  Descrizione: string | null;
-};
-
-type ConditionType = string | Condition;
-
-const alphabet = ['TUTTE', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'V', 'Z'];
-
-const getAllConditions = (): string[] => [
-  ...(CONDITIONS_A ?? []),
-  ...(CONDITIONS_B ?? []),
-  ...(CONDITIONS_C ?? []),
-  ...(CONDITIONS_D ?? []),
-  ...(CONDITIONS_E ?? []),
-  ...(CONDITIONS_F ?? []),
-  ...(CONDITIONS_G ?? []),
-  ...(CONDITIONS_H ?? []),
-  ...(CONDITIONS_I ?? []),
-  ...(CONDITIONS_L ?? []),
-  ...(CONDITIONS_M ?? []),
-  ...(CONDITIONS_N ?? []),
-  ...(CONDITIONS_O ?? []),
-  ...(CONDITIONS_P ?? []),
-  ...(CONDITIONS_R ?? []),
-  ...(CONDITIONS_S ?? []),
-  ...(CONDITIONS_T ?? []),
-  ...(CONDITIONS_U ?? []),
-  ...(CONDITIONS_V ?? []),
-  ...(CONDITIONS_Z ?? [])
-].filter(Boolean);
-
-const getConditionsByLetter = (letter: string): string[] => {
-  if (letter === 'TUTTE') return getAllConditions();
-  
-  switch (letter) {
-    case 'A': return CONDITIONS_A ?? [];
-    case 'B': return CONDITIONS_B ?? [];
-    case 'C': return CONDITIONS_C ?? [];
-    case 'D': return CONDITIONS_D ?? [];
-    case 'E': return CONDITIONS_E ?? [];
-    case 'F': return CONDITIONS_F ?? [];
-    case 'G': return CONDITIONS_G ?? [];
-    case 'H': return CONDITIONS_H ?? [];
-    case 'I': return CONDITIONS_I ?? [];
-    case 'L': return CONDITIONS_L ?? [];
-    case 'M': return CONDITIONS_M ?? [];
-    case 'N': return CONDITIONS_N ?? [];
-    case 'O': return CONDITIONS_O ?? [];
-    case 'P': return CONDITIONS_P ?? [];
-    case 'R': return CONDITIONS_R ?? [];
-    case 'S': return CONDITIONS_S ?? [];
-    case 'T': return CONDITIONS_T ?? [];
-    case 'U': return CONDITIONS_U ?? [];
-    case 'V': return CONDITIONS_V ?? [];
-    case 'Z': return CONDITIONS_Z ?? [];
-    default: return [];
-  }
-};
+const LETTERS = ["Tutte", "A", "B", "C", "D", "E", "F", "G", "H", "I", "L", "M", "N", "O", "P", "R", "S", "T", "U", "V", "Z"];
 
 export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLetter, setSelectedLetter] = useState('TUTTE');
+  const [selectedLetter, setSelectedLetter] = useState("Tutte");
 
-  const { data: conditions, isLoading, error } = useQuery<Condition[]>({
+  const { data: conditions, isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('Starting to fetch conditions from PATOLOGIE table...');
+      console.log('Fetching conditions...');
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('*')
@@ -93,80 +28,102 @@ export default function SearchCondition() {
         throw error;
       }
 
-      console.log('Successfully fetched conditions:', data);
+      console.log('Fetched conditions:', data);
       return data;
     },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: 3
+    meta: {
+      errorMessage: "Errore nel caricamento delle patologie"
+    }
   });
 
+  // Handle error with toast
   if (error) {
-    console.error('Error loading conditions:', error);
     toast.error("Errore nel caricamento delle patologie");
   }
 
-  const allConditions = getAllConditions();
-  
-  const filteredConditions: ConditionType[] = searchTerm
-    ? allConditions.filter(condition =>
-        condition.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : getConditionsByLetter(selectedLetter);
+  const filteredConditions = conditions?.filter(condition => {
+    const matchesSearch = searchTerm 
+      ? condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
+      : true;
+    const matchesLetter = selectedLetter === "Tutte" 
+      ? true 
+      : condition.Patologia.startsWith(selectedLetter);
+    return matchesSearch && matchesLetter;
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-primary mb-8">Cerca Patologia</h1>
+      <h1 className="text-3xl font-bold text-primary mb-8">Cerca una Patologia</h1>
       
-      <div className="mb-8">
-        <SearchBar
+      <div className="relative mb-8">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <Input
+          type="text"
           placeholder="Cerca una patologia..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10 py-6 text-lg"
         />
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-8 justify-center">
-        {alphabet.map((letter) => (
-          <button
+      {/* Alphabetical Index */}
+      <div className="flex flex-wrap gap-2 mb-8">
+        {LETTERS.map((letter) => (
+          <Button
             key={letter}
-            onClick={() => {
-              setSelectedLetter(letter);
-              setSearchTerm("");
-            }}
-            className={`px-4 py-2 rounded-lg ${
-              selectedLetter === letter
-                ? "bg-primary text-white"
-                : "bg-gray-100 hover:bg-gray-200"
-            }`}
+            variant={selectedLetter === letter ? "default" : "outline"}
+            className="min-w-[40px]"
+            onClick={() => setSelectedLetter(letter)}
           >
             {letter}
-          </button>
+          </Button>
         ))}
       </div>
 
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-[100px]" />
+            <Card key={i} className="p-6 animate-pulse bg-gray-100" />
           ))}
-        </div>
-      ) : filteredConditions?.length === 0 ? (
-        <div className="text-center">
-          <p className="text-gray-500 mb-4">
-            Nessuna patologia trovata
-          </p>
-          <Link 
-            to="/inserisci-patologia"
-            className="text-primary hover:underline"
-          >
-            Clicca qui per aggiungerla
-          </Link>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredConditions?.map((condition, index) => (
-            <ConditionCard key={index} condition={condition} />
+          {filteredConditions?.map((condition) => (
+            <Card key={condition.id} className="p-6">
+              <div className="flex flex-col h-full">
+                <h2 className="text-xl font-semibold text-primary mb-2">
+                  {condition.Patologia}
+                </h2>
+                {condition.Descrizione && (
+                  <p className="text-gray-600 line-clamp-1 mb-4 flex-grow">
+                    {condition.Descrizione}
+                  </p>
+                )}
+                <Link 
+                  to={`/patologia/${condition.Patologia.toLowerCase()}`}
+                  className="w-full"
+                >
+                  <Button className="w-full" variant="outline">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    Leggi Esperienze
+                  </Button>
+                </Link>
+              </div>
+            </Card>
           ))}
+        </div>
+      )}
+
+      {filteredConditions?.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-500 mb-4">Nessuna patologia trovata</p>
+          <Link 
+            to="/inserisci-patologia"
+            className="inline-flex items-center text-primary hover:text-primary/80"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Clicca qui per aggiungerla
+          </Link>
         </div>
       )}
     </div>

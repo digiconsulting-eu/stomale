@@ -20,65 +20,54 @@ const Reviews = () => {
   const { data: reviews, isLoading, error } = useQuery({
     queryKey: ['reviews'],
     queryFn: async () => {
-      console.log('Reviews page: Starting to fetch reviews...');
-      try {
-        const { data, error } = await supabase
-          .from('reviews')
-          .select(`
-            id,
-            title,
-            experience,
-            diagnosis_difficulty,
-            symptoms_severity,
-            has_medication,
-            medication_effectiveness,
-            healing_possibility,
-            social_discomfort,
-            PATOLOGIE (
-              Patologia
-            )
-          `)
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false });
+      console.log('Fetching reviews...');
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          title,
+          experience,
+          diagnosis_difficulty,
+          symptoms_severity,
+          has_medication,
+          medication_effectiveness,
+          healing_possibility,
+          social_discomfort,
+          created_at,
+          PATOLOGIE (
+            Patologia
+          )
+        `)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching reviews:', error);
-          throw error;
-        }
-
-        console.log('Successfully fetched reviews:', data);
-        return data;
-      } catch (error) {
-        console.error('Error in reviews query:', error);
+      if (error) {
+        console.error('Error fetching reviews:', error);
         throw error;
       }
+
+      console.log('Fetched reviews:', data);
+      return data;
     },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: 3
+    meta: {
+      errorMessage: "Errore nel caricamento delle recensioni"
+    }
   });
+
+  // Handle error with useEffect
+  if (error) {
+    toast.error("Errore nel caricamento delle recensioni");
+  }
 
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-[200px]" />
           ))}
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    console.error('Error loading reviews:', error);
-    toast.error("Errore nel caricamento delle recensioni");
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
-        <p className="text-center text-red-500">
-          Si è verificato un errore nel caricamento delle recensioni. Riprova più tardi.
-        </p>
       </div>
     );
   }
@@ -92,34 +81,27 @@ const Reviews = () => {
     return reviews.slice(startIndex, endIndex);
   };
 
-  const currentReviews = getCurrentPageReviews();
-  console.log('Current page reviews:', currentReviews);
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
       
-      {currentReviews.length === 0 ? (
-        <p className="text-center text-gray-500">Nessuna recensione disponibile al momento.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {currentReviews.map((review) => (
-            <ReviewCard 
-              key={review.id}
-              id={review.id}
-              title={review.title}
-              condition={review.PATOLOGIE?.Patologia.toLowerCase() || ''}
-              experience={review.experience}
-              diagnosisDifficulty={review.diagnosis_difficulty}
-              symptomsSeverity={review.symptoms_severity}
-              hasMedication={review.has_medication}
-              medicationEffectiveness={review.medication_effectiveness}
-              healingPossibility={review.healing_possibility}
-              socialDiscomfort={review.social_discomfort}
-            />
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {getCurrentPageReviews().map((review) => (
+          <ReviewCard 
+            key={review.id}
+            id={review.id}
+            title={review.title}
+            condition={review.PATOLOGIE?.Patologia || ''}
+            experience={review.experience}
+            diagnosisDifficulty={review.diagnosis_difficulty}
+            symptomsSeverity={review.symptoms_severity}
+            hasMedication={review.has_medication}
+            medicationEffectiveness={review.medication_effectiveness}
+            healingPossibility={review.healing_possibility}
+            socialDiscomfort={review.social_discomfort}
+          />
+        ))}
+      </div>
 
       {totalPages > 1 && (
         <Pagination>
