@@ -28,16 +28,15 @@ export default function SearchCondition() {
         console.log("Fetching conditions from PATOLOGIE table...");
         const { data, error } = await supabase
           .from('PATOLOGIE')
-          .select('id, Patologia, Descrizione')
-          .order('Patologia');
+          .select('*');
         
         if (error) {
           console.error('Error fetching conditions:', error);
           throw error;
         }
 
-        console.log("Fetched conditions successfully:", data);
-        return data as Condition[];
+        console.log("Raw data from PATOLOGIE:", data);
+        return (data || []) as Condition[];
       } catch (err) {
         console.error('Error in queryFn:', err);
         throw err;
@@ -61,6 +60,7 @@ export default function SearchCondition() {
     return matchesSearch && matchesLetter;
   });
 
+  console.log("Total conditions:", conditions.length);
   console.log("Filtered conditions:", filteredConditions);
 
   return (
