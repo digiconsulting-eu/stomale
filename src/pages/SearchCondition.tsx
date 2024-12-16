@@ -35,6 +35,7 @@ export default function SearchCondition() {
         throw error;
       }
 
+      console.log("Fetched conditions:", data);
       return (data || []) as Condition[];
     }
   });
