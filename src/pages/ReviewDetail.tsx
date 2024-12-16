@@ -6,17 +6,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function ReviewDetail() {
-  const { condition, id } = useParams();
+  const { condition, title } = useParams();
 
   const { data: review, isLoading, error } = useQuery({
-    queryKey: ["review", condition, id],
+    queryKey: ["review", condition, title],
     queryFn: async () => {
       try {
-        if (!condition || !id) {
+        if (!condition || !title) {
           throw new Error('Parametri mancanti');
         }
 
-        console.log('Fetching review with condition:', condition, 'and ID:', id);
+        console.log('Fetching review with condition:', condition, 'and title:', title);
         
         // First get the condition ID
         const { data: patologiaData, error: patologiaError } = await supabase
@@ -37,8 +37,15 @@ export default function ReviewDetail() {
 
         console.log('Found patologia with ID:', patologiaData.id);
 
-        // Then get the review using the condition ID and review ID
-        const { data: reviewData, error: reviewError } = await supabase
+        // Create a URL-friendly version of the review title for comparison
+        const decodedTitle = decodeURIComponent(title);
+        const normalizedSearchTitle = decodedTitle
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+
+        // Then get the review using the condition ID and normalized title
+        const { data: reviewsData, error: reviewError } = await supabase
           .from('reviews')
           .select(`
             *,
@@ -49,27 +56,38 @@ export default function ReviewDetail() {
               username
             )
           `)
-          .eq('condition_id', patologiaData.id)
-          .eq('id', id)
-          .maybeSingle();
+          .eq('condition_id', patologiaData.id);
 
         if (reviewError) {
           console.error('Error fetching review:', reviewError);
           throw new Error('Errore nel caricamento della recensione');
         }
 
-        if (!reviewData) {
-          console.error('No review found with ID:', id);
+        // Find the review with matching normalized title
+        const matchingReview = reviewsData?.find(review => {
+          const reviewTitleSlug = review.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+          return reviewTitleSlug === normalizedSearchTitle;
+        });
+
+        if (!matchingReview) {
+          console.error('No review found with title:', title);
           throw new Error('Recensione non trovata');
         }
 
-        console.log('Found review:', reviewData);
-        return reviewData;
+        console.log('Found review:', matchingReview);
+        return matchingReview;
       } catch (error) {
         console.error('Error in review query:', error);
         throw error;
       }
-    }
+    },
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   if (error) {

@@ -28,6 +28,14 @@ export const ReviewCard = ({
     return text.slice(0, 150).trim() + "...";
   };
 
+  // Function to create URL-friendly slug from title
+  const createSlug = (text: string) => {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  };
+
   return (
     <Card className="bg-white p-6 hover:shadow-lg transition-shadow">
       <div className="space-y-4">
@@ -45,7 +53,7 @@ export const ReviewCard = ({
           {truncateExperience(experience)}
         </p>
 
-        <Link to={`/patologia/${condition}/recensione/${id}`}>
+        <Link to={`/patologia/${condition}/recensione/${createSlug(title)}`}>
           <Button 
             className="w-full bg-primary text-white hover:bg-primary-hover"
           >
