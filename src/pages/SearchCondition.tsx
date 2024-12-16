@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, BookOpen, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const LETTERS = ["Tutte", "A", "B", "C", "D", "E", "F", "G", "H", "I", "L", "M", "N", "O", "P", "R", "S", "T", "U", "V", "Z"];
 
@@ -14,32 +15,43 @@ export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState("Tutte");
 
-  const { data: conditions, isLoading, error } = useQuery({
+  const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('Fetching conditions...');
-      const { data, error } = await supabase
-        .from('PATOLOGIE')
-        .select('*')
-        .order('Patologia');
+      try {
+        console.log('Fetching conditions for search page...');
+        const { data, error } = await supabase
+          .from('PATOLOGIE')
+          .select('*')
+          .order('Patologia');
 
-      if (error) {
-        console.error('Error fetching conditions:', error);
-        throw error;
+        if (error) {
+          console.error('Error fetching conditions:', error);
+          throw error;
+        }
+
+        if (!data) {
+          console.log('No conditions found');
+          return [];
+        }
+
+        console.log('Successfully fetched conditions:', data.length);
+        return data;
+      } catch (error) {
+        console.error('Error in conditions query:', error);
+        if (error.message?.includes('429')) {
+          toast.error("Troppe richieste. Per favore, attendi qualche secondo e riprova.");
+        } else {
+          toast.error("Errore nel caricamento delle patologie");
+        }
+        return [];
       }
-
-      console.log('Fetched conditions:', data);
-      return data;
     },
-    meta: {
-      errorMessage: "Errore nel caricamento delle patologie"
-    }
+    staleTime: 30000, // Cache data for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
-
-  // Handle error with toast
-  if (error) {
-    toast.error("Errore nel caricamento delle patologie");
-  }
 
   const filteredConditions = conditions?.filter(condition => {
     const matchesSearch = searchTerm 
@@ -66,7 +78,6 @@ export default function SearchCondition() {
         />
       </div>
 
-      {/* Alphabetical Index */}
       <div className="flex flex-wrap gap-2 mb-8">
         {LETTERS.map((letter) => (
           <Button
@@ -82,9 +93,20 @@ export default function SearchCondition() {
 
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="p-6 animate-pulse bg-gray-100" />
+          {Array(6).fill(0).map((_, i) => (
+            <Skeleton key={i} className="h-[200px]" />
           ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-8">
+          <p className="text-red-500 mb-4">Si è verificato un errore nel caricamento delle patologie.</p>
+          <Button 
+            variant="outline" 
+            onClick={() => window.location.reload()}
+            className="mx-auto"
+          >
+            Riprova
+          </Button>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -95,7 +117,7 @@ export default function SearchCondition() {
                   {condition.Patologia}
                 </h2>
                 {condition.Descrizione && (
-                  <p className="text-gray-600 line-clamp-1 mb-4 flex-grow">
+                  <p className="text-gray-600 line-clamp-2 mb-4 flex-grow">
                     {condition.Descrizione}
                   </p>
                 )}
@@ -111,19 +133,19 @@ export default function SearchCondition() {
               </div>
             </Card>
           ))}
-        </div>
-      )}
 
-      {filteredConditions?.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-500 mb-4">Nessuna patologia trovata</p>
-          <Link 
-            to="/inserisci-patologia"
-            className="inline-flex items-center text-primary hover:text-primary/80"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Clicca qui per aggiungerla
-          </Link>
+          {filteredConditions?.length === 0 && (
+            <div className="col-span-full text-center py-8">
+              <p className="text-gray-500 mb-4">Nessuna patologia trovata</p>
+              <Link 
+                to="/inserisci-patologia"
+                className="inline-flex items-center text-primary hover:text-primary/80"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Clicca qui per aggiungerla
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </div>
