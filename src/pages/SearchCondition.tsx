@@ -25,30 +25,36 @@ export default function SearchCondition() {
     queryKey: ['conditions'],
     queryFn: async () => {
       try {
-        console.log("Fetching conditions from PATOLOGIE table...");
-        const { data, error } = await supabase
+        console.log("Starting to fetch conditions from PATOLOGIE table...");
+        const { data, error, count } = await supabase
           .from('PATOLOGIE')
-          .select('*');
+          .select('*', { count: 'exact' });
         
         if (error) {
           console.error('Error fetching conditions:', error);
           throw error;
         }
 
-        console.log("Raw data from PATOLOGIE:", data);
-        return (data || []) as Condition[];
+        console.log(`Found ${count} conditions in PATOLOGIE table`);
+        console.log("Sample of fetched data:", data?.slice(0, 3));
+        
+        if (!data || data.length === 0) {
+          console.log("No conditions found in the database");
+          return [];
+        }
+
+        return data as Condition[];
       } catch (err) {
         console.error('Error in queryFn:', err);
         throw err;
       }
     },
-    retry: 1
+    retry: 1,
+    onError: (error) => {
+      console.error('Query error:', error);
+      toast.error("Errore nel caricamento delle patologie. Riprova più tardi.");
+    }
   });
-
-  if (error) {
-    console.error('Query error:', error);
-    toast.error("Errore nel caricamento delle patologie. Riprova più tardi.");
-  }
 
   const filteredConditions = conditions.filter(condition => {
     const matchesSearch = searchTerm 
@@ -60,8 +66,8 @@ export default function SearchCondition() {
     return matchesSearch && matchesLetter;
   });
 
-  console.log("Total conditions:", conditions.length);
-  console.log("Filtered conditions:", filteredConditions);
+  console.log("Total conditions loaded:", conditions.length);
+  console.log("Filtered conditions count:", filteredConditions.length);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -96,6 +102,10 @@ export default function SearchCondition() {
           {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-[200px]" />
           ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-8">
+          <p className="text-red-500">Si è verificato un errore nel caricamento delle patologie.</p>
         </div>
       ) : filteredConditions.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
