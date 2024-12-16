@@ -56,7 +56,8 @@ export default function ReviewDetail() {
               username
             )
           `)
-          .eq('condition_id', patologiaData.id);
+          .eq('condition_id', patologiaData.id)
+          .eq('status', 'approved');
 
         if (reviewError) {
           console.error('Error fetching review:', reviewError);
