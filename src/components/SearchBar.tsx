@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import {
@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const SearchBar = () => {
   const [open, setOpen] = useState(false);
@@ -21,13 +22,25 @@ export const SearchBar = () => {
   const { data: conditions = [] } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('PATOLOGIE')
-        .select('Patologia')
-        .order('Patologia');
-      
-      if (error) throw error;
-      return data.map(row => row.Patologia);
+      try {
+        console.log('Fetching conditions for SearchBar...');
+        const { data, error } = await supabase
+          .from('PATOLOGIE')
+          .select('Patologia')
+          .order('Patologia');
+        
+        if (error) {
+          console.error('Error fetching conditions:', error);
+          throw error;
+        }
+
+        console.log('Fetched conditions successfully:', data);
+        return data.map(row => row.Patologia);
+      } catch (error) {
+        console.error('Error in conditions query:', error);
+        toast.error("Errore nel caricamento delle patologie");
+        throw error;
+      }
     }
   });
 
