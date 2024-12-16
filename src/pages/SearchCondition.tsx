@@ -28,7 +28,8 @@ export default function SearchCondition() {
         console.log("Fetching conditions from PATOLOGIE table...");
         const { data, error } = await supabase
           .from('PATOLOGIE')
-          .select('*');
+          .select('id, Patologia, Descrizione')
+          .order('Patologia');
         
         if (error) {
           console.error('Error fetching conditions:', error);
