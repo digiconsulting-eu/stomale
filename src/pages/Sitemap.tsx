@@ -25,7 +25,6 @@ const Sitemap = () => {
         const { data: reviews, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
-            id,
             title,
             PATOLOGIE (
               Patologia
@@ -40,7 +39,7 @@ const Sitemap = () => {
 
         console.log('Fetched reviews:', reviews?.length);
 
-        const baseUrl = 'https://stomale.info';
+        const baseUrl = window.location.origin;
         
         // Static routes
         const staticUrls = [
@@ -107,6 +106,17 @@ ${urls.map(url => `  <url>
 
     generateSitemap();
   }, []);
+
+  useEffect(() => {
+    // Set content type for the response
+    if (xmlContent) {
+      const blob = new Blob([xmlContent], { type: 'application/xml' });
+      const url = URL.createObjectURL(blob);
+      
+      // Clean up
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [xmlContent]);
 
   return (
     <pre 
