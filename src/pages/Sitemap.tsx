@@ -116,9 +116,8 @@ ${urls.map(url => `  <url>
     generateSitemap();
   }, []);
 
-  // Instead of trying to modify document.contentType, we'll render the XML content in a pre tag
   return (
-    <pre style={{ whiteSpace: 'pre-wrap' }}>
+    <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
       {xmlContent}
     </pre>
   );
