@@ -7,8 +7,6 @@ const Sitemap = () => {
   useEffect(() => {
     const generateSitemap = async () => {
       try {
-        console.log('Fetching data for sitemap...');
-        
         // Fetch conditions
         const { data: conditions, error: conditionsError } = await supabase
           .from('PATOLOGIE')
@@ -19,7 +17,7 @@ const Sitemap = () => {
           throw conditionsError;
         }
 
-        console.log('Fetched conditions:', conditions?.length);
+        console.log('Fetched conditions for sitemap:', conditions?.length);
 
         // Fetch approved reviews
         const { data: reviews, error: reviewsError } = await supabase
@@ -37,14 +35,13 @@ const Sitemap = () => {
           throw reviewsError;
         }
 
-        console.log('Fetched reviews:', reviews?.length);
+        console.log('Fetched reviews for sitemap:', reviews?.length);
 
-        // Use a hardcoded base URL for production
-        const baseUrl = 'https://stomale.info';
+        const baseUrl = window.location.origin;
         
         // Start with static routes
         let urls = [
-          `${baseUrl}/`,
+          baseUrl,
           `${baseUrl}/recensioni`,
           `${baseUrl}/nuova-recensione`,
           `${baseUrl}/cerca-patologia`,
@@ -89,26 +86,22 @@ ${urls.map(url => `  <url>
   </url>`).join('\n')}
 </urlset>`;
 
+        // Set the XML content
         setXmlContent(xml);
-        
-        // Create a Blob with the XML content
+
+        // Create and download the sitemap file
         const blob = new Blob([xml], { type: 'application/xml' });
         const url = window.URL.createObjectURL(blob);
-        
-        // Create a link and trigger download
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'sitemap.xml';
-        document.body.appendChild(link);
-        link.click();
-        
-        // Cleanup
-        document.body.removeChild(link);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'sitemap.xml';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        
+
       } catch (error) {
         console.error('Error generating sitemap:', error);
-        // Return a valid but empty sitemap in case of error
         setXmlContent('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
       }
     };
@@ -117,9 +110,12 @@ ${urls.map(url => `  <url>
   }, []);
 
   return (
-    <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-      {xmlContent}
-    </pre>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
+      <pre className="bg-gray-100 p-4 rounded-lg overflow-auto" style={{ maxHeight: '600px' }}>
+        {xmlContent}
+      </pre>
+    </div>
   );
 };
 
