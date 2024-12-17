@@ -107,17 +107,6 @@ ${urls.map(url => `  <url>
     generateSitemap();
   }, []);
 
-  useEffect(() => {
-    // Set content type for the response
-    if (xmlContent) {
-      const blob = new Blob([xmlContent], { type: 'application/xml' });
-      const url = URL.createObjectURL(blob);
-      
-      // Clean up
-      return () => URL.revokeObjectURL(url);
-    }
-  }, [xmlContent]);
-
   return (
     <pre 
       style={{ 
