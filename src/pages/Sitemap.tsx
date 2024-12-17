@@ -11,6 +11,7 @@ const Sitemap = () => {
     const generateSitemap = async () => {
       try {
         setIsLoading(true);
+        console.log('Fetching data for sitemap...');
         
         // Fetch conditions
         const { data: conditions, error: conditionsError } = await supabase
@@ -22,11 +23,14 @@ const Sitemap = () => {
           throw conditionsError;
         }
 
+        console.log('Fetched conditions:', conditions?.length);
+
         // Fetch approved reviews
         const { data: reviews, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
             title,
+            condition_id,
             PATOLOGIE (
               Patologia
             )
@@ -37,6 +41,8 @@ const Sitemap = () => {
           console.error('Error fetching reviews:', reviewsError);
           throw reviewsError;
         }
+
+        console.log('Fetched reviews:', reviews?.length);
 
         const baseUrl = window.location.origin;
         const lastmod = format(new Date(), 'yyyy-MM-dd');
@@ -75,6 +81,8 @@ const Sitemap = () => {
         }).filter(Boolean) || [];
 
         const allUrls = [...staticRoutes, ...conditionUrls, ...reviewUrls];
+
+        console.log('Total URLs in sitemap:', allUrls.length);
 
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="sitemap.xsl"?>
@@ -137,8 +145,7 @@ ${allUrls.map(({ url, priority }) => `  <url>
       <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
       <div className="mb-4">
         <p className="text-gray-600">
-          This is your website's sitemap in XML format. It has been automatically downloaded
-          and can be submitted to Google Search Console.
+          Your sitemap has been generated and downloaded. You can now submit it to Google Search Console.
         </p>
       </div>
       <pre className="bg-gray-100 p-4 rounded-lg overflow-auto max-h-[600px] text-sm">
