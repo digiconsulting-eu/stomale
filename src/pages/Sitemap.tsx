@@ -1,19 +1,28 @@
 import { useEffect, useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
 const Sitemap = () => {
-  const [xmlContent, setXmlContent] = useState<string>('');
+  const [xmlContent, setXmlContent] = useState('');
 
   useEffect(() => {
     const generateSitemap = async () => {
       try {
+        console.log('Fetching data for sitemap...');
+        
         // Fetch conditions
-        const { data: conditions } = await supabase
+        const { data: conditions, error: conditionsError } = await supabase
           .from('PATOLOGIE')
           .select('Patologia');
 
+        if (conditionsError) {
+          console.error('Error fetching conditions:', conditionsError);
+          throw conditionsError;
+        }
+
+        console.log('Fetched conditions:', conditions?.length);
+
         // Fetch approved reviews
-        const { data: reviews } = await supabase
+        const { data: reviews, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
             title,
@@ -23,58 +32,60 @@ const Sitemap = () => {
           `)
           .eq('status', 'approved');
 
-        const baseUrl = window.location.origin;
-        
-        // Static routes
-        const staticUrls = [
-          '',
-          '/recensioni',
-          '/nuova-recensione',
-          '/cerca-patologia',
-          '/cerca-sintomi',
-          '/inserisci-patologia',
-          '/cookie-policy',
-          '/privacy-policy',
-          '/terms'
-        ];
+        if (reviewsError) {
+          console.error('Error fetching reviews:', reviewsError);
+          throw reviewsError;
+        }
 
-        let urls = staticUrls.map(path => `${baseUrl}${path}`);
+        console.log('Fetched reviews:', reviews?.length);
+
+        // Use a hardcoded base URL for production
+        const baseUrl = 'https://stomale.info';
+        
+        // Start with static routes
+        let urls = [
+          `${baseUrl}/`,
+          `${baseUrl}/recensioni`,
+          `${baseUrl}/nuova-recensione`,
+          `${baseUrl}/cerca-patologia`,
+          `${baseUrl}/cerca-sintomi`,
+          `${baseUrl}/inserisci-patologia`,
+          `${baseUrl}/privacy-policy`,
+          `${baseUrl}/cookie-policy`,
+          `${baseUrl}/terms`,
+        ];
 
         // Add condition URLs
         if (conditions) {
-          const conditionUrls = conditions.map(condition => {
-            if (!condition.Patologia) return null;
-            const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-            return `${baseUrl}/patologia/${encodedCondition}`;
-          }).filter(Boolean) as string[];
+          const conditionUrls = conditions.map(condition => 
+            `${baseUrl}/patologia/${encodeURIComponent(condition.Patologia)}`
+          );
           urls = [...urls, ...conditionUrls];
         }
 
         // Add review URLs
         if (reviews) {
           const reviewUrls = reviews.map(review => {
-            if (!review.PATOLOGIE?.Patologia || !review.title) return null;
-            
-            const encodedCondition = encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase());
-            const encodedTitle = encodeURIComponent(
-              review.title
+            if (review.PATOLOGIE?.Patologia && review.title) {
+              const titleSlug = review.title
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '')
-            );
-            
-            return `${baseUrl}/patologia/${encodedCondition}/recensione/${encodedTitle}`;
-          }).filter(Boolean) as string[];
-          
+                .replace(/(^-|-$)/g, '');
+              return `${baseUrl}/patologia/${encodeURIComponent(review.PATOLOGIE.Patologia)}/recensione/${titleSlug}`;
+            }
+            return null;
+          }).filter(Boolean);
           urls = [...urls, ...reviewUrls];
         }
+
+        console.log('Total URLs in sitemap:', urls.length);
 
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(url => `  <url>
     <loc>${url}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>`).join('\n')}
 </urlset>`;
 
@@ -82,6 +93,7 @@ ${urls.map(url => `  <url>
         
       } catch (error) {
         console.error('Error generating sitemap:', error);
+        // Return a valid but empty sitemap in case of error
         setXmlContent('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
       }
     };
@@ -89,22 +101,22 @@ ${urls.map(url => `  <url>
     generateSitemap();
   }, []);
 
-  // Set the correct content type for XML
+  // Set the correct content type and display the XML
   useEffect(() => {
     if (xmlContent) {
-      const blob = new Blob([xmlContent], { type: 'application/xml' });
-      const url = URL.createObjectURL(blob);
+      // Set content type to XML
+      document.contentType = 'application/xml';
       
-      // Create a link and click it to download the sitemap
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'sitemap.xml';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Create a new document with XML content
+      const xmlDoc = new DOMParser().parseFromString(xmlContent, 'application/xml');
       
-      // Clean up
-      URL.revokeObjectURL(url);
+      // Clear existing content
+      document.documentElement.innerHTML = '';
+      
+      // Append XML content
+      document.documentElement.appendChild(
+        document.importNode(xmlDoc.documentElement, true)
+      );
     }
   }, [xmlContent]);
 
