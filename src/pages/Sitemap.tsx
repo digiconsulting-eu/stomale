@@ -25,6 +25,7 @@ const Sitemap = () => {
         const { data: reviews, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
+            id,
             title,
             PATOLOGIE (
               Patologia
@@ -59,16 +60,17 @@ const Sitemap = () => {
         // Add condition URLs
         if (conditions) {
           const conditionUrls = conditions.map(condition => {
+            if (!condition.Patologia) return null;
             const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
             return `${baseUrl}/patologia/${encodedCondition}`;
-          });
+          }).filter(Boolean) as string[];
           urls = [...urls, ...conditionUrls];
         }
 
         // Add review URLs
         if (reviews) {
           const reviewUrls = reviews.map(review => {
-            if (!review.PATOLOGIE?.Patologia) return null;
+            if (!review.PATOLOGIE?.Patologia || !review.title) return null;
             
             const encodedCondition = encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase());
             const encodedTitle = encodeURIComponent(
@@ -106,15 +108,16 @@ ${urls.map(url => `  <url>
     generateSitemap();
   }, []);
 
-  // Return raw XML content
   return (
-    <div 
-      dangerouslySetInnerHTML={{ __html: xmlContent }} 
+    <pre 
       style={{ 
         whiteSpace: 'pre-wrap',
-        fontFamily: 'monospace'
-      }} 
-    />
+        fontFamily: 'monospace',
+        padding: '20px'
+      }}
+    >
+      {xmlContent}
+    </pre>
   );
 };
 
