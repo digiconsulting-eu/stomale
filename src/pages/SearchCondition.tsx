@@ -36,7 +36,10 @@ export default function SearchCondition() {
         console.error('Error in conditions query:', error);
         throw error;
       }
-    }
+    },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 1000 * 60 * 5 // 5 minutes
   });
 
   const filteredConditions = conditions?.filter(condition => {

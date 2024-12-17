@@ -112,12 +112,12 @@ ${urls.map(url => `  <url>
     <pre 
       style={{ 
         whiteSpace: 'pre-wrap',
+        wordWrap: 'break-word',
         fontFamily: 'monospace',
         padding: '20px'
       }}
-    >
-      {xmlContent}
-    </pre>
+      dangerouslySetInnerHTML={{ __html: xmlContent }}
+    />
   );
 };
 

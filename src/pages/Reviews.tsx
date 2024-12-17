@@ -53,7 +53,11 @@ const Reviews = () => {
         console.error('Error in reviews query:', error);
         throw error;
       }
-    }
+    },
+    staleTime: 30000, // Cache data for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+    retry: 3, // Retry failed requests 3 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000) // Exponential backoff
   });
 
   if (isLoading) {
