@@ -1,25 +1,24 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, BookOpen, Plus } from "lucide-react";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Search, BookOpen } from "lucide-react";
 
-const LETTERS = ["Tutte", "A", "B", "C", "D", "E", "F", "G", "H", "I", "L", "M", "N", "O", "P", "R", "S", "T", "U", "V", "Z"];
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLetter, setSelectedLetter] = useState("Tutte");
+  const [selectedLetter, setSelectedLetter] = useState("");
 
-  const { data: conditions = [], isLoading, isError } = useQuery({
-    queryKey: ['searchConditions'],
+  const { data: conditions, isLoading } = useQuery({
+    queryKey: ['conditions'],
     queryFn: async () => {
       try {
-        console.log('Fetching conditions for search page...');
+        console.log('Fetching conditions...');
         const { data, error } = await supabase
           .from('PATOLOGIE')
           .select('*')
@@ -31,7 +30,7 @@ export default function SearchCondition() {
         }
 
         console.log('Successfully fetched conditions:', data?.length || 0);
-        return data || [];
+        return data;
       } catch (error) {
         console.error('Error in conditions query:', error);
         throw error;
@@ -44,17 +43,24 @@ export default function SearchCondition() {
   });
 
   const filteredConditions = conditions?.filter(condition => {
-    const matchesSearch = searchTerm 
-      ? condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
-    const matchesLetter = selectedLetter === "Tutte" 
-      ? true 
-      : condition.Patologia.startsWith(selectedLetter);
+    const matchesSearch = condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLetter = !selectedLetter || condition.Patologia.toUpperCase().startsWith(selectedLetter);
     return matchesSearch && matchesLetter;
   });
 
-  if (isError) {
-    toast.error("Errore nel caricamento delle patologie");
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-primary mb-6 md:mb-8">
+          Cerca una Patologia
+        </h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {Array(6).fill(0).map((_, i) => (
+            <Skeleton key={i} className="h-[80px] md:h-[100px]" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -87,49 +93,40 @@ export default function SearchCondition() {
         ))}
       </div>
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-          {Array(6).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-[80px] md:h-[100px]" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-          {filteredConditions?.map((condition) => (
-            <Card key={condition.id} className="p-3 md:p-4">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-base md:text-lg font-semibold text-primary truncate">
-                  {condition.Patologia}
-                </h2>
-                <Link 
-                  to={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
-                  className="shrink-0"
-                >
-                  <Button 
-                    size="sm" 
-                    className="bg-primary hover:bg-primary-hover text-white h-8 w-8 p-0"
-                  >
-                    <BookOpen className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          ))}
-
-          {filteredConditions?.length === 0 && (
-            <div className="col-span-full text-center py-6 md:py-8">
-              <p className="text-gray-500 mb-3 md:mb-4">Nessuna patologia trovata</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        {filteredConditions?.map((condition) => (
+          <Card key={condition.id} className="p-3 md:p-4">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-base md:text-lg font-semibold text-primary truncate">
+                {condition.Patologia}
+              </h2>
               <Link 
-                to="/inserisci-patologia"
-                className="inline-flex items-center text-primary hover:text-primary/80"
+                to={`/patologia/${encodeURIComponent(condition.Patologia)}`}
+                className="shrink-0"
               >
-                <Plus className="mr-2 h-4 w-4" />
-                Clicca qui per aggiungerla
+                <Button 
+                  size="sm" 
+                  className="bg-primary hover:bg-primary-hover text-white h-8 w-8 p-0"
+                >
+                  <BookOpen className="h-4 w-4" />
+                </Button>
               </Link>
             </div>
-          )}
-        </div>
-      )}
+          </Card>
+        ))}
+
+        {filteredConditions?.length === 0 && (
+          <div className="col-span-full text-center py-6 md:py-8">
+            <p className="text-gray-500 mb-3 md:mb-4">Nessuna patologia trovata</p>
+            <Link 
+              to="/inserisci-patologia"
+              className="inline-flex items-center text-primary hover:text-primary/80"
+            >
+              Vuoi aggiungere una nuova patologia?
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
