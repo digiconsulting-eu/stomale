@@ -47,8 +47,8 @@ export default function Index() {
     },
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
+    gcTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 5,
   });
 
   if (isError) {
@@ -81,7 +81,19 @@ export default function Index() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {latestReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard
+                key={review.id}
+                id={review.id}
+                title={review.title}
+                condition={review.PATOLOGIE?.Patologia || ''}
+                experience={review.experience}
+                diagnosisDifficulty={review.diagnosis_difficulty}
+                symptomsSeverity={review.symptoms_severity}
+                hasMedication={review.has_medication}
+                medicationEffectiveness={review.medication_effectiveness}
+                healingPossibility={review.healing_possibility}
+                socialDiscomfort={review.social_discomfort}
+              />
             ))}
           </div>
         )}
