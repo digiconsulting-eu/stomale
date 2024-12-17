@@ -18,7 +18,7 @@ const Sitemap = () => {
           .select('title, PATOLOGIE(Patologia)')
           .eq('status', 'approved');
 
-        const baseUrl = window.location.origin;
+        const baseUrl = 'https://stomale.info';
         
         // Static routes
         const staticUrls = [
@@ -63,17 +63,11 @@ const Sitemap = () => {
 
         setXmlContent(xml);
         
-        // Set the content type to XML
-        const blob = new Blob([xml], { type: 'application/xml' });
-        const url = window.URL.createObjectURL(blob);
-        
-        // Force download or display
-        const a = document.createElement('a');
-        a.href = url;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        // Set content type header
+        const contentTypeHeader = document.createElement('meta');
+        contentTypeHeader.httpEquiv = 'Content-Type';
+        contentTypeHeader.content = 'application/xml';
+        document.head.appendChild(contentTypeHeader);
         
         console.log(`Generated sitemap with ${urls.length} URLs`);
       } catch (error) {
@@ -84,7 +78,12 @@ const Sitemap = () => {
     generateSitemap();
   }, []);
 
-  return null;
+  // Return the XML content as pre-formatted text
+  return (
+    <pre style={{ display: 'block', whiteSpace: 'pre' }}>
+      {xmlContent}
+    </pre>
+  );
 };
 
 export default Sitemap;
