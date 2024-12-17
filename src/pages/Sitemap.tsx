@@ -91,6 +91,21 @@ ${urls.map(url => `  <url>
 
         setXmlContent(xml);
         
+        // Create a Blob with the XML content
+        const blob = new Blob([xml], { type: 'application/xml' });
+        const url = window.URL.createObjectURL(blob);
+        
+        // Create a link and trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'sitemap.xml';
+        document.body.appendChild(link);
+        link.click();
+        
+        // Cleanup
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
       } catch (error) {
         console.error('Error generating sitemap:', error);
         // Return a valid but empty sitemap in case of error
@@ -101,26 +116,12 @@ ${urls.map(url => `  <url>
     generateSitemap();
   }, []);
 
-  // Set the correct content type and display the XML
-  useEffect(() => {
-    if (xmlContent) {
-      // Set content type to XML
-      document.contentType = 'application/xml';
-      
-      // Create a new document with XML content
-      const xmlDoc = new DOMParser().parseFromString(xmlContent, 'application/xml');
-      
-      // Clear existing content
-      document.documentElement.innerHTML = '';
-      
-      // Append XML content
-      document.documentElement.appendChild(
-        document.importNode(xmlDoc.documentElement, true)
-      );
-    }
-  }, [xmlContent]);
-
-  return null;
+  // Instead of trying to modify document.contentType, we'll render the XML content in a pre tag
+  return (
+    <pre style={{ whiteSpace: 'pre-wrap' }}>
+      {xmlContent}
+    </pre>
+  );
 };
 
 export default Sitemap;
