@@ -36,8 +36,6 @@ const AuthStateHandler = () => {
         if (protectedRoutes.some(route => location.pathname.startsWith(route))) {
           navigate('/', { replace: true });
         }
-      } else if (event === 'TOKEN_REFRESHED') {
-        console.log('Token refreshed successfully');
       }
     });
 

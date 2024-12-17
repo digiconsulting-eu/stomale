@@ -15,8 +15,8 @@ export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState("Tutte");
 
-  const { data: conditions = [], isLoading, error } = useQuery({
-    queryKey: ['conditions'],
+  const { data: conditions = [], isLoading, isError } = useQuery({
+    queryKey: ['searchConditions'],
     queryFn: async () => {
       try {
         console.log('Fetching conditions for search page...');
@@ -30,27 +30,16 @@ export default function SearchCondition() {
           throw error;
         }
 
-        if (!data) {
-          console.log('No conditions found');
-          return [];
-        }
-
-        console.log('Successfully fetched conditions:', data.length);
-        return data;
+        console.log('Successfully fetched conditions:', data?.length || 0);
+        return data || [];
       } catch (error) {
         console.error('Error in conditions query:', error);
-        if (error.message?.includes('429')) {
-          toast.error("Troppe richieste. Per favore, attendi qualche secondo e riprova.");
-        } else {
-          toast.error("Errore nel caricamento delle patologie");
-        }
-        return [];
+        throw error;
       }
     },
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const filteredConditions = conditions?.filter(condition => {
@@ -62,6 +51,10 @@ export default function SearchCondition() {
       : condition.Patologia.startsWith(selectedLetter);
     return matchesSearch && matchesLetter;
   });
+
+  if (isError) {
+    toast.error("Errore nel caricamento delle patologie");
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -97,17 +90,6 @@ export default function SearchCondition() {
             <Skeleton key={i} className="h-[100px]" />
           ))}
         </div>
-      ) : error ? (
-        <div className="text-center py-8">
-          <p className="text-red-500 mb-4">Si è verificato un errore nel caricamento delle patologie.</p>
-          <Button 
-            variant="outline" 
-            onClick={() => window.location.reload()}
-            className="mx-auto"
-          >
-            Riprova
-          </Button>
-        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredConditions?.map((condition) => (
@@ -117,7 +99,7 @@ export default function SearchCondition() {
                   {condition.Patologia}
                 </h2>
                 <Link 
-                  to={`/patologia/${condition.Patologia.toLowerCase()}`}
+                  to={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
                   className="shrink-0"
                 >
                   <Button 
