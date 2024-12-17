@@ -96,9 +96,6 @@ ${urls.map(url => `  <url>
 </urlset>`;
 
         setXmlContent(xml);
-
-        // Set XML content type
-        document.contentType = 'application/xml';
         
       } catch (error) {
         console.error('Error generating sitemap:', error);
