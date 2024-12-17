@@ -1,95 +1,104 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const SearchBar = () => {
-  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const navigate = useNavigate();
 
-  const { data: conditions = [], isError } = useQuery({
+  const { data: conditions = [] } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      try {
-        console.log('Fetching conditions for SearchBar...');
-        const { data, error } = await supabase
-          .from('PATOLOGIE')
-          .select('Patologia')
-          .order('Patologia');
-        
-        if (error) {
-          console.error('Error fetching conditions:', error);
-          throw error;
-        }
+      console.log('Fetching conditions for SearchBar...');
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('Patologia')
+        .order('Patologia');
 
-        console.log('Successfully fetched conditions:', data?.length || 0);
-        return data?.map(row => row.Patologia) || [];
-      } catch (error) {
-        console.error('Error in conditions query:', error);
+      if (error) {
+        console.error('Error fetching conditions:', error);
         throw error;
       }
+
+      return data.map(item => item.Patologia) || [];
     },
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
-  if (isError) {
-    toast.error("Errore nel caricamento delle patologie");
-  }
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      const filtered = conditions.filter(condition =>
+        condition.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setSuggestions(filtered);
+    } else {
+      setSuggestions([]);
+    }
+  }, [searchTerm, conditions]);
+
+  const handleSearch = (term: string = searchTerm) => {
+    if (term) {
+      const exactMatch = conditions.find(
+        condition => condition.toLowerCase() === term.toLowerCase()
+      );
+      
+      if (exactMatch) {
+        navigate(`/patologia/${exactMatch.toLowerCase()}`);
+      } else {
+        navigate(`/cerca-patologia?q=${encodeURIComponent(term)}`);
+      }
+      
+      setSearchTerm("");
+      setSuggestions([]);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
-      <Button
-        variant="outline"
-        role="combobox"
-        aria-expanded={open}
-        className="w-full px-6 py-7 pl-14 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white/80 backdrop-blur-sm shadow-lg text-lg justify-start font-normal hover:bg-white/90"
-        onClick={() => setOpen(true)}
-      >
-        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary" size={24} />
-        <span className="text-gray-500">Cerca sintomi o patologie...</span>
-      </Button>
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <Command className="rounded-lg border shadow-md bg-white">
-          <CommandInput 
-            placeholder="Cerca una patologia..." 
-            className="h-12 text-gray-700 placeholder:text-gray-400"
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Input
+            type="text"
+            placeholder="Cerca una patologia..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full pl-4 pr-10 py-2"
           />
-          <CommandList className="text-gray-700 bg-white">
-            <CommandEmpty className="py-6 text-gray-500">
-              Nessuna patologia trovata.
-            </CommandEmpty>
-            <CommandGroup heading="Patologie" className="text-gray-900 font-medium">
-              {conditions.map((condition) => (
-                <CommandItem
-                  key={condition}
-                  value={condition}
-                  onSelect={() => {
-                    navigate(`/patologia/${encodeURIComponent(condition.toLowerCase())}`);
-                    setOpen(false);
-                  }}
-                  className="hover:bg-gray-100 cursor-pointer py-2 px-3 text-gray-700"
+          {suggestions.length > 0 && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+              {suggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleSearch(suggestion)}
                 >
-                  {condition}
-                </CommandItem>
+                  {suggestion}
+                </div>
               ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </CommandDialog>
+            </div>
+          )}
+        </div>
+        <Button 
+          onClick={() => handleSearch()}
+          className="px-6"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };
