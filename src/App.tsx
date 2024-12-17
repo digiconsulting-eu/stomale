@@ -28,7 +28,8 @@ const AuthStateHandler = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session?.user?.email);
       
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' && location.pathname === '/login') {
+        // Only redirect to dashboard when explicitly signing in from login page
         navigate('/dashboard', { replace: true });
       } else if (event === 'SIGNED_OUT') {
         // Only redirect to home if we're on a protected route
