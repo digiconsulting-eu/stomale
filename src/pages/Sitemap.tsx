@@ -55,7 +55,7 @@ const Sitemap = () => {
         // Add condition URLs
         if (conditions) {
           const conditionUrls = conditions.map(condition => 
-            `${baseUrl}/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`
+            `${baseUrl}/patologia/${encodeURIComponent(condition.Patologia)}`
           );
           urls = [...urls, ...conditionUrls];
         }
@@ -68,7 +68,7 @@ const Sitemap = () => {
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/(^-|-$)/g, '');
-              return `${baseUrl}/patologia/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}/recensione/${titleSlug}`;
+              return `${baseUrl}/patologia/${encodeURIComponent(review.PATOLOGIE.Patologia)}/recensione/${titleSlug}`;
             }
             return null;
           }).filter(Boolean);
@@ -86,18 +86,19 @@ ${urls.map(url => `  <url>
   </url>`).join('\n')}
 </urlset>`;
 
-        // Set content type to XML
-        const blob = new Blob([xml], { type: 'application/xml' });
-        const url = URL.createObjectURL(blob);
-        
-        // If accessed directly as XML, serve the file
-        if (window.location.pathname === '/sitemap.xml') {
-          window.location.href = url;
-          return;
-        }
-
-        // Otherwise show the preview
+        // Set the XML content
         setXmlContent(xml);
+
+        // Create and download the sitemap file
+        const blob = new Blob([xml], { type: 'application/xml' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'sitemap.xml';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
 
       } catch (error) {
         console.error('Error generating sitemap:', error);
@@ -108,14 +109,9 @@ ${urls.map(url => `  <url>
     generateSitemap();
   }, []);
 
-  // If we're requesting the XML file directly, don't render the preview
-  if (window.location.pathname === '/sitemap.xml') {
-    return null;
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Sitemap Preview</h1>
+      <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
       <pre className="bg-gray-100 p-4 rounded-lg overflow-auto" style={{ maxHeight: '600px' }}>
         {xmlContent}
       </pre>
