@@ -47,27 +47,13 @@ const Reviews = () => {
           throw error;
         }
 
-        if (!data) {
-          console.log('No reviews found');
-          return [];
-        }
-
-        console.log('Successfully fetched reviews:', data.length);
-        return data;
+        console.log('Successfully fetched reviews:', data?.length || 0);
+        return data || [];
       } catch (error) {
         console.error('Error in reviews query:', error);
-        if (error.message?.includes('429')) {
-          toast.error("Troppe richieste. Per favore, attendi qualche secondo e riprova.");
-        } else {
-          toast.error("Errore nel caricamento delle recensioni");
-        }
         throw error;
       }
-    },
-    staleTime: 30000, // Cache data for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes (renamed from cacheTime)
-    retry: 3, // Retry failed requests 3 times
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    }
   });
 
   if (isLoading) {
