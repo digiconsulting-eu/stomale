@@ -7,22 +7,13 @@ const Sitemap = () => {
   useEffect(() => {
     const generateSitemap = async () => {
       try {
-        console.log('Fetching data for sitemap...');
-        
         // Fetch conditions
-        const { data: conditions, error: conditionsError } = await supabase
+        const { data: conditions } = await supabase
           .from('PATOLOGIE')
           .select('Patologia');
 
-        if (conditionsError) {
-          console.error('Error fetching conditions:', conditionsError);
-          throw conditionsError;
-        }
-
-        console.log('Fetched conditions:', conditions?.length);
-
         // Fetch approved reviews
-        const { data: reviews, error: reviewsError } = await supabase
+        const { data: reviews } = await supabase
           .from('reviews')
           .select(`
             title,
@@ -31,13 +22,6 @@ const Sitemap = () => {
             )
           `)
           .eq('status', 'approved');
-
-        if (reviewsError) {
-          console.error('Error fetching reviews:', reviewsError);
-          throw reviewsError;
-        }
-
-        console.log('Fetched reviews:', reviews?.length);
 
         const baseUrl = window.location.origin;
         
@@ -85,8 +69,6 @@ const Sitemap = () => {
           urls = [...urls, ...reviewUrls];
         }
 
-        console.log('Total URLs in sitemap:', urls.length);
-
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(url => `  <url>
@@ -100,24 +82,33 @@ ${urls.map(url => `  <url>
         
       } catch (error) {
         console.error('Error generating sitemap:', error);
-        setXmlContent('Error generating sitemap');
+        setXmlContent('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
       }
     };
 
     generateSitemap();
   }, []);
 
-  return (
-    <pre 
-      style={{ 
-        whiteSpace: 'pre-wrap',
-        wordWrap: 'break-word',
-        fontFamily: 'monospace',
-        padding: '20px'
-      }}
-      dangerouslySetInnerHTML={{ __html: xmlContent }}
-    />
-  );
+  // Set the correct content type for XML
+  useEffect(() => {
+    if (xmlContent) {
+      const blob = new Blob([xmlContent], { type: 'application/xml' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create a link and click it to download the sitemap
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'sitemap.xml';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up
+      URL.revokeObjectURL(url);
+    }
+  }, [xmlContent]);
+
+  return null;
 };
 
 export default Sitemap;
