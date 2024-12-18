@@ -31,6 +31,8 @@ export default function SearchCondition() {
       console.log('Successfully fetched conditions:', data?.length || 0);
       return data || [];
     },
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const filteredConditions = conditions.filter(condition => {
