@@ -32,8 +32,9 @@ export const SearchBar = () => {
     staleTime: 1000 * 60 * 5,
   });
 
+  // Update suggestions when searchTerm or conditions change
   useEffect(() => {
-    if (searchTerm.length > 0) {
+    if (searchTerm.length > 0 && conditions.length > 0) {
       const filtered = conditions.filter(condition =>
         condition.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -41,7 +42,7 @@ export const SearchBar = () => {
     } else {
       setSuggestions([]);
     }
-  }, [searchTerm, conditions]);
+  }, [searchTerm, conditions]); // Add proper dependency array
 
   const handleSearch = (term: string = searchTerm) => {
     if (term) {
