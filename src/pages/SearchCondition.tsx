@@ -14,22 +14,27 @@ export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState("");
 
-  const { data: conditions = [], isLoading, error } = useQuery({
+  const { data: conditions = [], isLoading } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('Fetching conditions for search page...');
-      const { data, error } = await supabase
-        .from('PATOLOGIE')
-        .select('*')
-        .order('Patologia');
+      try {
+        console.log('Fetching conditions...');
+        const { data, error } = await supabase
+          .from('PATOLOGIE')
+          .select('*')
+          .order('Patologia');
 
-      if (error) {
-        console.error('Error fetching conditions:', error);
+        if (error) {
+          console.error('Error fetching conditions:', error);
+          throw error;
+        }
+
+        console.log('Successfully fetched conditions:', data?.length || 0);
+        return data || [];
+      } catch (error) {
+        console.error('Error in conditions query:', error);
         throw error;
       }
-
-      console.log('Successfully fetched conditions:', data?.length);
-      return data || [];
     },
   });
 
@@ -46,20 +51,6 @@ export default function SearchCondition() {
       
     return matchesSearch && matchesLetter;
   });
-
-  if (error) {
-    console.error('Error in conditions query:', error);
-    return (
-      <div className="container mx-auto px-4 py-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-primary mb-6">
-          Cerca una Patologia
-        </h1>
-        <div className="text-red-500">
-          Si è verificato un errore nel caricamento delle patologie.
-        </div>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
