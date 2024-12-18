@@ -8,11 +8,11 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, BookOpen } from "lucide-react";
 
-const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const LETTERS = ["TUTTE", ...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""))];
 
 export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLetter, setSelectedLetter] = useState("");
+  const [selectedLetter, setSelectedLetter] = useState("TUTTE");
 
   const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
@@ -20,7 +20,8 @@ export default function SearchCondition() {
       console.log('Fetching conditions...');
       const { data, error } = await supabase
         .from('PATOLOGIE')
-        .select('*');
+        .select('*')
+        .order('Patologia');
 
       if (error) {
         console.error('Error fetching conditions:', error);
@@ -43,9 +44,9 @@ export default function SearchCondition() {
       ? condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
       
-    const matchesLetter = selectedLetter 
-      ? condition.Patologia.toUpperCase().startsWith(selectedLetter)
-      : true;
+    const matchesLetter = selectedLetter === "TUTTE" 
+      ? true 
+      : condition.Patologia.toUpperCase().startsWith(selectedLetter);
       
     return matchesSearch && matchesLetter;
   });
@@ -88,7 +89,7 @@ export default function SearchCondition() {
             key={letter}
             variant={selectedLetter === letter ? "default" : "outline"}
             className="min-w-[32px] md:min-w-[40px] h-8 md:h-10 px-2 text-sm md:text-base"
-            onClick={() => setSelectedLetter(selectedLetter === letter ? "" : letter)}
+            onClick={() => setSelectedLetter(letter)}
           >
             {letter}
           </Button>
