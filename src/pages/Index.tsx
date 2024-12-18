@@ -4,6 +4,8 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { SearchBar } from "@/components/SearchBar";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export default function Index() {
   const { data: latestReviews = [], isLoading, isError } = useQuery({
@@ -58,6 +60,13 @@ export default function Index() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-12">
+        <div className="relative mb-8">
+          <img 
+            src="/lovable-uploads/f6c39c72-c0f1-48d1-bd7c-8e14f1185fb6.png" 
+            alt="Pills background" 
+            className="w-full max-w-3xl mx-auto rounded-lg shadow-lg"
+          />
+        </div>
         <h1 className="text-4xl font-bold text-primary mb-4">
           Condividi la tua esperienza
         </h1>
@@ -65,6 +74,19 @@ export default function Index() {
           Aiuta altri pazienti condividendo la tua storia
         </p>
         <SearchBar />
+        
+        <div className="flex justify-center gap-4 mt-8">
+          <Link to="/nuova-recensione">
+            <Button className="bg-primary hover:bg-primary-hover text-white px-6 py-2">
+              Racconta la tua Esperienza
+            </Button>
+          </Link>
+          <Link to="/cerca-patologia">
+            <Button variant="secondary" className="px-6 py-2">
+              Cerca Patologia
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <section className="mt-16">
