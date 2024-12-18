@@ -40,15 +40,18 @@ export default function SearchCondition() {
   const filteredConditions = conditions.filter(condition => {
     if (!condition?.Patologia) return false;
     
-    const matchesSearch = searchTerm 
-      ? condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
-      
-    const matchesLetter = selectedLetter === "TUTTE" 
-      ? true 
-      : condition.Patologia.toUpperCase().startsWith(selectedLetter);
-      
-    return matchesSearch && matchesLetter;
+    // If there's a search term, filter by it regardless of selected letter
+    if (searchTerm) {
+      return condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+    
+    // If no search term and "TUTTE" is selected, show all conditions
+    if (selectedLetter === "TUTTE") {
+      return true;
+    }
+    
+    // Otherwise, filter by selected letter
+    return condition.Patologia.startsWith(selectedLetter);
   });
 
   if (isLoading) {
