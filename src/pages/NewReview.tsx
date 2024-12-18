@@ -3,27 +3,43 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ReviewForm } from "@/components/review/ReviewForm";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function NewReview() {
-  useEffect(() => {
-    setPageTitle(getDefaultPageTitle("Racconta la tua Esperienza"));
-  }, []);
-
   const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
   const [searchParams] = useSearchParams();
   const conditionParam = searchParams.get("patologia");
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      toast.error("Devi effettuare l'accesso per raccontare la tua esperienza");
-      navigate("/registrati");
-    }
-  }, [isLoggedIn, navigate]);
+    setPageTitle(getDefaultPageTitle("Racconta la tua Esperienza"));
+  }, []);
 
-  if (!isLoggedIn) {
-    return null;
-  }
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Devi effettuare l'accesso per raccontare la tua esperienza", {
+          description: "Registrati o accedi per condividere la tua esperienza"
+        });
+        navigate("/registrati");
+        return;
+      }
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        toast.error("Devi effettuare l'accesso per raccontare la tua esperienza");
+        navigate("/registrati");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   return (
     <div className="container max-w-3xl py-8 space-y-8 animate-fade-in">
