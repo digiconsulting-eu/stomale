@@ -11,6 +11,12 @@ import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 
 const LETTERS = ["TUTTE", ...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""))];
 
+interface Condition {
+  id: number;
+  Patologia: string;
+  Descrizione?: string;
+}
+
 export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState("TUTTE");
@@ -30,21 +36,16 @@ export default function SearchCondition() {
       }
 
       console.log('Successfully fetched conditions:', data?.length || 0);
-      return data || [];
+      return (data || []) as Condition[];
     },
   });
 
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Cerca Patologia"));
-    console.log('Current conditions:', conditions?.length || 0);
-  }, [conditions]);
+  }, []);
 
   const filteredConditions = conditions.filter(condition => {
-    // Add debug logging
-    console.log('Filtering condition:', condition?.Patologia);
-    
     if (!condition?.Patologia) {
-      console.log('Skipping condition due to missing Patologia');
       return false;
     }
     
@@ -58,18 +59,12 @@ export default function SearchCondition() {
     
     // If "TUTTE" is selected, show all conditions
     if (selectedLetter === "TUTTE") {
-      console.log('TUTTE selected, showing condition:', conditionName);
       return true;
     }
     
     // Otherwise, filter by selected letter
     return conditionName.startsWith(selectedLetter);
   });
-
-  // Add debug logging for filtered results
-  useEffect(() => {
-    console.log('Filtered conditions:', filteredConditions?.length || 0);
-  }, [filteredConditions]);
 
   if (isLoading) {
     return (
