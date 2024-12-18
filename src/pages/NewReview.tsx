@@ -2,8 +2,13 @@ import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ReviewForm } from "@/components/review/ReviewForm";
+import { setPageTitle } from "@/utils/pageTitle";
 
 export default function NewReview() {
+  useEffect(() => {
+    setPageTitle(getDefaultPageTitle("Racconta la tua Esperienza"));
+  }, []);
+
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
   const [searchParams] = useSearchParams();

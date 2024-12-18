@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
@@ -5,8 +6,13 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LoginForm, type LoginFormValues } from "@/components/auth/LoginForm";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
+import { setPageTitle } from "@/utils/pageTitle";
 
 export default function Login() {
+  useEffect(() => {
+    setPageTitle(getDefaultPageTitle("Login"));
+  }, []);
+
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 

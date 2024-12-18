@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ReviewCard } from "@/components/ReviewCard";
 import { 
   Pagination, 
@@ -12,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,6 +62,10 @@ const Reviews = () => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000) // Exponential backoff
   });
 
+  useEffect(() => {
+    setPageTitle(getDefaultPageTitle("Ultime Recensioni"));
+  }, []);
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -105,7 +111,7 @@ const Reviews = () => {
 
         {reviews?.length === 0 && (
           <div className="col-span-full text-center py-8">
-            <p className="text-gray-500">Nessuna recensione disponibile al momento.</p>
+            <p className="text-gray-500">Non ci sono ancora recensioni.</p>
           </div>
         )}
       </div>

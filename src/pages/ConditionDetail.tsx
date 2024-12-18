@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ConditionOverview } from "@/components/condition/ConditionOverview";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +12,7 @@ import { ConditionActions } from "@/components/condition/ConditionActions";
 import { ConditionReviews } from "@/components/condition/ConditionReviews";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { toast } from "sonner";
+import { getConditionPageTitle } from "@/utils/pageTitle";
 
 interface DatabaseReview {
   id: number;
@@ -127,6 +129,12 @@ export default function ConditionDetail() {
     localStorage.setItem('favoriteConditions', JSON.stringify(newFavorites));
     setIsFavorite(!isFavorite);
   };
+
+  useEffect(() => {
+    if (condition) {
+      setPageTitle(getConditionPageTitle(condition));
+    }
+  }, [condition]);
 
   // Query per ottenere l'ID della patologia
   const { data: patologiaData } = useQuery({

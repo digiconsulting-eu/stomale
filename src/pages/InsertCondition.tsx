@@ -1,185 +1,117 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pencil } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { setPageTitle } from "@/utils/pageTitle";
 
-const InsertCondition = () => {
+export default function InsertCondition() {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  const [newCondition, setNewCondition] = useState("");
-  const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [description, setDescription] = useState(
-    "Non trovi la patologia che stai cercando? Inseriscila qui e sarà aggiunta all'elenco dopo l'approvazione."
-  );
-  const [editedDescription, setEditedDescription] = useState(description);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const checkIfConditionExists = async (condition: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('PATOLOGIE')
-        .select('Patologia')
-        .ilike('Patologia', condition.trim());
-
-      if (error) {
-        console.error('Error checking condition:', error);
-        return false;
-      }
-
-      return data && data.length > 0;
-    } catch (error) {
-      console.error('Error in checkIfConditionExists:', error);
-      return false;
-    }
-  };
+  useEffect(() => {
+    setPageTitle(getDefaultPageTitle("Inserisci Patologia"));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!newCondition.trim()) {
-      toast.error("Inserisci il nome della patologia");
-      return;
-    }
-
-    setIsSubmitting(true);
+    setIsLoading(true);
 
     try {
-      const exists = await checkIfConditionExists(newCondition);
-      
-      if (exists) {
-        toast.error("Questa patologia è già presente nell'elenco");
-        setIsSubmitting(false);
+      // Check if condition already exists
+      const { data: existingCondition } = await supabase
+        .from('PATOLOGIE')
+        .select('Patologia')
+        .ilike('Patologia', name)
+        .single();
+
+      if (existingCondition) {
+        toast.error("Questa patologia esiste già");
         return;
       }
 
-      const normalizedCondition = newCondition.trim().toUpperCase();
-
+      // Insert new condition
       const { error } = await supabase
         .from('PATOLOGIE')
         .insert([
-          { 
-            Patologia: normalizedCondition,
-            Descrizione: '' 
+          {
+            Patologia: name.toUpperCase(),
+            Descrizione: description,
+            status: 'pending'
           }
         ]);
 
-      if (error) {
-        if (error.code === '23505') {
-          toast.error("Questa patologia è già presente nell'elenco");
-        } else {
-          console.error('Error inserting condition:', error);
-          toast.error("Si è verificato un errore durante l'inserimento della patologia");
-        }
-        return;
-      }
+      if (error) throw error;
 
-      // Reset form and show success message
-      setNewCondition("");
-      toast.success("Patologia inserita con successo!");
-      navigate("/cerca-patologia");
-    } catch (error) {
+      toast.success("Patologia inserita con successo");
+      navigate(`/cerca-patologia`);
+    } catch (error: any) {
       console.error('Error inserting condition:', error);
-      toast.error("Si è verificato un errore durante l'inserimento della patologia");
+      toast.error("Errore durante l'inserimento della patologia", {
+        description: error.message
+      });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
-
-  const handleSaveDescription = () => {
-    setDescription(editedDescription);
-    setIsEditingDescription(false);
-    toast.success("Descrizione aggiornata con successo");
-  };
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      toast.error("Devi effettuare l'accesso per inserire una nuova patologia");
-      navigate("/registrati");
-    }
-  }, [isLoggedIn, navigate]);
-
-  if (!isLoggedIn) {
-    return null;
-  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle>Inserisci una nuova patologia</CardTitle>
-              <CardDescription>
-                {isEditingDescription ? (
-                  <div className="space-y-4 mt-4">
-                    <Textarea
-                      value={editedDescription}
-                      onChange={(e) => setEditedDescription(e.target.value)}
-                      className="min-h-[100px]"
-                    />
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setIsEditingDescription(false);
-                          setEditedDescription(description);
-                        }}
-                      >
-                        Annulla
-                      </Button>
-                      <Button onClick={handleSaveDescription}>
-                        Salva
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-start gap-2">
-                    <span>{description}</span>
-                    {isLoggedIn && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setIsEditingDescription(true)}
-                        className="flex-shrink-0"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </CardDescription>
-            </div>
+    <div className="container max-w-2xl mx-auto px-4 py-8">
+      <div className="card">
+        <h1 className="text-2xl font-bold text-center mb-6">
+          Inserisci una Nuova Patologia
+        </h1>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium">
+              Nome Patologia
+            </label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="Inserisci il nome della patologia"
+              disabled={isLoading}
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Input
-                type="text"
-                placeholder="Nome della patologia"
-                value={newCondition}
-                onChange={(e) => setNewCondition(e.target.value)}
-                className="w-full"
-                disabled={isSubmitting}
-              />
-            </div>
-            <Button 
-              type="submit" 
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Inserimento in corso..." : "Inserisci Patologia"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+
+          <div className="space-y-2">
+            <label htmlFor="description" className="text-sm font-medium">
+              Descrizione
+            </label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+              placeholder="Inserisci una breve descrizione della patologia"
+              disabled={isLoading}
+              rows={6}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading}
+          >
+            {isLoading ? "Inserimento..." : "Inserisci Patologia"}
+          </Button>
+        </form>
+
+        <div className="mt-6 text-sm text-text-light">
+          <p>
+            La patologia verrà revisionata dal nostro team prima di essere pubblicata.
+            Riceverai una notifica quando sarà approvata.
+          </p>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default InsertCondition;
+}

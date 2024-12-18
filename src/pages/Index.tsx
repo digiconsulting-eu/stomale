@@ -1,11 +1,17 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewCard } from "@/components/ReviewCard";
 import { SearchBar } from "@/components/SearchBar";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { setPageTitle } from "@/utils/pageTitle";
 
 export default function Index() {
+  useEffect(() => {
+    setPageTitle("Stomale.info | Recensioni su malattie, sintomi e patologie");
+  }, []);
+
   const { data: latestReviews = [], isLoading, isError } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {

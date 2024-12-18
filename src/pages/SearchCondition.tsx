@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, BookOpen } from "lucide-react";
+import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 
 const LETTERS = ["TUTTE", ...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""))];
 
@@ -32,6 +33,10 @@ export default function SearchCondition() {
       return data || [];
     },
   });
+
+  useEffect(() => {
+    setPageTitle(getDefaultPageTitle("Cerca Patologia"));
+  }, []);
 
   if (error) {
     console.error('Error in conditions query:', error);

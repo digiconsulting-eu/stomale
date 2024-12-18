@@ -1,166 +1,108 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { RegistrationForm } from "@/components/auth/RegistrationForm";
-import { checkUserExists } from "@/utils/auth";
-import { Button } from "@/components/ui/button";
+import { RegisterForm, type RegisterFormValues } from "@/components/auth/RegisterForm";
+import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
+import { setPageTitle } from "@/utils/pageTitle";
 
-const Register = () => {
+export default function Register() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
 
-  const startCooldown = () => {
-    setCooldown(12);
-    const cooldownInterval = setInterval(() => {
-      setCooldown((prevCooldown) => {
-        if (prevCooldown <= 1) {
-          clearInterval(cooldownInterval);
-          return 0;
-        }
-        return prevCooldown - 1;
-      });
-    }, 1000);
-  };
+  useEffect(() => {
+    setPageTitle(getDefaultPageTitle("Registrati"));
+  }, []);
 
-  const handleSubmit = async ({ 
-    email, 
-    password, 
-    birthYear, 
-    gender,
-    gdprConsent 
-  }: {
-    email: string;
-    password: string;
-    birthYear: string;
-    gender: string;
-    gdprConsent: boolean;
-  }) => {
-    if (cooldown > 0) {
-      toast.error(`Attendi ${cooldown} secondi prima di riprovare`);
-      return;
-    }
-
+  const handleSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
-    console.log("Starting registration process for:", email);
+    console.log("Starting registration process for:", data.email);
 
     try {
-      const userExists = await checkUserExists(email);
-      if (userExists) {
-        toast.error("Un account con questa email esiste già. Prova ad accedere.");
-        navigate('/login');
-        return;
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
         options: {
           data: {
-            birth_year: birthYear,
-            gender: gender,
+            username: data.username,
           },
         },
       });
 
-      if (error) {
-        console.error('Registration error:', error);
-        if (error.message.includes("rate limit")) {
-          startCooldown();
-        }
-        throw error;
+      if (signUpError) {
+        console.error("Registration error:", signUpError);
+        throw signUpError;
       }
 
-      if (data.user) {
-        // Update GDPR consent in the users table
-        const { error: updateError } = await supabase
-          .from('users')
-          .update({ 
-            gdpr_consent: gdprConsent,
-            gdpr_consent_date: new Date().toISOString()
-          })
-          .eq('id', data.user.id);
-
-        if (updateError) {
-          console.error('Error updating GDPR consent:', updateError);
-          toast.error("Errore nell'aggiornamento del consenso GDPR");
-          return;
-        }
-
-        localStorage.setItem('isLoggedIn', 'true');
-        
-        const { data: adminData, error: adminError } = await supabase
-          .from('admin')
-          .select('email')
-          .eq('email', email);
-          
-        if (!adminError && adminData && adminData.length > 0) {
-          localStorage.setItem('isAdmin', 'true');
-        }
-
-        toast.success("Registrazione completata con successo!");
-        navigate('/dashboard');
+      if (!authData.user) {
+        console.error("No user data received after successful registration");
+        throw new Error("Non è stato possibile completare la registrazione");
       }
+
+      console.log("User registered successfully:", authData.user.email);
+
+      toast.success("Registrazione completata con successo", {
+        description: "Ti abbiamo inviato una email di conferma. Controlla la tua casella di posta.",
+      });
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+
     } catch (error: any) {
-      console.error('Error during registration:', error);
-      toast.error(error.message || "Si è verificato un errore durante la registrazione");
+      console.error('Error during registration process:', error);
+      
+      if (error.message.includes('User already registered')) {
+        toast.error("Email già registrata", {
+          description: "Questa email è già associata a un account esistente"
+        });
+      } else {
+        toast.error("Errore durante la registrazione", {
+          description: error.message
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="container max-w-md mx-auto px-4 py-8">
-      <div className="card">
-        <h1 className="text-2xl font-bold text-center mb-6">Registrati</h1>
-        
-        <RegistrationForm 
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-          cooldown={cooldown}
-        />
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-md mx-auto">
+        <div className="card">
+          <h1 className="text-2xl font-bold text-center mb-6">Registrati</h1>
+          
+          <RegisterForm onSubmit={handleSubmit} isLoading={isLoading} />
 
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-muted-foreground">
+                  Oppure continua con
+                </span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-text-light">
-                Oppure continua con
-              </span>
+
+            <div className="mt-6">
+              <SocialLoginButtons isLoading={isLoading} />
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            <Button variant="outline" className="w-full" disabled={isLoading}>
-              Google
-            </Button>
-            <Button variant="outline" className="w-full" disabled={isLoading}>
-              Facebook
-            </Button>
-            <Button variant="outline" className="w-full" disabled={isLoading}>
-              LinkedIn
-            </Button>
-          </div>
-        </div>
-
-        <div className="mt-6 text-center text-sm">
-          <Link to="/recupera-password" className="text-primary hover:underline">
-            Hai dimenticato la password?
-          </Link>
-        </div>
-
-        <div className="mt-4 text-center text-sm">
-          Hai già un account?{" "}
-          <Link to="/login" className="text-primary hover:underline">
-            Accedi
-          </Link>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Hai già un account?{" "}
+            <Link
+              to="/login"
+              className="text-primary hover:underline"
+            >
+              Accedi
+            </Link>
+          </p>
         </div>
       </div>
     </div>
   );
-};
-
-export default Register;
+}

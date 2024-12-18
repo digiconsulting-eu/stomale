@@ -1,12 +1,20 @@
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ReviewContent } from "@/components/review/ReviewContent";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getReviewPageTitle } from "@/utils/pageTitle";
 
 export default function ReviewDetail() {
   const { condition, title } = useParams();
+
+  useEffect(() => {
+    if (condition && title) {
+      setPageTitle(getReviewPageTitle(condition, decodeURIComponent(title)));
+    }
+  }, [condition, title]);
 
   const { data: review, isLoading, error } = useQuery({
     queryKey: ["review", condition, title],
