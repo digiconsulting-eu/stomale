@@ -38,25 +38,24 @@ export default function SearchCondition() {
     setPageTitle(getDefaultPageTitle("Cerca Patologia"));
   }, []);
 
-  if (error) {
-    console.error('Error in conditions query:', error);
-  }
-
   const filteredConditions = conditions.filter(condition => {
     if (!condition?.Patologia) return false;
     
+    const conditionName = condition.Patologia.toUpperCase();
+    const searchTermUpper = searchTerm.toUpperCase();
+    
     // If there's a search term, filter by it regardless of selected letter
     if (searchTerm) {
-      return condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
+      return conditionName.includes(searchTermUpper);
     }
     
-    // If no search term and "TUTTE" is selected, show all conditions
+    // If "TUTTE" is selected, show all conditions
     if (selectedLetter === "TUTTE") {
       return true;
     }
     
     // Otherwise, filter by selected letter
-    return condition.Patologia.startsWith(selectedLetter);
+    return conditionName.startsWith(selectedLetter);
   });
 
   if (isLoading) {
@@ -70,6 +69,15 @@ export default function SearchCondition() {
             <Skeleton key={i} className="h-[80px] md:h-[100px]" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('Error in conditions query:', error);
+    return (
+      <div className="container mx-auto px-4 py-6 text-center">
+        <p className="text-red-500">Si è verificato un errore nel caricamento delle patologie.</p>
       </div>
     );
   }
@@ -105,28 +113,28 @@ export default function SearchCondition() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-        {filteredConditions.map((condition) => (
-          <Card key={condition.id} className="p-3 md:p-4">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-base md:text-lg font-semibold text-primary truncate">
-                {condition.Patologia}
-              </h2>
-              <Link 
-                to={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
-                className="shrink-0"
-              >
-                <Button 
-                  size="sm" 
-                  className="bg-primary hover:bg-primary-hover text-white h-8 w-8 p-0"
+        {filteredConditions.length > 0 ? (
+          filteredConditions.map((condition) => (
+            <Card key={condition.id} className="p-3 md:p-4">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-base md:text-lg font-semibold text-primary truncate">
+                  {condition.Patologia}
+                </h2>
+                <Link 
+                  to={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
+                  className="shrink-0"
                 >
-                  <BookOpen className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </Card>
-        ))}
-
-        {filteredConditions.length === 0 && (
+                  <Button 
+                    size="sm" 
+                    className="bg-primary hover:bg-primary-hover text-white h-8 w-8 p-0"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          ))
+        ) : (
           <div className="col-span-full text-center py-6 md:py-8">
             <p className="text-gray-500 mb-3 md:mb-4">Nessuna patologia trovata</p>
             <Link 
