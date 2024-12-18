@@ -14,14 +14,13 @@ export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState("");
 
-  const { data: conditions = [], isLoading } = useQuery({
+  const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
       console.log('Fetching conditions...');
       const { data, error } = await supabase
         .from('PATOLOGIE')
-        .select('*')
-        .order('Patologia');
+        .select('*');
 
       if (error) {
         console.error('Error fetching conditions:', error);
@@ -31,9 +30,11 @@ export default function SearchCondition() {
       console.log('Successfully fetched conditions:', data?.length || 0);
       return data || [];
     },
-    retry: 1,
-    staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  if (error) {
+    console.error('Error in conditions query:', error);
+  }
 
   const filteredConditions = conditions.filter(condition => {
     if (!condition?.Patologia) return false;
