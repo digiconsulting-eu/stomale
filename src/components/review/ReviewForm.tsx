@@ -45,6 +45,14 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
+      // Get the current user
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        toast.error("Devi effettuare l'accesso per inviare una recensione");
+        navigate("/login");
+        return;
+      }
+
       // Get condition_id from PATOLOGIE table
       const { data: patologiaData, error: patologiaError } = await supabase
         .from('PATOLOGIE')
@@ -54,11 +62,12 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
 
       if (patologiaError) throw patologiaError;
 
-      // Insert review
+      // Insert review with user_id
       const { error: reviewError } = await supabase
         .from('reviews')
         .insert([
           {
+            user_id: session.user.id,
             condition_id: patologiaData.id,
             title: data.title,
             symptoms: data.symptoms,
