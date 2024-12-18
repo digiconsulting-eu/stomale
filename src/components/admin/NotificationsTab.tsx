@@ -29,16 +29,14 @@ interface Notification {
 interface NotificationsTabProps {
   notifications: Notification[];
   markNotificationAsRead: (id: string) => void;
-  onDeleteCondition?: (conditionName: string) => void;
 }
 
 export const NotificationsTab = ({ 
   notifications, 
-  markNotificationAsRead,
-  onDeleteCondition 
+  markNotificationAsRead 
 }: NotificationsTabProps) => {
   // Query to fetch pending reviews
-  const { data: pendingReviews } = useQuery({
+  const { data: pendingReviews, refetch: refetchPendingReviews } = useQuery({
     queryKey: ['pending-reviews'],
     queryFn: async () => {
       console.log('Fetching pending reviews...');
@@ -78,6 +76,7 @@ export const NotificationsTab = ({
       if (error) throw error;
       
       toast.success("Recensione approvata con successo");
+      refetchPendingReviews();
     } catch (error) {
       console.error('Error approving review:', error);
       toast.error("Errore durante l'approvazione della recensione");
@@ -94,6 +93,7 @@ export const NotificationsTab = ({
       if (error) throw error;
       
       toast.success("Recensione rifiutata con successo");
+      refetchPendingReviews();
     } catch (error) {
       console.error('Error rejecting review:', error);
       toast.error("Errore durante il rifiuto della recensione");
@@ -103,52 +103,57 @@ export const NotificationsTab = ({
   return (
     <div className="space-y-8">
       {/* Pending Reviews Section */}
-      {pendingReviews && pendingReviews.length > 0 && (
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Nuove recensioni da approvare</h2>
-          <div className="space-y-4">
-            {pendingReviews.map((review) => (
-              <div
-                key={review.id}
-                className="p-4 rounded-lg border bg-white"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold">{review.title}</h3>
-                    <p className="text-sm text-gray-500">
-                      Patologia: {review.PATOLOGIE?.Patologia}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(review.created_at).toLocaleDateString('it-IT')}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => handleApproveReview(review.id)}
-                    >
-                      <Check className="h-4 w-4 mr-1" />
-                      Approva
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleRejectReview(review.id)}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Rifiuta
-                    </Button>
-                  </div>
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">
+          Nuove recensioni da approvare ({pendingReviews?.length || 0})
+        </h2>
+        <div className="space-y-4">
+          {pendingReviews?.map((review) => (
+            <div
+              key={review.id}
+              className="p-4 rounded-lg border bg-white"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold">{review.title}</h3>
+                  <p className="text-sm text-gray-500">
+                    Patologia: {review.PATOLOGIE?.Patologia}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {new Date(review.created_at).toLocaleDateString('it-IT')}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => handleApproveReview(review.id)}
+                  >
+                    <Check className="h-4 w-4 mr-1" />
+                    Approva
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleRejectReview(review.id)}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Rifiuta
+                  </Button>
                 </div>
               </div>
-            ))}
-          </div>
-        </Card>
-      )}
+            </div>
+          ))}
+
+          {pendingReviews?.length === 0 && (
+            <p className="text-gray-500">Non ci sono recensioni in attesa di approvazione.</p>
+          )}
+        </div>
+      </Card>
 
       {/* Regular Notifications */}
       <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Notifiche</h2>
         {notifications.map((notification) => (
           <div
             key={notification.id}
@@ -170,6 +175,10 @@ export const NotificationsTab = ({
             <p className="text-sm text-gray-500 mt-2">{notification.date}</p>
           </div>
         ))}
+
+        {notifications.length === 0 && (
+          <p className="text-gray-500">Non ci sono notifiche.</p>
+        )}
       </div>
     </div>
   );
