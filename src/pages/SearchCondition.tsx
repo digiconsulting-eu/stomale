@@ -14,32 +14,23 @@ export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState("");
 
-  const { data: conditions = [], isLoading } = useQuery({
+  const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      try {
-        console.log('Fetching conditions...');
-        const { data, error } = await supabase
-          .from('PATOLOGIE')
-          .select('*')
-          .order('Patologia');
+      console.log('Fetching conditions for search page...');
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('*')
+        .order('Patologia');
 
-        if (error) {
-          console.error('Error fetching conditions:', error);
-          throw error;
-        }
-
-        console.log('Successfully fetched conditions:', data?.length || 0);
-        return data || [];
-      } catch (error) {
-        console.error('Error in conditions query:', error);
+      if (error) {
+        console.error('Error fetching conditions:', error);
         throw error;
       }
+
+      console.log('Successfully fetched conditions:', data?.length);
+      return data || [];
     },
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 30,
   });
 
   const filteredConditions = conditions.filter(condition => {
@@ -55,6 +46,20 @@ export default function SearchCondition() {
       
     return matchesSearch && matchesLetter;
   });
+
+  if (error) {
+    console.error('Error in conditions query:', error);
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-primary mb-6">
+          Cerca una Patologia
+        </h1>
+        <div className="text-red-500">
+          Si è verificato un errore nel caricamento delle patologie.
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
