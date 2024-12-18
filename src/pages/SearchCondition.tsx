@@ -36,10 +36,17 @@ export default function SearchCondition() {
 
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Cerca Patologia"));
-  }, []);
+    console.log('Current conditions:', conditions?.length || 0);
+  }, [conditions]);
 
   const filteredConditions = conditions.filter(condition => {
-    if (!condition?.Patologia) return false;
+    // Add debug logging
+    console.log('Filtering condition:', condition?.Patologia);
+    
+    if (!condition?.Patologia) {
+      console.log('Skipping condition due to missing Patologia');
+      return false;
+    }
     
     const conditionName = condition.Patologia.toUpperCase();
     const searchTermUpper = searchTerm.toUpperCase();
@@ -51,12 +58,18 @@ export default function SearchCondition() {
     
     // If "TUTTE" is selected, show all conditions
     if (selectedLetter === "TUTTE") {
+      console.log('TUTTE selected, showing condition:', conditionName);
       return true;
     }
     
     // Otherwise, filter by selected letter
     return conditionName.startsWith(selectedLetter);
   });
+
+  // Add debug logging for filtered results
+  useEffect(() => {
+    console.log('Filtered conditions:', filteredConditions?.length || 0);
+  }, [filteredConditions]);
 
   if (isLoading) {
     return (
