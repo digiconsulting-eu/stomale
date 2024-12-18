@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import Index from "@/pages/Index";
 import ReviewDetail from "@/pages/ReviewDetail";
@@ -23,6 +23,7 @@ import Sitemap from "@/pages/Sitemap";
 export const AppRoutes = () => {
   return (
     <Routes>
+      {/* Public routes */}
       <Route path="/" element={<Index />} />
       <Route path="/patologia/:condition/recensione/:title" element={<ReviewDetail />} />
       <Route path="/recensioni" element={<Reviews />} />
@@ -35,6 +36,12 @@ export const AppRoutes = () => {
       <Route path="/recupera-password" element={<RecoverPassword />} />
       <Route path="/update-password" element={<UpdatePassword />} />
       <Route path="/patologia/:condition" element={<ConditionDetail />} />
+      <Route path="/cookie-policy" element={<CookiePolicy />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/sitemap.xml" element={<Sitemap />} />
+
+      {/* Protected routes */}
       <Route path="/admin" element={<Admin />} />
       <Route path="/admin/recensioni" element={<ReviewManagement />} />
       <Route path="/admin/utenti" element={<UserManagement />} />
@@ -46,10 +53,9 @@ export const AppRoutes = () => {
           </ProtectedRoute>
         } 
       />
-      <Route path="/cookie-policy" element={<CookiePolicy />} />
-      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/sitemap.xml" element={<Sitemap />} />
+
+      {/* Catch-all route for 404s - redirect to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

@@ -29,10 +29,8 @@ const AuthStateHandler = () => {
       console.log('Auth state changed:', event, session?.user?.email);
       
       if (event === 'SIGNED_IN' && location.pathname === '/login') {
-        // Only redirect to dashboard when explicitly signing in from login page
         navigate('/dashboard', { replace: true });
       } else if (event === 'SIGNED_OUT') {
-        // Only redirect to home if we're on a protected route
         const protectedRoutes = ['/dashboard', '/admin'];
         if (protectedRoutes.some(route => location.pathname.startsWith(route))) {
           navigate('/', { replace: true });
@@ -62,8 +60,6 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
       <BrowserRouter>
         <ScrollToTop />
         <AuthStateHandler />
@@ -75,6 +71,8 @@ const App = () => (
           <Footer />
           <CookieConsent />
         </div>
+        <Toaster />
+        <Sonner />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
