@@ -17,24 +17,19 @@ export default function SearchCondition() {
   const { data: conditions = [], isLoading } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      try {
-        console.log('Fetching conditions...');
-        const { data, error } = await supabase
-          .from('PATOLOGIE')
-          .select('*')
-          .order('Patologia');
+      console.log('Fetching conditions for search page...');
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('*')
+        .order('Patologia');
 
-        if (error) {
-          console.error('Error fetching conditions:', error);
-          throw error;
-        }
-
-        console.log('Successfully fetched conditions:', data?.length || 0);
-        return data || [];
-      } catch (error) {
-        console.error('Error in conditions query:', error);
+      if (error) {
+        console.error('Error fetching conditions:', error);
         throw error;
       }
+
+      console.log('Successfully fetched conditions:', data?.length);
+      return data || [];
     },
   });
 
