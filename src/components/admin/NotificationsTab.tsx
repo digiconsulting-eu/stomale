@@ -3,6 +3,19 @@ import { Bell, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Review {
+  id: number;
+  title: string;
+  condition_id: number;
+  status: string;
+  created_at: string;
+  PATOLOGIE: {
+    Patologia: string;
+  };
+}
 
 interface Notification {
   id: string;
@@ -19,115 +32,101 @@ interface NotificationsTabProps {
   onDeleteCondition?: (conditionName: string) => void;
 }
 
-// Helper component for notification actions
-const NotificationActions = ({ 
-  type, 
-  content, 
-  onApprove, 
-  onReject 
-}: { 
-  type: string; 
-  content: string; 
-  onApprove: () => void; 
-  onReject: () => void;
-}) => {
-  if (type === "new_condition") {
-    return (
-      <div className="flex gap-2">
-        <Button
-          variant="default"
-          size="sm"
-          onClick={onApprove}
-        >
-          <Check className="h-4 w-4 mr-1" />
-          Approva
-        </Button>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={onReject}
-        >
-          <X className="h-4 w-4 mr-1" />
-          Rifiuta
-        </Button>
-      </div>
-    );
-  }
-  return null;
-};
-
 export const NotificationsTab = ({ 
   notifications, 
   markNotificationAsRead,
   onDeleteCondition 
 }: NotificationsTabProps) => {
-  const handleApproveCondition = (content: string) => {
-    const conditionName = content.split(": ")[1];
-    
-    // Get pending conditions and remove the approved one
-    const pendingConditions = JSON.parse(localStorage.getItem('pendingConditions') || '[]');
-    const updatedPendingConditions = pendingConditions.filter(
-      (condition: string) => condition !== conditionName
-    );
-    localStorage.setItem('pendingConditions', JSON.stringify(updatedPendingConditions));
+  // Query to fetch pending reviews
+  const { data: pendingReviews } = useQuery({
+    queryKey: ['pending-reviews'],
+    queryFn: async () => {
+      console.log('Fetching pending reviews...');
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          title,
+          condition_id,
+          status,
+          created_at,
+          PATOLOGIE (
+            Patologia
+          )
+        `)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
 
-    // Add the condition to the approved conditions list
-    const approvedConditions = JSON.parse(localStorage.getItem('approvedConditions') || '[]');
-    approvedConditions.push(conditionName);
-    localStorage.setItem('approvedConditions', JSON.stringify(approvedConditions));
+      if (error) {
+        console.error('Error fetching pending reviews:', error);
+        throw error;
+      }
 
-    // Force a re-render
-    window.dispatchEvent(new Event('storage'));
+      console.log('Fetched pending reviews:', data);
+      return data as Review[];
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
 
-    toast.success(`Patologia "${conditionName}" approvata con successo`);
-  };
+  const handleApproveReview = async (reviewId: number) => {
+    try {
+      const { error } = await supabase
+        .from('reviews')
+        .update({ status: 'approved' })
+        .eq('id', reviewId);
 
-  const handleDeleteCondition = (content: string) => {
-    const conditionName = content.split(": ")[1];
-    
-    // Remove from pending conditions
-    const pendingConditions = JSON.parse(localStorage.getItem('pendingConditions') || '[]');
-    const updatedPendingConditions = pendingConditions.filter(
-      (condition: string) => condition !== conditionName
-    );
-    localStorage.setItem('pendingConditions', JSON.stringify(updatedPendingConditions));
-
-    // Force a re-render
-    window.dispatchEvent(new Event('storage'));
-
-    toast.success(`Patologia "${conditionName}" rifiutata`);
-    
-    if (onDeleteCondition) {
-      onDeleteCondition(conditionName);
+      if (error) throw error;
+      
+      toast.success("Recensione approvata con successo");
+    } catch (error) {
+      console.error('Error approving review:', error);
+      toast.error("Errore durante l'approvazione della recensione");
     }
   };
 
-  // Get pending conditions from localStorage and filter out approved ones
-  const pendingConditions = JSON.parse(localStorage.getItem('pendingConditions') || '[]');
-  const approvedConditions = JSON.parse(localStorage.getItem('approvedConditions') || '[]');
-  const filteredPendingConditions = pendingConditions.filter(
-    (condition: string) => !approvedConditions.includes(condition)
-  );
+  const handleRejectReview = async (reviewId: number) => {
+    try {
+      const { error } = await supabase
+        .from('reviews')
+        .update({ status: 'rejected' })
+        .eq('id', reviewId);
+
+      if (error) throw error;
+      
+      toast.success("Recensione rifiutata con successo");
+    } catch (error) {
+      console.error('Error rejecting review:', error);
+      toast.error("Errore durante il rifiuto della recensione");
+    }
+  };
 
   return (
     <div className="space-y-8">
-      {/* Pending Conditions Section */}
-      {filteredPendingConditions.length > 0 && (
+      {/* Pending Reviews Section */}
+      {pendingReviews && pendingReviews.length > 0 && (
         <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Nuove patologie da approvare</h2>
+          <h2 className="text-xl font-semibold mb-4">Nuove recensioni da approvare</h2>
           <div className="space-y-4">
-            {filteredPendingConditions.map((condition: string) => (
+            {pendingReviews.map((review) => (
               <div
-                key={condition}
+                key={review.id}
                 className="p-4 rounded-lg border bg-white"
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">{condition}</h3>
+                  <div>
+                    <h3 className="font-semibold">{review.title}</h3>
+                    <p className="text-sm text-gray-500">
+                      Patologia: {review.PATOLOGIE?.Patologia}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {new Date(review.created_at).toLocaleDateString('it-IT')}
+                    </p>
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       variant="default"
                       size="sm"
-                      onClick={() => handleApproveCondition(`Nuova patologia: ${condition}`)}
+                      onClick={() => handleApproveReview(review.id)}
                     >
                       <Check className="h-4 w-4 mr-1" />
                       Approva
@@ -135,7 +134,7 @@ export const NotificationsTab = ({
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDeleteCondition(`Nuova patologia: ${condition}`)}
+                      onClick={() => handleRejectReview(review.id)}
                     >
                       <X className="h-4 w-4 mr-1" />
                       Rifiuta
@@ -168,15 +167,7 @@ export const NotificationsTab = ({
               )}
             </div>
             <p className="text-gray-600 mt-1">{notification.content}</p>
-            <div className="flex justify-between items-center mt-2">
-              <p className="text-sm text-gray-500">{notification.date}</p>
-              <NotificationActions
-                type={notification.type}
-                content={notification.content}
-                onApprove={() => handleApproveCondition(notification.content)}
-                onReject={() => handleDeleteCondition(notification.content)}
-              />
-            </div>
+            <p className="text-sm text-gray-500 mt-2">{notification.date}</p>
           </div>
         ))}
       </div>
