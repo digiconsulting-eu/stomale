@@ -3,19 +3,26 @@ import { Link, useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { RegistrationForm, type RegisterFormValues } from "@/components/auth/RegistrationForm";
+import { RegistrationForm } from "@/components/auth/RegistrationForm";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 
 export default function Register() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Registrati"));
   }, []);
 
-  const handleSubmit = async (data: RegisterFormValues) => {
+  const handleSubmit = async (data: {
+    email: string;
+    password: string;
+    birthYear: string;
+    gender: string;
+    gdprConsent: boolean;
+  }) => {
     setIsLoading(true);
     console.log("Starting registration process for:", data.email);
 
@@ -25,7 +32,8 @@ export default function Register() {
         password: data.password,
         options: {
           data: {
-            username: data.username,
+            birth_year: data.birthYear,
+            gender: data.gender,
           },
         },
       });
@@ -62,6 +70,18 @@ export default function Register() {
           description: error.message
         });
       }
+      
+      // Set cooldown when an error occurs
+      setCooldown(30);
+      const timer = setInterval(() => {
+        setCooldown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +93,11 @@ export default function Register() {
         <div className="card">
           <h1 className="text-2xl font-bold text-center mb-6">Registrati</h1>
           
-          <RegistrationForm onSubmit={handleSubmit} isLoading={isLoading} />
+          <RegistrationForm 
+            onSubmit={handleSubmit} 
+            isLoading={isLoading} 
+            cooldown={cooldown}
+          />
 
           <div className="mt-6">
             <div className="relative">
