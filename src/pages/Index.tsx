@@ -95,6 +95,12 @@ export default function Index() {
                 socialDiscomfort={review.social_discomfort}
               />
             ))}
+
+            {latestReviews.length === 0 && (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">Non ci sono ancora recensioni.</p>
+              </div>
+            )}
           </div>
         )}
       </section>
