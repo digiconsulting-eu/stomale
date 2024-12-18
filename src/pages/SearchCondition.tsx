@@ -14,7 +14,7 @@ export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState("");
 
-  const { data: conditions, isLoading } = useQuery({
+  const { data: conditions = [], isLoading } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
       try {
@@ -30,7 +30,7 @@ export default function SearchCondition() {
         }
 
         console.log('Successfully fetched conditions:', data?.length || 0);
-        return data;
+        return data || [];
       } catch (error) {
         console.error('Error in conditions query:', error);
         throw error;
@@ -42,9 +42,17 @@ export default function SearchCondition() {
     gcTime: 1000 * 60 * 30,
   });
 
-  const filteredConditions = conditions?.filter(condition => {
-    const matchesSearch = condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLetter = !selectedLetter || condition.Patologia.toUpperCase().startsWith(selectedLetter);
+  const filteredConditions = conditions.filter(condition => {
+    if (!condition?.Patologia) return false;
+    
+    const matchesSearch = searchTerm 
+      ? condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
+      : true;
+      
+    const matchesLetter = selectedLetter 
+      ? condition.Patologia.toUpperCase().startsWith(selectedLetter)
+      : true;
+      
     return matchesSearch && matchesLetter;
   });
 
@@ -86,7 +94,7 @@ export default function SearchCondition() {
             key={letter}
             variant={selectedLetter === letter ? "default" : "outline"}
             className="min-w-[32px] md:min-w-[40px] h-8 md:h-10 px-2 text-sm md:text-base"
-            onClick={() => setSelectedLetter(letter)}
+            onClick={() => setSelectedLetter(selectedLetter === letter ? "" : letter)}
           >
             {letter}
           </Button>
@@ -94,14 +102,14 @@ export default function SearchCondition() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-        {filteredConditions?.map((condition) => (
+        {filteredConditions.map((condition) => (
           <Card key={condition.id} className="p-3 md:p-4">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-base md:text-lg font-semibold text-primary truncate">
                 {condition.Patologia}
               </h2>
               <Link 
-                to={`/patologia/${encodeURIComponent(condition.Patologia)}`}
+                to={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
                 className="shrink-0"
               >
                 <Button 
@@ -115,7 +123,7 @@ export default function SearchCondition() {
           </Card>
         ))}
 
-        {filteredConditions?.length === 0 && (
+        {filteredConditions.length === 0 && (
           <div className="col-span-full text-center py-6 md:py-8">
             <p className="text-gray-500 mb-3 md:mb-4">Nessuna patologia trovata</p>
             <Link 
