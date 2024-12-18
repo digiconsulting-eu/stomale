@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LoginForm, type LoginFormValues } from "@/components/auth/LoginForm";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
-import { setPageTitle } from "@/utils/pageTitle";
+import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 
 export default function Login() {
   useEffect(() => {

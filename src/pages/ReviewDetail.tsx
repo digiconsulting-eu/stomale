@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ReviewContent } from "@/components/review/ReviewContent";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getReviewPageTitle } from "@/utils/pageTitle";
+import { setPageTitle, getReviewPageTitle } from "@/utils/pageTitle";
 
 export default function ReviewDetail() {
   const { condition, title } = useParams();

@@ -12,7 +12,7 @@ import { ConditionActions } from "@/components/condition/ConditionActions";
 import { ConditionReviews } from "@/components/condition/ConditionReviews";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { toast } from "sonner";
-import { getConditionPageTitle } from "@/utils/pageTitle";
+import { setPageTitle, getConditionPageTitle } from "@/utils/pageTitle";
 
 interface DatabaseReview {
   id: number;
@@ -255,3 +255,4 @@ export default function ConditionDetail() {
     </div>
   );
 }
+

@@ -3,9 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { RegisterForm, type RegisterFormValues } from "@/components/auth/RegisterForm";
+import { RegistrationForm, type RegisterFormValues } from "@/components/auth/RegistrationForm";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
-import { setPageTitle } from "@/utils/pageTitle";
+import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -73,7 +73,7 @@ export default function Register() {
         <div className="card">
           <h1 className="text-2xl font-bold text-center mb-6">Registrati</h1>
           
-          <RegisterForm onSubmit={handleSubmit} isLoading={isLoading} />
+          <RegistrationForm onSubmit={handleSubmit} isLoading={isLoading} />
 
           <div className="mt-6">
             <div className="relative">

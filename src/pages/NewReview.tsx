@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ReviewForm } from "@/components/review/ReviewForm";
-import { setPageTitle } from "@/utils/pageTitle";
+import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 
 export default function NewReview() {
   useEffect(() => {
