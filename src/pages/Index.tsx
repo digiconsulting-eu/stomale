@@ -60,32 +60,37 @@ export default function Index() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-12">
-        <div className="relative mb-8">
-          <img 
-            src="/lovable-uploads/f6c39c72-c0f1-48d1-bd7c-8e14f1185fb6.png" 
-            alt="Pills background" 
-            className="w-full max-w-3xl mx-auto rounded-lg shadow-lg"
-          />
-        </div>
-        <h1 className="text-4xl font-bold text-primary mb-4">
-          Condividi la tua esperienza
-        </h1>
-        <p className="text-xl text-gray-600 mb-8">
-          Aiuta altri pazienti condividendo la tua storia
-        </p>
-        <SearchBar />
-        
-        <div className="flex justify-center gap-4 mt-8">
-          <Link to="/nuova-recensione">
-            <Button className="bg-primary hover:bg-primary-hover text-white px-6 py-2">
-              Racconta la tua Esperienza
-            </Button>
-          </Link>
-          <Link to="/cerca-patologia">
-            <Button variant="secondary" className="px-6 py-2">
-              Cerca Patologia
-            </Button>
-          </Link>
+        <div 
+          className="relative mb-8 min-h-[300px] flex items-center justify-center rounded-lg shadow-lg"
+          style={{
+            backgroundImage: 'url("/lovable-uploads/f6c39c72-c0f1-48d1-bd7c-8e14f1185fb6.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          <div className="absolute inset-0 bg-black/30 rounded-lg"></div>
+          <div className="relative z-10 text-white">
+            <h1 className="text-4xl font-bold mb-4">
+              Condividi la tua esperienza
+            </h1>
+            <p className="text-xl mb-8">
+              Aiuta altri pazienti condividendo la tua storia
+            </p>
+            <SearchBar />
+            
+            <div className="flex justify-center gap-4 mt-8">
+              <Link to="/nuova-recensione">
+                <Button className="bg-primary hover:bg-primary-hover text-white px-6 py-2">
+                  Racconta la tua Esperienza
+                </Button>
+              </Link>
+              <Link to="/cerca-patologia">
+                <Button variant="secondary" className="px-6 py-2">
+                  Cerca Patologia
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
