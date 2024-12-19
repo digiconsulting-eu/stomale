@@ -19,47 +19,37 @@ const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const reviewsPerPage = 20;
 
-  const { data: reviews, isLoading, error } = useQuery({
-    queryKey: ['reviews'],
+  const { data: reviews, isLoading } = useQuery({
+    queryKey: ['approved-reviews'],
     queryFn: async () => {
-      try {
-        console.log('Fetching reviews...');
-        const { data, error } = await supabase
-          .from('reviews')
-          .select(`
-            id,
-            title,
-            experience,
-            diagnosis_difficulty,
-            symptoms_severity,
-            has_medication,
-            medication_effectiveness,
-            healing_possibility,
-            social_discomfort,
-            created_at,
-            PATOLOGIE (
-              Patologia
-            )
-          `)
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false });
+      console.log('Fetching approved reviews...');
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          title,
+          experience,
+          diagnosis_difficulty,
+          symptoms_severity,
+          has_medication,
+          medication_effectiveness,
+          healing_possibility,
+          social_discomfort,
+          created_at,
+          PATOLOGIE (
+            Patologia
+          )
+        `)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching reviews:', error);
-          throw error;
-        }
-
-        console.log('Successfully fetched reviews:', data?.length || 0);
-        return data || [];
-      } catch (error) {
-        console.error('Error in reviews query:', error);
+      if (error) {
+        console.error('Error fetching reviews:', error);
         throw error;
       }
-    },
-    staleTime: 30000, // Cache data for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
-    retry: 3, // Retry failed requests 3 times
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000) // Exponential backoff
+
+      return data || [];
+    }
   });
 
   useEffect(() => {
@@ -80,7 +70,6 @@ const Reviews = () => {
   }
 
   const totalPages = Math.ceil((reviews?.length || 0) / reviewsPerPage);
-
   const getCurrentPageReviews = () => {
     if (!reviews) return [];
     const startIndex = (currentPage - 1) * reviewsPerPage;
@@ -111,7 +100,7 @@ const Reviews = () => {
 
         {reviews?.length === 0 && (
           <div className="col-span-full text-center py-8">
-            <p className="text-gray-500">Non ci sono ancora recensioni.</p>
+            <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
           </div>
         )}
       </div>
