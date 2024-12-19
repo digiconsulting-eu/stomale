@@ -38,6 +38,8 @@ export default function SearchCondition() {
       console.log('Successfully fetched conditions:', data?.length || 0);
       return (data || []) as Condition[];
     },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     gcTime: 1000 * 60 * 10, // Keep unused data for 10 minutes
   });
@@ -54,17 +56,14 @@ export default function SearchCondition() {
     const conditionName = condition.Patologia.toUpperCase();
     const searchTermUpper = searchTerm.toUpperCase();
     
-    // If there's a search term, filter by it regardless of selected letter
     if (searchTerm) {
       return conditionName.includes(searchTermUpper);
     }
     
-    // If "TUTTE" is selected, show all conditions
     if (selectedLetter === "TUTTE") {
       return true;
     }
     
-    // Otherwise, filter by selected letter
     return conditionName.startsWith(selectedLetter);
   });
 
