@@ -36,16 +36,12 @@ export default function SearchCondition() {
           throw error;
         }
 
-        console.log('Successfully fetched conditions:', data?.length || 0);
-        return (data || []) as Condition[];
+        return data || [];
       } catch (error) {
         console.error('Error in conditions query:', error);
         throw error;
       }
-    },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
+    }
   });
 
   useEffect(() => {
@@ -53,24 +49,17 @@ export default function SearchCondition() {
   }, []);
 
   const filteredConditions = conditions.filter(condition => {
-    if (!condition?.Patologia) {
-      return false;
-    }
-    
     const conditionName = condition.Patologia.toUpperCase();
     const searchTermUpper = searchTerm.toUpperCase();
     
-    // If there's a search term, filter by it regardless of selected letter
     if (searchTerm) {
       return conditionName.includes(searchTermUpper);
     }
     
-    // If "TUTTE" is selected, show all conditions
     if (selectedLetter === "TUTTE") {
       return true;
     }
     
-    // Otherwise, filter by selected letter
     return conditionName.startsWith(selectedLetter);
   });
 

@@ -25,7 +25,7 @@ export const SearchBar = () => {
         throw error;
       }
 
-      return data?.map(item => item.Patologia) || [];
+      return data.map(item => item.Patologia) || [];
     },
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
