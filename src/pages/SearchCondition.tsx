@@ -36,12 +36,15 @@ export default function SearchCondition() {
           throw error;
         }
 
-        return data || [];
+        return data as Condition[];
       } catch (error) {
         console.error('Error in conditions query:', error);
         throw error;
       }
-    }
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   useEffect(() => {
@@ -49,6 +52,10 @@ export default function SearchCondition() {
   }, []);
 
   const filteredConditions = conditions.filter(condition => {
+    if (!condition?.Patologia) {
+      return false;
+    }
+    
     const conditionName = condition.Patologia.toUpperCase();
     const searchTermUpper = searchTerm.toUpperCase();
     

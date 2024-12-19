@@ -25,11 +25,9 @@ export const SearchBar = () => {
         throw error;
       }
 
-      return data.map(item => item.Patologia) || [];
-    },
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 1000 * 60 * 5,
+      if (!data) return [];
+      return data.map(item => item.Patologia);
+    }
   });
 
   const handleSearch = (term: string = searchTerm) => {
