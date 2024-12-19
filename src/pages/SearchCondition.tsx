@@ -38,6 +38,8 @@ export default function SearchCondition() {
       console.log('Successfully fetched conditions:', data?.length || 0);
       return (data || []) as Condition[];
     },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 10, // Keep unused data for 10 minutes
   });
 
   useEffect(() => {
