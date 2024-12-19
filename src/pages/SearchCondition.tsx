@@ -24,28 +24,20 @@ export default function SearchCondition() {
   const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      try {
-        console.log('Fetching conditions...');
-        const { data, error } = await supabase
-          .from('PATOLOGIE')
-          .select('*')
-          .order('Patologia');
+      console.log('Fetching conditions...');
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('*')
+        .order('Patologia');
 
-        if (error) {
-          console.error('Error fetching conditions:', error);
-          throw error;
-        }
-
-        console.log('Successfully fetched conditions:', data?.length || 0);
-        return (data || []) as Condition[];
-      } catch (error) {
-        console.error('Error in conditions query:', error);
+      if (error) {
+        console.error('Error fetching conditions:', error);
         throw error;
       }
+
+      console.log('Successfully fetched conditions:', data?.length || 0);
+      return (data || []) as Condition[];
     },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   useEffect(() => {
