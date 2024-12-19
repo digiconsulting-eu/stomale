@@ -79,8 +79,17 @@ const Reviews = () => {
     );
   }
 
-  const totalPages = Math.ceil((reviews?.length || 0) / reviewsPerPage);
+  if (error) {
+    toast.error("Errore nel caricamento delle recensioni");
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
+        <p className="text-red-500">Si è verificato un errore nel caricamento delle recensioni.</p>
+      </div>
+    );
+  }
 
+  const totalPages = Math.ceil((reviews?.length || 0) / reviewsPerPage);
   const getCurrentPageReviews = () => {
     if (!reviews) return [];
     const startIndex = (currentPage - 1) * reviewsPerPage;
