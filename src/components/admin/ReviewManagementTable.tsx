@@ -11,13 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ReviewActions } from "./ReviewActions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 export const ReviewManagementTable = () => {
-  const navigate = useNavigate();
-
   const { data: reviews, isLoading } = useQuery({
     queryKey: ['all-reviews'],
     queryFn: async () => {
@@ -106,20 +101,10 @@ export const ReviewManagementTable = () => {
                 {new Date(review.created_at).toLocaleDateString('it-IT')}
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/admin/recensioni/${review.id}`)}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    Anteprima
-                  </Button>
-                  <ReviewActions
-                    reviewId={review.id}
-                    status={review.status}
-                  />
-                </div>
+                <ReviewActions
+                  reviewId={review.id}
+                  status={review.status}
+                />
               </TableCell>
             </TableRow>
           ))}

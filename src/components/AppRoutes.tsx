@@ -19,7 +19,6 @@ import Terms from "@/pages/Terms";
 import RecoverPassword from "@/pages/RecoverPassword";
 import UpdatePassword from "@/pages/UpdatePassword";
 import Sitemap from "@/pages/Sitemap";
-import AdminReviewPreview from "@/pages/AdminReviewPreview";
 
 export const AppRoutes = () => {
   return (
@@ -45,7 +44,6 @@ export const AppRoutes = () => {
       {/* Protected routes */}
       <Route path="/admin" element={<Admin />} />
       <Route path="/admin/recensioni" element={<ReviewManagement />} />
-      <Route path="/admin/recensioni/:reviewId" element={<AdminReviewPreview />} />
       <Route path="/admin/utenti" element={<UserManagement />} />
       <Route 
         path="/dashboard" 
