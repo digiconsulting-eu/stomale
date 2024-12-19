@@ -25,7 +25,7 @@ export const SearchBar = () => {
         throw error;
       }
 
-      return data.map(item => item.Patologia) || [];
+      return data?.map(item => item.Patologia) || [];
     },
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -55,7 +55,6 @@ export const SearchBar = () => {
     }
   };
 
-  // Update suggestions when user types
   const updateSuggestions = (value: string) => {
     setSearchTerm(value);
     if (value.length > 0 && conditions.length > 0) {
