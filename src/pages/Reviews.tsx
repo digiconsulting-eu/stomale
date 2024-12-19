@@ -19,37 +19,47 @@ const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const reviewsPerPage = 20;
 
-  const { data: reviews, isLoading } = useQuery({
-    queryKey: ['approved-reviews'],
+  const { data: reviews, isLoading, error } = useQuery({
+    queryKey: ['reviews'],
     queryFn: async () => {
-      console.log('Fetching approved reviews...');
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          title,
-          experience,
-          diagnosis_difficulty,
-          symptoms_severity,
-          has_medication,
-          medication_effectiveness,
-          healing_possibility,
-          social_discomfort,
-          created_at,
-          PATOLOGIE (
-            Patologia
-          )
-        `)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false });
+      try {
+        console.log('Fetching reviews...');
+        const { data, error } = await supabase
+          .from('reviews')
+          .select(`
+            id,
+            title,
+            experience,
+            diagnosis_difficulty,
+            symptoms_severity,
+            has_medication,
+            medication_effectiveness,
+            healing_possibility,
+            social_discomfort,
+            created_at,
+            PATOLOGIE (
+              Patologia
+            )
+          `)
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching reviews:', error);
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          throw error;
+        }
+
+        console.log('Successfully fetched reviews:', data?.length || 0);
+        return data || [];
+      } catch (error) {
+        console.error('Error in reviews query:', error);
         throw error;
       }
-
-      return data || [];
-    }
+    },
+    staleTime: 30000, // Cache data for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep cache for 5 minutes
+    retry: 3, // Retry failed requests 3 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000) // Exponential backoff
   });
 
   useEffect(() => {
@@ -65,6 +75,16 @@ const Reviews = () => {
             <Skeleton key={i} className="h-[200px]" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    toast.error("Errore nel caricamento delle recensioni");
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
+        <p className="text-red-500">Si è verificato un errore nel caricamento delle recensioni.</p>
       </div>
     );
   }
@@ -100,7 +120,7 @@ const Reviews = () => {
 
         {reviews?.length === 0 && (
           <div className="col-span-full text-center py-8">
-            <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
+            <p className="text-gray-500">Non ci sono ancora recensioni.</p>
           </div>
         )}
       </div>
