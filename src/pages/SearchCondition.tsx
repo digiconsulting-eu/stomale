@@ -36,7 +36,7 @@ export default function SearchCondition() {
           throw error;
         }
 
-        return data as Condition[];
+        return data || [];
       } catch (error) {
         console.error('Error in conditions query:', error);
         throw error;
@@ -52,11 +52,7 @@ export default function SearchCondition() {
   }, []);
 
   const filteredConditions = conditions.filter(condition => {
-    if (!condition?.Patologia) {
-      return false;
-    }
-    
-    const conditionName = condition.Patologia.toUpperCase();
+    const conditionName = condition?.Patologia?.toUpperCase() || '';
     const searchTermUpper = searchTerm.toUpperCase();
     
     if (searchTerm) {
