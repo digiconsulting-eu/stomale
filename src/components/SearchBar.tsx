@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -32,18 +32,6 @@ export const SearchBar = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Update suggestions when searchTerm or conditions change
-  useEffect(() => {
-    if (searchTerm.length > 0 && conditions.length > 0) {
-      const filtered = conditions.filter(condition =>
-        condition.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setSuggestions(filtered);
-    } else {
-      setSuggestions([]);
-    }
-  }, [searchTerm, conditions]); // Add proper dependency array
-
   const handleSearch = (term: string = searchTerm) => {
     if (term) {
       const exactMatch = conditions.find(
@@ -67,6 +55,19 @@ export const SearchBar = () => {
     }
   };
 
+  // Update suggestions when user types
+  const updateSuggestions = (value: string) => {
+    setSearchTerm(value);
+    if (value.length > 0 && conditions.length > 0) {
+      const filtered = conditions.filter(condition =>
+        condition.toLowerCase().includes(value.toLowerCase())
+      );
+      setSuggestions(filtered);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       <div className="flex gap-2">
@@ -75,7 +76,7 @@ export const SearchBar = () => {
             type="text"
             placeholder="Cerca una patologia..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => updateSuggestions(e.target.value)}
             onKeyDown={handleKeyDown}
             className="w-full pl-4 pr-10 py-2"
           />

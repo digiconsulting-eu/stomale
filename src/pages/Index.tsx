@@ -15,41 +15,36 @@ export default function Index() {
   const { data: latestReviews = [], isLoading, isError } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
-      try {
-        console.log('Fetching latest reviews...');
-        const { data, error } = await supabase
-          .from('reviews')
-          .select(`
+      console.log('Fetching latest reviews...');
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          title,
+          experience,
+          diagnosis_difficulty,
+          symptoms_severity,
+          has_medication,
+          medication_effectiveness,
+          healing_possibility,
+          social_discomfort,
+          created_at,
+          PATOLOGIE (
             id,
-            title,
-            experience,
-            diagnosis_difficulty,
-            symptoms_severity,
-            has_medication,
-            medication_effectiveness,
-            healing_possibility,
-            social_discomfort,
-            created_at,
-            PATOLOGIE (
-              id,
-              Patologia
-            )
-          `)
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false })
-          .limit(6);
+            Patologia
+          )
+        `)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(6);
 
-        if (error) {
-          console.error('Error fetching reviews:', error);
-          throw error;
-        }
-
-        console.log('Successfully fetched reviews:', data?.length || 0);
-        return data || [];
-      } catch (error) {
-        console.error('Error in reviews query:', error);
+      if (error) {
+        console.error('Error fetching reviews:', error);
         throw error;
       }
+
+      console.log('Successfully fetched reviews:', data?.length || 0);
+      return data || [];
     },
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
