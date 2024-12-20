@@ -12,7 +12,6 @@ export default function SearchCondition() {
   const [selectedLetter, setSelectedLetter] = useState("TUTTE");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Array of letters for the alphabetical index
   const letters = ["TUTTE", "A", "B", "C", "D", "E", "F", "G", "H", "I", "L", "M", 
                   "N", "O", "P", "Q", "R", "S", "T", "U", "V", "Z"];
 
@@ -36,6 +35,7 @@ export default function SearchCondition() {
 
       console.log('Raw PATOLOGIE response:', data);
       console.log('Number of conditions fetched:', data?.length || 0);
+      console.log('First few conditions:', data?.slice(0, 3));
       
       if (!data) {
         console.log('No data returned from PATOLOGIE table');
@@ -62,6 +62,16 @@ export default function SearchCondition() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Cerca Patologia</h1>
       
+      {/* Search input - now above the alphabetical index */}
+      <div className="mb-6">
+        <Input
+          placeholder="Cerca una patologia..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full max-w-4xl mx-auto h-12 text-lg"
+        />
+      </div>
+
       {/* Alphabetical index */}
       <div className="flex flex-wrap gap-2 mb-6">
         {letters.map((letter) => (
@@ -74,16 +84,6 @@ export default function SearchCondition() {
             {letter}
           </Button>
         ))}
-      </div>
-
-      {/* Search input */}
-      <div className="mb-6">
-        <Input
-          placeholder="Cerca una patologia..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-xl"
-        />
       </div>
 
       {/* Conditions grid */}
