@@ -29,8 +29,7 @@ export default function SearchCondition() {
         console.log('Starting conditions fetch...');
         const { data, error } = await supabase
           .from('PATOLOGIE')
-          .select('id, Patologia')
-          .order('Patologia');
+          .select();
 
         if (error) {
           console.error('Supabase error:', error);
