@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Sitemap = () => {
@@ -12,12 +12,25 @@ const Sitemap = () => {
           return;
         }
 
-        // Create a blob with the XML content
-        const blob = new Blob([data], { type: 'application/xml' });
-        const url = URL.createObjectURL(blob);
-
-        // Redirect the browser to the XML content
-        window.location.href = url;
+        // Create a new document with the XML content
+        const xmlDoc = new DOMParser().parseFromString(data, 'application/xml');
+        const xmlString = new XMLSerializer().serializeToString(xmlDoc);
+        
+        // Set the content type to XML
+        const htmlDoc = document.implementation.createHTMLDocument();
+        htmlDoc.documentElement.innerHTML = '';
+        
+        // Create a pre element to display the XML
+        const pre = document.createElement('pre');
+        pre.textContent = xmlString;
+        document.body.innerHTML = '';
+        document.body.appendChild(pre);
+        
+        // Set the correct content type
+        const meta = document.createElement('meta');
+        meta.httpEquiv = 'Content-Type';
+        meta.content = 'application/xml; charset=utf-8';
+        document.head.appendChild(meta);
       } catch (err) {
         console.error('Unexpected error:', err);
       }
