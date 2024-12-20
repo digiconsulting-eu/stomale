@@ -37,6 +37,9 @@ export default function SearchCondition() {
       }
 
       console.log('Fetched conditions:', data);
+      if (!data || data.length === 0) {
+        console.log('No conditions found in the database');
+      }
       return data as Condition[];
     }
   });
@@ -51,7 +54,10 @@ export default function SearchCondition() {
   }
 
   const filteredConditions = conditions.filter((condition: Condition) => {
-    if (!condition?.Patologia) return false;
+    if (!condition?.Patologia) {
+      console.log('Found condition without Patologia:', condition);
+      return false;
+    }
     
     const conditionName = condition.Patologia.toUpperCase();
     const searchTermUpper = searchTerm.toUpperCase();
@@ -66,6 +72,8 @@ export default function SearchCondition() {
     
     return conditionName.startsWith(selectedLetter);
   });
+
+  console.log('Filtered conditions:', filteredConditions);
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
