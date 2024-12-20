@@ -2,10 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Sitemap = () => {
-  const [sitemapXml, setSitemapXml] = useState<string | null>(null);
-
   useEffect(() => {
-    const fetchSitemap = async () => {
+    const fetchAndServeSitemap = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('sitemap');
         
@@ -14,33 +12,21 @@ const Sitemap = () => {
           return;
         }
 
-        setSitemapXml(data);
+        // Create a blob with the XML content
+        const blob = new Blob([data], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
+
+        // Redirect the browser to the XML content
+        window.location.href = url;
       } catch (err) {
         console.error('Unexpected error:', err);
       }
     };
 
-    fetchSitemap();
+    fetchAndServeSitemap();
   }, []);
 
-  useEffect(() => {
-    if (sitemapXml) {
-      const blob = new Blob([sitemapXml], { type: 'application/xml' });
-      const url = URL.createObjectURL(blob);
-      
-      // Programmatically download the sitemap
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'sitemap.xml';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      URL.revokeObjectURL(url);
-    }
-  }, [sitemapXml]);
-
-  return null; // This component doesn't render anything
+  return null;
 };
 
 export default Sitemap;
