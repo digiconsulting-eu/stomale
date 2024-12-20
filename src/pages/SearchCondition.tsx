@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, BookOpen } from "lucide-react";
+import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 
 const LETTERS = ["TUTTE", ...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""))];
@@ -42,7 +43,7 @@ export default function SearchCondition() {
         throw error;
       }
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
@@ -50,6 +51,11 @@ export default function SearchCondition() {
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Cerca Patologia"));
   }, []);
+
+  if (error) {
+    toast.error("Errore nel caricamento delle patologie");
+    console.error('Error loading conditions:', error);
+  }
 
   const filteredConditions = conditions.filter(condition => {
     const conditionName = condition?.Patologia?.toUpperCase() || '';
@@ -65,30 +71,6 @@ export default function SearchCondition() {
     
     return conditionName.startsWith(selectedLetter);
   });
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-6 md:py-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-primary mb-6 md:mb-8">
-          Cerca una Patologia
-        </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-          {Array(6).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-[80px] md:h-[100px]" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    console.error('Error in conditions query:', error);
-    return (
-      <div className="container mx-auto px-4 py-6 text-center">
-        <p className="text-red-500">Si è verificato un errore nel caricamento delle patologie.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
@@ -120,9 +102,15 @@ export default function SearchCondition() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-        {filteredConditions.length > 0 ? (
-          filteredConditions.map((condition) => (
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {Array(6).fill(0).map((_, i) => (
+            <Skeleton key={i} className="h-[80px] md:h-[100px]" />
+          ))}
+        </div>
+      ) : filteredConditions.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          {filteredConditions.map((condition) => (
             <Card key={condition.id} className="p-3 md:p-4">
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-base md:text-lg font-semibold text-primary truncate">
@@ -141,19 +129,19 @@ export default function SearchCondition() {
                 </Link>
               </div>
             </Card>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-6 md:py-8">
-            <p className="text-gray-500 mb-3 md:mb-4">Nessuna patologia trovata</p>
-            <Link 
-              to="/inserisci-patologia"
-              className="inline-flex items-center text-primary hover:text-primary/80"
-            >
-              Vuoi aggiungere una nuova patologia?
-            </Link>
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-6 md:py-8">
+          <p className="text-gray-500 mb-3 md:mb-4">Nessuna patologia trovata</p>
+          <Link 
+            to="/inserisci-patologia"
+            className="inline-flex items-center text-primary hover:text-primary/80"
+          >
+            Vuoi aggiungere una nuova patologia?
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
