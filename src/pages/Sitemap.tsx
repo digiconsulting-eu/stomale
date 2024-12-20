@@ -43,7 +43,7 @@ const Sitemap = ({ isXml = false }: SitemapProps) => {
 
         console.log('Fetched reviews for sitemap:', reviews?.length);
 
-        const baseUrl = window.location.origin;
+        const baseUrl = 'https://stomale.info';
         const currentDate = format(new Date(), 'yyyy-MM-dd');
         
         // Define static routes with their priorities and update frequencies
@@ -105,19 +105,21 @@ ${allUrls.map(url => `  <url>
 
         setXmlContent(xml);
 
-        // If XML format is requested, set the content type and download
+        // If XML format is requested, set the content type and serve the XML
         if (isXml) {
           const blob = new Blob([xml], { type: 'application/xml' });
           const url = window.URL.createObjectURL(blob);
           
-          // Create a link element and trigger download
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'sitemap.xml';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
+          // Set the correct content type header
+          const response = new Response(blob, {
+            headers: {
+              'Content-Type': 'application/xml',
+              'Content-Disposition': 'inline; filename=sitemap.xml'
+            }
+          });
+
+          // Serve the XML content
+          return response;
         }
 
       } catch (error) {
@@ -129,7 +131,7 @@ ${allUrls.map(url => `  <url>
     generateSitemap();
   }, [isXml]);
 
-  // If XML format is requested, return null (the file will be downloaded)
+  // If XML format is requested, return null (the response will be handled by the effect)
   if (isXml) {
     return null;
   }
