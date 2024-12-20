@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
-const Sitemap = () => {
+interface SitemapProps {
+  isXml?: boolean;
+}
+
+const Sitemap = ({ isXml = false }: SitemapProps) => {
   const [xmlContent, setXmlContent] = useState('');
 
   useEffect(() => {
@@ -99,19 +103,22 @@ ${allUrls.map(url => `  <url>
   </url>`).join('\n')}
 </urlset>`;
 
-        // Set the XML content
         setXmlContent(xml);
 
-        // Create and download the sitemap file
-        const blob = new Blob([xml], { type: 'application/xml' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'sitemap.xml';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
+        // If XML format is requested, set the content type and download
+        if (isXml) {
+          const blob = new Blob([xml], { type: 'application/xml' });
+          const url = window.URL.createObjectURL(blob);
+          
+          // Create a link element and trigger download
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'sitemap.xml';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }
 
       } catch (error) {
         console.error('Error generating sitemap:', error);
@@ -120,8 +127,14 @@ ${allUrls.map(url => `  <url>
     };
 
     generateSitemap();
-  }, []);
+  }, [isXml]);
 
+  // If XML format is requested, return null (the file will be downloaded)
+  if (isXml) {
+    return null;
+  }
+
+  // Otherwise, render the HTML preview
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-4">Sitemap</h1>

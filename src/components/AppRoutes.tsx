@@ -39,7 +39,8 @@ export const AppRoutes = () => {
       <Route path="/cookie-policy" element={<CookiePolicy />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
-      <Route path="/sitemap.xml" element={<Sitemap />} />
+      <Route path="/sitemap" element={<Sitemap />} /> {/* Regular HTML view */}
+      <Route path="/sitemap.xml" element={<Sitemap isXml />} /> {/* XML format */}
 
       {/* Protected routes */}
       <Route path="/admin" element={<Admin />} />
