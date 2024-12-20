@@ -89,12 +89,14 @@ ${allUrls.map(url => `  <url>
         setXmlContent(xml);
 
         if (isXml) {
-          // Set content type to XML
-          document.contentType = 'application/xml';
-          // Render the XML directly
-          document.body.innerHTML = xml;
-          document.body.style.whiteSpace = 'pre';
-          document.body.style.fontFamily = 'monospace';
+          // Create a new document with XML content type
+          document.open('text/xml');
+          document.write(xml);
+          document.close();
+          // Style the XML output
+          const style = document.createElement('style');
+          style.textContent = 'body { white-space: pre; font-family: monospace; }';
+          document.head.appendChild(style);
         }
 
       } catch (error) {
