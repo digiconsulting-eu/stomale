@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
+import { Link } from "react-router-dom";
 
 export default function SearchCondition() {
   const [conditions, setConditions] = useState<any[]>([]);
@@ -61,7 +62,6 @@ export default function SearchCondition() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Cerca Patologia</h1>
       
-      {/* Search input with increased width and height */}
       <div className="mb-8">
         <Input
           placeholder="Cerca una patologia..."
@@ -71,7 +71,6 @@ export default function SearchCondition() {
         />
       </div>
 
-      {/* Alphabetical index */}
       <div className="flex flex-wrap gap-2 mb-8">
         {letters.map((letter) => (
           <Button
@@ -85,7 +84,6 @@ export default function SearchCondition() {
         ))}
       </div>
 
-      {/* Conditions grid */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
@@ -95,12 +93,15 @@ export default function SearchCondition() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredConditions.map(condition => (
-            <div 
-              key={condition.id} 
-              className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+            <Link 
+              key={condition.id}
+              to={`/patologia/${condition.Patologia.toLowerCase()}`}
+              className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white group"
             >
-              <h2 className="text-xl font-semibold">{condition.Patologia}</h2>
-            </div>
+              <h2 className="text-xl font-semibold text-[#0EA5E9] group-hover:text-[#0EA5E9]/80 transition-colors">
+                {condition.Patologia}
+              </h2>
+            </Link>
           ))}
           {filteredConditions.length === 0 && (
             <div className="col-span-full text-center py-8">
