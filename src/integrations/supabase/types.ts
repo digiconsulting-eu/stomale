@@ -142,16 +142,19 @@ export type Database = {
       }
       PATOLOGIE: {
         Row: {
+          created_at: string | null
           Descrizione: string | null
           id: number
           Patologia: string
         }
         Insert: {
+          created_at?: string | null
           Descrizione?: string | null
           id?: number
           Patologia?: string
         }
         Update: {
+          created_at?: string | null
           Descrizione?: string | null
           id?: number
           Patologia?: string
