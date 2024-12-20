@@ -26,30 +26,36 @@ export default function SearchCondition() {
     queryKey: ['conditions'],
     queryFn: async () => {
       try {
-        console.log('Fetching conditions in SearchCondition...');
-        const { data, error, count } = await supabase
+        console.log('Starting conditions fetch...');
+        const { data, error } = await supabase
           .from('PATOLOGIE')
-          .select('*', { count: 'exact' });
+          .select('id, Patologia, Descrizione')
+          .order('Patologia');
 
         if (error) {
-          console.error('Supabase error fetching conditions:', error);
+          console.error('Supabase error:', error);
           throw error;
         }
 
-        console.log('Supabase response:', { data, count });
+        console.log('Fetch successful. Raw data:', data);
         
         if (!data || data.length === 0) {
-          console.log('No conditions found in database. Count:', count);
+          console.log('No data returned from query');
+          return [];
         }
 
-        return (data || []) as Condition[];
+        // Log first few items to verify data structure
+        console.log('Sample items:', data.slice(0, 3));
+        
+        return data as Condition[];
       } catch (error) {
-        console.error('Error in conditions query:', error);
+        console.error('Query error:', error);
         throw error;
       }
     },
     retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   useEffect(() => {
@@ -63,7 +69,7 @@ export default function SearchCondition() {
 
   const filteredConditions = conditions.filter((condition: Condition) => {
     if (!condition?.Patologia) {
-      console.warn('Found condition without Patologia:', condition);
+      console.warn('Invalid condition object:', condition);
       return false;
     }
     
@@ -83,6 +89,7 @@ export default function SearchCondition() {
 
   console.log('Total conditions:', conditions.length);
   console.log('Filtered conditions:', filteredConditions.length);
+  console.log('Current filter:', { searchTerm, selectedLetter });
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
