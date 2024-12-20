@@ -105,21 +105,19 @@ ${allUrls.map(url => `  <url>
 
         setXmlContent(xml);
 
-        // If XML format is requested, set the content type and serve the XML
         if (isXml) {
+          // Create a blob with the XML content
           const blob = new Blob([xml], { type: 'application/xml' });
-          const url = window.URL.createObjectURL(blob);
           
-          // Set the correct content type header
-          const response = new Response(blob, {
-            headers: {
-              'Content-Type': 'application/xml',
-              'Content-Disposition': 'inline; filename=sitemap.xml'
-            }
-          });
-
-          // Serve the XML content
-          return response;
+          // Download the file
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'sitemap.xml';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
         }
 
       } catch (error) {
@@ -131,7 +129,7 @@ ${allUrls.map(url => `  <url>
     generateSitemap();
   }, [isXml]);
 
-  // If XML format is requested, return null (the response will be handled by the effect)
+  // If XML format is requested, return null (the file will be downloaded)
   if (isXml) {
     return null;
   }
