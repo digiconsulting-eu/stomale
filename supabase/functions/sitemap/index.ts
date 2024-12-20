@@ -33,7 +33,7 @@ serve(async (req) => {
       `)
       .eq('status', 'approved')
 
-    const baseUrl = 'https://stomale.info'
+    const baseUrl = 'https://stomale.info/sitemap.xml'
     const currentDate = format(new Date(), 'yyyy-MM-dd')
 
     const staticRoutes = [
