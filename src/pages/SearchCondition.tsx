@@ -25,27 +25,19 @@ export default function SearchCondition() {
   const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      try {
-        console.log('Fetching conditions...');
-        const { data, error } = await supabase
-          .from('PATOLOGIE')
-          .select('*')
-          .order('Patologia');
+      console.log('Fetching conditions...');
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('*');
 
-        if (error) {
-          console.error('Error fetching conditions:', error);
-          throw error;
-        }
-
-        return data || [];
-      } catch (error) {
-        console.error('Error in conditions query:', error);
+      if (error) {
+        console.error('Error fetching conditions:', error);
         throw error;
       }
-    },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
+
+      console.log('Fetched conditions:', data);
+      return data || [];
+    }
   });
 
   useEffect(() => {
@@ -57,7 +49,7 @@ export default function SearchCondition() {
     console.error('Error loading conditions:', error);
   }
 
-  const filteredConditions = conditions.filter(condition => {
+  const filteredConditions = conditions.filter((condition: Condition) => {
     const conditionName = condition?.Patologia?.toUpperCase() || '';
     const searchTermUpper = searchTerm.toUpperCase();
     
@@ -110,7 +102,7 @@ export default function SearchCondition() {
         </div>
       ) : filteredConditions.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-          {filteredConditions.map((condition) => (
+          {filteredConditions.map((condition: Condition) => (
             <Card key={condition.id} className="p-3 md:p-4">
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-base md:text-lg font-semibold text-primary truncate">
