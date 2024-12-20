@@ -12,6 +12,10 @@ export default function SearchCondition() {
   const [selectedLetter, setSelectedLetter] = useState("TUTTE");
   const [isLoading, setIsLoading] = useState(true);
 
+  // Array of letters for the alphabetical index
+  const letters = ["TUTTE", "A", "B", "C", "D", "E", "F", "G", "H", "I", "L", "M", 
+                  "N", "O", "P", "Q", "R", "S", "T", "U", "V", "Z"];
+
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Cerca Patologia"));
     fetchConditions();
@@ -22,7 +26,8 @@ export default function SearchCondition() {
       console.log('Starting conditions fetch from PATOLOGIE table...');
       const { data, error } = await supabase
         .from('PATOLOGIE')
-        .select('*');
+        .select('id, Patologia')
+        .order('Patologia');
 
       if (error) {
         console.error('Supabase error:', error);
@@ -47,29 +52,54 @@ export default function SearchCondition() {
   };
 
   const filteredConditions = conditions.filter(condition => {
-    return condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLetter = selectedLetter === "TUTTE" || 
+                         condition.Patologia.startsWith(selectedLetter);
+    return matchesSearch && matchesLetter;
   });
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Cerca Patologia</h1>
-      <div className="mb-4">
+      
+      {/* Alphabetical index */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {letters.map((letter) => (
+          <Button
+            key={letter}
+            variant={selectedLetter === letter ? "default" : "outline"}
+            onClick={() => setSelectedLetter(letter)}
+            className="min-w-[40px]"
+          >
+            {letter}
+          </Button>
+        ))}
+      </div>
+
+      {/* Search input */}
+      <div className="mb-6">
         <Input
           placeholder="Cerca una patologia..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-xl"
         />
       </div>
+
+      {/* Conditions grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-[200px]" />
+            <Skeleton key={i} className="h-[100px]" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredConditions.map(condition => (
-            <div key={condition.id} className="border p-4 rounded">
+            <div 
+              key={condition.id} 
+              className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+            >
               <h2 className="text-xl font-semibold">{condition.Patologia}</h2>
             </div>
           ))}
