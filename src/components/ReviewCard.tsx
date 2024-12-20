@@ -41,12 +41,17 @@ export const ReviewCard = ({
       <div className="space-y-4">
         <div>
           <h3 className="text-xl font-semibold mb-2">{title}</h3>
-          <Badge 
-            variant="outline" 
-            className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+          <Link 
+            to={`/patologia/${condition.toLowerCase()}`}
+            className="inline-block"
           >
-            {condition}
-          </Badge>
+            <Badge 
+              variant="outline" 
+              className="mb-4 text-[#0EA5E9] hover:text-[#0EA5E9]/80 bg-[#0EA5E9]/10 border-[#0EA5E9]/20 hover:bg-[#0EA5E9]/20 cursor-pointer transition-colors"
+            >
+              {condition}
+            </Badge>
+          </Link>
         </div>
 
         <p className="text-sm text-gray-600 line-clamp-2 mb-4">
