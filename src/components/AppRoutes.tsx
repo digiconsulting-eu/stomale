@@ -18,40 +18,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Terms from "@/pages/Terms";
 import RecoverPassword from "@/pages/RecoverPassword";
 import UpdatePassword from "@/pages/UpdatePassword";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
-
-const SitemapRedirect = () => {
-  useEffect(() => {
-    const fetchSitemap = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('sitemap');
-        if (error) throw error;
-        
-        // Create a blob from the XML data
-        const blob = new Blob([data], { type: 'application/xml' });
-        const url = window.URL.createObjectURL(blob);
-        
-        // Create a link and click it to download the file
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'sitemap.xml';
-        document.body.appendChild(a);
-        a.click();
-        
-        // Cleanup
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } catch (error) {
-        console.error('Error fetching sitemap:', error);
-      }
-    };
-
-    fetchSitemap();
-  }, []);
-
-  return null;
-};
+import Sitemap from "@/pages/Sitemap";
 
 export const AppRoutes = () => {
   return (
@@ -72,7 +39,7 @@ export const AppRoutes = () => {
       <Route path="/cookie-policy" element={<CookiePolicy />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
-      <Route path="/sitemap.xml" element={<SitemapRedirect />} />
+      <Route path="/sitemap.xml" element={<Sitemap />} />
 
       {/* Protected routes */}
       <Route path="/admin" element={<Admin />} />
