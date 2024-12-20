@@ -89,14 +89,16 @@ ${allUrls.map(url => `  <url>
         setXmlContent(xml);
 
         if (isXml) {
-          // Create a new document with XML content type
-          document.open('text/xml');
-          document.write(xml);
-          document.close();
-          // Style the XML output
-          const style = document.createElement('style');
-          style.textContent = 'body { white-space: pre; font-family: monospace; }';
-          document.head.appendChild(style);
+          // For XML format, set the content type and return the raw XML
+          const blob = new Blob([xml], { type: 'application/xml' });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'sitemap.xml';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
         }
 
       } catch (error) {
