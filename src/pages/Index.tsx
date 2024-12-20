@@ -28,9 +28,7 @@ export default function Index() {
           medication_effectiveness,
           healing_possibility,
           social_discomfort,
-          created_at,
           PATOLOGIE (
-            id,
             Patologia
           )
         `)
@@ -44,10 +42,7 @@ export default function Index() {
       }
 
       return data || [];
-    },
-    staleTime: 1000 * 60 * 5,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
+    }
   });
 
   if (isError) {
