@@ -25,10 +25,10 @@ export default function SearchCondition() {
   const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('Fetching conditions...');
+      console.log('Fetching conditions in SearchCondition...');
       const { data, error } = await supabase
         .from('PATOLOGIE')
-        .select('id, Patologia, Descrizione')
+        .select('*')
         .order('Patologia');
 
       if (error) {
@@ -37,9 +37,6 @@ export default function SearchCondition() {
       }
 
       console.log('Fetched conditions:', data);
-      if (!data || data.length === 0) {
-        console.log('No conditions found in the database');
-      }
       return data as Condition[];
     }
   });
@@ -49,8 +46,8 @@ export default function SearchCondition() {
   }, []);
 
   if (error) {
+    console.error('Error in conditions query:', error);
     toast.error("Errore nel caricamento delle patologie");
-    console.error('Error loading conditions:', error);
   }
 
   const filteredConditions = conditions.filter((condition: Condition) => {
@@ -73,7 +70,8 @@ export default function SearchCondition() {
     return conditionName.startsWith(selectedLetter);
   });
 
-  console.log('Filtered conditions:', filteredConditions);
+  console.log('Total conditions:', conditions.length);
+  console.log('Filtered conditions:', filteredConditions.length);
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
