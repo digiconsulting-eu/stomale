@@ -25,20 +25,31 @@ export default function SearchCondition() {
   const { data: conditions = [], isLoading, error } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('Fetching conditions in SearchCondition...');
-      const { data, error } = await supabase
-        .from('PATOLOGIE')
-        .select('*')
-        .order('Patologia');
+      try {
+        console.log('Fetching conditions in SearchCondition...');
+        const { data, error, count } = await supabase
+          .from('PATOLOGIE')
+          .select('*', { count: 'exact' });
 
-      if (error) {
-        console.error('Error fetching conditions:', error);
+        if (error) {
+          console.error('Supabase error fetching conditions:', error);
+          throw error;
+        }
+
+        console.log('Supabase response:', { data, count });
+        
+        if (!data || data.length === 0) {
+          console.log('No conditions found in database. Count:', count);
+        }
+
+        return (data || []) as Condition[];
+      } catch (error) {
+        console.error('Error in conditions query:', error);
         throw error;
       }
-
-      console.log('Fetched conditions:', data);
-      return data as Condition[];
-    }
+    },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   useEffect(() => {
@@ -52,7 +63,7 @@ export default function SearchCondition() {
 
   const filteredConditions = conditions.filter((condition: Condition) => {
     if (!condition?.Patologia) {
-      console.log('Found condition without Patologia:', condition);
+      console.warn('Found condition without Patologia:', condition);
       return false;
     }
     
