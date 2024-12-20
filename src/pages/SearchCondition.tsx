@@ -26,10 +26,11 @@ export default function SearchCondition() {
     queryKey: ['conditions'],
     queryFn: async () => {
       try {
-        console.log('Starting conditions fetch...');
+        console.log('Starting conditions fetch from PATOLOGIE table...');
         const { data, error } = await supabase
           .from('PATOLOGIE')
-          .select();
+          .select('id, Patologia, Descrizione')
+          .order('Patologia');
 
         if (error) {
           console.error('Supabase error:', error);
@@ -39,7 +40,7 @@ export default function SearchCondition() {
         console.log('Raw Supabase response:', data);
         
         if (!data) {
-          console.log('No data returned from query');
+          console.log('No data returned from PATOLOGIE table');
           return [];
         }
 
