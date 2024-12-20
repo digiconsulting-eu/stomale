@@ -29,23 +29,23 @@ export default function SearchCondition() {
         console.log('Starting conditions fetch...');
         const { data, error } = await supabase
           .from('PATOLOGIE')
-          .select('id, Patologia, Descrizione')
-          .order('Patologia');
+          .select('*');
 
         if (error) {
           console.error('Supabase error:', error);
           throw error;
         }
 
-        console.log('Fetch successful. Raw data:', data);
+        console.log('Raw Supabase response:', data);
         
-        if (!data || data.length === 0) {
+        if (!data) {
           console.log('No data returned from query');
           return [];
         }
 
-        // Log first few items to verify data structure
-        console.log('Sample items:', data.slice(0, 3));
+        // Log the first few items to verify data structure
+        console.log('First few conditions:', data.slice(0, 3));
+        console.log('Total conditions fetched:', data.length);
         
         return data as Condition[];
       } catch (error) {
