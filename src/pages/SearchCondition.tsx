@@ -28,7 +28,8 @@ export default function SearchCondition() {
       console.log('Fetching conditions...');
       const { data, error } = await supabase
         .from('PATOLOGIE')
-        .select('*');
+        .select('id, Patologia, Descrizione')
+        .order('Patologia');
 
       if (error) {
         console.error('Error fetching conditions:', error);
@@ -36,7 +37,7 @@ export default function SearchCondition() {
       }
 
       console.log('Fetched conditions:', data);
-      return data || [];
+      return data as Condition[];
     }
   });
 
@@ -50,7 +51,9 @@ export default function SearchCondition() {
   }
 
   const filteredConditions = conditions.filter((condition: Condition) => {
-    const conditionName = condition?.Patologia?.toUpperCase() || '';
+    if (!condition?.Patologia) return false;
+    
+    const conditionName = condition.Patologia.toUpperCase();
     const searchTermUpper = searchTerm.toUpperCase();
     
     if (searchTerm) {
