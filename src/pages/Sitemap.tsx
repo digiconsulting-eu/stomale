@@ -12,20 +12,13 @@ const Sitemap = ({ isXml = false }: SitemapProps) => {
   useEffect(() => {
     const generateSitemap = async () => {
       try {
-        // Fetch conditions with their last update date
-        const { data: conditions, error: conditionsError } = await supabase
+        const { data: conditions } = await supabase
           .from('PATOLOGIE')
           .select('Patologia, created_at');
 
-        if (conditionsError) {
-          console.error('Error fetching conditions:', conditionsError);
-          throw conditionsError;
-        }
-
         console.log('Fetched conditions for sitemap:', conditions?.length);
 
-        // Fetch approved reviews with their update dates and related condition
-        const { data: reviews, error: reviewsError } = await supabase
+        const { data: reviews } = await supabase
           .from('reviews')
           .select(`
             title,
@@ -36,17 +29,11 @@ const Sitemap = ({ isXml = false }: SitemapProps) => {
           `)
           .eq('status', 'approved');
 
-        if (reviewsError) {
-          console.error('Error fetching reviews:', reviewsError);
-          throw reviewsError;
-        }
-
         console.log('Fetched reviews for sitemap:', reviews?.length);
 
         const baseUrl = 'https://stomale.info';
         const currentDate = format(new Date(), 'yyyy-MM-dd');
         
-        // Define static routes with their priorities and update frequencies
         const staticRoutes = [
           { url: baseUrl, priority: '1.0', changefreq: 'daily' },
           { url: `${baseUrl}/recensioni`, priority: '0.9', changefreq: 'daily' },
@@ -62,7 +49,6 @@ const Sitemap = ({ isXml = false }: SitemapProps) => {
           lastmod: currentDate
         }));
 
-        // Add condition URLs
         const conditionUrls = conditions?.map(condition => ({
           url: `${baseUrl}/patologia/${encodeURIComponent(condition.Patologia)}`,
           lastmod: format(new Date(condition.created_at || currentDate), 'yyyy-MM-dd'),
@@ -70,7 +56,6 @@ const Sitemap = ({ isXml = false }: SitemapProps) => {
           changefreq: 'weekly'
         })) || [];
 
-        // Add review URLs
         const reviewUrls = reviews?.map(review => {
           if (review.PATOLOGIE?.Patologia && review.title) {
             const titleSlug = review.title
@@ -87,12 +72,10 @@ const Sitemap = ({ isXml = false }: SitemapProps) => {
           return null;
         }).filter(Boolean) || [];
 
-        // Combine all URLs
         const allUrls = [...staticRoutes, ...conditionUrls, ...reviewUrls];
 
         console.log('Total URLs in sitemap:', allUrls.length);
 
-        // Generate XML
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${allUrls.map(url => `  <url>
@@ -106,18 +89,12 @@ ${allUrls.map(url => `  <url>
         setXmlContent(xml);
 
         if (isXml) {
-          // Create a blob with the XML content
-          const blob = new Blob([xml], { type: 'application/xml' });
-          
-          // Download the file
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'sitemap.xml';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
+          // Set content type to XML
+          document.contentType = 'application/xml';
+          // Render the XML directly
+          document.body.innerHTML = xml;
+          document.body.style.whiteSpace = 'pre';
+          document.body.style.fontFamily = 'monospace';
         }
 
       } catch (error) {
@@ -129,12 +106,10 @@ ${allUrls.map(url => `  <url>
     generateSitemap();
   }, [isXml]);
 
-  // If XML format is requested, return null (the file will be downloaded)
   if (isXml) {
     return null;
   }
 
-  // Otherwise, render the HTML preview
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
