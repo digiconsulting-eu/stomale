@@ -15,7 +15,7 @@ interface Review {
 interface Condition {
   id: number
   Patologia: string
-  updated_at?: string
+  created_at?: string
 }
 
 Deno.serve(async (req) => {
@@ -24,36 +24,46 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Starting sitemap generation...');
+    console.log('[Sitemap Function] Starting sitemap generation...');
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[Sitemap Function] Missing environment variables');
+      throw new Error('Missing environment variables');
+    }
+
+    console.log('[Sitemap Function] Creating Supabase client...');
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Fetch conditions and their latest reviews
+    console.log('[Sitemap Function] Fetching conditions...');
     const { data: conditions, error: conditionsError } = await supabase
       .from('PATOLOGIE')
       .select('id, Patologia, created_at')
 
     if (conditionsError) {
-      console.error('Error fetching conditions:', conditionsError)
-      throw conditionsError
+      console.error('[Sitemap Function] Error fetching conditions:', conditionsError);
+      throw conditionsError;
     }
 
-    console.log(`Fetched ${conditions?.length || 0} conditions`);
+    console.log(`[Sitemap Function] Fetched ${conditions?.length || 0} conditions`);
 
+    console.log('[Sitemap Function] Fetching reviews...');
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
       .select('title, condition_id, updated_at')
       .eq('status', 'approved')
 
     if (reviewsError) {
-      console.error('Error fetching reviews:', reviewsError)
-      throw reviewsError
+      console.error('[Sitemap Function] Error fetching reviews:', reviewsError);
+      throw reviewsError;
     }
 
-    console.log(`Fetched ${reviews?.length || 0} reviews`);
+    console.log(`[Sitemap Function] Fetched ${reviews?.length || 0} reviews`);
 
     // Start building the XML
+    console.log('[Sitemap Function] Building XML...');
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -71,6 +81,7 @@ Deno.serve(async (req) => {
 
     // Add condition pages
     conditions.forEach((condition: Condition) => {
+      console.log(`[Sitemap Function] Processing condition: ${condition.Patologia}`);
       const conditionReviews = reviews.filter(r => r.condition_id === condition.id)
       const lastUpdate = conditionReviews.length > 0 
         ? Math.max(...conditionReviews.map(r => new Date(r.updated_at).getTime()))
@@ -86,6 +97,7 @@ Deno.serve(async (req) => {
 
       // Add review pages for this condition
       conditionReviews.forEach((review: Review) => {
+        console.log(`[Sitemap Function] Processing review: ${review.title}`);
         xml += `
   <url>
     <loc>https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}/recensione/${encodeURIComponent(review.title.toLowerCase())}</loc>
@@ -130,13 +142,15 @@ Deno.serve(async (req) => {
   </url>
 </urlset>`
 
-    console.log('Sitemap XML generated successfully');
+    console.log('[Sitemap Function] XML generation completed successfully');
+    console.log('[Sitemap Function] First 500 characters of XML:', xml.substring(0, 500));
+
     return new Response(xml, {
       headers: corsHeaders,
     })
 
   } catch (error) {
-    console.error('Error generating sitemap:', error)
+    console.error('[Sitemap Function] Error generating sitemap:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: corsHeaders

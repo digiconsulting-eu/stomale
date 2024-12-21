@@ -5,34 +5,33 @@ const Sitemap = () => {
   useEffect(() => {
     const fetchAndServeSitemap = async () => {
       try {
-        console.log('Fetching sitemap data...');
+        console.log('[Sitemap] Starting sitemap fetch...');
         const { data, error } = await supabase.functions.invoke('sitemap');
         
         if (error) {
-          console.error('Error fetching sitemap:', error);
+          console.error('[Sitemap] Error fetching sitemap:', error);
           return;
         }
 
-        console.log('Sitemap data received:', data);
+        if (!data) {
+          console.error('[Sitemap] No data received from edge function');
+          return;
+        }
+
+        console.log('[Sitemap] Data received from edge function:', data);
 
         // Set the content type and serve the XML directly
         const blob = new Blob([data], { type: 'application/xml' });
         const url = window.URL.createObjectURL(blob);
-        
-        // Create a link and trigger download
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        document.body.appendChild(a);
+        console.log('[Sitemap] Created blob URL:', url);
         
         // Replace current page content
         window.location.href = url;
         
         // Cleanup
         window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
       } catch (err) {
-        console.error('Unexpected error:', err);
+        console.error('[Sitemap] Unexpected error:', err);
       }
     };
 
