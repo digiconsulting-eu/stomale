@@ -12,20 +12,17 @@ const Sitemap = () => {
           return;
         }
 
-        // Create a blob with the XML content and proper MIME type
-        const blob = new Blob([data], { type: 'application/xml' });
-        const url = URL.createObjectURL(blob);
+        // Create a new document
+        const xmlDoc = new DOMParser().parseFromString(data, 'application/xml');
+        const xmlString = new XMLSerializer().serializeToString(xmlDoc);
 
-        // Set response headers
-        const response = new Response(blob, {
-          headers: {
-            'Content-Type': 'application/xml; charset=utf-8',
-            'Content-Disposition': 'inline; filename=sitemap.xml'
-          }
-        });
+        // Set the content type to XML
+        document.contentType = 'application/xml';
 
-        // Serve the XML content
-        window.location.href = url;
+        // Clear the current document and write the XML
+        document.documentElement.innerHTML = '';
+        document.write(xmlString);
+        document.close();
       } catch (err) {
         console.error('Unexpected error:', err);
       }
