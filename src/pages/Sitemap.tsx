@@ -12,18 +12,13 @@ const Sitemap = () => {
           return;
         }
 
-        // Create a blob with the XML content and proper MIME type
-        const blob = new Blob([data], { type: 'application/xml' });
-        const url = URL.createObjectURL(blob);
-
-        // Download the XML file
-        const link = document.createElement('a');
-        link.href = url;
-        link.type = 'application/xml';
-        link.dispatchEvent(new MouseEvent('click'));
-
-        // Clean up
-        URL.revokeObjectURL(url);
+        // Set the XML content type
+        const xmlContent = new Blob([data], { type: 'application/xml' });
+        
+        // Replace the current document content with the XML
+        document.open('text/xml');
+        document.write(await xmlContent.text());
+        document.close();
       } catch (err) {
         console.error('Unexpected error:', err);
       }
