@@ -5,6 +5,7 @@ const Sitemap = () => {
   useEffect(() => {
     const fetchAndServeSitemap = async () => {
       try {
+        console.log('Fetching sitemap data...');
         const { data, error } = await supabase.functions.invoke('sitemap');
         
         if (error) {
@@ -12,17 +13,24 @@ const Sitemap = () => {
           return;
         }
 
-        // Create a new XML document
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data, 'application/xml');
+        console.log('Sitemap data received:', data);
+
+        // Set the content type and serve the XML directly
+        const blob = new Blob([data], { type: 'application/xml' });
+        const url = window.URL.createObjectURL(blob);
         
-        // Set the content type header
-        const xmlString = new XMLSerializer().serializeToString(xmlDoc);
-        const xmlBlob = new Blob([xmlString], { type: 'application/xml' });
-        const xmlUrl = URL.createObjectURL(xmlBlob);
+        // Create a link and trigger download
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        document.body.appendChild(a);
         
-        // Redirect to the XML content
-        window.location.href = xmlUrl;
+        // Replace current page content
+        window.location.href = url;
+        
+        // Cleanup
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
       } catch (err) {
         console.error('Unexpected error:', err);
       }

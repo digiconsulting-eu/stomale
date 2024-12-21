@@ -24,6 +24,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('Starting sitemap generation...');
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const supabase = createClient(supabaseUrl, supabaseKey)
@@ -38,6 +39,8 @@ Deno.serve(async (req) => {
       throw conditionsError
     }
 
+    console.log(`Fetched ${conditions?.length || 0} conditions`);
+
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
       .select('title, condition_id, updated_at')
@@ -47,6 +50,8 @@ Deno.serve(async (req) => {
       console.error('Error fetching reviews:', reviewsError)
       throw reviewsError
     }
+
+    console.log(`Fetched ${reviews?.length || 0} reviews`);
 
     // Start building the XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -69,7 +74,7 @@ Deno.serve(async (req) => {
       const conditionReviews = reviews.filter(r => r.condition_id === condition.id)
       const lastUpdate = conditionReviews.length > 0 
         ? Math.max(...conditionReviews.map(r => new Date(r.updated_at).getTime()))
-        : new Date(condition.created_at).getTime()
+        : new Date(condition.created_at || new Date()).getTime()
 
       xml += `
   <url>
@@ -125,6 +130,7 @@ Deno.serve(async (req) => {
   </url>
 </urlset>`
 
+    console.log('Sitemap XML generated successfully');
     return new Response(xml, {
       headers: corsHeaders,
     })
