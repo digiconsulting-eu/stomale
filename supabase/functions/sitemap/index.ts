@@ -6,18 +6,6 @@ const corsHeaders = {
   'Content-Type': 'application/xml; charset=utf-8'
 }
 
-interface Review {
-  title: string
-  condition_id: number
-  updated_at: string
-}
-
-interface Condition {
-  id: number
-  Patologia: string
-  created_at?: string
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -25,135 +13,124 @@ Deno.serve(async (req) => {
 
   try {
     console.log('[Sitemap Function] Starting sitemap generation...');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     
     if (!supabaseUrl || !supabaseKey) {
-      console.error('[Sitemap Function] Missing environment variables');
       throw new Error('Missing environment variables');
     }
 
-    console.log('[Sitemap Function] Creating Supabase client...');
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('[Sitemap Function] Supabase client initialized');
 
-    // Fetch conditions and their latest reviews
-    console.log('[Sitemap Function] Fetching conditions...');
+    // Fetch conditions
     const { data: conditions, error: conditionsError } = await supabase
       .from('PATOLOGIE')
-      .select('id, Patologia, created_at')
+      .select('id, Patologia');
 
     if (conditionsError) {
-      console.error('[Sitemap Function] Error fetching conditions:', conditionsError);
       throw conditionsError;
     }
 
     console.log(`[Sitemap Function] Fetched ${conditions?.length || 0} conditions`);
 
-    console.log('[Sitemap Function] Fetching reviews...');
+    // Fetch approved reviews
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
-      .select('title, condition_id, updated_at')
-      .eq('status', 'approved')
+      .select('id, title, condition_id')
+      .eq('status', 'approved');
 
     if (reviewsError) {
-      console.error('[Sitemap Function] Error fetching reviews:', reviewsError);
       throw reviewsError;
     }
 
     console.log(`[Sitemap Function] Fetched ${reviews?.length || 0} reviews`);
 
-    // Start building the XML
-    console.log('[Sitemap Function] Building XML...');
+    // Generate sitemap XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://stomale.info/</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://stomale.info/recensioni</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
-  </url>`
+  </url>`;
 
     // Add condition pages
-    conditions.forEach((condition: Condition) => {
-      console.log(`[Sitemap Function] Processing condition: ${condition.Patologia}`);
-      const conditionReviews = reviews.filter(r => r.condition_id === condition.id)
-      const lastUpdate = conditionReviews.length > 0 
-        ? Math.max(...conditionReviews.map(r => new Date(r.updated_at).getTime()))
-        : new Date(condition.created_at || new Date()).getTime()
-
+    conditions?.forEach((condition) => {
       xml += `
   <url>
-    <loc>https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}</loc>
-    <lastmod>${new Date(lastUpdate).toISOString().split('T')[0]}</lastmod>
+    <loc>https://stomale.info/patologia/${condition.Patologia.toLowerCase()}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>`
+  </url>`;
+    });
 
-      // Add review pages for this condition
-      conditionReviews.forEach((review: Review) => {
-        console.log(`[Sitemap Function] Processing review: ${review.title}`);
+    // Add review pages
+    reviews?.forEach((review) => {
+      const condition = conditions?.find(c => c.id === review.condition_id);
+      if (condition) {
+        const reviewSlug = review.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+
         xml += `
   <url>
-    <loc>https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}/recensione/${encodeURIComponent(review.title.toLowerCase())}</loc>
-    <lastmod>${new Date(review.updated_at).toISOString().split('T')[0]}</lastmod>
+    <loc>https://stomale.info/patologia/${condition.Patologia.toLowerCase()}/recensione/${reviewSlug}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-  </url>`
-      })
-    })
+  </url>`;
+      }
+    });
 
     // Add static pages
     xml += `
   <url>
     <loc>https://stomale.info/cerca-patologia</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://stomale.info/nuova-recensione</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://stomale.info/privacy-policy</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://stomale.info/cookie-policy</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://stomale.info/terms</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
-</urlset>`
+</urlset>`;
 
-    console.log('[Sitemap Function] XML generation completed successfully');
-    console.log('[Sitemap Function] First 500 characters of XML:', xml.substring(0, 500));
+    console.log('[Sitemap Function] XML generation completed');
+    console.log('[Sitemap Function] Sample of generated XML:', xml.substring(0, 500));
 
-    return new Response(xml, {
-      headers: corsHeaders,
-    })
-
+    return new Response(xml, { headers: corsHeaders });
   } catch (error) {
-    console.error('[Sitemap Function] Error generating sitemap:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: corsHeaders
-    })
+    console.error('[Sitemap Function] Error:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }), 
+      { 
+        status: 500, 
+        headers: corsHeaders 
+      }
+    );
   }
-})
+});

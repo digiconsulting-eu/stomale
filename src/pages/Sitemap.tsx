@@ -18,20 +18,22 @@ const Sitemap = () => {
           return;
         }
 
-        console.log('[Sitemap] Data received from edge function:', data);
+        console.log('[Sitemap] Data received:', data);
 
-        // Set the content type and serve the XML directly
+        // Create a blob with the XML content
         const blob = new Blob([data], { type: 'application/xml' });
-        const url = window.URL.createObjectURL(blob);
-        console.log('[Sitemap] Created blob URL:', url);
+        const url = URL.createObjectURL(blob);
         
-        // Replace current page content
-        window.location.href = url;
-        
-        // Cleanup
-        window.URL.revokeObjectURL(url);
+        // Download the XML file
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'sitemap.xml';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       } catch (err) {
-        console.error('[Sitemap] Unexpected error:', err);
+        console.error('[Sitemap] Error:', err);
       }
     };
 
