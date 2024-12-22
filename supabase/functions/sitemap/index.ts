@@ -81,9 +81,6 @@ Deno.serve(async (req) => {
     sitemap += 'Altre pagine:\n';
     sitemap += 'https://stomale.info/cerca-patologia\n';
     sitemap += 'https://stomale.info/nuova-recensione\n';
-    sitemap += 'https://stomale.info/privacy-policy\n';
-    sitemap += 'https://stomale.info/cookie-policy\n';
-    sitemap += 'https://stomale.info/terms\n';
 
     console.log('[Sitemap Function] Text generation completed');
     console.log('[Sitemap Function] Sample of generated text:', sitemap.substring(0, 500));
