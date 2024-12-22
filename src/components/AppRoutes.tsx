@@ -23,6 +23,10 @@ import Sitemap from "@/pages/Sitemap";
 export const AppRoutes = () => {
   return (
     <Routes>
+      {/* Sitemap routes - placing these first to ensure they're matched */}
+      <Route path="/sitemap" element={<Sitemap />} />
+      <Route path="/sitemap.txt" element={<Sitemap />} />
+
       {/* Public routes */}
       <Route path="/" element={<Index />} />
       <Route path="/patologia/:condition/recensione/:title" element={<ReviewDetail />} />
@@ -39,10 +43,6 @@ export const AppRoutes = () => {
       <Route path="/cookie-policy" element={<CookiePolicy />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
-      
-      {/* Sitemap routes */}
-      <Route path="/sitemap" element={<Sitemap />} />
-      <Route path="/sitemap.txt" element={<Sitemap />} />
 
       {/* Protected routes */}
       <Route path="/admin" element={<Admin />} />
