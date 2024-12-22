@@ -65,6 +65,11 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
     }
 
+    // Function to properly encode URLs while preserving spaces as %20
+    const encodeUrl = (str: string) => {
+      return str.split(' ').map(part => encodeURIComponent(part)).join('%20');
+    };
+
     // Determine format based on Accept header
     const acceptHeader = req.headers.get('Content-Type') || '';
     const isXml = acceptHeader.includes('application/xml');
@@ -81,7 +86,7 @@ Deno.serve(async (req) => {
       // Add conditions
       conditions?.forEach((condition) => {
         if (condition.Patologia) {
-          const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+          const encodedCondition = encodeUrl(condition.Patologia.toLowerCase());
           xml += `  <url>\n    <loc>https://stomale.info/patologia/${encodedCondition}</loc>\n  </url>\n`;
         }
       });
@@ -89,7 +94,7 @@ Deno.serve(async (req) => {
       // Add reviews
       reviews?.forEach((review) => {
         if (review.PATOLOGIE?.Patologia && review.title) {
-          const encodedCondition = encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase());
+          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia.toLowerCase());
           const reviewSlug = review.title
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
@@ -129,7 +134,7 @@ Deno.serve(async (req) => {
       sitemap += 'Patologie:\n';
       conditions?.forEach((condition) => {
         if (condition.Patologia) {
-          const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+          const encodedCondition = encodeUrl(condition.Patologia.toLowerCase());
           sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
         }
       });
@@ -139,7 +144,7 @@ Deno.serve(async (req) => {
       sitemap += 'Recensioni per patologia:\n';
       reviews?.forEach((review) => {
         if (review.PATOLOGIE?.Patologia && review.title) {
-          const encodedCondition = encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase());
+          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia.toLowerCase());
           const reviewSlug = review.title
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
