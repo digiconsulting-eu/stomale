@@ -8,13 +8,20 @@ export default function Sitemap() {
   useEffect(() => {
     const generateSitemap = async () => {
       try {
+        console.log('Starting sitemap generation...');
+        
         // Fetch conditions
         const { data: conditions, error: conditionsError } = await supabase
           .from('PATOLOGIE')
           .select('Patologia')
           .order('Patologia');
 
-        if (conditionsError) throw conditionsError;
+        if (conditionsError) {
+          console.error('Error fetching conditions:', conditionsError);
+          throw conditionsError;
+        }
+
+        console.log(`Fetched ${conditions?.length || 0} conditions`);
 
         // Fetch approved reviews
         const { data: reviews, error: reviewsError } = await supabase
@@ -27,7 +34,12 @@ export default function Sitemap() {
           `)
           .eq('status', 'approved');
 
-        if (reviewsError) throw reviewsError;
+        if (reviewsError) {
+          console.error('Error fetching reviews:', reviewsError);
+          throw reviewsError;
+        }
+
+        console.log(`Fetched ${reviews?.length || 0} reviews`);
 
         // Generate sitemap content
         let sitemap = 'SITEMAP STOMALE.INFO\n\n';
@@ -62,6 +74,7 @@ export default function Sitemap() {
         sitemap += 'https://stomale.info/cerca-patologia\n';
         sitemap += 'https://stomale.info/nuova-recensione\n';
 
+        console.log('Sitemap generation completed');
         setContent(sitemap);
       } catch (err) {
         console.error('Error generating sitemap:', err);
