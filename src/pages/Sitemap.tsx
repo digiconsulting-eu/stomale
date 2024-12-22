@@ -21,6 +21,10 @@ const Sitemap = () => {
         }
 
         console.log('[Sitemap] Data received:', data);
+        
+        // Set the content type header
+        document.contentType = 'text/plain';
+        
         setContent(data);
       } catch (err) {
         console.error('[Sitemap] Error:', err);
@@ -30,12 +34,12 @@ const Sitemap = () => {
     fetchSitemap();
   }, []);
 
-  // Use pre tag to maintain formatting and white space
   return (
     <pre style={{ 
       whiteSpace: 'pre-wrap',
       wordWrap: 'break-word',
-      padding: '20px',
+      margin: 0,
+      padding: 0,
       fontFamily: 'monospace'
     }}>
       {content}
