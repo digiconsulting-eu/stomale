@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Sitemap() {
   const [content, setContent] = useState<string>("Loading sitemap...");
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const isTxtFormat = location.pathname.endsWith('.txt');
 
   useEffect(() => {
     const fetchSitemap = async () => {
       try {
         console.log('Fetching sitemap data...');
         
-        // Call the Edge Function
         const { data, error } = await supabase.functions.invoke('sitemap');
         
         if (error) {
@@ -33,6 +35,13 @@ export default function Sitemap() {
     fetchSitemap();
   }, []);
 
+  useEffect(() => {
+    // Set the appropriate content type for .txt format
+    if (isTxtFormat) {
+      document.contentType = 'text/plain';
+    }
+  }, [isTxtFormat]);
+
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -41,6 +50,10 @@ export default function Sitemap() {
         </div>
       </div>
     );
+  }
+
+  if (isTxtFormat) {
+    return <pre>{content}</pre>;
   }
 
   return (
