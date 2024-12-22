@@ -3,11 +3,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'text/plain; charset=utf-8'
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -15,7 +13,6 @@ Deno.serve(async (req) => {
   try {
     console.log('[Sitemap Function] Starting sitemap generation...');
     
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
@@ -26,7 +23,6 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     console.log('[Sitemap Function] Supabase client initialized');
 
-    // Fetch conditions
     const { data: conditions, error: conditionsError } = await supabase
       .from('PATOLOGIE')
       .select('Patologia')
@@ -37,9 +33,6 @@ Deno.serve(async (req) => {
       throw conditionsError;
     }
 
-    console.log(`[Sitemap Function] Fetched ${conditions?.length || 0} conditions`);
-
-    // Fetch approved reviews
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
       .select(`
@@ -55,14 +48,10 @@ Deno.serve(async (req) => {
       throw reviewsError;
     }
 
-    console.log(`[Sitemap Function] Fetched ${reviews?.length || 0} reviews`);
-
-    // Generate sitemap content
     let sitemap = 'SITEMAP STOMALE.INFO\n\n';
     sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
     sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
 
-    // Add condition pages
     sitemap += 'Patologie:\n';
     conditions?.forEach((condition) => {
       const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
@@ -70,7 +59,6 @@ Deno.serve(async (req) => {
     });
     sitemap += '\n';
 
-    // Add review pages
     sitemap += 'Recensioni per patologia:\n';
     reviews?.forEach((review) => {
       if (review.PATOLOGIE?.Patologia) {
@@ -79,13 +67,11 @@ Deno.serve(async (req) => {
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
-
         sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
       }
     });
     sitemap += '\n';
 
-    // Add static pages
     sitemap += 'Altre pagine:\n';
     sitemap += 'https://stomale.info/cerca-patologia\n';
     sitemap += 'https://stomale.info/nuova-recensione\n';

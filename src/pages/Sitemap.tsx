@@ -6,7 +6,7 @@ export default function Sitemap() {
   const [content, setContent] = useState<string>("Loading sitemap...");
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
-  const isTxtFormat = location.pathname.endsWith('.txt');
+  const isTxtFormat = location.pathname === '/sitemap.txt';
 
   useEffect(() => {
     const fetchSitemap = async () => {
@@ -46,26 +46,27 @@ export default function Sitemap() {
   }
 
   if (isTxtFormat) {
-    // For .txt format, use a plain pre tag with minimal styling
     return (
       <pre style={{ 
-        whiteSpace: 'pre',
-        fontFamily: 'monospace',
+        whiteSpace: 'pre-wrap',
+        wordWrap: 'break-word',
         margin: 0,
-        padding: 0 
+        padding: '1rem',
+        fontFamily: 'monospace'
       }}>
         {content}
       </pre>
     );
   }
 
-  // For HTML format, use the styled version
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
-      <pre className="bg-gray-50 p-4 rounded border border-gray-200 overflow-x-auto">
-        {content}
-      </pre>
+      <div className="bg-white p-6 rounded-lg shadow">
+        <pre className="whitespace-pre-wrap break-words font-mono text-sm">
+          {content}
+        </pre>
+      </div>
     </div>
   );
 }
