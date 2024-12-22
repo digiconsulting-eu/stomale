@@ -15,19 +15,21 @@ export default function Sitemap() {
       try {
         setIsLoading(true);
         setError(null);
-        console.log('Fetching sitemap data...');
+        console.log('Fetching sitemap data...', location.pathname);
         
-        const { data, error } = await supabase.functions.invoke('sitemap', {
+        const { data, error: fetchError } = await supabase.functions.invoke('sitemap', {
+          method: 'GET',
           headers: {
-            'Cache-Control': 'no-cache'
+            'Cache-Control': 'no-cache',
+            'Content-Type': 'text/plain'
           }
         });
         
-        console.log('Sitemap response:', { data, error });
+        console.log('Sitemap response:', { data, error: fetchError });
         
-        if (error) {
-          console.error('Error fetching sitemap:', error);
-          throw error;
+        if (fetchError) {
+          console.error('Error fetching sitemap:', fetchError);
+          throw new Error(fetchError.message);
         }
 
         if (typeof data === 'string') {
@@ -39,7 +41,7 @@ export default function Sitemap() {
           throw new Error('Unexpected response format from sitemap function');
         }
       } catch (err) {
-        console.error('Error:', err);
+        console.error('Error in sitemap component:', err);
         setError(err instanceof Error ? err.message : 'Failed to generate sitemap. Please try again later.');
       } finally {
         setIsLoading(false);
@@ -47,9 +49,8 @@ export default function Sitemap() {
     };
 
     fetchSitemap();
-  }, []);
+  }, [location.pathname]);
 
-  // Handle loading state
   if (isLoading) {
     if (isTxtFormat) {
       return "Loading sitemap...";
@@ -61,7 +62,6 @@ export default function Sitemap() {
     );
   }
 
-  // Handle error state
   if (error) {
     if (isTxtFormat) {
       return error;
@@ -75,7 +75,6 @@ export default function Sitemap() {
     );
   }
 
-  // Return content based on format
   if (isTxtFormat) {
     return content;
   }
