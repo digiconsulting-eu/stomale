@@ -11,22 +11,28 @@ const Sitemap = () => {
       try {
         setIsLoading(true);
         setError(null);
-        console.log('Fetching conditions...');
+        console.log('Starting sitemap generation...');
         
         // Fetch conditions
+        console.log('Fetching conditions from PATOLOGIE table...');
         const { data: conditions, error: conditionsError } = await supabase
           .from('PATOLOGIE')
           .select('id, Patologia');
 
         if (conditionsError) {
           console.error('Error fetching conditions:', conditionsError);
-          throw conditionsError;
+          throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
         }
 
-        console.log('Fetched conditions:', conditions?.length);
-        console.log('Fetching reviews...');
+        if (!conditions) {
+          console.error('No conditions data received');
+          throw new Error('No conditions data received');
+        }
+
+        console.log(`Successfully fetched ${conditions.length} conditions`);
 
         // Fetch approved reviews
+        console.log('Fetching approved reviews...');
         const { data: reviews, error: reviewsError } = await supabase
           .from('reviews')
           .select('id, title, condition_id')
@@ -34,28 +40,36 @@ const Sitemap = () => {
 
         if (reviewsError) {
           console.error('Error fetching reviews:', reviewsError);
-          throw reviewsError;
+          throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
         }
 
-        console.log('Fetched reviews:', reviews?.length);
+        if (!reviews) {
+          console.error('No reviews data received');
+          throw new Error('No reviews data received');
+        }
+
+        console.log(`Successfully fetched ${reviews.length} approved reviews`);
 
         // Generate sitemap content
+        console.log('Generating sitemap content...');
         let content = 'SITEMAP STOMALE.INFO\n\n';
         content += 'Homepage:\nhttps://stomale.info/\n\n';
         content += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
 
         // Add condition pages
+        console.log('Adding condition URLs...');
         content += 'Patologie:\n';
-        conditions?.forEach((condition) => {
+        conditions.forEach((condition) => {
           const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
           content += `https://stomale.info/patologia/${encodedCondition}\n`;
         });
         content += '\n';
 
         // Add review pages
+        console.log('Adding review URLs...');
         content += 'Recensioni per patologia:\n';
-        reviews?.forEach((review) => {
-          const condition = conditions?.find(c => c.id === review.condition_id);
+        reviews.forEach((review) => {
+          const condition = conditions.find(c => c.id === review.condition_id);
           if (condition) {
             const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
             const reviewSlug = review.title
@@ -68,6 +82,7 @@ const Sitemap = () => {
         content += '\n';
 
         // Add static pages
+        console.log('Adding static page URLs...');
         content += 'Altre pagine:\n';
         content += 'https://stomale.info/cerca-patologia\n';
         content += 'https://stomale.info/nuova-recensione\n';
@@ -75,11 +90,12 @@ const Sitemap = () => {
         content += 'https://stomale.info/cookie-policy\n';
         content += 'https://stomale.info/terms\n';
 
-        console.log('Generated sitemap content');
+        console.log('Sitemap generation completed');
         setSitemapContent(content);
+        setIsLoading(false);
       } catch (error) {
-        console.error('Error generating sitemap:', error);
-        setError('Error generating sitemap');
+        console.error('Error in sitemap generation:', error);
+        setError(error instanceof Error ? error.message : 'Error generating sitemap');
         setSitemapContent('');
       } finally {
         setIsLoading(false);
@@ -88,14 +104,6 @@ const Sitemap = () => {
 
     generateSitemap();
   }, []);
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto p-8">
-        <div className="text-center">Loading sitemap...</div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -107,9 +115,15 @@ const Sitemap = () => {
 
   return (
     <div className="container mx-auto p-8">
-      <pre className="whitespace-pre-wrap break-words font-mono p-5 bg-gray-50 border border-gray-200 rounded-md">
-        {sitemapContent}
-      </pre>
+      {isLoading ? (
+        <div className="text-center">
+          <div className="animate-pulse">Loading sitemap...</div>
+        </div>
+      ) : (
+        <pre className="whitespace-pre-wrap break-words font-mono p-5 bg-gray-50 border border-gray-200 rounded-md">
+          {sitemapContent}
+        </pre>
+      )}
     </div>
   );
 };
