@@ -35,7 +35,6 @@ export default function Sitemap() {
     fetchSitemap();
   }, []);
 
-  // Instead of trying to modify document.contentType, we'll use styling and formatting
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -62,8 +61,11 @@ export default function Sitemap() {
 
   // For HTML format, use the styled version
   return (
-    <pre className="whitespace-pre-wrap font-mono text-sm p-4">
-      {content}
-    </pre>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
+      <pre className="bg-gray-50 p-4 rounded border border-gray-200 overflow-x-auto">
+        {content}
+      </pre>
+    </div>
   );
 }
