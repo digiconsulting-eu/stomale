@@ -1,22 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Sitemap = () => {
-  const [content, setContent] = useState<string>('');
-
   useEffect(() => {
     const fetchSitemap = async () => {
       try {
-        console.log('[Sitemap] Starting sitemap fetch...');
         const { data, error } = await supabase.functions.invoke('sitemap');
         
         if (error) {
-          console.error('[Sitemap] Error fetching sitemap:', error);
+          console.error('[Sitemap] Error:', error);
           return;
         }
 
-        console.log('[Sitemap] Sitemap data received:', data);
-        setContent(data || '');
+        // Create a Blob with the sitemap content
+        const blob = new Blob([data], { type: 'text/plain' });
+        
+        // Create a URL for the Blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Create a link element
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'sitemap.txt';
+        
+        // Append link to body, click it, and remove it
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up the URL
+        window.URL.revokeObjectURL(url);
       } catch (err) {
         console.error('[Sitemap] Error:', err);
       }
@@ -25,17 +38,7 @@ const Sitemap = () => {
     fetchSitemap();
   }, []);
 
-  return (
-    <pre style={{ 
-      margin: 0,
-      padding: 0,
-      fontFamily: 'monospace',
-      whiteSpace: 'pre',
-      display: 'block'
-    }}>
-      {content}
-    </pre>
-  );
+  return null;
 };
 
 export default Sitemap;

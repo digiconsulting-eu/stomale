@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('[Sitemap Function] Starting sitemap generation...');
+    console.log('[Sitemap] Starting sitemap generation...');
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -22,9 +22,9 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-    console.log('[Sitemap Function] Supabase client initialized');
+    console.log('[Sitemap] Supabase client initialized');
 
-    // Fetch conditions
+    // Fetch all conditions
     const { data: conditions, error: conditionsError } = await supabase
       .from('PATOLOGIE')
       .select('id, Patologia');
@@ -32,6 +32,7 @@ Deno.serve(async (req) => {
     if (conditionsError) {
       throw conditionsError;
     }
+    console.log(`[Sitemap] Found ${conditions?.length || 0} conditions`);
 
     // Fetch approved reviews
     const { data: reviews, error: reviewsError } = await supabase
@@ -42,18 +43,22 @@ Deno.serve(async (req) => {
     if (reviewsError) {
       throw reviewsError;
     }
+    console.log(`[Sitemap] Found ${reviews?.length || 0} approved reviews`);
 
     // Generate sitemap content
-    let sitemap = 'https://stomale.info/\n';
-    sitemap += 'https://stomale.info/recensioni\n';
-    sitemap += 'https://stomale.info/cerca-patologia\n';
-    sitemap += 'https://stomale.info/nuova-recensione\n';
+    let urls = [];
+    
+    // Add static pages
+    urls.push('https://stomale.info/');
+    urls.push('https://stomale.info/recensioni');
+    urls.push('https://stomale.info/cerca-patologia');
+    urls.push('https://stomale.info/nuova-recensione');
 
     // Add condition pages
     if (conditions) {
       conditions.forEach((condition) => {
         const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-        sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
+        urls.push(`https://stomale.info/patologia/${encodedCondition}`);
       });
     }
 
@@ -67,16 +72,19 @@ Deno.serve(async (req) => {
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
-          sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
+          urls.push(`https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}`);
         }
       });
     }
 
-    console.log('[Sitemap Function] Generated sitemap content');
+    // Join URLs with newlines
+    const sitemap = urls.join('\n');
+    console.log('[Sitemap] Generated sitemap with', urls.length, 'URLs');
+
     return new Response(sitemap, { headers: corsHeaders });
   } catch (error) {
-    console.error('[Sitemap Function] Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), { 
+    console.error('[Sitemap] Error:', error);
+    return new Response('Error generating sitemap', { 
       status: 500,
       headers: corsHeaders
     });
