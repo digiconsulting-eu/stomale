@@ -7,37 +7,49 @@ const Sitemap = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const generateSitemap = async () => {
+    const fetchSitemapContent = async () => {
       try {
+        // Fetch conditions
         const { data: conditions, error: conditionsError } = await supabase
           .from('PATOLOGIE')
           .select('id, Patologia');
 
-        if (conditionsError) throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
-        if (!conditions || conditions.length === 0) throw new Error('No conditions found');
+        if (conditionsError) {
+          console.error('Error fetching conditions:', conditionsError);
+          throw new Error('Failed to fetch conditions');
+        }
 
+        // Fetch approved reviews
         const { data: reviews, error: reviewsError } = await supabase
           .from('reviews')
           .select('id, title, condition_id')
           .eq('status', 'approved');
 
-        if (reviewsError) throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
+        if (reviewsError) {
+          console.error('Error fetching reviews:', reviewsError);
+          throw new Error('Failed to fetch reviews');
+        }
 
+        // Generate sitemap content
         let content = 'SITEMAP STOMALE.INFO\n\n';
         content += 'Homepage:\nhttps://stomale.info/\n\n';
         content += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
 
-        content += 'Patologie:\n';
-        conditions.forEach((condition) => {
-          const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-          content += `https://stomale.info/patologia/${encodedCondition}\n`;
-        });
-        content += '\n';
+        // Add condition pages
+        if (conditions && conditions.length > 0) {
+          content += 'Patologie:\n';
+          conditions.forEach((condition) => {
+            const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+            content += `https://stomale.info/patologia/${encodedCondition}\n`;
+          });
+          content += '\n';
+        }
 
+        // Add review pages
         if (reviews && reviews.length > 0) {
           content += 'Recensioni per patologia:\n';
           reviews.forEach((review) => {
-            const condition = conditions.find(c => c.id === review.condition_id);
+            const condition = conditions?.find(c => c.id === review.condition_id);
             if (condition) {
               const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
               const reviewSlug = review.title
@@ -50,6 +62,7 @@ const Sitemap = () => {
           content += '\n';
         }
 
+        // Add static pages
         content += 'Altre pagine:\n';
         content += 'https://stomale.info/cerca-patologia\n';
         content += 'https://stomale.info/nuova-recensione\n';
@@ -59,35 +72,44 @@ const Sitemap = () => {
 
         setSitemapContent(content);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error generating sitemap');
+        console.error('Error generating sitemap:', err);
+        setError('Error generating sitemap. Please try again later.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    generateSitemap();
+    fetchSitemapContent();
   }, []);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg font-medium">Generating sitemap...</div>
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-4 py-8">
+          <p className="text-center text-lg">Loading sitemap...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-500 text-lg font-medium">{error}</div>
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto px-4 py-8">
+          <p className="text-center text-red-500">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <pre className="p-8 font-mono text-sm whitespace-pre-wrap break-words">
-      {sitemapContent}
-    </pre>
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-4 py-8">
+        <pre className="whitespace-pre-wrap break-words bg-gray-50 p-6 rounded-lg border border-gray-200 text-sm">
+          {sitemapContent || 'No sitemap content available'}
+        </pre>
+      </div>
+    </div>
   );
 };
 
