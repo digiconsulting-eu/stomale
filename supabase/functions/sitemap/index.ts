@@ -49,20 +49,18 @@ Deno.serve(async (req) => {
     console.log(`[Sitemap Function] Fetched ${reviews?.length || 0} reviews`);
 
     // Generate sitemap content
-    let sitemap = 'SITEMAP STOMALE.INFO\n\n';
-    sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
-    sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
+    let sitemap = 'https://stomale.info/\n';
+    sitemap += 'https://stomale.info/recensioni\n';
+    sitemap += 'https://stomale.info/cerca-patologia\n';
+    sitemap += 'https://stomale.info/nuova-recensione\n\n';
 
     // Add condition pages
-    sitemap += 'Patologie:\n';
     conditions?.forEach((condition) => {
       const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
       sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
     });
-    sitemap += '\n';
 
     // Add review pages
-    sitemap += 'Recensioni per patologia:\n';
     reviews?.forEach((review) => {
       const condition = conditions?.find(c => c.id === review.condition_id);
       if (condition) {
@@ -75,15 +73,6 @@ Deno.serve(async (req) => {
         sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
       }
     });
-    sitemap += '\n';
-
-    // Add static pages
-    sitemap += 'Altre pagine:\n';
-    sitemap += 'https://stomale.info/cerca-patologia\n';
-    sitemap += 'https://stomale.info/nuova-recensione\n';
-    sitemap += 'https://stomale.info/privacy-policy\n';
-    sitemap += 'https://stomale.info/cookie-policy\n';
-    sitemap += 'https://stomale.info/terms\n';
 
     console.log('[Sitemap Function] Text generation completed');
     console.log('[Sitemap Function] Sample of generated text:', sitemap.substring(0, 500));
