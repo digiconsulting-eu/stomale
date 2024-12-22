@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Sitemap = () => {
+  const [content, setContent] = useState<string>('');
+
   useEffect(() => {
     const fetchSitemap = async () => {
       try {
@@ -12,24 +14,7 @@ const Sitemap = () => {
           return;
         }
 
-        // Create a Blob with the sitemap content
-        const blob = new Blob([data], { type: 'text/plain' });
-        
-        // Create a URL for the Blob
-        const url = window.URL.createObjectURL(blob);
-        
-        // Create a link element
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'sitemap.txt';
-        
-        // Append link to body, click it, and remove it
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Clean up the URL
-        window.URL.revokeObjectURL(url);
+        setContent(data);
       } catch (err) {
         console.error('[Sitemap] Error:', err);
       }
@@ -38,7 +23,11 @@ const Sitemap = () => {
     fetchSitemap();
   }, []);
 
-  return null;
+  return (
+    <pre style={{ whiteSpace: 'pre-line', padding: '20px' }}>
+      {content}
+    </pre>
+  );
 };
 
 export default Sitemap;
