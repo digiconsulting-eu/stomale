@@ -21,10 +21,6 @@ const Sitemap = () => {
         }
 
         console.log('[Sitemap] Data received:', data);
-        
-        // Set the content type header
-        document.contentType = 'text/plain';
-        
         setContent(data);
       } catch (err) {
         console.error('[Sitemap] Error:', err);
