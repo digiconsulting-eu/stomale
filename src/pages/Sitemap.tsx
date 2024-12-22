@@ -6,6 +6,13 @@ export default function Sitemap() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Set the content type to text/plain
+    document.querySelector('meta[http-equiv="Content-Type"]')?.remove();
+    const meta = document.createElement('meta');
+    meta.httpEquiv = "Content-Type";
+    meta.content = "text/plain; charset=utf-8";
+    document.head.appendChild(meta);
+
     const generateSitemap = async () => {
       try {
         // Fetch conditions
@@ -70,6 +77,11 @@ export default function Sitemap() {
     };
 
     generateSitemap();
+
+    // Cleanup
+    return () => {
+      document.querySelector('meta[http-equiv="Content-Type"]')?.remove();
+    };
   }, []);
 
   if (error) {
@@ -82,9 +94,6 @@ export default function Sitemap() {
     );
   }
 
-  return (
-    <pre className="whitespace-pre-wrap p-4 font-mono text-sm">
-      {content}
-    </pre>
-  );
+  // Return plain text content without any HTML wrapping
+  return content;
 }
