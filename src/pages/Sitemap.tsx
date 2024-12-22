@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 export default function Sitemap() {
-  const [content, setContent] = useState<string>("Loading sitemap...");
+  const [content, setContent] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const isTxtFormat = location.pathname === '/sitemap.txt';
 
   useEffect(() => {
     const fetchSitemap = async () => {
       try {
+        setIsLoading(true);
         console.log('Fetching sitemap data...');
         
         const { data, error } = await supabase.functions.invoke('sitemap');
@@ -29,11 +32,24 @@ export default function Sitemap() {
       } catch (err) {
         console.error('Error:', err);
         setError('Failed to generate sitemap. Please try again later.');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchSitemap();
   }, []);
+
+  if (isLoading) {
+    if (isTxtFormat) {
+      return "Loading sitemap...";
+    }
+    return (
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   if (error) {
     if (isTxtFormat) {
