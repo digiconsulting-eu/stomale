@@ -14,23 +14,17 @@ Deno.serve(async (req) => {
   try {
     console.log('[Sitemap Function] Starting sitemap generation...');
     
-    // Get environment variables and log their presence (not their values)
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseKey) {
-      console.error('[Sitemap Function] Missing environment variables:', {
-        hasSupabaseUrl: !!supabaseUrl,
-        hasSupabaseKey: !!supabaseKey
-      });
+      console.error('[Sitemap Function] Missing environment variables');
       throw new Error('Configuration error: Missing environment variables');
     }
 
-    console.log('[Sitemap Function] Creating Supabase client...');
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Test database connection with a simple query
-    console.log('[Sitemap Function] Testing database connection...');
+    // Test database connection
     const { data: testData, error: testError } = await supabase
       .from('PATOLOGIE')
       .select('count(*)');
@@ -40,9 +34,7 @@ Deno.serve(async (req) => {
       throw new Error(`Database connection failed: ${testError.message}`);
     }
 
-    console.log('[Sitemap Function] Database connection successful');
-
-    // Fetch conditions with error handling
+    // Fetch conditions
     const { data: conditions, error: conditionsError } = await supabase
       .from('PATOLOGIE')
       .select('Patologia');
@@ -52,9 +44,7 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
     }
 
-    console.log(`[Sitemap Function] Fetched ${conditions?.length || 0} conditions`);
-
-    // Fetch approved reviews with error handling
+    // Fetch approved reviews
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
       .select(`
@@ -69,8 +59,6 @@ Deno.serve(async (req) => {
       console.error('[Sitemap Function] Error fetching reviews:', reviewsError);
       throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
     }
-
-    console.log(`[Sitemap Function] Fetched ${reviews?.length || 0} reviews`);
 
     // Generate sitemap content
     let sitemap = 'SITEMAP STOMALE.INFO\n\n';
@@ -112,9 +100,7 @@ Deno.serve(async (req) => {
     sitemap += 'https://stomale.info/terms\n';
 
     console.log('[Sitemap Function] Sitemap generation completed');
-    console.log('[Sitemap Function] Sitemap size:', sitemap.length, 'characters');
 
-    // Return the sitemap with proper headers
     return new Response(sitemap, { 
       headers: {
         ...corsHeaders,
@@ -125,7 +111,6 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('[Sitemap Function] Fatal error:', error);
-    console.error('[Sitemap Function] Stack trace:', error.stack);
     
     return new Response(
       JSON.stringify({ 
