@@ -52,10 +52,12 @@ export default function SearchCondition() {
   };
 
   const filteredConditions = conditions.filter(condition => {
-    const matchesSearch = condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLetter = selectedLetter === "TUTTE" || 
-                         condition.Patologia.startsWith(selectedLetter);
-    return matchesSearch && matchesLetter;
+    // Se c'è un termine di ricerca, filtra per quello indipendentemente dalla lettera selezionata
+    if (searchTerm) {
+      return condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+    // Se non c'è un termine di ricerca, usa solo il filtro per lettera
+    return selectedLetter === "TUTTE" || condition.Patologia.startsWith(selectedLetter);
   });
 
   return (
@@ -76,7 +78,11 @@ export default function SearchCondition() {
           <Button
             key={letter}
             variant={selectedLetter === letter ? "default" : "outline"}
-            onClick={() => setSelectedLetter(letter)}
+            onClick={() => {
+              setSelectedLetter(letter);
+              // Reset search term when changing letter
+              setSearchTerm("");
+            }}
             className="min-w-[40px]"
           >
             {letter}
