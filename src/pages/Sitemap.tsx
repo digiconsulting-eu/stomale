@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const Sitemap = () => {
+  const [content, setContent] = useState<string>('');
+
   useEffect(() => {
-    const fetchAndServeSitemap = async () => {
+    const fetchSitemap = async () => {
       try {
         console.log('[Sitemap] Starting sitemap fetch...');
         const { data, error } = await supabase.functions.invoke('sitemap');
@@ -19,22 +21,26 @@ const Sitemap = () => {
         }
 
         console.log('[Sitemap] Data received:', data);
-
-        // Create a text blob with the sitemap content
-        const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-
-        // Redirect to the blob URL
-        window.location.href = url;
+        setContent(data);
       } catch (err) {
         console.error('[Sitemap] Error:', err);
       }
     };
 
-    fetchAndServeSitemap();
+    fetchSitemap();
   }, []);
 
-  return null;
+  // Use pre tag to maintain formatting and white space
+  return (
+    <pre style={{ 
+      whiteSpace: 'pre-wrap',
+      wordWrap: 'break-word',
+      padding: '20px',
+      fontFamily: 'monospace'
+    }}>
+      {content}
+    </pre>
+  );
 };
 
 export default Sitemap;
