@@ -7,31 +7,44 @@ const Sitemap = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const generateSitemap = async () => {
       try {
-        // Fetch conditions
+        console.log('Fetching conditions...');
         const { data: conditions, error: conditionsError } = await supabase
           .from('PATOLOGIE')
           .select('id, Patologia');
 
-        if (conditionsError) throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
-        if (!conditions) throw new Error('No conditions data received');
+        if (conditionsError) {
+          console.error('Conditions error:', conditionsError);
+          throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
+        }
 
-        // Fetch approved reviews
+        if (!conditions || conditions.length === 0) {
+          console.log('No conditions found');
+          throw new Error('No conditions data received');
+        }
+
+        console.log(`Found ${conditions.length} conditions`);
+
+        console.log('Fetching reviews...');
         const { data: reviews, error: reviewsError } = await supabase
           .from('reviews')
           .select('id, title, condition_id')
           .eq('status', 'approved');
 
-        if (reviewsError) throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
-        if (!reviews) throw new Error('No reviews data received');
+        if (reviewsError) {
+          console.error('Reviews error:', reviewsError);
+          throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
+        }
 
-        // Generate sitemap content
+        console.log(`Found ${reviews?.length || 0} reviews`);
+
         let content = 'SITEMAP STOMALE.INFO\n\n';
         content += 'Homepage:\nhttps://stomale.info/\n\n';
         content += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
 
-        // Add condition pages
         content += 'Patologie:\n';
         conditions.forEach((condition) => {
           const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
@@ -39,22 +52,22 @@ const Sitemap = () => {
         });
         content += '\n';
 
-        // Add review pages
-        content += 'Recensioni per patologia:\n';
-        reviews.forEach((review) => {
-          const condition = conditions.find(c => c.id === review.condition_id);
-          if (condition) {
-            const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-            const reviewSlug = review.title
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/(^-|-$)/g, '');
-            content += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
-          }
-        });
-        content += '\n';
+        if (reviews && reviews.length > 0) {
+          content += 'Recensioni per patologia:\n';
+          reviews.forEach((review) => {
+            const condition = conditions.find(c => c.id === review.condition_id);
+            if (condition) {
+              const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+              const reviewSlug = review.title
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+              content += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
+            }
+          });
+          content += '\n';
+        }
 
-        // Add static pages
         content += 'Altre pagine:\n';
         content += 'https://stomale.info/cerca-patologia\n';
         content += 'https://stomale.info/nuova-recensione\n';
@@ -62,24 +75,50 @@ const Sitemap = () => {
         content += 'https://stomale.info/cookie-policy\n';
         content += 'https://stomale.info/terms\n';
 
-        setSitemapContent(content);
+        console.log('Sitemap content generated');
+
+        if (isMounted) {
+          setSitemapContent(content);
+          setIsLoading(false);
+        }
       } catch (error) {
-        console.error('Error in sitemap generation:', error);
-        setError(error instanceof Error ? error.message : 'Error generating sitemap');
-      } finally {
-        setIsLoading(false);
+        console.error('Sitemap generation error:', error);
+        if (isMounted) {
+          setError(error instanceof Error ? error.message : 'Error generating sitemap');
+          setIsLoading(false);
+        }
       }
     };
 
     generateSitemap();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (isLoading) {
-    return <div className="text-center p-8">Generating sitemap...</div>;
+    return (
+      <div className="container mx-auto p-8">
+        <div className="text-center animate-pulse">Generating sitemap...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-red-500 p-8">{error}</div>;
+    return (
+      <div className="container mx-auto p-8">
+        <div className="text-red-500 text-center">{error}</div>
+      </div>
+    );
+  }
+
+  if (!sitemapContent) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="text-center">No sitemap content available</div>
+      </div>
+    );
   }
 
   return (
