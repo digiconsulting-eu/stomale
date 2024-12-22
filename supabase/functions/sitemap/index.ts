@@ -56,7 +56,8 @@ Deno.serve(async (req) => {
     // Add condition pages
     sitemap += 'Patologie:\n';
     conditions?.forEach((condition) => {
-      sitemap += `https://stomale.info/patologia/${condition.Patologia.toLowerCase()}\n`;
+      const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+      sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
     });
     sitemap += '\n';
 
@@ -65,12 +66,13 @@ Deno.serve(async (req) => {
     reviews?.forEach((review) => {
       const condition = conditions?.find(c => c.id === review.condition_id);
       if (condition) {
+        const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
         const reviewSlug = review.title
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
 
-        sitemap += `https://stomale.info/patologia/${condition.Patologia.toLowerCase()}/recensione/${reviewSlug}\n`;
+        sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
       }
     });
     sitemap += '\n';
