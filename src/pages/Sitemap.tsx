@@ -37,23 +37,26 @@ const Sitemap = () => {
         console.log('Fetched reviews:', reviews?.length);
 
         // Generate sitemap content
-        let content = 'SITEMAP STOMALE.INFO\n\n';
-        content += 'Homepage:\nhttps://stomale.info/\n\n';
-        content += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
+        let content = '';
+        content += 'https://stomale.info/\n';
+        content += 'https://stomale.info/recensioni\n';
+        content += 'https://stomale.info/cerca-patologia\n';
+        content += 'https://stomale.info/nuova-recensione\n';
+        content += 'https://stomale.info/inserisci-patologia\n';
+        content += 'https://stomale.info/login\n';
+        content += 'https://stomale.info/registrati\n';
+        content += 'https://stomale.info/recupera-password\n\n';
 
         // Add condition pages
         if (conditions && conditions.length > 0) {
-          content += 'Patologie:\n';
           conditions.forEach((condition) => {
             const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
             content += `https://stomale.info/patologia/${encodedCondition}\n`;
           });
-          content += '\n';
         }
 
         // Add review pages
         if (reviews && reviews.length > 0) {
-          content += 'Recensioni per patologia:\n';
           reviews.forEach((review) => {
             const condition = conditions?.find(c => c.id === review.condition_id);
             if (condition) {
@@ -65,16 +68,7 @@ const Sitemap = () => {
               content += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
             }
           });
-          content += '\n';
         }
-
-        // Add static pages
-        content += 'Altre pagine:\n';
-        content += 'https://stomale.info/cerca-patologia\n';
-        content += 'https://stomale.info/nuova-recensione\n';
-        content += 'https://stomale.info/privacy-policy\n';
-        content += 'https://stomale.info/cookie-policy\n';
-        content += 'https://stomale.info/terms\n';
 
         console.log('Generated sitemap content:', content.substring(0, 200) + '...');
         setSitemapContent(content);
@@ -91,21 +85,18 @@ const Sitemap = () => {
 
   // For the /sitemap.txt route, return plain text
   if (window.location.pathname === '/sitemap.txt') {
-    // Create a text blob and download it
-    const blob = new Blob([sitemapContent], { type: 'text/plain;charset=utf-8' });
-    const url = window.URL.createObjectURL(blob);
+    if (isLoading) {
+      return 'Generating sitemap...';
+    }
     
-    // Create a link and click it
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'sitemap.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (error) {
+      return error;
+    }
     
-    return null;
+    return sitemapContent;
   }
 
+  // For the normal route, return the styled component
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
