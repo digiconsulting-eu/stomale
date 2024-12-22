@@ -9,6 +9,8 @@ const Sitemap = () => {
   useEffect(() => {
     const fetchSitemapContent = async () => {
       try {
+        console.log('Fetching sitemap content...');
+        
         // Fetch conditions
         const { data: conditions, error: conditionsError } = await supabase
           .from('PATOLOGIE')
@@ -18,6 +20,8 @@ const Sitemap = () => {
           console.error('Error fetching conditions:', conditionsError);
           throw new Error('Failed to fetch conditions');
         }
+
+        console.log('Fetched conditions:', conditions?.length);
 
         // Fetch approved reviews
         const { data: reviews, error: reviewsError } = await supabase
@@ -29,6 +33,8 @@ const Sitemap = () => {
           console.error('Error fetching reviews:', reviewsError);
           throw new Error('Failed to fetch reviews');
         }
+
+        console.log('Fetched reviews:', reviews?.length);
 
         // Generate sitemap content
         let content = 'SITEMAP STOMALE.INFO\n\n';
@@ -70,6 +76,7 @@ const Sitemap = () => {
         content += 'https://stomale.info/cookie-policy\n';
         content += 'https://stomale.info/terms\n';
 
+        console.log('Generated sitemap content:', content.substring(0, 200) + '...');
         setSitemapContent(content);
       } catch (err) {
         console.error('Error generating sitemap:', err);
@@ -100,6 +107,11 @@ const Sitemap = () => {
         </div>
       </div>
     );
+  }
+
+  // Return raw text for sitemap.txt route
+  if (window.location.pathname === '/sitemap.txt') {
+    return <pre>{sitemapContent}</pre>;
   }
 
   return (
