@@ -103,14 +103,15 @@ Deno.serve(async (req) => {
     sitemap += 'https://stomale.info/privacy-policy\n';
     sitemap += 'https://stomale.info/terms\n';
 
-    console.log('[Sitemap Function] Sitemap generation completed');
+    console.log('[Sitemap Function] Sitemap generation completed successfully');
 
     return new Response(sitemap, { 
       headers: {
         ...corsHeaders,
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'public, max-age=3600'
-      }
+      },
+      status: 200
     });
 
   } catch (error) {
