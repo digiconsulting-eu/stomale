@@ -35,26 +35,30 @@ export default function Sitemap() {
     fetchSitemap();
   }, []);
 
-  // Se siamo in formato TXT, restituisci direttamente il contenuto
-  if (isTxtFormat) {
-    if (error) {
+  if (error) {
+    if (isTxtFormat) {
       return error;
     }
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (isTxtFormat) {
     return content;
   }
 
-  // Altrimenti, mostra la versione HTML
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
       <div className="bg-white p-6 rounded-lg shadow">
-        {error ? (
-          <div className="text-red-600">{error}</div>
-        ) : (
-          <pre className="whitespace-pre-wrap break-words font-mono text-sm">
-            {content}
-          </pre>
-        )}
+        <pre className="whitespace-pre-wrap break-words font-mono text-sm">
+          {content}
+        </pre>
       </div>
     </div>
   );
