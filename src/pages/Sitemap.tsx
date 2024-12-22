@@ -9,20 +9,23 @@ export default function Sitemap() {
     const fetchSitemap = async () => {
       try {
         console.log('[Sitemap] Starting sitemap fetch...');
-        const { data, error } = await supabase.functions.invoke('sitemap');
+        const { data: functionData, error: functionError } = await supabase.functions.invoke('sitemap');
         
-        if (error) {
-          throw error;
+        if (functionError) {
+          console.error('[Sitemap] Function error:', functionError);
+          throw functionError;
         }
 
-        if (typeof data === 'string') {
-          setContent(data);
+        if (typeof functionData === 'string') {
+          console.log('[Sitemap] Successfully received sitemap data');
+          setContent(functionData);
         } else {
-          setContent('Error: Invalid sitemap format');
+          console.error('[Sitemap] Invalid data format:', functionData);
+          throw new Error('Invalid sitemap format received');
         }
       } catch (err) {
         console.error('[Sitemap] Error:', err);
-        setError('Failed to generate sitemap');
+        setError('Failed to generate sitemap. Please try again later.');
         setContent('Error generating sitemap');
       }
     };
@@ -31,7 +34,13 @@ export default function Sitemap() {
   }, []);
 
   if (error) {
-    return <div className="text-red-500 p-4">{error}</div>;
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      </div>
+    );
   }
 
   return (

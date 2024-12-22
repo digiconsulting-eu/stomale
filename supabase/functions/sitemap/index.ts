@@ -28,9 +28,11 @@ Deno.serve(async (req) => {
     // Fetch conditions
     const { data: conditions, error: conditionsError } = await supabase
       .from('PATOLOGIE')
-      .select('id, Patologia');
+      .select('Patologia')
+      .order('Patologia');
 
     if (conditionsError) {
+      console.error('[Sitemap Function] Error fetching conditions:', conditionsError);
       throw conditionsError;
     }
 
@@ -39,10 +41,16 @@ Deno.serve(async (req) => {
     // Fetch approved reviews
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
-      .select('id, title, condition_id')
+      .select(`
+        title,
+        PATOLOGIE (
+          Patologia
+        )
+      `)
       .eq('status', 'approved');
 
     if (reviewsError) {
+      console.error('[Sitemap Function] Error fetching reviews:', reviewsError);
       throw reviewsError;
     }
 
@@ -64,9 +72,8 @@ Deno.serve(async (req) => {
     // Add review pages
     sitemap += 'Recensioni per patologia:\n';
     reviews?.forEach((review) => {
-      const condition = conditions?.find(c => c.id === review.condition_id);
-      if (condition) {
-        const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+      if (review.PATOLOGIE?.Patologia) {
+        const encodedCondition = encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase());
         const reviewSlug = review.title
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
