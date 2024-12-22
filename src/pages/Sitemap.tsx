@@ -15,13 +15,8 @@ const Sitemap = () => {
           return;
         }
 
-        if (!data) {
-          console.error('[Sitemap] No data received from edge function');
-          return;
-        }
-
-        console.log('[Sitemap] Data received:', data);
-        setContent(data);
+        console.log('[Sitemap] Sitemap data received:', data);
+        setContent(data || '');
       } catch (err) {
         console.error('[Sitemap] Error:', err);
       }
@@ -35,8 +30,8 @@ const Sitemap = () => {
       margin: 0,
       padding: 0,
       fontFamily: 'monospace',
-      whiteSpace: 'pre-wrap',
-      wordWrap: 'break-word'
+      whiteSpace: 'pre',
+      display: 'block'
     }}>
       {content}
     </pre>

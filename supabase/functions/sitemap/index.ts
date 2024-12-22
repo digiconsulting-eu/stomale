@@ -14,7 +14,6 @@ Deno.serve(async (req) => {
   try {
     console.log('[Sitemap Function] Starting sitemap generation...');
     
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     
@@ -34,8 +33,6 @@ Deno.serve(async (req) => {
       throw conditionsError;
     }
 
-    console.log(`[Sitemap Function] Fetched ${conditions?.length || 0} conditions`);
-
     // Fetch approved reviews
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
@@ -46,46 +43,42 @@ Deno.serve(async (req) => {
       throw reviewsError;
     }
 
-    console.log(`[Sitemap Function] Fetched ${reviews?.length || 0} reviews`);
-
     // Generate sitemap content
     let sitemap = 'https://stomale.info/\n';
     sitemap += 'https://stomale.info/recensioni\n';
     sitemap += 'https://stomale.info/cerca-patologia\n';
-    sitemap += 'https://stomale.info/nuova-recensione\n\n';
+    sitemap += 'https://stomale.info/nuova-recensione\n';
 
     // Add condition pages
-    conditions?.forEach((condition) => {
-      const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-      sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
-    });
+    if (conditions) {
+      conditions.forEach((condition) => {
+        const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+        sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
+      });
+    }
 
     // Add review pages
-    reviews?.forEach((review) => {
-      const condition = conditions?.find(c => c.id === review.condition_id);
-      if (condition) {
-        const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-        const reviewSlug = review.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
+    if (reviews && conditions) {
+      reviews.forEach((review) => {
+        const condition = conditions.find(c => c.id === review.condition_id);
+        if (condition) {
+          const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+          const reviewSlug = review.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+          sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
+        }
+      });
+    }
 
-        sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
-      }
-    });
-
-    console.log('[Sitemap Function] Text generation completed');
-    console.log('[Sitemap Function] Sample of generated text:', sitemap.substring(0, 500));
-
+    console.log('[Sitemap Function] Generated sitemap content');
     return new Response(sitemap, { headers: corsHeaders });
   } catch (error) {
     console.error('[Sitemap Function] Error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }), 
-      { 
-        status: 500, 
-        headers: corsHeaders 
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), { 
+      status: 500,
+      headers: corsHeaders
+    });
   }
 });
