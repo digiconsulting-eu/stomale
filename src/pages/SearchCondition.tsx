@@ -51,17 +51,12 @@ export default function SearchCondition() {
     }
   };
 
-  // Filtra prima per il termine di ricerca
-  const searchFilteredConditions = conditions.filter(condition =>
-    condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Poi applica il filtro per lettera solo se è selezionata una lettera specifica
-  const displayedConditions = selectedLetter === "TUTTE" 
-    ? searchFilteredConditions 
-    : searchFilteredConditions.filter(condition => 
-        condition.Patologia.startsWith(selectedLetter)
-      );
+  const filteredConditions = conditions.filter(condition => {
+    const matchesSearch = condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLetter = selectedLetter === "TUTTE" || 
+                         condition.Patologia.startsWith(selectedLetter);
+    return matchesSearch && matchesLetter;
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -97,7 +92,7 @@ export default function SearchCondition() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayedConditions.map(condition => (
+          {filteredConditions.map(condition => (
             <Link 
               key={condition.id}
               to={`/patologia/${condition.Patologia.toLowerCase()}`}
@@ -108,7 +103,7 @@ export default function SearchCondition() {
               </h2>
             </Link>
           ))}
-          {displayedConditions.length === 0 && (
+          {filteredConditions.length === 0 && (
             <div className="col-span-full text-center py-8">
               <p className="text-gray-500">Nessuna patologia trovata.</p>
             </div>

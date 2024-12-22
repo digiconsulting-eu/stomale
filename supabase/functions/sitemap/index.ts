@@ -12,8 +12,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('[Sitemap] Starting sitemap generation...');
+    console.log('[Sitemap Function] Starting sitemap generation...');
     
+    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     
@@ -22,9 +23,9 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-    console.log('[Sitemap] Supabase client initialized');
+    console.log('[Sitemap Function] Supabase client initialized');
 
-    // Fetch all conditions
+    // Fetch conditions
     const { data: conditions, error: conditionsError } = await supabase
       .from('PATOLOGIE')
       .select('id, Patologia');
@@ -32,7 +33,8 @@ Deno.serve(async (req) => {
     if (conditionsError) {
       throw conditionsError;
     }
-    console.log(`[Sitemap] Found ${conditions?.length || 0} conditions`);
+
+    console.log(`[Sitemap Function] Fetched ${conditions?.length || 0} conditions`);
 
     // Fetch approved reviews
     const { data: reviews, error: reviewsError } = await supabase
@@ -43,50 +45,58 @@ Deno.serve(async (req) => {
     if (reviewsError) {
       throw reviewsError;
     }
-    console.log(`[Sitemap] Found ${reviews?.length || 0} approved reviews`);
+
+    console.log(`[Sitemap Function] Fetched ${reviews?.length || 0} reviews`);
 
     // Generate sitemap content
-    let urls = [];
-    
-    // Add static pages
-    urls.push('https://stomale.info/');
-    urls.push('https://stomale.info/recensioni');
-    urls.push('https://stomale.info/cerca-patologia');
-    urls.push('https://stomale.info/nuova-recensione');
+    let sitemap = 'SITEMAP STOMALE.INFO\n\n';
+    sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
+    sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
 
     // Add condition pages
-    if (conditions) {
-      conditions.forEach((condition) => {
-        const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-        urls.push(`https://stomale.info/patologia/${encodedCondition}`);
-      });
-    }
+    sitemap += 'Patologie:\n';
+    conditions?.forEach((condition) => {
+      const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+      sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
+    });
+    sitemap += '\n';
 
     // Add review pages
-    if (reviews && conditions) {
-      reviews.forEach((review) => {
-        const condition = conditions.find(c => c.id === review.condition_id);
-        if (condition) {
-          const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-          const reviewSlug = review.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
-          urls.push(`https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}`);
-        }
-      });
-    }
+    sitemap += 'Recensioni per patologia:\n';
+    reviews?.forEach((review) => {
+      const condition = conditions?.find(c => c.id === review.condition_id);
+      if (condition) {
+        const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+        const reviewSlug = review.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
 
-    // Join URLs with newlines
-    const sitemap = urls.join('\n');
-    console.log('[Sitemap] Generated sitemap with', urls.length, 'URLs');
+        sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
+      }
+    });
+    sitemap += '\n';
+
+    // Add static pages
+    sitemap += 'Altre pagine:\n';
+    sitemap += 'https://stomale.info/cerca-patologia\n';
+    sitemap += 'https://stomale.info/nuova-recensione\n';
+    sitemap += 'https://stomale.info/privacy-policy\n';
+    sitemap += 'https://stomale.info/cookie-policy\n';
+    sitemap += 'https://stomale.info/terms\n';
+
+    console.log('[Sitemap Function] Text generation completed');
+    console.log('[Sitemap Function] Sample of generated text:', sitemap.substring(0, 500));
 
     return new Response(sitemap, { headers: corsHeaders });
   } catch (error) {
-    console.error('[Sitemap] Error:', error);
-    return new Response('Error generating sitemap', { 
-      status: 500,
-      headers: corsHeaders
-    });
+    console.error('[Sitemap Function] Error:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }), 
+      { 
+        status: 500, 
+        headers: corsHeaders 
+      }
+    );
   }
 });
