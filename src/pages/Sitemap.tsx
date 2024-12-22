@@ -83,7 +83,7 @@ const Sitemap = () => {
     fetchSitemapContent();
   }, []);
 
-  // For the /sitemap.txt route, set the content type to text/plain
+  // For the /sitemap.txt route, return plain text
   if (window.location.pathname === '/sitemap.txt') {
     if (isLoading) {
       return 'Generating sitemap...';
@@ -91,11 +91,6 @@ const Sitemap = () => {
     
     if (error) {
       return error;
-    }
-
-    // Set the content type header for text/plain
-    if (document) {
-      document.contentType = 'text/plain';
     }
     
     return sitemapContent;

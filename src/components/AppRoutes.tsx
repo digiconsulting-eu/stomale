@@ -39,7 +39,11 @@ export const AppRoutes = () => {
       <Route path="/cookie-policy" element={<CookiePolicy />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
-      <Route path="/sitemap.txt" element={<Sitemap />} />
+      <Route path="/sitemap.txt" element={
+        <div style={{ whiteSpace: 'pre' }}>
+          <Sitemap />
+        </div>
+      } />
 
       {/* Protected routes */}
       <Route path="/admin" element={<Admin />} />
