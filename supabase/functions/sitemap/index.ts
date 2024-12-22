@@ -14,17 +14,34 @@ Deno.serve(async (req) => {
   try {
     console.log('[Sitemap Function] Starting sitemap generation...');
     
-    // Use environment variables
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    // Get environment variables and log their presence (not their values)
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    console.log('[Sitemap Function] Environment check:', {
+      hasSupabaseUrl: !!supabaseUrl,
+      hasSupabaseKey: !!supabaseKey
+    });
     
     if (!supabaseUrl || !supabaseKey) {
-      console.error('[Sitemap Function] Missing environment variables');
       throw new Error('Configuration error: Missing environment variables');
     }
 
     console.log('[Sitemap Function] Initializing Supabase client...');
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Test database connection
+    console.log('[Sitemap Function] Testing database connection...');
+    const { data: testData, error: testError } = await supabase
+      .from('PATOLOGIE')
+      .select('count(*)', { count: 'exact' });
+
+    if (testError) {
+      console.error('[Sitemap Function] Database connection test failed:', testError);
+      throw testError;
+    }
+
+    console.log('[Sitemap Function] Database connection successful. Row count:', testData);
 
     // Fetch conditions
     console.log('[Sitemap Function] Fetching conditions...');
@@ -59,6 +76,7 @@ Deno.serve(async (req) => {
     console.log(`[Sitemap Function] Successfully fetched ${reviews?.length || 0} reviews`);
 
     // Generate sitemap content
+    console.log('[Sitemap Function] Generating sitemap content...');
     let sitemap = 'SITEMAP STOMALE.INFO\n\n';
     sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
     sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
@@ -98,6 +116,7 @@ Deno.serve(async (req) => {
     sitemap += 'https://stomale.info/terms\n';
 
     console.log('[Sitemap Function] Sitemap generation completed successfully');
+    console.log('[Sitemap Function] Sitemap content length:', sitemap.length);
 
     return new Response(sitemap, { 
       headers: {
@@ -107,8 +126,12 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('[Sitemap Function] Error:', error);
+    console.error('[Sitemap Function] Stack trace:', error.stack);
     return new Response(
-      JSON.stringify({ error: 'Failed to generate sitemap' }), 
+      JSON.stringify({ 
+        error: 'Failed to generate sitemap',
+        details: error.message 
+      }), 
       { 
         status: 500, 
         headers: {
