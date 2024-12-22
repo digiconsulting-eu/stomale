@@ -6,31 +6,70 @@ export default function Sitemap() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSitemap = async () => {
+    const generateSitemap = async () => {
       try {
-        console.log('[Sitemap] Starting sitemap fetch...');
-        const { data: functionData, error: functionError } = await supabase.functions.invoke('sitemap');
-        
-        if (functionError) {
-          console.error('[Sitemap] Function error:', functionError);
-          throw functionError;
-        }
+        // Fetch conditions
+        const { data: conditions, error: conditionsError } = await supabase
+          .from('PATOLOGIE')
+          .select('Patologia');
 
-        if (typeof functionData === 'string') {
-          console.log('[Sitemap] Successfully received sitemap data');
-          setContent(functionData);
-        } else {
-          console.error('[Sitemap] Invalid data format:', functionData);
-          throw new Error('Invalid sitemap format received');
-        }
+        if (conditionsError) throw conditionsError;
+
+        // Fetch approved reviews
+        const { data: reviews, error: reviewsError } = await supabase
+          .from('reviews')
+          .select(`
+            title,
+            PATOLOGIE (
+              Patologia
+            )
+          `)
+          .eq('status', 'approved');
+
+        if (reviewsError) throw reviewsError;
+
+        // Generate sitemap content
+        let sitemap = 'SITEMAP STOMALE.INFO\n\n';
+        sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
+        sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
+
+        // Add condition pages
+        sitemap += 'Patologie:\n';
+        conditions?.forEach((condition) => {
+          const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+          sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
+        });
+        sitemap += '\n';
+
+        // Add review pages
+        sitemap += 'Recensioni per patologia:\n';
+        reviews?.forEach((review) => {
+          if (review.PATOLOGIE?.Patologia) {
+            const encodedCondition = encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase());
+            const reviewSlug = review.title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '');
+
+            sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
+          }
+        });
+        sitemap += '\n';
+
+        // Add other important pages
+        sitemap += 'Altre pagine:\n';
+        sitemap += 'https://stomale.info/cerca-patologia\n';
+        sitemap += 'https://stomale.info/nuova-recensione\n';
+
+        setContent(sitemap);
       } catch (err) {
-        console.error('[Sitemap] Error:', err);
+        console.error('Error generating sitemap:', err);
         setError('Failed to generate sitemap. Please try again later.');
         setContent('Error generating sitemap');
       }
     };
 
-    fetchSitemap();
+    generateSitemap();
   }, []);
 
   if (error) {
