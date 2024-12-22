@@ -7,6 +7,7 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -15,8 +16,8 @@ Deno.serve(async (req) => {
     console.log('[Sitemap Function] Starting sitemap generation...');
     
     // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseKey) {
       throw new Error('Missing environment variables');
@@ -89,17 +90,24 @@ Deno.serve(async (req) => {
     sitemap += 'https://stomale.info/cerca-patologia\n';
     sitemap += 'https://stomale.info/nuova-recensione\n';
 
-    console.log('[Sitemap Function] Text generation completed');
-    console.log('[Sitemap Function] Sample of generated text:', sitemap.substring(0, 500));
+    console.log('[Sitemap Function] Sitemap generation completed');
 
-    return new Response(sitemap, { headers: corsHeaders });
+    return new Response(sitemap, { 
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'text/plain; charset=utf-8'
+      }
+    });
   } catch (error) {
     console.error('[Sitemap Function] Error:', error);
     return new Response(
       JSON.stringify({ error: error.message }), 
       { 
         status: 500, 
-        headers: corsHeaders 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
     );
   }
