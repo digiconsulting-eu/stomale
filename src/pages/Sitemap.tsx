@@ -14,9 +14,16 @@ export default function Sitemap() {
     const fetchSitemap = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         console.log('Fetching sitemap data...');
         
-        const { data, error } = await supabase.functions.invoke('sitemap');
+        const { data, error } = await supabase.functions.invoke('sitemap', {
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
+        
+        console.log('Sitemap response:', { data, error });
         
         if (error) {
           console.error('Error fetching sitemap:', error);
@@ -25,13 +32,15 @@ export default function Sitemap() {
 
         if (typeof data === 'string') {
           setContent(data);
+        } else if (data?.error) {
+          throw new Error(data.error);
         } else {
           console.error('Unexpected response format:', data);
           throw new Error('Unexpected response format from sitemap function');
         }
       } catch (err) {
         console.error('Error:', err);
-        setError('Failed to generate sitemap. Please try again later.');
+        setError(err instanceof Error ? err.message : 'Failed to generate sitemap. Please try again later.');
       } finally {
         setIsLoading(false);
       }
