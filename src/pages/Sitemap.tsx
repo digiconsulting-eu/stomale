@@ -1,87 +1,32 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 export default function Sitemap() {
   const [content, setContent] = useState<string>("Generating sitemap...");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Set the content type to text/plain
-    document.querySelector('meta[http-equiv="Content-Type"]')?.remove();
-    const meta = document.createElement('meta');
-    meta.httpEquiv = "Content-Type";
-    meta.content = "text/plain; charset=utf-8";
-    document.head.appendChild(meta);
-
-    const generateSitemap = async () => {
+    const fetchSitemap = async () => {
       try {
-        // Fetch conditions
-        const { data: conditions, error: conditionsError } = await supabase
-          .from('PATOLOGIE')
-          .select('Patologia');
-
-        if (conditionsError) throw conditionsError;
-
-        // Fetch approved reviews
-        const { data: reviews, error: reviewsError } = await supabase
-          .from('reviews')
-          .select(`
-            title,
-            PATOLOGIE (
-              Patologia
-            )
-          `)
-          .eq('status', 'approved');
-
-        if (reviewsError) throw reviewsError;
-
-        // Generate sitemap content
-        let sitemap = 'SITEMAP STOMALE.INFO\n\n';
-        sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
-        sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
-
-        // Add condition pages
-        sitemap += 'Patologie:\n';
-        conditions?.forEach((condition) => {
-          const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-          sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
+        const response = await fetch('https://hnuhdoycwpjfjhthfqbt.functions.supabase.co/sitemap', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
         });
-        sitemap += '\n';
 
-        // Add review pages
-        sitemap += 'Recensioni per patologia:\n';
-        reviews?.forEach((review) => {
-          if (review.PATOLOGIE?.Patologia) {
-            const encodedCondition = encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase());
-            const reviewSlug = review.title
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/(^-|-$)/g, '');
+        if (!response.ok) {
+          throw new Error('Failed to fetch sitemap');
+        }
 
-            sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
-          }
-        });
-        sitemap += '\n';
-
-        // Add other important pages
-        sitemap += 'Altre pagine:\n';
-        sitemap += 'https://stomale.info/cerca-patologia\n';
-        sitemap += 'https://stomale.info/nuova-recensione\n';
-
-        setContent(sitemap);
+        const text = await response.text();
+        setContent(text);
       } catch (err) {
-        console.error('Error generating sitemap:', err);
+        console.error('Error fetching sitemap:', err);
         setError('Failed to generate sitemap. Please try again later.');
-        setContent('Error generating sitemap');
       }
     };
 
-    generateSitemap();
-
-    // Cleanup
-    return () => {
-      document.querySelector('meta[http-equiv="Content-Type"]')?.remove();
-    };
+    fetchSitemap();
   }, []);
 
   if (error) {
@@ -94,6 +39,5 @@ export default function Sitemap() {
     );
   }
 
-  // Return plain text content without any HTML wrapping
   return content;
 }
