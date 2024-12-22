@@ -28,10 +28,11 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Test database connection
+    // Test database connection with a simple query
     const { data: testData, error: testError } = await supabase
       .from('PATOLOGIE')
-      .select('count(*)');
+      .select('id')
+      .limit(1);
 
     if (testError) {
       console.error('[Sitemap Function] Database connection test failed:', testError);
