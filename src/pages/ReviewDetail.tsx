@@ -30,7 +30,7 @@ export default function ReviewDetail() {
         const { data: patologiaData, error: patologiaError } = await supabase
           .from('PATOLOGIE')
           .select('id')
-          .eq('Patologia', condition.toUpperCase())
+          .eq('Patologia', decodeURIComponent(condition).toUpperCase())
           .single();
 
         if (patologiaError) {
@@ -52,6 +52,8 @@ export default function ReviewDetail() {
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
 
+        console.log('Normalized search title:', normalizedSearchTitle);
+
         // Then get the review using the condition ID and normalized title
         const { data: reviewsData, error: reviewError } = await supabase
           .from('reviews')
@@ -72,12 +74,15 @@ export default function ReviewDetail() {
           throw new Error('Errore nel caricamento della recensione');
         }
 
+        console.log('Found reviews:', reviewsData);
+
         // Find the review with matching normalized title
         const matchingReview = reviewsData?.find(review => {
           const reviewTitleSlug = review.title
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
+          console.log('Comparing:', reviewTitleSlug, 'with:', normalizedSearchTitle);
           return reviewTitleSlug === normalizedSearchTitle;
         });
 
@@ -86,7 +91,7 @@ export default function ReviewDetail() {
           throw new Error('Recensione non trovata');
         }
 
-        console.log('Found review:', matchingReview);
+        console.log('Found matching review:', matchingReview);
         return matchingReview;
       } catch (error) {
         console.error('Error in review query:', error);
@@ -113,7 +118,7 @@ export default function ReviewDetail() {
               href={`/patologia/${condition}`}
               className="text-primary hover:underline inline-block mt-4"
             >
-              ← Torna a {condition}
+              ← Torna a {decodeURIComponent(condition)}
             </a>
           )}
         </div>
