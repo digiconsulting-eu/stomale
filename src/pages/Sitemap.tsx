@@ -35,13 +35,7 @@ export default function Sitemap() {
     fetchSitemap();
   }, []);
 
-  useEffect(() => {
-    // Set the appropriate content type for .txt format
-    if (isTxtFormat) {
-      document.contentType = 'text/plain';
-    }
-  }, [isTxtFormat]);
-
+  // Instead of trying to modify document.contentType, we'll use styling and formatting
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -53,9 +47,20 @@ export default function Sitemap() {
   }
 
   if (isTxtFormat) {
-    return <pre>{content}</pre>;
+    // For .txt format, use a plain pre tag with minimal styling
+    return (
+      <pre style={{ 
+        whiteSpace: 'pre',
+        fontFamily: 'monospace',
+        margin: 0,
+        padding: 0 
+      }}>
+        {content}
+      </pre>
+    );
   }
 
+  // For HTML format, use the styled version
   return (
     <pre className="whitespace-pre-wrap font-mono text-sm p-4">
       {content}
