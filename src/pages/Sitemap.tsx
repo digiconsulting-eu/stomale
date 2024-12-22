@@ -20,23 +20,8 @@ const Sitemap = () => {
 
         console.log('[Sitemap] Data received:', data);
 
-        // Create XML content
-        const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${data.split('\n').filter(url => url.startsWith('http')).map(url => `
-  <url>
-    <loc>${url.trim()}</loc>
-    <changefreq>weekly</changefreq>
-  </url>`).join('')}
-</urlset>`;
-
-        // Set the content type to XML
-        const xmlDoc = new DOMParser().parseFromString(xmlContent, 'application/xml');
-        const serializer = new XMLSerializer();
-        const finalXml = serializer.serializeToString(xmlDoc);
-
-        // Create a blob with the XML content
-        const blob = new Blob([finalXml], { type: 'application/xml' });
+        // Create a text blob with the sitemap content
+        const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
 
         // Redirect to the blob URL
