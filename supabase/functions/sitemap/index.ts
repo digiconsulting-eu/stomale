@@ -6,6 +6,7 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -87,6 +88,9 @@ Deno.serve(async (req) => {
     sitemap += 'https://stomale.info/nuova-recensione\n';
     sitemap += 'https://stomale.info/inserisci-patologia\n';
     sitemap += 'https://stomale.info/cerca-sintomi\n';
+    sitemap += 'https://stomale.info/cookie-policy\n';
+    sitemap += 'https://stomale.info/privacy-policy\n';
+    sitemap += 'https://stomale.info/terms\n';
 
     console.log('[Sitemap Function] Sitemap generation completed successfully');
 

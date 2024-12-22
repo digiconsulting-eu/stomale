@@ -40,6 +40,7 @@ export default function Sitemap() {
     fetchSitemap();
   }, []);
 
+  // Handle loading state
   if (isLoading) {
     if (isTxtFormat) {
       return "Loading sitemap...";
@@ -51,6 +52,7 @@ export default function Sitemap() {
     );
   }
 
+  // Handle error state
   if (error) {
     if (isTxtFormat) {
       return error;
@@ -64,6 +66,7 @@ export default function Sitemap() {
     );
   }
 
+  // Return content based on format
   if (isTxtFormat) {
     return content;
   }
