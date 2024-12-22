@@ -89,6 +89,23 @@ const Sitemap = () => {
     fetchSitemapContent();
   }, []);
 
+  // For the /sitemap.txt route, return plain text
+  if (window.location.pathname === '/sitemap.txt') {
+    // Create a text blob and download it
+    const blob = new Blob([sitemapContent], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    
+    // Create a link and click it
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'sitemap.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    return null;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
@@ -107,11 +124,6 @@ const Sitemap = () => {
         </div>
       </div>
     );
-  }
-
-  // Return raw text for sitemap.txt route
-  if (window.location.pathname === '/sitemap.txt') {
-    return <pre>{sitemapContent}</pre>;
   }
 
   return (
