@@ -23,7 +23,7 @@ import Sitemap from "@/pages/Sitemap";
 export const AppRoutes = () => {
   return (
     <Routes>
-      {/* Sitemap routes - placing these first to ensure they're matched */}
+      {/* Sitemap routes - ensuring both formats are handled */}
       <Route path="/sitemap" element={<Sitemap />} />
       <Route path="/sitemap.txt" element={<Sitemap />} />
 
