@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'application/xml; charset=utf-8'
+  'Content-Type': 'text/plain; charset=utf-8'
 }
 
 Deno.serve(async (req) => {
@@ -48,31 +48,20 @@ Deno.serve(async (req) => {
 
     console.log(`[Sitemap Function] Fetched ${reviews?.length || 0} reviews`);
 
-    // Generate sitemap XML
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://stomale.info/</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/recensioni</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>`;
+    // Generate sitemap content
+    let sitemap = 'SITEMAP STOMALE.INFO\n\n';
+    sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
+    sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
 
     // Add condition pages
+    sitemap += 'Patologie:\n';
     conditions?.forEach((condition) => {
-      xml += `
-  <url>
-    <loc>https://stomale.info/patologia/${condition.Patologia.toLowerCase()}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
+      sitemap += `https://stomale.info/patologia/${condition.Patologia.toLowerCase()}\n`;
     });
+    sitemap += '\n';
 
     // Add review pages
+    sitemap += 'Recensioni per patologia:\n';
     reviews?.forEach((review) => {
       const condition = conditions?.find(c => c.id === review.condition_id);
       if (condition) {
@@ -81,48 +70,23 @@ Deno.serve(async (req) => {
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
 
-        xml += `
-  <url>
-    <loc>https://stomale.info/patologia/${condition.Patologia.toLowerCase()}/recensione/${reviewSlug}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
+        sitemap += `https://stomale.info/patologia/${condition.Patologia.toLowerCase()}/recensione/${reviewSlug}\n`;
       }
     });
+    sitemap += '\n';
 
     // Add static pages
-    xml += `
-  <url>
-    <loc>https://stomale.info/cerca-patologia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/nuova-recensione</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/privacy-policy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/cookie-policy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/terms</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-</urlset>`;
+    sitemap += 'Altre pagine:\n';
+    sitemap += 'https://stomale.info/cerca-patologia\n';
+    sitemap += 'https://stomale.info/nuova-recensione\n';
+    sitemap += 'https://stomale.info/privacy-policy\n';
+    sitemap += 'https://stomale.info/cookie-policy\n';
+    sitemap += 'https://stomale.info/terms\n';
 
-    console.log('[Sitemap Function] XML generation completed');
-    console.log('[Sitemap Function] Sample of generated XML:', xml.substring(0, 500));
+    console.log('[Sitemap Function] Text generation completed');
+    console.log('[Sitemap Function] Sample of generated text:', sitemap.substring(0, 500));
 
-    return new Response(xml, { headers: corsHeaders });
+    return new Response(sitemap, { headers: corsHeaders });
   } catch (error) {
     console.error('[Sitemap Function] Error:', error);
     return new Response(

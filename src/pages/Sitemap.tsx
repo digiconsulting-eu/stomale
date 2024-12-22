@@ -20,18 +20,19 @@ const Sitemap = () => {
 
         console.log('[Sitemap] Data received:', data);
 
-        // Create a blob with the XML content
-        const blob = new Blob([data], { type: 'application/xml' });
-        const url = URL.createObjectURL(blob);
+        // Create a text element with the sitemap content
+        const pre = document.createElement('pre');
+        pre.style.whiteSpace = 'pre-wrap';
+        pre.style.wordWrap = 'break-word';
+        pre.style.padding = '20px';
+        pre.textContent = data;
         
-        // Download the XML file
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'sitemap.xml';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        // Clear any existing content and append the pre element
+        const root = document.getElementById('root');
+        if (root) {
+          root.innerHTML = '';
+          root.appendChild(pre);
+        }
       } catch (err) {
         console.error('[Sitemap] Error:', err);
       }
