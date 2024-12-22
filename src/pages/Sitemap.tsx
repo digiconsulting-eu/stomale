@@ -3,16 +3,28 @@ import { supabase } from '@/integrations/supabase/client';
 
 const Sitemap = () => {
   const [sitemapContent, setSitemapContent] = useState<string>('Loading sitemap...');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const generateSitemap = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+        console.log('Fetching conditions...');
+        
         // Fetch conditions
         const { data: conditions, error: conditionsError } = await supabase
           .from('PATOLOGIE')
           .select('id, Patologia');
 
-        if (conditionsError) throw conditionsError;
+        if (conditionsError) {
+          console.error('Error fetching conditions:', conditionsError);
+          throw conditionsError;
+        }
+
+        console.log('Fetched conditions:', conditions?.length);
+        console.log('Fetching reviews...');
 
         // Fetch approved reviews
         const { data: reviews, error: reviewsError } = await supabase
@@ -20,7 +32,12 @@ const Sitemap = () => {
           .select('id, title, condition_id')
           .eq('status', 'approved');
 
-        if (reviewsError) throw reviewsError;
+        if (reviewsError) {
+          console.error('Error fetching reviews:', reviewsError);
+          throw reviewsError;
+        }
+
+        console.log('Fetched reviews:', reviews?.length);
 
         // Generate sitemap content
         let content = 'SITEMAP STOMALE.INFO\n\n';
@@ -58,27 +75,39 @@ const Sitemap = () => {
         content += 'https://stomale.info/cookie-policy\n';
         content += 'https://stomale.info/terms\n';
 
+        console.log('Generated sitemap content');
         setSitemapContent(content);
       } catch (error) {
         console.error('Error generating sitemap:', error);
-        setSitemapContent('Error generating sitemap');
+        setError('Error generating sitemap');
+        setSitemapContent('');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     generateSitemap();
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="text-center">Loading sitemap...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-8">
-      <pre style={{
-        whiteSpace: 'pre-wrap',
-        wordWrap: 'break-word',
-        fontFamily: 'monospace',
-        padding: '20px',
-        background: '#f5f5f5',
-        border: '1px solid #ddd',
-        borderRadius: '4px'
-      }}>
+      <pre className="whitespace-pre-wrap break-words font-mono p-5 bg-gray-50 border border-gray-200 rounded-md">
         {sitemapContent}
       </pre>
     </div>
