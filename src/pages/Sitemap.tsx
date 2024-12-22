@@ -30,14 +30,13 @@ const Sitemap = () => {
     fetchSitemap();
   }, []);
 
-  // Use a pre tag to maintain formatting and set styles for plain text display
   return (
     <pre style={{ 
-      whiteSpace: 'pre-wrap',
-      wordWrap: 'break-word',
       margin: 0,
       padding: 0,
-      fontFamily: 'monospace'
+      fontFamily: 'monospace',
+      whiteSpace: 'pre-wrap',
+      wordWrap: 'break-word'
     }}>
       {content}
     </pre>
