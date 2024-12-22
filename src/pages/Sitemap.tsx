@@ -9,35 +9,9 @@ const Sitemap = () => {
   useEffect(() => {
     const fetchSitemapContent = async () => {
       try {
-        console.log('Fetching sitemap content...');
-        
-        // Fetch conditions
-        const { data: conditions, error: conditionsError } = await supabase
-          .from('PATOLOGIE')
-          .select('id, Patologia');
-
-        if (conditionsError) {
-          console.error('Error fetching conditions:', conditionsError);
-          throw new Error('Failed to fetch conditions');
-        }
-
-        console.log('Fetched conditions:', conditions?.length);
-
-        // Fetch approved reviews
-        const { data: reviews, error: reviewsError } = await supabase
-          .from('reviews')
-          .select('id, title, condition_id')
-          .eq('status', 'approved');
-
-        if (reviewsError) {
-          console.error('Error fetching reviews:', reviewsError);
-          throw new Error('Failed to fetch reviews');
-        }
-
-        console.log('Fetched reviews:', reviews?.length);
-
-        // Generate sitemap content
         let content = '';
+        
+        // Add static routes
         content += 'https://stomale.info/\n';
         content += 'https://stomale.info/recensioni\n';
         content += 'https://stomale.info/cerca-patologia\n';
@@ -47,16 +21,34 @@ const Sitemap = () => {
         content += 'https://stomale.info/registrati\n';
         content += 'https://stomale.info/recupera-password\n\n';
 
+        // Fetch conditions
+        const { data: conditions, error: conditionsError } = await supabase
+          .from('PATOLOGIE')
+          .select('id, Patologia');
+
+        if (conditionsError) throw conditionsError;
+
         // Add condition pages
-        if (conditions && conditions.length > 0) {
+        if (conditions) {
+          content += '# Patologie\n';
           conditions.forEach((condition) => {
             const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
             content += `https://stomale.info/patologia/${encodedCondition}\n`;
           });
+          content += '\n';
         }
 
+        // Fetch approved reviews
+        const { data: reviews, error: reviewsError } = await supabase
+          .from('reviews')
+          .select('id, title, condition_id')
+          .eq('status', 'approved');
+
+        if (reviewsError) throw reviewsError;
+
         // Add review pages
-        if (reviews && reviews.length > 0) {
+        if (reviews) {
+          content += '# Recensioni\n';
           reviews.forEach((review) => {
             const condition = conditions?.find(c => c.id === review.condition_id);
             if (condition) {
@@ -70,12 +62,11 @@ const Sitemap = () => {
           });
         }
 
-        console.log('Generated sitemap content:', content.substring(0, 200) + '...');
         setSitemapContent(content);
+        setIsLoading(false);
       } catch (err) {
         console.error('Error generating sitemap:', err);
-        setError('Error generating sitemap. Please try again later.');
-      } finally {
+        setError('Error generating sitemap');
         setIsLoading(false);
       }
     };
@@ -86,43 +77,29 @@ const Sitemap = () => {
   // For the /sitemap.txt route, return plain text
   if (window.location.pathname === '/sitemap.txt') {
     if (isLoading) {
-      return 'Generating sitemap...';
+      return 'Generating sitemap...\n\nPlease wait while we gather all URLs.';
     }
     
     if (error) {
-      return error;
+      return `Error: ${error}`;
     }
     
     return sitemapContent;
   }
 
   // For the normal route, return the styled component
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white">
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-center text-lg">Loading sitemap...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-white">
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-center text-red-500">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
-        <pre className="whitespace-pre-wrap break-words bg-gray-50 p-6 rounded-lg border border-gray-200 text-sm">
-          {sitemapContent || 'No sitemap content available'}
-        </pre>
+        {isLoading ? (
+          <p className="text-center text-lg">Loading sitemap...</p>
+        ) : error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : (
+          <pre className="whitespace-pre-wrap break-words bg-gray-50 p-6 rounded-lg border border-gray-200 text-sm">
+            {sitemapContent}
+          </pre>
+        )}
       </div>
     </div>
   );
