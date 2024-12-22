@@ -9,6 +9,7 @@ export default function Sitemap() {
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const isTxtFormat = location.pathname === '/sitemap.txt';
+  const isXmlFormat = location.pathname === '/sitemap.xml';
 
   useEffect(() => {
     const fetchSitemap = async () => {
@@ -21,7 +22,7 @@ export default function Sitemap() {
           method: 'GET',
           headers: {
             'Cache-Control': 'no-cache',
-            'Content-Type': 'text/plain'
+            'Content-Type': isXmlFormat ? 'application/xml' : 'text/plain'
           }
         });
         
@@ -49,16 +50,22 @@ export default function Sitemap() {
     };
 
     fetchSitemap();
-  }, [location.pathname]);
+  }, [location.pathname, isXmlFormat]);
 
-  // Se è richiesto il formato TXT, restituisci direttamente il contenuto
-  if (isTxtFormat) {
-    if (isLoading) return "Loading sitemap...";
+  // Se è richiesto il formato TXT o XML, restituisci direttamente il contenuto
+  if (isTxtFormat || isXmlFormat) {
+    if (isLoading) return "Generating sitemap...";
     if (error) return error;
     return content;
   }
 
-  // Altrimenti, mostra l'interfaccia HTML
+  // Redirect to XML format if accessed directly
+  if (location.pathname === '/sitemap') {
+    window.location.href = '/sitemap.xml';
+    return null;
+  }
+
+  // Altrimenti, mostra l'interfaccia HTML (questo non dovrebbe mai essere raggiunto)
   return (
     <div className="container mx-auto px-4 py-8">
       {isLoading ? (

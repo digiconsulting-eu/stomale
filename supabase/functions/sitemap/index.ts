@@ -65,55 +65,111 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
     }
 
-    // Generate sitemap content
-    let sitemap = 'SITEMAP STOMALE.INFO\n\n';
-    sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
-    sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
+    // Determine format based on Accept header
+    const acceptHeader = req.headers.get('Content-Type') || '';
+    const isXml = acceptHeader.includes('application/xml');
 
-    // Add conditions
-    sitemap += 'Patologie:\n';
-    conditions?.forEach((condition) => {
-      if (condition.Patologia) {
-        const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-        sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
-      }
-    });
-    sitemap += '\n';
+    if (isXml) {
+      // Generate XML sitemap
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+      
+      // Add homepage
+      xml += '  <url>\n    <loc>https://stomale.info/</loc>\n  </url>\n';
+      xml += '  <url>\n    <loc>https://stomale.info/recensioni</loc>\n  </url>\n';
+      
+      // Add conditions
+      conditions?.forEach((condition) => {
+        if (condition.Patologia) {
+          const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+          xml += `  <url>\n    <loc>https://stomale.info/patologia/${encodedCondition}</loc>\n  </url>\n`;
+        }
+      });
 
-    // Add reviews
-    sitemap += 'Recensioni per patologia:\n';
-    reviews?.forEach((review) => {
-      if (review.PATOLOGIE?.Patologia && review.title) {
-        const encodedCondition = encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase());
-        const reviewSlug = review.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
-        sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
-      }
-    });
-    sitemap += '\n';
+      // Add reviews
+      reviews?.forEach((review) => {
+        if (review.PATOLOGIE?.Patologia && review.title) {
+          const encodedCondition = encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase());
+          const reviewSlug = review.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+          xml += `  <url>\n    <loc>https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n  </url>\n`;
+        }
+      });
 
-    // Add static pages
-    sitemap += 'Altre pagine:\n';
-    sitemap += 'https://stomale.info/cerca-patologia\n';
-    sitemap += 'https://stomale.info/nuova-recensione\n';
-    sitemap += 'https://stomale.info/inserisci-patologia\n';
-    sitemap += 'https://stomale.info/cerca-sintomi\n';
-    sitemap += 'https://stomale.info/cookie-policy\n';
-    sitemap += 'https://stomale.info/privacy-policy\n';
-    sitemap += 'https://stomale.info/terms\n';
+      // Add static pages
+      xml += '  <url>\n    <loc>https://stomale.info/cerca-patologia</loc>\n  </url>\n';
+      xml += '  <url>\n    <loc>https://stomale.info/nuova-recensione</loc>\n  </url>\n';
+      xml += '  <url>\n    <loc>https://stomale.info/inserisci-patologia</loc>\n  </url>\n';
+      xml += '  <url>\n    <loc>https://stomale.info/cerca-sintomi</loc>\n  </url>\n';
+      xml += '  <url>\n    <loc>https://stomale.info/cookie-policy</loc>\n  </url>\n';
+      xml += '  <url>\n    <loc>https://stomale.info/privacy-policy</loc>\n  </url>\n';
+      xml += '  <url>\n    <loc>https://stomale.info/terms</loc>\n  </url>\n';
 
-    console.log('[Sitemap Function] Sitemap generation completed successfully');
+      xml += '</urlset>';
 
-    return new Response(sitemap, { 
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600'
-      },
-      status: 200
-    });
+      console.log('[Sitemap Function] XML sitemap generation completed successfully');
+
+      return new Response(xml, { 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600'
+        },
+        status: 200
+      });
+    } else {
+      // Generate text sitemap
+      let sitemap = 'SITEMAP STOMALE.INFO\n\n';
+      sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
+      sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
+
+      // Add conditions
+      sitemap += 'Patologie:\n';
+      conditions?.forEach((condition) => {
+        if (condition.Patologia) {
+          const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+          sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
+        }
+      });
+      sitemap += '\n';
+
+      // Add reviews
+      sitemap += 'Recensioni per patologia:\n';
+      reviews?.forEach((review) => {
+        if (review.PATOLOGIE?.Patologia && review.title) {
+          const encodedCondition = encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase());
+          const reviewSlug = review.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+          sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
+        }
+      });
+      sitemap += '\n';
+
+      // Add static pages
+      sitemap += 'Altre pagine:\n';
+      sitemap += 'https://stomale.info/cerca-patologia\n';
+      sitemap += 'https://stomale.info/nuova-recensione\n';
+      sitemap += 'https://stomale.info/inserisci-patologia\n';
+      sitemap += 'https://stomale.info/cerca-sintomi\n';
+      sitemap += 'https://stomale.info/cookie-policy\n';
+      sitemap += 'https://stomale.info/privacy-policy\n';
+      sitemap += 'https://stomale.info/terms\n';
+
+      console.log('[Sitemap Function] Text sitemap generation completed successfully');
+
+      return new Response(sitemap, { 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600'
+        },
+        status: 200
+      });
+    }
 
   } catch (error) {
     console.error('[Sitemap Function] Fatal error:', error);
