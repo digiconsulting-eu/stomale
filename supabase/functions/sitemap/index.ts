@@ -17,22 +17,26 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseKey) {
+      console.error('[Sitemap Function] Missing environment variables');
       throw new Error('Missing environment variables');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     console.log('[Sitemap Function] Supabase client initialized');
 
+    // Fetch conditions with error handling
     const { data: conditions, error: conditionsError } = await supabase
       .from('PATOLOGIE')
-      .select('Patologia')
-      .order('Patologia');
+      .select('Patologia');
 
     if (conditionsError) {
       console.error('[Sitemap Function] Error fetching conditions:', conditionsError);
       throw conditionsError;
     }
 
+    console.log(`[Sitemap Function] Successfully fetched ${conditions?.length || 0} conditions`);
+
+    // Fetch approved reviews with error handling
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
       .select(`
@@ -48,10 +52,14 @@ Deno.serve(async (req) => {
       throw reviewsError;
     }
 
+    console.log(`[Sitemap Function] Successfully fetched ${reviews?.length || 0} reviews`);
+
+    // Generate sitemap content
     let sitemap = 'SITEMAP STOMALE.INFO\n\n';
     sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
     sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
 
+    // Add conditions
     sitemap += 'Patologie:\n';
     conditions?.forEach((condition) => {
       const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
@@ -59,6 +67,7 @@ Deno.serve(async (req) => {
     });
     sitemap += '\n';
 
+    // Add reviews
     sitemap += 'Recensioni per patologia:\n';
     reviews?.forEach((review) => {
       if (review.PATOLOGIE?.Patologia) {
@@ -72,11 +81,14 @@ Deno.serve(async (req) => {
     });
     sitemap += '\n';
 
+    // Add static pages
     sitemap += 'Altre pagine:\n';
     sitemap += 'https://stomale.info/cerca-patologia\n';
     sitemap += 'https://stomale.info/nuova-recensione\n';
+    sitemap += 'https://stomale.info/inserisci-patologia\n';
+    sitemap += 'https://stomale.info/cerca-sintomi\n';
 
-    console.log('[Sitemap Function] Sitemap generation completed');
+    console.log('[Sitemap Function] Sitemap generation completed successfully');
 
     return new Response(sitemap, { 
       headers: {
