@@ -7,39 +7,21 @@ const Sitemap = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
-
     const generateSitemap = async () => {
       try {
-        console.log('Fetching conditions...');
         const { data: conditions, error: conditionsError } = await supabase
           .from('PATOLOGIE')
           .select('id, Patologia');
 
-        if (conditionsError) {
-          console.error('Conditions error:', conditionsError);
-          throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
-        }
+        if (conditionsError) throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
+        if (!conditions || conditions.length === 0) throw new Error('No conditions found');
 
-        if (!conditions || conditions.length === 0) {
-          console.log('No conditions found');
-          throw new Error('No conditions data received');
-        }
-
-        console.log(`Found ${conditions.length} conditions`);
-
-        console.log('Fetching reviews...');
         const { data: reviews, error: reviewsError } = await supabase
           .from('reviews')
           .select('id, title, condition_id')
           .eq('status', 'approved');
 
-        if (reviewsError) {
-          console.error('Reviews error:', reviewsError);
-          throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
-        }
-
-        console.log(`Found ${reviews?.length || 0} reviews`);
+        if (reviewsError) throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
 
         let content = 'SITEMAP STOMALE.INFO\n\n';
         content += 'Homepage:\nhttps://stomale.info/\n\n';
@@ -75,58 +57,37 @@ const Sitemap = () => {
         content += 'https://stomale.info/cookie-policy\n';
         content += 'https://stomale.info/terms\n';
 
-        console.log('Sitemap content generated');
-
-        if (isMounted) {
-          setSitemapContent(content);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('Sitemap generation error:', error);
-        if (isMounted) {
-          setError(error instanceof Error ? error.message : 'Error generating sitemap');
-          setIsLoading(false);
-        }
+        setSitemapContent(content);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error generating sitemap');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     generateSitemap();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-8">
-        <div className="text-center animate-pulse">Generating sitemap...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg font-medium">Generating sitemap...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-8">
-        <div className="text-red-500 text-center">{error}</div>
-      </div>
-    );
-  }
-
-  if (!sitemapContent) {
-    return (
-      <div className="container mx-auto p-8">
-        <div className="text-center">No sitemap content available</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-500 text-lg font-medium">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-8">
-      <pre className="whitespace-pre-wrap break-words font-mono p-5 bg-gray-50 border border-gray-200 rounded-md">
-        {sitemapContent}
-      </pre>
-    </div>
+    <pre className="p-8 font-mono text-sm whitespace-pre-wrap break-words">
+      {sitemapContent}
+    </pre>
   );
 };
 
