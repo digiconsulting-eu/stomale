@@ -32,7 +32,13 @@ const Reviews = () => {
 
         console.log('Total approved reviews:', totalCount);
 
-        // Then get paginated approved reviews with detailed logging
+        // Calculate pagination range
+        const from = (currentPage - 1) * REVIEWS_PER_PAGE;
+        const to = from + REVIEWS_PER_PAGE - 1;
+
+        console.log(`Fetching reviews from ${from} to ${to}`);
+
+        // Then get paginated approved reviews
         const { data: reviews, error } = await supabase
           .from('reviews')
           .select(`
@@ -56,7 +62,7 @@ const Reviews = () => {
           `)
           .eq('status', 'approved')
           .order('created_at', { ascending: false })
-          .range((currentPage - 1) * REVIEWS_PER_PAGE, currentPage * REVIEWS_PER_PAGE - 1);
+          .range(from, to);
 
         if (error) {
           console.error('Error fetching reviews:', error);
@@ -64,7 +70,6 @@ const Reviews = () => {
         }
 
         console.log('Fetched reviews:', reviews);
-        console.log('Reviews query response:', { reviews, totalCount });
         
         if (!reviews || reviews.length === 0) {
           console.log('No reviews found or empty response');
