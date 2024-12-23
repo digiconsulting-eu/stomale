@@ -61,7 +61,7 @@ const ReviewDetail = () => {
   });
 
   if (error) {
-    toast.error("Errore nel caricamento della recensione");
+    toast.error("Si è verificato un errore nel caricamento della recensione");
     return (
       <div className="container mx-auto px-4 py-8">
         <p className="text-red-500">Si è verificato un errore nel caricamento della recensione.</p>
