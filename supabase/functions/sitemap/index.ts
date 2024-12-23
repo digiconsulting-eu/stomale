@@ -6,6 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
 }
 
+const BASE_URL = 'https://stomale.info';
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -65,9 +67,9 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
     }
 
-    // Function to properly encode URLs while preserving spaces as %20
+    // Function to properly encode URLs
     const encodeUrl = (str: string) => {
-      return str.split(' ').map(part => encodeURIComponent(part)).join('%20');
+      return str.toLowerCase().split(' ').map(part => encodeURIComponent(part)).join('%20');
     };
 
     // Determine format based on Accept header
@@ -80,37 +82,37 @@ Deno.serve(async (req) => {
       xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
       
       // Add homepage
-      xml += '  <url>\n    <loc>https://stomale.info/</loc>\n  </url>\n';
-      xml += '  <url>\n    <loc>https://stomale.info/recensioni</loc>\n  </url>\n';
+      xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/recensioni</loc>\n  </url>\n`;
       
       // Add conditions
       conditions?.forEach((condition) => {
         if (condition.Patologia) {
-          const encodedCondition = encodeUrl(condition.Patologia.toLowerCase());
-          xml += `  <url>\n    <loc>https://stomale.info/patologia/${encodedCondition}</loc>\n  </url>\n`;
+          const encodedCondition = encodeUrl(condition.Patologia);
+          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n  </url>\n`;
         }
       });
 
       // Add reviews
       reviews?.forEach((review) => {
         if (review.PATOLOGIE?.Patologia && review.title) {
-          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia.toLowerCase());
+          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
           const reviewSlug = review.title
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
-          xml += `  <url>\n    <loc>https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n  </url>\n`;
+          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n  </url>\n`;
         }
       });
 
       // Add static pages
-      xml += '  <url>\n    <loc>https://stomale.info/cerca-patologia</loc>\n  </url>\n';
-      xml += '  <url>\n    <loc>https://stomale.info/nuova-recensione</loc>\n  </url>\n';
-      xml += '  <url>\n    <loc>https://stomale.info/inserisci-patologia</loc>\n  </url>\n';
-      xml += '  <url>\n    <loc>https://stomale.info/cerca-sintomi</loc>\n  </url>\n';
-      xml += '  <url>\n    <loc>https://stomale.info/cookie-policy</loc>\n  </url>\n';
-      xml += '  <url>\n    <loc>https://stomale.info/privacy-policy</loc>\n  </url>\n';
-      xml += '  <url>\n    <loc>https://stomale.info/terms</loc>\n  </url>\n';
+      xml += `  <url>\n    <loc>${BASE_URL}/cerca-patologia</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/nuova-recensione</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/inserisci-patologia</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/cerca-sintomi</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/cookie-policy</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/privacy-policy</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/terms</loc>\n  </url>\n`;
 
       xml += '</urlset>';
 
@@ -127,15 +129,15 @@ Deno.serve(async (req) => {
     } else {
       // Generate text sitemap
       let sitemap = 'SITEMAP STOMALE.INFO\n\n';
-      sitemap += 'Homepage:\nhttps://stomale.info/\n\n';
-      sitemap += 'Recensioni:\nhttps://stomale.info/recensioni\n\n';
+      sitemap += `Homepage:\n${BASE_URL}/\n\n`;
+      sitemap += `Recensioni:\n${BASE_URL}/recensioni\n\n`;
 
       // Add conditions
       sitemap += 'Patologie:\n';
       conditions?.forEach((condition) => {
         if (condition.Patologia) {
-          const encodedCondition = encodeUrl(condition.Patologia.toLowerCase());
-          sitemap += `https://stomale.info/patologia/${encodedCondition}\n`;
+          const encodedCondition = encodeUrl(condition.Patologia);
+          sitemap += `${BASE_URL}/patologia/${encodedCondition}\n`;
         }
       });
       sitemap += '\n';
@@ -144,25 +146,25 @@ Deno.serve(async (req) => {
       sitemap += 'Recensioni per patologia:\n';
       reviews?.forEach((review) => {
         if (review.PATOLOGIE?.Patologia && review.title) {
-          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia.toLowerCase());
+          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
           const reviewSlug = review.title
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
-          sitemap += `https://stomale.info/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
+          sitemap += `${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
         }
       });
       sitemap += '\n';
 
       // Add static pages
       sitemap += 'Altre pagine:\n';
-      sitemap += 'https://stomale.info/cerca-patologia\n';
-      sitemap += 'https://stomale.info/nuova-recensione\n';
-      sitemap += 'https://stomale.info/inserisci-patologia\n';
-      sitemap += 'https://stomale.info/cerca-sintomi\n';
-      sitemap += 'https://stomale.info/cookie-policy\n';
-      sitemap += 'https://stomale.info/privacy-policy\n';
-      sitemap += 'https://stomale.info/terms\n';
+      sitemap += `${BASE_URL}/cerca-patologia\n`;
+      sitemap += `${BASE_URL}/nuova-recensione\n`;
+      sitemap += `${BASE_URL}/inserisci-patologia\n`;
+      sitemap += `${BASE_URL}/cerca-sintomi\n`;
+      sitemap += `${BASE_URL}/cookie-policy\n`;
+      sitemap += `${BASE_URL}/privacy-policy\n`;
+      sitemap += `${BASE_URL}/terms\n`;
 
       console.log('[Sitemap Function] Text sitemap generation completed successfully');
 
