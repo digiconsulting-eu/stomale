@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReviewCard } from "@/components/ReviewCard";
 import { NotificationsTab } from "@/components/dashboard/NotificationsTab";
+import { ProfileTab } from "@/components/dashboard/ProfileTab";
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("reviews");
@@ -47,6 +48,7 @@ const UserDashboard = () => {
         <TabsList>
           <TabsTrigger value="reviews">Le mie recensioni</TabsTrigger>
           <TabsTrigger value="notifications">Notifiche</TabsTrigger>
+          <TabsTrigger value="profile">Profilo</TabsTrigger>
         </TabsList>
 
         <TabsContent value="reviews" className="space-y-6">
@@ -75,6 +77,10 @@ const UserDashboard = () => {
 
         <TabsContent value="notifications">
           <NotificationsTab />
+        </TabsContent>
+
+        <TabsContent value="profile">
+          <ProfileTab />
         </TabsContent>
       </Tabs>
     </div>
