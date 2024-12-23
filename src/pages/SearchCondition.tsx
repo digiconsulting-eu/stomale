@@ -1,64 +1,57 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 import { Link } from "react-router-dom";
+import { useConditions } from "@/hooks/useConditions";
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+const ITEMS_PER_PAGE = 30;
 
 export default function SearchCondition() {
-  const [conditions, setConditions] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState("TUTTE");
-  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const letters = ["TUTTE", "A", "B", "C", "D", "E", "F", "G", "H", "I", "L", "M", 
                   "N", "O", "P", "Q", "R", "S", "T", "U", "V", "Z"];
 
+  const { 
+    conditions, 
+    totalPages,
+    isLoading,
+    error 
+  } = useConditions({
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
+    searchTerm,
+    letter: selectedLetter
+  });
+
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Cerca Patologia"));
-    fetchConditions();
   }, []);
 
-  const fetchConditions = async () => {
-    try {
-      console.log('Starting conditions fetch from PATOLOGIE table...');
-      const { data, error } = await supabase
-        .from('PATOLOGIE')
-        .select('id, Patologia')
-        .order('Patologia');
-
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      console.log('Raw PATOLOGIE response:', data);
-      console.log('Number of conditions fetched:', data?.length || 0);
-      
-      if (!data) {
-        console.log('No data returned from PATOLOGIE table');
-        return;
-      }
-
-      setConditions(data);
-    } catch (error) {
+  useEffect(() => {
+    if (error) {
       console.error('Error fetching conditions:', error);
       toast.error("Errore nel caricamento delle patologie");
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [error]);
 
-  const filteredConditions = conditions.filter(condition => {
-    // Se c'è un termine di ricerca, filtra per quello indipendentemente dalla lettera selezionata
-    if (searchTerm) {
-      return condition.Patologia.toLowerCase().includes(searchTerm.toLowerCase());
-    }
-    // Se non c'è un termine di ricerca, usa solo il filtro per lettera
-    return selectedLetter === "TUTTE" || condition.Patologia.startsWith(selectedLetter);
-  });
+  // Reset alla prima pagina quando cambiano i filtri
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedLetter]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -80,7 +73,6 @@ export default function SearchCondition() {
             variant={selectedLetter === letter ? "default" : "outline"}
             onClick={() => {
               setSelectedLetter(letter);
-              // Reset search term when changing letter
               setSearchTerm("");
             }}
             className="min-w-[40px]"
@@ -97,24 +89,79 @@ export default function SearchCondition() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredConditions.map(condition => (
-            <Link 
-              key={condition.id}
-              to={`/patologia/${condition.Patologia.toLowerCase()}`}
-              className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white group"
-            >
-              <h2 className="text-xl font-semibold text-[#0EA5E9] group-hover:text-[#0EA5E9]/80 transition-colors">
-                {condition.Patologia}
-              </h2>
-            </Link>
-          ))}
-          {filteredConditions.length === 0 && (
-            <div className="col-span-full text-center py-8">
-              <p className="text-gray-500">Nessuna patologia trovata.</p>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {conditions.map(condition => (
+              <Link 
+                key={condition.id}
+                to={`/patologia/${condition.Patologia.toLowerCase()}`}
+                className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white group"
+              >
+                <h2 className="text-xl font-semibold text-[#0EA5E9] group-hover:text-[#0EA5E9]/80 transition-colors">
+                  {condition.Patologia}
+                </h2>
+              </Link>
+            ))}
+            {conditions.length === 0 && (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">Nessuna patologia trovata.</p>
+              </div>
+            )}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      />
+                    </PaginationItem>
+                  )}
+                  
+                  {[...Array(totalPages)].map((_, i) => {
+                    const pageNumber = i + 1;
+                    // Mostra solo le pagine vicine a quella corrente
+                    if (
+                      pageNumber === 1 ||
+                      pageNumber === totalPages ||
+                      (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2)
+                    ) {
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(pageNumber)}
+                            isActive={currentPage === pageNumber}
+                          >
+                            {pageNumber}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+                    // Mostra i puntini di sospensione
+                    if (
+                      (pageNumber === currentPage - 3 && pageNumber > 2) ||
+                      (pageNumber === currentPage + 3 && pageNumber < totalPages - 1)
+                    ) {
+                      return <PaginationItem key={pageNumber}>...</PaginationItem>;
+                    }
+                    return null;
+                  })}
+
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
