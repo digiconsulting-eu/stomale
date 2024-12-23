@@ -13,6 +13,8 @@ interface ReviewHeaderProps {
 export const ReviewHeader = ({ title, condition, date, username }: ReviewHeaderProps) => {
   const conditionName = capitalizeFirstLetter(condition);
   
+  console.log('ReviewHeader received username:', username);
+
   return (
     <div className="mb-6">
       <div className="flex justify-between items-start mb-6">

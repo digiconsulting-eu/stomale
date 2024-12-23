@@ -141,6 +141,12 @@ export default function ReviewDetail() {
 
   if (!review) return null;
 
+  console.log('Review data being passed to ReviewContent:', {
+    username: review.users?.username,
+    title: review.title,
+    condition: review.PATOLOGIE?.Patologia.toLowerCase()
+  });
+
   return (
     <div className="container py-8">
       <div className="grid lg:grid-cols-12 gap-8">
