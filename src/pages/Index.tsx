@@ -27,7 +27,7 @@ export default function Index() {
 
         if (!count) return [];
 
-        // Poi prendiamo 12 recensioni casuali
+        // Poi prendiamo 12 recensioni casuali con i dati dell'utente
         const { data, error } = await supabase
           .from('reviews')
           .select(`
