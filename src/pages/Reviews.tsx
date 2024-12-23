@@ -32,7 +32,7 @@ const Reviews = () => {
 
         console.log('Total approved reviews:', totalCount);
 
-        // Then get paginated approved reviews
+        // Then get paginated approved reviews with detailed logging
         const { data: reviews, error } = await supabase
           .from('reviews')
           .select(`
@@ -64,6 +64,7 @@ const Reviews = () => {
         }
 
         console.log('Fetched reviews:', reviews);
+        console.log('Reviews query response:', { reviews, totalCount });
         
         if (!reviews || reviews.length === 0) {
           console.log('No reviews found or empty response');
@@ -79,7 +80,11 @@ const Reviews = () => {
         throw error;
       }
     },
-    retry: 1
+    retry: 1,
+    onError: (error) => {
+      console.error('Query error:', error);
+      toast.error("Errore nel caricamento delle recensioni");
+    }
   });
 
   useEffect(() => {
@@ -88,7 +93,6 @@ const Reviews = () => {
 
   if (error) {
     console.error('Error in reviews query:', error);
-    toast.error("Errore nel caricamento delle recensioni");
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-12 gap-6">
@@ -106,6 +110,12 @@ const Reviews = () => {
 
   const reviews = data?.reviews || [];
   const totalPages = data?.totalPages || 0;
+
+  console.log('Rendering Reviews component with:', { 
+    reviewsCount: reviews.length, 
+    totalPages, 
+    isLoading 
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
