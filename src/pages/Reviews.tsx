@@ -34,7 +34,7 @@ const Reviews = () => {
 
         if (countError) throw countError;
 
-        // Then get paginated data
+        // Then get paginated data with user information
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -48,6 +48,9 @@ const Reviews = () => {
             healing_possibility,
             social_discomfort,
             created_at,
+            users (
+              username
+            ),
             PATOLOGIE (
               Patologia
             )
@@ -57,6 +60,8 @@ const Reviews = () => {
           .range((currentPage - 1) * REVIEWS_PER_PAGE, currentPage * REVIEWS_PER_PAGE - 1);
 
         if (error) throw error;
+
+        console.log('Fetched reviews with users:', data);
 
         return {
           reviews: data || [],
@@ -185,6 +190,7 @@ const Reviews = () => {
             medicationEffectiveness={review.medication_effectiveness}
             healingPossibility={review.healing_possibility}
             socialDiscomfort={review.social_discomfort}
+            username={review.users?.username}
           />
         ))}
 
