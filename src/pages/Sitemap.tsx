@@ -52,9 +52,20 @@ export default function Sitemap() {
     fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // Se è richiesto il formato TXT o XML, restituisci direttamente il contenuto
-  if (isTxtFormat || isXmlFormat) {
-    if (isLoading) return "Generating sitemap...";
+  // If XML format is requested, return raw XML content
+  if (isXmlFormat) {
+    if (isLoading) return null;
+    if (error) return error;
+    
+    // Create a new document
+    const doc = new DOMParser().parseFromString(content, 'application/xml');
+    const serializer = new XMLSerializer();
+    return serializer.serializeToString(doc);
+  }
+
+  // If TXT format is requested, return raw text content
+  if (isTxtFormat) {
+    if (isLoading) return null;
     if (error) return error;
     return content;
   }
@@ -65,7 +76,7 @@ export default function Sitemap() {
     return null;
   }
 
-  // Altrimenti, mostra l'interfaccia HTML (questo non dovrebbe mai essere raggiunto)
+  // HTML interface (this shouldn't be reached for XML/TXT requests)
   return (
     <div className="container mx-auto px-4 py-8">
       {isLoading ? (
