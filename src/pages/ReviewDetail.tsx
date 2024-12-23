@@ -62,7 +62,7 @@ export default function ReviewDetail() {
             PATOLOGIE (
               Patologia
             ),
-            user:users (
+            user:users!reviews_user_id_fkey (
               username
             )
           `)
