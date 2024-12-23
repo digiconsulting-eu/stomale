@@ -19,14 +19,21 @@ const Reviews = () => {
       try {
         console.log('Fetching reviews page:', currentPage);
         
+        // First get total count of approved reviews
         const { count: totalCount, error: countError } = await supabase
           .from('reviews')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'approved');
 
-        if (countError) throw countError;
+        if (countError) {
+          console.error('Error getting count:', countError);
+          throw countError;
+        }
 
-        const { data, error } = await supabase
+        console.log('Total approved reviews:', totalCount);
+
+        // Then get paginated approved reviews
+        const { data: reviews, error } = await supabase
           .from('reviews')
           .select(`
             id,
@@ -39,7 +46,7 @@ const Reviews = () => {
             healing_possibility,
             social_discomfort,
             created_at,
-            users!reviews_user_id_fkey (
+            users (
               username
             ),
             PATOLOGIE (
@@ -50,10 +57,15 @@ const Reviews = () => {
           .order('created_at', { ascending: false })
           .range((currentPage - 1) * REVIEWS_PER_PAGE, currentPage * REVIEWS_PER_PAGE - 1);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          throw error;
+        }
+
+        console.log('Fetched reviews:', reviews);
 
         return {
-          reviews: data || [],
+          reviews: reviews || [],
           totalCount: totalCount || 0,
           totalPages: Math.ceil((totalCount || 0) / REVIEWS_PER_PAGE)
         };
@@ -69,6 +81,7 @@ const Reviews = () => {
   }, []);
 
   if (error) {
+    console.error('Error in reviews query:', error);
     toast.error("Errore nel caricamento delle recensioni");
     return (
       <div className="container mx-auto px-4 py-8">

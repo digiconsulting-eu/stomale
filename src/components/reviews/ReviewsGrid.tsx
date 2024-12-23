@@ -7,6 +7,9 @@ interface ReviewsGridProps {
 }
 
 export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
+  console.log('ReviewsGrid - reviews:', reviews);
+  console.log('ReviewsGrid - isLoading:', isLoading);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-6 mb-8">
@@ -19,22 +22,25 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
 
   return (
     <div className="grid grid-cols-2 gap-6 mb-8">
-      {reviews.map((review) => (
-        <ReviewCard 
-          key={review.id}
-          id={review.id}
-          title={review.title}
-          condition={review.PATOLOGIE?.Patologia || ''}
-          experience={review.experience}
-          diagnosisDifficulty={review.diagnosis_difficulty}
-          symptomsSeverity={review.symptoms_severity}
-          hasMedication={review.has_medication}
-          medicationEffectiveness={review.medication_effectiveness}
-          healingPossibility={review.healing_possibility}
-          socialDiscomfort={review.social_discomfort}
-          username={review.users?.username}
-        />
-      ))}
+      {reviews.map((review) => {
+        console.log('Rendering review:', review);
+        return (
+          <ReviewCard 
+            key={review.id}
+            id={review.id}
+            title={review.title}
+            condition={review.PATOLOGIE?.Patologia || ''}
+            experience={review.experience}
+            diagnosisDifficulty={review.diagnosis_difficulty}
+            symptomsSeverity={review.symptoms_severity}
+            hasMedication={review.has_medication}
+            medicationEffectiveness={review.medication_effectiveness}
+            healingPossibility={review.healing_possibility}
+            socialDiscomfort={review.social_discomfort}
+            username={review.users?.username}
+          />
+        );
+      })}
 
       {reviews.length === 0 && (
         <div className="col-span-2 text-center py-8">
