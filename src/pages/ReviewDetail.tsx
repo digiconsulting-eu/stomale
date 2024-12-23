@@ -18,10 +18,10 @@ const ReviewDetail = () => {
     queryKey: ['review', condition, title],
     queryFn: async () => {
       try {
-        // Convert URL-friendly title back to original format
-        const titleSlug = title?.toLowerCase().replace(/-/g, ' ');
+        console.log('Searching for review with title:', title);
         
-        const { data, error: queryError } = await supabase
+        // Get all reviews for this condition to find the matching one
+        const { data: reviews, error: queryError } = await supabase
           .from('reviews')
           .select(`
             *,
@@ -33,13 +33,25 @@ const ReviewDetail = () => {
             )
           `)
           .eq('status', 'approved')
-          .eq('title', titleSlug)
-          .limit(1);
+          .eq('PATOLOGIE.Patologia', condition?.toUpperCase());
 
         if (queryError) throw queryError;
-        if (!data || data.length === 0) return null;
         
-        return data[0];
+        // Find the review whose URL-friendly title matches our parameter
+        const matchingReview = reviews?.find(review => {
+          const reviewTitleSlug = review.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+          
+          return reviewTitleSlug === title;
+        });
+
+        console.log('Found matching review:', matchingReview);
+        
+        if (!matchingReview) return null;
+        return matchingReview;
+        
       } catch (error) {
         console.error('Error in review query:', error);
         throw error;
