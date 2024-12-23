@@ -44,7 +44,6 @@ export const AppRoutes = () => {
       <Route path="/sitemap" element={<Sitemap />} />
       <Route path="/sitemap.txt" element={<Sitemap />} />
       <Route path="/sitemap.xml" element={<Sitemap />} />
-      <Route path="/sitemap-google.xml" element={<Sitemap />} />
 
       {/* Protected routes */}
       <Route path="/admin" element={<Admin />} />
