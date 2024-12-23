@@ -17,7 +17,7 @@ const Reviews = () => {
     queryKey: ['reviews', currentPage, REVIEWS_PER_PAGE],
     queryFn: async () => {
       try {
-        console.log('Fetching reviews page:', currentPage);
+        console.log('Starting reviews fetch for page:', currentPage);
         
         // First get total count of approved reviews
         const { count: totalCount, error: countError } = await supabase
@@ -46,6 +46,7 @@ const Reviews = () => {
             healing_possibility,
             social_discomfort,
             created_at,
+            status,
             users (
               username
             ),
@@ -63,6 +64,10 @@ const Reviews = () => {
         }
 
         console.log('Fetched reviews:', reviews);
+        
+        if (!reviews || reviews.length === 0) {
+          console.log('No reviews found or empty response');
+        }
 
         return {
           reviews: reviews || [],
@@ -73,7 +78,8 @@ const Reviews = () => {
         console.error('Error in reviews query:', error);
         throw error;
       }
-    }
+    },
+    retry: 1
   });
 
   useEffect(() => {
