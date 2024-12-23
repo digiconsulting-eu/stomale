@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 
 interface CommentSectionProps {
   reviewId: string;
@@ -13,7 +14,50 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ reviewId }) => {
   const [isCommentBoxOpen, setIsCommentBoxOpen] = useState(false);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const COMMENTS_PER_PAGE = 10;
   const navigate = useNavigate();
+
+  const { data: commentsData, refetch } = useQuery({
+    queryKey: ['comments', reviewId, currentPage],
+    queryFn: async () => {
+      const offset = (currentPage - 1) * COMMENTS_PER_PAGE;
+      
+      // First get total count
+      const { count: totalCount, error: countError } = await supabase
+        .from('comments')
+        .select('*', { count: 'exact', head: true })
+        .eq('review_id', parseInt(reviewId))
+        .eq('status', 'approved');
+
+      if (countError) throw countError;
+
+      // Then get paginated comments
+      const { data: comments, error } = await supabase
+        .from('comments')
+        .select(`
+          id,
+          content,
+          created_at,
+          users (
+            username
+          )
+        `)
+        .eq('review_id', parseInt(reviewId))
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + COMMENTS_PER_PAGE - 1);
+
+      if (error) throw error;
+
+      return {
+        comments: comments || [],
+        totalCount: totalCount || 0,
+        totalPages: Math.ceil((totalCount || 0) / COMMENTS_PER_PAGE)
+      };
+    },
+    staleTime: 30000
+  });
 
   const handleOpenCommentBox = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -51,6 +95,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ reviewId }) => {
       toast.success('Commento inviato con successo');
       setComment('');
       setIsCommentBoxOpen(false);
+      refetch();
     } catch (error) {
       console.error('Errore durante l\'invio del commento:', error);
       toast.error('Impossibile inviare il commento');
@@ -58,6 +103,9 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ reviewId }) => {
       setIsSubmitting(false);
     }
   };
+
+  const comments = commentsData?.comments || [];
+  const totalPages = commentsData?.totalPages || 0;
 
   return (
     <div className="space-y-4">
@@ -97,6 +145,44 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ reviewId }) => {
             </Button>
           </div>
         </form>
+      )}
+
+      {comments.length > 0 && (
+        <div className="space-y-4 mt-8">
+          {comments.map((comment) => (
+            <div key={comment.id} className="bg-gray-50 p-4 rounded-lg">
+              <div className="flex justify-between items-start mb-2">
+                <span className="font-medium">{comment.users?.username}</span>
+                <span className="text-sm text-gray-500">
+                  {new Date(comment.created_at).toLocaleDateString('it-IT')}
+                </span>
+              </div>
+              <p className="text-gray-700">{comment.content}</p>
+            </div>
+          ))}
+
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Precedente
+              </Button>
+              <span className="mx-4 py-2">
+                Pagina {currentPage} di {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Successiva
+              </Button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

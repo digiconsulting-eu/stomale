@@ -15,15 +15,26 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 
+const REVIEWS_PER_PAGE = 20;
+
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const reviewsPerPage = 20;
 
-  const { data: reviews, isLoading, error } = useQuery({
-    queryKey: ['reviews'],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['reviews', currentPage, REVIEWS_PER_PAGE],
     queryFn: async () => {
       try {
-        console.log('Fetching reviews...');
+        console.log('Fetching reviews page:', currentPage);
+        
+        // First get total count
+        const { count: totalCount, error: countError } = await supabase
+          .from('reviews')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'approved');
+
+        if (countError) throw countError;
+
+        // Then get paginated data
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -42,16 +53,16 @@ const Reviews = () => {
             )
           `)
           .eq('status', 'approved')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .range((currentPage - 1) * REVIEWS_PER_PAGE, currentPage * REVIEWS_PER_PAGE - 1);
 
-        if (error) {
-          console.error('Error fetching reviews:', error);
-          throw error;
-        }
+        if (error) throw error;
 
-        console.log('Raw reviews response:', data);
-        console.log('Number of reviews fetched:', data?.length || 0);
-        return data || [];
+        return {
+          reviews: data || [],
+          totalCount: totalCount || 0,
+          totalPages: Math.ceil((totalCount || 0) / REVIEWS_PER_PAGE)
+        };
       } catch (error) {
         console.error('Error in reviews query:', error);
         throw error;
@@ -86,20 +97,15 @@ const Reviews = () => {
     );
   }
 
-  const totalPages = Math.ceil((reviews?.length || 0) / reviewsPerPage);
-  const getCurrentPageReviews = () => {
-    if (!reviews) return [];
-    const startIndex = (currentPage - 1) * reviewsPerPage;
-    const endIndex = startIndex + reviewsPerPage;
-    return reviews.slice(startIndex, endIndex);
-  };
+  const reviews = data?.reviews || [];
+  const totalPages = data?.totalPages || 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {getCurrentPageReviews().map((review) => (
+        {reviews.map((review) => (
           <ReviewCard 
             key={review.id}
             id={review.id}
@@ -115,7 +121,7 @@ const Reviews = () => {
           />
         ))}
 
-        {reviews?.length === 0 && (
+        {reviews.length === 0 && (
           <div className="col-span-full text-center py-8">
             <p className="text-gray-500">Non ci sono ancora recensioni.</p>
           </div>

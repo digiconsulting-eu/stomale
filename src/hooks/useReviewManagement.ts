@@ -2,12 +2,28 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export const useReviewManagement = () => {
-  const queryClient = useQueryClient();
+interface UseReviewManagementProps {
+  page?: number;
+  limit?: number;
+}
 
-  const { data: reviews, isLoading } = useQuery({
-    queryKey: ['reviews'],
+export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagementProps = {}) => {
+  const queryClient = useQueryClient();
+  const offset = (page - 1) * limit;
+
+  const { data: reviewsData, isLoading } = useQuery({
+    queryKey: ['reviews', page, limit],
     queryFn: async () => {
+      console.log('Fetching reviews with pagination:', { page, limit, offset });
+      
+      // First get total count
+      const { count: totalCount, error: countError } = await supabase
+        .from('reviews')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) throw countError;
+
+      // Then get paginated data
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -21,10 +37,16 @@ export const useReviewManagement = () => {
             Patologia
           )
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
 
       if (error) throw error;
-      return data;
+
+      return {
+        reviews: data || [],
+        totalCount: totalCount || 0,
+        totalPages: Math.ceil((totalCount || 0) / limit)
+      };
     }
   });
 
@@ -76,7 +98,9 @@ export const useReviewManagement = () => {
   });
 
   return {
-    reviews,
+    reviews: reviewsData?.reviews || [],
+    totalCount: reviewsData?.totalCount || 0,
+    totalPages: reviewsData?.totalPages || 0,
     isLoading,
     updateReviewStatus
   };
