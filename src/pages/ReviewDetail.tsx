@@ -88,11 +88,13 @@ const ReviewDetail = () => {
         symptoms={review.symptoms}
         experience={review.experience}
         diagnosisDifficulty={review.diagnosis_difficulty}
-        symptomsSeverity={review.symptoms_severity}
+        symptomSeverity={review.symptoms_severity} // Changed from symptomsSeverity to symptomSeverity
         hasMedication={review.has_medication}
         medicationEffectiveness={review.medication_effectiveness}
         healingPossibility={review.healing_possibility}
         socialDiscomfort={review.social_discomfort}
+        reviewId={review.id.toString()} // Added reviewId prop
+        date={new Date(review.created_at).toLocaleDateString('it-IT')} // Added date prop
       />
     </div>
   );
