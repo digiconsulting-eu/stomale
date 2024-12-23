@@ -1,139 +1,85 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ReviewContent } from "@/components/review/ReviewContent";
 import { supabase } from "@/integrations/supabase/client";
+import { ReviewContent } from "@/components/review/ReviewContent";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { setPageTitle, getReviewPageTitle } from "@/utils/pageTitle";
 
 export default function ReviewDetail() {
   const { condition, title } = useParams();
 
-  useEffect(() => {
-    if (condition && title) {
-      setPageTitle(getReviewPageTitle(condition, decodeURIComponent(title)));
-    }
-  }, [condition, title]);
-
-  const { data: review, isLoading, error } = useQuery({
-    queryKey: ["review", condition, title],
+  const { data: review, isLoading } = useQuery({
+    queryKey: ['review', condition, title],
     queryFn: async () => {
-      try {
-        if (!condition || !title) {
-          throw new Error('Parametri mancanti');
-        }
-
-        console.log('Fetching review with condition:', condition, 'and title:', title);
-        
-        // First get the condition ID
-        const { data: patologiaData, error: patologiaError } = await supabase
-          .from('PATOLOGIE')
-          .select('id')
-          .eq('Patologia', decodeURIComponent(condition).toUpperCase())
-          .single();
-
-        if (patologiaError) {
-          console.error('Error fetching patologia:', patologiaError);
-          throw new Error('Patologia non trovata');
-        }
-
-        if (!patologiaData) {
-          console.error('No patologia found for:', condition);
-          throw new Error('Patologia non trovata');
-        }
-
-        console.log('Found patologia with ID:', patologiaData.id);
-
-        // Create a URL-friendly version of the review title for comparison
-        const decodedTitle = decodeURIComponent(title);
-        const normalizedSearchTitle = decodedTitle
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
-
-        console.log('Normalized search title:', normalizedSearchTitle);
-
-        // Then get the review using the condition ID and normalized title
-        const { data: reviewsData, error: reviewError } = await supabase
-          .from('reviews')
-          .select(`
-            *,
-            PATOLOGIE (
-              Patologia
-            ),
-            users (
-              username
-            )
-          `)
-          .eq('condition_id', patologiaData.id)
-          .eq('status', 'approved');
-
-        if (reviewError) {
-          console.error('Error fetching review:', reviewError);
-          throw new Error('Errore nel caricamento della recensione');
-        }
-
-        console.log('Found reviews:', reviewsData);
-
-        // Find the review with matching normalized title
-        const matchingReview = reviewsData?.find(review => {
-          const reviewTitleSlug = review.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
-          console.log('Comparing:', reviewTitleSlug, 'with:', normalizedSearchTitle);
-          return reviewTitleSlug === normalizedSearchTitle;
-        });
-
-        if (!matchingReview) {
-          console.error('No review found with title:', title);
-          throw new Error('Recensione non trovata');
-        }
-
-        console.log('Found matching review with full data:', matchingReview);
-        return matchingReview;
-      } catch (error) {
-        console.error('Error in review query:', error);
-        throw error;
+      if (!condition || !title) {
+        throw new Error('Missing condition or title');
       }
-    },
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+
+      console.log('Fetching review with condition:', condition, 'and title:', title);
+
+      // First get the condition ID
+      const { data: conditionData, error: conditionError } = await supabase
+        .from('PATOLOGIE')
+        .select('id, Patologia')
+        .ilike('Patologia', condition)
+        .single();
+
+      if (conditionError) {
+        console.error('Error fetching condition:', conditionError);
+        throw conditionError;
+      }
+
+      if (!conditionData) {
+        throw new Error('Condition not found');
+      }
+
+      // Then get the review
+      const { data: reviewData, error: reviewError } = await supabase
+        .from('reviews')
+        .select(`
+          *,
+          PATOLOGIE (
+            Patologia
+          ),
+          users (
+            username
+          )
+        `)
+        .eq('condition_id', conditionData.id)
+        .eq('status', 'approved')
+        .single();
+
+      if (reviewError) {
+        console.error('Error fetching review:', reviewError);
+        throw reviewError;
+      }
+
+      console.log('Found matching review with full data:', reviewData);
+
+      return reviewData;
+    }
   });
 
-  if (error) {
-    toast.error("Recensione non trovata");
-    return (
-      <div className="container py-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl font-bold text-primary">Recensione non trovata</h1>
-          <p className="text-text-light">
-            La recensione che stai cercando non esiste o potrebbe essere stata rimossa.
-          </p>
-          {condition && (
-            <a 
-              href={`/patologia/${condition}`}
-              className="text-primary hover:underline inline-block mt-4"
-            >
-              ← Torna a {decodeURIComponent(condition)}
-            </a>
-          )}
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (review) {
+      setPageTitle(getReviewPageTitle(
+        review.PATOLOGIE?.Patologia || '',
+        review.title
+      ));
+    }
+  }, [review]);
 
   if (isLoading) {
     return (
-      <div className="container py-8">
-        <div className="space-y-8">
-          <Skeleton className="h-12 w-3/4" />
-          <Skeleton className="h-6 w-1/4" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-[400px] w-full" />
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Skeleton className="h-8 w-3/4 mb-4" />
+          <Skeleton className="h-6 w-1/2 mb-8" />
+          <Skeleton className="h-40 mb-8" />
+          <Skeleton className="h-20 mb-4" />
+          <Skeleton className="h-20" />
         </div>
       </div>
     );
@@ -148,12 +94,12 @@ export default function ReviewDetail() {
   });
 
   return (
-    <div className="container py-8">
-      <div className="grid lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 lg:order-2">
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
           <ReviewContent
             title={review.title}
-            condition={review.PATOLOGIE?.Patologia.toLowerCase() || ''}
+            condition={review.PATOLOGIE?.Patologia.toLowerCase()}
             date={new Date(review.created_at).toLocaleDateString('it-IT')}
             symptoms={review.symptoms}
             experience={review.experience}

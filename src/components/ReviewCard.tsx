@@ -14,6 +14,7 @@ interface ReviewCardProps {
   medicationEffectiveness?: number;
   healingPossibility?: number;
   socialDiscomfort?: number;
+  username?: string;
 }
 
 export const ReviewCard = ({
@@ -21,6 +22,7 @@ export const ReviewCard = ({
   title,
   condition,
   experience,
+  username,
 }: ReviewCardProps) => {
   // Function to truncate text to roughly 2 lines (approximately 150 characters)
   const truncateExperience = (text: string = '') => {
@@ -41,6 +43,9 @@ export const ReviewCard = ({
       <div className="space-y-4">
         <div>
           <h3 className="text-xl font-semibold mb-2">{title}</h3>
+          {username && (
+            <p className="text-sm text-gray-600 mb-2">{username}</p>
+          )}
           <Link 
             to={`/patologia/${condition.toLowerCase()}`}
             className="inline-block"

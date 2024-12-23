@@ -27,7 +27,7 @@ export default function Index() {
 
         if (!count) return [];
 
-        // Poi prendiamo 12 recensioni casuali usando OFFSET
+        // Poi prendiamo 12 recensioni casuali
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -40,22 +40,22 @@ export default function Index() {
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
+            users (
+              username
+            ),
             PATOLOGIE (
               Patologia
             )
           `)
           .eq('status', 'approved')
-          .limit(12)
-          .range(
-            Math.floor(Math.random() * Math.max(0, count - 12)), 
-            Math.floor(Math.random() * Math.max(0, count - 1))
-          );
+          .limit(12);
 
         if (error) {
           console.error('Error fetching reviews:', error);
           throw error;
         }
 
+        console.log('Fetched reviews:', data);
         return data || [];
       } catch (error) {
         console.error('Error in query execution:', error);
@@ -115,6 +115,7 @@ export default function Index() {
                 medicationEffectiveness={review.medication_effectiveness}
                 healingPossibility={review.healing_possibility}
                 socialDiscomfort={review.social_discomfort}
+                username={review.users?.username}
               />
             ))}
 
