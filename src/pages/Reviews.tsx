@@ -119,73 +119,6 @@ const Reviews = () => {
   const reviews = data?.reviews || [];
   const totalPages = data?.totalPages || 0;
 
-  const renderPaginationNumbers = () => {
-    const pages = [];
-    const totalPagesArray = Array.from({ length: totalPages }, (_, i) => i + 1);
-    
-    // Always show first page
-    pages.push(
-      <PaginationItem key={1}>
-        <PaginationLink
-          onClick={() => setCurrentPage(1)}
-          isActive={currentPage === 1}
-        >
-          1
-        </PaginationLink>
-      </PaginationItem>
-    );
-
-    // Logic for showing dots and surrounding pages
-    if (currentPage > 3) {
-      pages.push(
-        <PaginationItem key="dots-1">
-          <div className="px-4">...</div>
-        </PaginationItem>
-      );
-    }
-
-    // Show current page and surrounding pages
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
-      if (i <= currentPage + 1 && i >= currentPage - 1) {
-        pages.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              onClick={() => setCurrentPage(i)}
-              isActive={currentPage === i}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
-    }
-
-    // Show dots before last page if needed
-    if (currentPage < totalPages - 2) {
-      pages.push(
-        <PaginationItem key="dots-2">
-          <div className="px-4">...</div>
-        </PaginationItem>
-      );
-    }
-
-    // Always show last page if there is more than one page
-    if (totalPages > 1) {
-      pages.push(
-        <PaginationItem key={totalPages}>
-          <PaginationLink
-            onClick={() => setCurrentPage(totalPages)}
-            isActive={currentPage === totalPages}
-          >
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-
-    return pages;
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-12 gap-6">
@@ -193,28 +126,25 @@ const Reviews = () => {
           <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
           
           <div className="grid grid-cols-1 gap-6 mb-8">
-            {reviews.map((review) => {
-              console.log('Review data:', review); // Debug log
-              return (
-                <ReviewCard 
-                  key={review.id}
-                  id={review.id}
-                  title={review.title}
-                  condition={review.PATOLOGIE?.Patologia || ''}
-                  experience={review.experience}
-                  diagnosisDifficulty={review.diagnosis_difficulty}
-                  symptomsSeverity={review.symptoms_severity}
-                  hasMedication={review.has_medication}
-                  medicationEffectiveness={review.medication_effectiveness}
-                  healingPossibility={review.healing_possibility}
-                  socialDiscomfort={review.social_discomfort}
-                  username={review.users?.username}
-                />
-              );
-            })}
+            {reviews.map((review) => (
+              <ReviewCard 
+                key={review.id}
+                id={review.id}
+                title={review.title}
+                condition={review.PATOLOGIE?.Patologia || ''}
+                experience={review.experience}
+                diagnosisDifficulty={review.diagnosis_difficulty}
+                symptomsSeverity={review.symptoms_severity}
+                hasMedication={review.has_medication}
+                medicationEffectiveness={review.medication_effectiveness}
+                healingPossibility={review.healing_possibility}
+                socialDiscomfort={review.social_discomfort}
+                username={review.users?.username}
+              />
+            ))}
 
             {reviews.length === 0 && (
-              <div className="col-span-full text-center py-8">
+              <div className="text-center py-8">
                 <p className="text-gray-500">Non ci sono ancora recensioni.</p>
               </div>
             )}
@@ -230,7 +160,19 @@ const Reviews = () => {
                   />
                 </PaginationItem>
                 
-                {renderPaginationNumbers()}
+                {[...Array(totalPages)].map((_, i) => {
+                  const pageNumber = i + 1;
+                  return (
+                    <PaginationItem key={pageNumber}>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(pageNumber)}
+                        isActive={currentPage === pageNumber}
+                      >
+                        {pageNumber}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
                 
                 <PaginationItem>
                   <PaginationNext 
