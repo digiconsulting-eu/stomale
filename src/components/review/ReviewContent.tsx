@@ -4,7 +4,7 @@ import { ReviewStats } from "@/components/ReviewStats";
 import { ReviewHeader } from "./ReviewHeader";
 import { ReviewBody } from "./ReviewBody";
 import { ReviewActions } from "./ReviewActions";
-import { capitalizeFirstLetter } from "@/utils/textUtils"; // Add this import
+import { capitalizeFirstLetter } from "@/utils/textUtils";
 
 interface ReviewContentProps {
   title: string;
@@ -38,37 +38,45 @@ export const ReviewContent = ({
   username
 }: ReviewContentProps) => {
   return (
-    <div>
-      <ReviewHeader 
-        title={title}
-        condition={condition}
-        date={date}
-        username={username}
-      />
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-8">
+          <ReviewHeader 
+            title={title}
+            condition={condition}
+            date={date}
+            username={username}
+          />
 
-      <ReviewBody 
-        symptoms={symptoms}
-        experience={experience}
-      />
+          <ReviewBody 
+            symptoms={symptoms}
+            experience={experience}
+          />
 
-      <div className="mb-8">
-        <CommentSection reviewId={reviewId} />
+          <div className="mb-8">
+            <CommentSection reviewId={reviewId} />
+          </div>
+
+          <ReviewActions condition={condition} />
+
+          <div className="mb-8">
+            <ReviewStats
+              diagnosisDifficulty={diagnosisDifficulty}
+              symptomSeverity={symptomSeverity}
+              hasMedication={hasMedication}
+              medicationEffectiveness={medicationEffectiveness}
+              healingPossibility={healingPossibility}
+              socialDiscomfort={socialDiscomfort}
+            />
+          </div>
+
+          <Disclaimer condition={capitalizeFirstLetter(condition)} />
+        </div>
+        
+        <div className="col-span-4">
+          {/* Space for banners */}
+        </div>
       </div>
-
-      <ReviewActions condition={condition} />
-
-      <div className="mb-8">
-        <ReviewStats
-          diagnosisDifficulty={diagnosisDifficulty}
-          symptomSeverity={symptomSeverity}
-          hasMedication={hasMedication}
-          medicationEffectiveness={medicationEffectiveness}
-          healingPossibility={healingPossibility}
-          socialDiscomfort={socialDiscomfort}
-        />
-      </div>
-
-      <Disclaimer condition={capitalizeFirstLetter(condition)} />
     </div>
   );
 };
