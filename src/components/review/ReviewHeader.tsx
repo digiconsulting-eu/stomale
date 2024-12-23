@@ -24,33 +24,35 @@ export const ReviewHeader = ({ title, condition, date, username }: ReviewHeaderP
         </Link>
       </div>
 
-      <h1 className="text-3xl font-bold text-primary mb-2">
+      <h1 className="text-3xl font-bold text-primary mb-4">
         {title || `Esperienza con ${conditionName}`}
       </h1>
 
-      <div className="flex flex-col gap-2 mb-6">
+      <div className="flex flex-col gap-3">
         {username && (
-          <p className="text-text-light text-sm">
+          <p className="text-gray-600 font-medium">
             {username}
           </p>
         )}
-        <div className="flex items-center text-text-light">
-          <Calendar size={14} className="mr-1" />
-          <span className="text-sm">{date}</span>
+        <div className="flex items-center text-gray-500">
+          <Calendar size={16} className="mr-2" />
+          <span>{date}</span>
         </div>
       </div>
       
-      <Link 
-        to={`/patologia/${condition}`}
-        className="block"
-      >
-        <Badge 
-          variant="secondary" 
-          className="inline-flex px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+      <div className="mt-4">
+        <Link 
+          to={`/patologia/${condition}`}
+          className="block"
         >
-          {conditionName}
-        </Badge>
-      </Link>
+          <Badge 
+            variant="secondary" 
+            className="inline-flex px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+          >
+            {conditionName}
+          </Badge>
+        </Link>
+      </div>
     </div>
   );
 };
