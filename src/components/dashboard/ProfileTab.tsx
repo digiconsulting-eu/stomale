@@ -87,9 +87,10 @@ export const ProfileTab = () => {
   const handleDeleteAccount = async () => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.admin.deleteUser(
-        (await supabase.auth.getSession()).data.session?.user?.id || ''
-      );
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const { error } = await supabase.rpc('delete_user');
       
       if (error) throw error;
 
