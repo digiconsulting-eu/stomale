@@ -82,12 +82,17 @@ const Reviews = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
-          <div className="grid grid-cols-1 gap-6 mb-8">
-            {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-[200px]" />
-            ))}
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-8">
+            <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
+            <div className="grid grid-cols-1 gap-6 mb-8">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-[200px]" />
+              ))}
+            </div>
+          </div>
+          <div className="col-span-4">
+            {/* Space for banners */}
           </div>
         </div>
       </div>
@@ -98,9 +103,14 @@ const Reviews = () => {
     toast.error("Errore nel caricamento delle recensioni");
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
-          <p className="text-red-500">Si è verificato un errore nel caricamento delle recensioni.</p>
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-8">
+            <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
+            <p className="text-red-500">Si è verificato un errore nel caricamento delle recensioni.</p>
+          </div>
+          <div className="col-span-4">
+            {/* Space for banners */}
+          </div>
         </div>
       </div>
     );
@@ -178,70 +188,79 @@ const Reviews = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
-        
-        <div className="grid grid-cols-1 gap-6 mb-8">
-          {reviews.map((review) => (
-            <ReviewCard 
-              key={review.id}
-              id={review.id}
-              title={review.title}
-              condition={review.PATOLOGIE?.Patologia || ''}
-              experience={review.experience}
-              diagnosisDifficulty={review.diagnosis_difficulty}
-              symptomsSeverity={review.symptoms_severity}
-              hasMedication={review.has_medication}
-              medicationEffectiveness={review.medication_effectiveness}
-              healingPossibility={review.healing_possibility}
-              socialDiscomfort={review.social_discomfort}
-              username={review.users?.username}
-            />
-          ))}
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-8">
+          <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
+          
+          <div className="grid grid-cols-1 gap-6 mb-8">
+            {reviews.map((review) => {
+              console.log('Review data:', review); // Debug log
+              return (
+                <ReviewCard 
+                  key={review.id}
+                  id={review.id}
+                  title={review.title}
+                  condition={review.PATOLOGIE?.Patologia || ''}
+                  experience={review.experience}
+                  diagnosisDifficulty={review.diagnosis_difficulty}
+                  symptomsSeverity={review.symptoms_severity}
+                  hasMedication={review.has_medication}
+                  medicationEffectiveness={review.medication_effectiveness}
+                  healingPossibility={review.healing_possibility}
+                  socialDiscomfort={review.social_discomfort}
+                  username={review.users?.username}
+                />
+              );
+            })}
 
-          {reviews.length === 0 && (
-            <div className="col-span-full text-center py-8">
-              <p className="text-gray-500">Non ci sono ancora recensioni.</p>
-            </div>
+            {reviews.length === 0 && (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">Non ci sono ancora recensioni.</p>
+              </div>
+            )}
+          </div>
+
+          {totalPages > 1 && (
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                
+                {renderPaginationNumbers()}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           )}
+
+          <div className="mt-12 bg-white rounded-lg p-6 text-sm text-text-light">
+            <p className="mb-4">
+              Su StoMale.info puoi leggere le esperienze di utenti che hanno o hanno avuto a che fare con diverse patologie. 
+              Puoi leggere le loro esperienze, commentarle o fare domande e scoprire quali sintomi hanno o come si stanno curando.
+            </p>
+            <p className="mb-4">
+              Gli utenti scrivono recensioni basate sulla propria esperienza personale e sotto diagnosi e consiglio medico, 
+              questo sito quindi NON è inteso per consulenza medica, diagnosi o trattamento e NON deve in nessun caso 
+              sostituirsi a un consulto medico, una visita specialistica o altro.
+            </p>
+            <p>
+              StoMale.info e DigiConsulting non si assumono responsabilità sulla libera interpretazione del contenuto scritto da altri utenti. 
+              E' doveroso contattare il proprio medico e/o specialista per la diagnosi di malattie e per la prescrizione e assunzione di farmaci.
+            </p>
+          </div>
         </div>
-
-        {totalPages > 1 && (
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-              
-              {renderPaginationNumbers()}
-              
-              <PaginationItem>
-                <PaginationNext 
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        )}
-
-        <div className="mt-12 bg-white rounded-lg p-6 text-sm text-text-light">
-          <p className="mb-4">
-            Su StoMale.info puoi leggere le esperienze di utenti che hanno o hanno avuto a che fare con diverse patologie. 
-            Puoi leggere le loro esperienze, commentarle o fare domande e scoprire quali sintomi hanno o come si stanno curando.
-          </p>
-          <p className="mb-4">
-            Gli utenti scrivono recensioni basate sulla propria esperienza personale e sotto diagnosi e consiglio medico, 
-            questo sito quindi NON è inteso per consulenza medica, diagnosi o trattamento e NON deve in nessun caso 
-            sostituirsi a un consulto medico, una visita specialistica o altro.
-          </p>
-          <p>
-            StoMale.info e DigiConsulting non si assumono responsabilità sulla libera interpretazione del contenuto scritto da altri utenti. 
-            E' doveroso contattare il proprio medico e/o specialista per la diagnosi di malattie e per la prescrizione e assunzione di farmaci.
-          </p>
+        
+        <div className="col-span-4">
+          {/* Space for banners */}
         </div>
       </div>
     </div>
