@@ -62,7 +62,7 @@ export default function ReviewDetail() {
             PATOLOGIE (
               Patologia
             ),
-            users (
+            user:users (
               username
             )
           `)
@@ -142,7 +142,7 @@ export default function ReviewDetail() {
   if (!review) return null;
 
   console.log('Review data being passed to ReviewContent:', {
-    username: review.users?.username,
+    username: review.user?.username,
     title: review.title,
     condition: review.PATOLOGIE?.Patologia.toLowerCase()
   });
@@ -164,7 +164,7 @@ export default function ReviewDetail() {
             healingPossibility={Number(review.healing_possibility)}
             socialDiscomfort={Number(review.social_discomfort)}
             reviewId={review.id.toString()}
-            username={review.users?.username}
+            username={review.user?.username}
           />
         </div>
       </div>
