@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,17 +16,38 @@ export const SearchBar = () => {
     queryKey: ['conditions'],
     queryFn: async () => {
       console.log('Fetching conditions for SearchBar...');
-      const { data, error } = await supabase
-        .from('PATOLOGIE')
-        .select('Patologia')
-        .order('Patologia');
+      
+      try {
+        // Check rate limit before making the request
+        const rateLimitResponse = await supabase.functions.invoke('rate-limit');
+        const rateLimitData = await rateLimitResponse.data;
+        
+        if (rateLimitResponse.error) {
+          throw new Error(rateLimitResponse.error.message);
+        }
 
-      if (error) {
-        console.error('Error fetching conditions:', error);
+        console.log('Rate limit remaining:', rateLimitData.remaining);
+
+        const { data, error } = await supabase
+          .from('PATOLOGIE')
+          .select('Patologia')
+          .order('Patologia');
+
+        if (error) {
+          console.error('Error fetching conditions:', error);
+          throw error;
+        }
+
+        return data?.map(item => item.Patologia) || [];
+      } catch (error: any) {
+        if (error.status === 429) {
+          toast.error("Troppe richieste. Riprova tra qualche secondo.");
+        } else {
+          console.error('Error:', error);
+          toast.error("Errore durante il caricamento delle patologie");
+        }
         throw error;
       }
-
-      return data?.map(item => item.Patologia) || [];
     },
     staleTime: 1000 * 60 * 5,
     retry: 3,

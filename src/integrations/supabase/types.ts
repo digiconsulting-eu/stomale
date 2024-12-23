@@ -161,6 +161,30 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          created_at: string
+          id: number
+          ip_address: string
+          last_request: number
+          request_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          ip_address: string
+          last_request: number
+          request_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          ip_address?: string
+          last_request?: number
+          request_count?: number
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           condition_id: number | null
