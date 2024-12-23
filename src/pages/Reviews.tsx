@@ -48,7 +48,7 @@ const Reviews = () => {
             healing_possibility,
             social_discomfort,
             created_at,
-            users (
+            users!reviews_user_id_fkey (
               username
             ),
             PATOLOGIE (
@@ -82,9 +82,9 @@ const Reviews = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 gap-6 mb-8">
             {[...Array(6)].map((_, i) => (
               <Skeleton key={i} className="h-[200px]" />
             ))}
@@ -98,7 +98,7 @@ const Reviews = () => {
     toast.error("Errore nel caricamento delle recensioni");
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
           <p className="text-red-500">Si è verificato un errore nel caricamento delle recensioni.</p>
         </div>
@@ -178,10 +178,10 @@ const Reviews = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-6 mb-8">
           {reviews.map((review) => (
             <ReviewCard 
               key={review.id}
