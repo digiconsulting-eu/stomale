@@ -52,8 +52,23 @@ export default function Sitemap() {
     fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // Se è richiesto il formato TXT o XML, restituisci direttamente il contenuto
-  if (isTxtFormat || isXmlFormat) {
+  // Se è richiesto il formato XML, restituisci direttamente il contenuto XML
+  if (isXmlFormat) {
+    // Create a new document and write the XML content
+    useEffect(() => {
+      if (!isLoading && !error && content) {
+        document.open('text/xml');
+        document.write(content);
+        document.close();
+      }
+    }, [isLoading, error, content]);
+    
+    // Return an empty div as React needs to return something
+    return <></>;
+  }
+
+  // Se è richiesto il formato TXT, restituisci direttamente il contenuto
+  if (isTxtFormat) {
     if (isLoading) return "Generating sitemap...";
     if (error) return error;
     return content;
