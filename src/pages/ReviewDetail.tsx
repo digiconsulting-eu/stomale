@@ -62,7 +62,7 @@ export default function ReviewDetail() {
             PATOLOGIE (
               Patologia
             ),
-            users!reviews_user_id_fkey (
+            users (
               username
             )
           `)
@@ -91,7 +91,7 @@ export default function ReviewDetail() {
           throw new Error('Recensione non trovata');
         }
 
-        console.log('Found matching review:', matchingReview);
+        console.log('Found matching review with full data:', matchingReview);
         return matchingReview;
       } catch (error) {
         console.error('Error in review query:', error);
