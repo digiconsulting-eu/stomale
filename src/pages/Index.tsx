@@ -18,33 +18,52 @@ export default function Index() {
     queryKey: ['latestReviews'],
     queryFn: async () => {
       console.log('Fetching random reviews...');
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          title,
-          experience,
-          diagnosis_difficulty,
-          symptoms_severity,
-          has_medication,
-          medication_effectiveness,
-          healing_possibility,
-          social_discomfort,
-          PATOLOGIE (
-            Patologia
-          )
-        `)
-        .eq('status', 'approved')
-        .order('RANDOM()')
-        .limit(6);
+      try {
+        // Prima otteniamo il conteggio totale delle recensioni approvate
+        const { count } = await supabase
+          .from('reviews')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'approved');
 
-      if (error) {
-        console.error('Error fetching reviews:', error);
+        if (!count) return [];
+
+        // Poi prendiamo 6 recensioni casuali usando OFFSET
+        const { data, error } = await supabase
+          .from('reviews')
+          .select(`
+            id,
+            title,
+            experience,
+            diagnosis_difficulty,
+            symptoms_severity,
+            has_medication,
+            medication_effectiveness,
+            healing_possibility,
+            social_discomfort,
+            PATOLOGIE (
+              Patologia
+            )
+          `)
+          .eq('status', 'approved')
+          .limit(6)
+          .range(
+            Math.floor(Math.random() * Math.max(0, count - 6)), 
+            Math.floor(Math.random() * Math.max(0, count - 1))
+          );
+
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          throw error;
+        }
+
+        return data || [];
+      } catch (error) {
+        console.error('Error in query execution:', error);
         throw error;
       }
-
-      return data || [];
-    }
+    },
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // Cache per 5 minuti
   });
 
   if (isError) {
