@@ -16,34 +16,23 @@ export default function Sitemap() {
       try {
         setIsLoading(true);
         setError(null);
-        console.log('Fetching sitemap data...', location.pathname);
-        
-        const { data, error: fetchError } = await supabase.functions.invoke('sitemap', {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Content-Type': isXmlFormat ? 'application/xml' : 'text/plain'
-          }
-        });
-        
-        console.log('Sitemap response:', { data, error: fetchError });
-        
-        if (fetchError) {
-          console.error('Error fetching sitemap:', fetchError);
-          throw new Error(fetchError.message);
+        console.log('Fetching sitemap from storage...');
+
+        const fileName = isXmlFormat ? 'sitemap.xml' : 'sitemap.txt';
+        const { data, error: downloadError } = await supabase.storage
+          .from('sitemaps')
+          .download(fileName);
+
+        if (downloadError) {
+          console.error('Error downloading sitemap:', downloadError);
+          throw new Error(downloadError.message);
         }
 
-        if (typeof data === 'string') {
-          setContent(data);
-        } else if (data?.error) {
-          throw new Error(data.error);
-        } else {
-          console.error('Unexpected response format:', data);
-          throw new Error('Unexpected response format from sitemap function');
-        }
+        const content = await data.text();
+        setContent(content);
       } catch (err) {
         console.error('Error in sitemap component:', err);
-        setError(err instanceof Error ? err.message : 'Failed to generate sitemap. Please try again later.');
+        setError(err instanceof Error ? err.message : 'Failed to fetch sitemap. Please try again later.');
       } finally {
         setIsLoading(false);
       }
@@ -54,7 +43,7 @@ export default function Sitemap() {
 
   // Se è richiesto il formato TXT o XML, restituisci direttamente il contenuto
   if (isTxtFormat || isXmlFormat) {
-    if (isLoading) return "Generating sitemap...";
+    if (isLoading) return "Fetching sitemap...";
     if (error) return error;
     return content;
   }
@@ -65,7 +54,7 @@ export default function Sitemap() {
     return null;
   }
 
-  // Altrimenti, mostra l'interfaccia HTML (questo non dovrebbe mai essere raggiunto)
+  // Altrimenti, mostra l'interfaccia HTML
   return (
     <div className="container mx-auto px-4 py-8">
       {isLoading ? (
