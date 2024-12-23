@@ -81,9 +81,10 @@ const Reviews = () => {
       }
     },
     retry: 1,
-    onError: (error) => {
-      console.error('Query error:', error);
-      toast.error("Errore nel caricamento delle recensioni");
+    meta: {
+      onError: () => {
+        toast.error("Errore nel caricamento delle recensioni");
+      }
     }
   });
 
