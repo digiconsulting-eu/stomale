@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,7 @@ export const ProfileTab = () => {
   };
 
   // Load profile data on component mount
-  useState(() => {
+  useEffect(() => {
     fetchProfile();
   }, []);
 
@@ -90,10 +90,15 @@ export const ProfileTab = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
 
-      const { error } = await supabase.rpc('delete_user');
-      
-      if (error) throw error;
+      // Delete the user's data from the public.users table
+      const { error: deleteError } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', session.user.id);
 
+      if (deleteError) throw deleteError;
+
+      // Sign out the user
       await supabase.auth.signOut();
       navigate('/', { replace: true });
       toast.success("Account eliminato con successo");
