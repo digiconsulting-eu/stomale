@@ -19,11 +19,7 @@ export default function Sitemap() {
         console.log('Fetching sitemap data...', location.pathname);
         
         const { data, error: fetchError } = await supabase.functions.invoke('sitemap', {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Content-Type': isXmlFormat ? 'application/xml' : 'text/plain'
-          }
+          method: 'GET'
         });
         
         console.log('Sitemap response:', { data, error: fetchError });
@@ -34,14 +30,6 @@ export default function Sitemap() {
         }
 
         if (typeof data === 'string') {
-          if (isXmlFormat) {
-            // For XML format, write directly to document
-            document.open('text/xml');
-            document.write(data);
-            document.close();
-            // Prevent React from rendering anything
-            return;
-          }
           setContent(data);
         } else if (data?.error) {
           throw new Error(data.error);
@@ -57,11 +45,15 @@ export default function Sitemap() {
       }
     };
 
-    fetchSitemap();
+    // Only fetch if it's not XML format
+    if (!isXmlFormat) {
+      fetchSitemap();
+    }
   }, [location.pathname, isXmlFormat]);
 
-  // Se è richiesto il formato XML, non renderizzare nulla poiché il contenuto è già stato scritto direttamente
+  // Redirect XML requests to the Edge Function
   if (isXmlFormat) {
+    window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sitemap`;
     return null;
   }
 
