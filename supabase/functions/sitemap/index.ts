@@ -72,9 +72,9 @@ Deno.serve(async (req) => {
       return str.toLowerCase().split(' ').map(part => encodeURIComponent(part)).join('%20');
     };
 
-    // Check if the request is for XML format
-    const url = new URL(req.url);
-    const isXml = url.pathname.endsWith('sitemap-google.xml');
+    // Determine format based on Accept header
+    const acceptHeader = req.headers.get('Content-Type') || '';
+    const isXml = acceptHeader.includes('application/xml');
 
     if (isXml) {
       // Generate XML sitemap
@@ -121,9 +121,10 @@ Deno.serve(async (req) => {
       return new Response(xml, { 
         headers: {
           ...corsHeaders,
-          'Content-Type': 'application/xml',
+          'Content-Type': 'application/xml; charset=utf-8',
           'Cache-Control': 'public, max-age=3600'
-        }
+        },
+        status: 200
       });
     } else {
       // Generate text sitemap
@@ -170,9 +171,10 @@ Deno.serve(async (req) => {
       return new Response(sitemap, { 
         headers: {
           ...corsHeaders,
-          'Content-Type': 'text/plain',
+          'Content-Type': 'text/plain; charset=utf-8',
           'Cache-Control': 'public, max-age=3600'
-        }
+        },
+        status: 200
       });
     }
 

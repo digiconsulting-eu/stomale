@@ -9,7 +9,7 @@ export default function Sitemap() {
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const isTxtFormat = location.pathname === '/sitemap.txt';
-  const isXmlFormat = location.pathname === '/sitemap-google.xml';
+  const isXmlFormat = location.pathname === '/sitemap.xml';
 
   useEffect(() => {
     const fetchSitemap = async () => {
@@ -19,7 +19,11 @@ export default function Sitemap() {
         console.log('Fetching sitemap data...', location.pathname);
         
         const { data, error: fetchError } = await supabase.functions.invoke('sitemap', {
-          method: 'GET'
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Content-Type': isXmlFormat ? 'application/xml' : 'text/plain'
+          }
         });
         
         console.log('Sitemap response:', { data, error: fetchError });
@@ -45,20 +49,11 @@ export default function Sitemap() {
       }
     };
 
-    // Only fetch if it's not XML format
-    if (!isXmlFormat) {
-      fetchSitemap();
-    }
+    fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // Redirect XML requests to the Edge Function
-  if (isXmlFormat) {
-    window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sitemap`;
-    return null;
-  }
-
-  // Se è richiesto il formato TXT, restituisci direttamente il contenuto
-  if (isTxtFormat) {
+  // Se è richiesto il formato TXT o XML, restituisci direttamente il contenuto
+  if (isTxtFormat || isXmlFormat) {
     if (isLoading) return "Generating sitemap...";
     if (error) return error;
     return content;
@@ -66,7 +61,7 @@ export default function Sitemap() {
 
   // Redirect to XML format if accessed directly
   if (location.pathname === '/sitemap') {
-    window.location.href = '/sitemap-google.xml';
+    window.location.href = '/sitemap.xml';
     return null;
   }
 
