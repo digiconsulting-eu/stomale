@@ -17,10 +17,11 @@ const ReviewDetail = () => {
   const { data: review, isLoading, error } = useQuery({
     queryKey: ['review', condition, title],
     queryFn: async () => {
-      console.log('Fetching review for:', { condition, title });
       try {
+        // Convert URL-friendly title back to original format
         const titleSlug = title?.toLowerCase().replace(/-/g, ' ');
-        const { data, error } = await supabase
+        
+        const { data, error: queryError } = await supabase
           .from('reviews')
           .select(`
             *,
@@ -33,20 +34,18 @@ const ReviewDetail = () => {
           `)
           .eq('status', 'approved')
           .eq('title', titleSlug)
-          .single();
+          .limit(1);
 
-        if (error) {
-          console.error('Error fetching review:', error);
-          throw error;
-        }
-
-        console.log('Found matching review with full data:', data);
-        return data;
+        if (queryError) throw queryError;
+        if (!data || data.length === 0) return null;
+        
+        return data[0];
       } catch (error) {
         console.error('Error in review query:', error);
         throw error;
       }
-    }
+    },
+    retry: 1
   });
 
   if (error) {
@@ -88,13 +87,13 @@ const ReviewDetail = () => {
         symptoms={review.symptoms}
         experience={review.experience}
         diagnosisDifficulty={review.diagnosis_difficulty}
-        symptomSeverity={review.symptoms_severity} // Changed from symptomsSeverity to symptomSeverity
+        symptomSeverity={review.symptoms_severity}
         hasMedication={review.has_medication}
         medicationEffectiveness={review.medication_effectiveness}
         healingPossibility={review.healing_possibility}
         socialDiscomfort={review.social_discomfort}
-        reviewId={review.id.toString()} // Added reviewId prop
-        date={new Date(review.created_at).toLocaleDateString('it-IT')} // Added date prop
+        reviewId={review.id.toString()}
+        date={new Date(review.created_at).toLocaleDateString('it-IT')}
       />
     </div>
   );
