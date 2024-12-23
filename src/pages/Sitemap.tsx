@@ -34,6 +34,14 @@ export default function Sitemap() {
         }
 
         if (typeof data === 'string') {
+          if (isXmlFormat) {
+            // For XML format, write directly to document
+            document.open('text/xml');
+            document.write(data);
+            document.close();
+            // Prevent React from rendering anything
+            return;
+          }
           setContent(data);
         } else if (data?.error) {
           throw new Error(data.error);
@@ -52,19 +60,9 @@ export default function Sitemap() {
     fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // Se è richiesto il formato XML, restituisci direttamente il contenuto XML
+  // Se è richiesto il formato XML, non renderizzare nulla poiché il contenuto è già stato scritto direttamente
   if (isXmlFormat) {
-    // Create a new document and write the XML content
-    useEffect(() => {
-      if (!isLoading && !error && content) {
-        document.open('text/xml');
-        document.write(content);
-        document.close();
-      }
-    }, [isLoading, error, content]);
-    
-    // Return an empty div as React needs to return something
-    return <></>;
+    return null;
   }
 
   // Se è richiesto il formato TXT, restituisci direttamente il contenuto
