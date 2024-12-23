@@ -48,6 +48,7 @@ export default function Index() {
             )
           `)
           .eq('status', 'approved')
+          .order('created_at', { ascending: false })
           .limit(12);
 
         if (error) {
