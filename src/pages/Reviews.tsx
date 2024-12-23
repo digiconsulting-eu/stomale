@@ -26,7 +26,6 @@ const Reviews = () => {
       try {
         console.log('Fetching reviews page:', currentPage);
         
-        // First get total count
         const { count: totalCount, error: countError } = await supabase
           .from('reviews')
           .select('*', { count: 'exact', head: true })
@@ -34,7 +33,6 @@ const Reviews = () => {
 
         if (countError) throw countError;
 
-        // Then get paginated data with user information
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -61,8 +59,6 @@ const Reviews = () => {
 
         if (error) throw error;
 
-        console.log('Fetched reviews with users:', data);
-
         return {
           reviews: data || [],
           totalCount: totalCount || 0,
@@ -85,7 +81,7 @@ const Reviews = () => {
         <div className="grid grid-cols-12 gap-6">
           <div className="col-span-8">
             <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
-            <div className="grid grid-cols-1 gap-6 mb-8">
+            <div className="grid grid-cols-2 gap-6 mb-8">
               {[...Array(6)].map((_, i) => (
                 <Skeleton key={i} className="h-[200px]" />
               ))}
@@ -125,7 +121,7 @@ const Reviews = () => {
         <div className="col-span-8">
           <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
           
-          <div className="grid grid-cols-1 gap-6 mb-8">
+          <div className="grid grid-cols-2 gap-6 mb-8">
             {reviews.map((review) => (
               <ReviewCard 
                 key={review.id}
@@ -144,44 +140,47 @@ const Reviews = () => {
             ))}
 
             {reviews.length === 0 && (
-              <div className="text-center py-8">
+              <div className="col-span-2 text-center py-8">
                 <p className="text-gray-500">Non ci sono ancora recensioni.</p>
               </div>
             )}
           </div>
 
           {totalPages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-                
-                {[...Array(totalPages)].map((_, i) => {
-                  const pageNumber = i + 1;
-                  return (
-                    <PaginationItem key={pageNumber}>
-                      <PaginationLink
-                        onClick={() => setCurrentPage(pageNumber)}
-                        isActive={currentPage === pageNumber}
-                      >
-                        {pageNumber}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                })}
-                
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            <div className="flex justify-center mt-8">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} cursor-pointer`}
+                    />
+                  </PaginationItem>
+                  
+                  {[...Array(totalPages)].map((_, i) => {
+                    const pageNumber = i + 1;
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(pageNumber)}
+                          isActive={currentPage === pageNumber}
+                          className="cursor-pointer hover:bg-primary/10"
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} cursor-pointer`}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           )}
 
           <div className="mt-12 bg-white rounded-lg p-6 text-sm text-text-light">
