@@ -27,7 +27,7 @@ export default function Index() {
 
         if (!count) return [];
 
-        // Poi prendiamo 6 recensioni casuali usando OFFSET
+        // Poi prendiamo 12 recensioni casuali usando OFFSET
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -45,9 +45,9 @@ export default function Index() {
             )
           `)
           .eq('status', 'approved')
-          .limit(6)
+          .limit(12)
           .range(
-            Math.floor(Math.random() * Math.max(0, count - 6)), 
+            Math.floor(Math.random() * Math.max(0, count - 12)), 
             Math.floor(Math.random() * Math.max(0, count - 1))
           );
 
@@ -96,7 +96,7 @@ export default function Index() {
         
         {isLoading ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(12)].map((_, i) => (
               <Skeleton key={i} className="h-[300px]" />
             ))}
           </div>
