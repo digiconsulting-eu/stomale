@@ -100,6 +100,73 @@ const Reviews = () => {
   const reviews = data?.reviews || [];
   const totalPages = data?.totalPages || 0;
 
+  const renderPaginationNumbers = () => {
+    const pages = [];
+    const totalPagesArray = Array.from({ length: totalPages }, (_, i) => i + 1);
+    
+    // Always show first page
+    pages.push(
+      <PaginationItem key={1}>
+        <PaginationLink
+          onClick={() => setCurrentPage(1)}
+          isActive={currentPage === 1}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+
+    // Logic for showing dots and surrounding pages
+    if (currentPage > 3) {
+      pages.push(
+        <PaginationItem key="dots-1">
+          <div className="px-4">...</div>
+        </PaginationItem>
+      );
+    }
+
+    // Show current page and surrounding pages
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      if (i <= currentPage + 1 && i >= currentPage - 1) {
+        pages.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => setCurrentPage(i)}
+              isActive={currentPage === i}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    }
+
+    // Show dots before last page if needed
+    if (currentPage < totalPages - 2) {
+      pages.push(
+        <PaginationItem key="dots-2">
+          <div className="px-4">...</div>
+        </PaginationItem>
+      );
+    }
+
+    // Always show last page if there is more than one page
+    if (totalPages > 1) {
+      pages.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink
+            onClick={() => setCurrentPage(totalPages)}
+            isActive={currentPage === totalPages}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return pages;
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-primary mb-8">Ultime Recensioni</h1>
@@ -138,16 +205,7 @@ const Reviews = () => {
               />
             </PaginationItem>
             
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  onClick={() => setCurrentPage(page)}
-                  isActive={currentPage === page}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
+            {renderPaginationNumbers()}
             
             <PaginationItem>
               <PaginationNext 

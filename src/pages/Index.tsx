@@ -6,6 +6,8 @@ import { SearchBar } from "@/components/SearchBar";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { setPageTitle } from "@/utils/pageTitle";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export default function Index() {
   useEffect(() => {
@@ -15,7 +17,7 @@ export default function Index() {
   const { data: latestReviews = [], isLoading, isError } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
-      console.log('Fetching latest reviews...');
+      console.log('Fetching random reviews...');
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -33,7 +35,7 @@ export default function Index() {
           )
         `)
         .eq('status', 'approved')
-        .order('created_at', { ascending: false })
+        .order('RANDOM()')
         .limit(6);
 
       if (error) {
@@ -62,9 +64,16 @@ export default function Index() {
       </div>
 
       <section className="mt-16">
-        <h2 className="text-2xl font-semibold text-primary mb-8">
-          Ultime Recensioni
-        </h2>
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-semibold text-primary">
+            Recensioni in evidenza
+          </h2>
+          <Link to="/recensioni">
+            <Button variant="outline">
+              Mostra tutte le recensioni
+            </Button>
+          </Link>
+        </div>
         
         {isLoading ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
