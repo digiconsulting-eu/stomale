@@ -4,6 +4,7 @@ import { ReviewStats } from "@/components/ReviewStats";
 import { ReviewHeader } from "./ReviewHeader";
 import { ReviewBody } from "./ReviewBody";
 import { ReviewActions } from "./ReviewActions";
+import { capitalizeFirstLetter } from "@/utils/textUtils"; // Add this import
 
 interface ReviewContentProps {
   title: string;
