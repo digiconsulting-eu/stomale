@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReviewCard } from "@/components/ReviewCard";
 import { NotificationsTab } from "@/components/dashboard/NotificationsTab";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
+import { FavoritesTab } from "@/components/dashboard/FavoritesTab";
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("reviews");
@@ -47,6 +48,7 @@ const UserDashboard = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="reviews">Le mie recensioni</TabsTrigger>
+          <TabsTrigger value="favorites">Patologie seguite</TabsTrigger>
           <TabsTrigger value="notifications">Notifiche</TabsTrigger>
           <TabsTrigger value="profile">Profilo</TabsTrigger>
         </TabsList>
@@ -73,6 +75,10 @@ const UserDashboard = () => {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="favorites">
+          <FavoritesTab />
         </TabsContent>
 
         <TabsContent value="notifications">
