@@ -9,7 +9,7 @@ export default function Sitemap() {
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const isTxtFormat = location.pathname === '/sitemap.txt';
-  const isXmlFormat = location.pathname === '/sitemap.xml';
+  const isXmlFormat = location.pathname === '/sitemap-google.xml';
 
   useEffect(() => {
     const fetchSitemap = async () => {
@@ -61,7 +61,7 @@ export default function Sitemap() {
 
   // Redirect to XML format if accessed directly
   if (location.pathname === '/sitemap') {
-    window.location.href = '/sitemap.xml';
+    window.location.href = '/sitemap-google.xml';
     return null;
   }
 
