@@ -30,7 +30,7 @@ export const ReviewHeader = ({ title, condition, date, username }: ReviewHeaderP
 
       <div className="flex flex-col gap-2 mb-6">
         {username && (
-          <p className="text-text-light">
+          <p className="text-text-light text-sm">
             {username}
           </p>
         )}
