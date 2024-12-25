@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,11 +7,15 @@ import { NotificationsTab } from "@/components/dashboard/NotificationsTab";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { FavoritesTab } from "@/components/dashboard/FavoritesTab";
 import { Badge } from "@/components/ui/badge";
+import { useLocation } from "react-router-dom";
 
 const UserDashboard = () => {
-  const [activeTab, setActiveTab] = useState("reviews");
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(
+    location.state?.activeTab || "reviews"
+  );
 
-  const { data: reviews } = useQuery({
+  const { data: reviews, isLoading } = useQuery({
     queryKey: ['user-reviews'],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -37,10 +41,20 @@ const UserDashboard = () => {
         .eq('user_id', session.session.user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        throw error;
+      }
+      return data || [];
     }
   });
+
+  // Update active tab when location state changes
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -55,7 +69,9 @@ const UserDashboard = () => {
         </TabsList>
 
         <TabsContent value="reviews" className="space-y-6">
-          {reviews?.length === 0 ? (
+          {isLoading ? (
+            <p className="text-gray-500">Caricamento recensioni...</p>
+          ) : reviews?.length === 0 ? (
             <p className="text-gray-500">Non hai ancora scritto recensioni.</p>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
