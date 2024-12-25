@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -7,10 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewsGrid } from "@/components/reviews/ReviewsGrid";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
 
 export default function SearchSymptoms() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSearchTerm = searchParams.get('q') || '';
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+  const [isSearching, setIsSearching] = useState(!!initialSearchTerm);
 
   const { data: reviews, isLoading } = useQuery({
     queryKey: ['symptom-reviews', searchTerm],
@@ -65,6 +68,7 @@ export default function SearchSymptoms() {
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
+      setSearchParams({ q: searchTerm });
       setIsSearching(true);
     }
   };
