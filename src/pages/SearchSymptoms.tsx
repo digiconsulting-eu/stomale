@@ -41,9 +41,9 @@ export default function SearchSymptoms() {
             )
           `)
           .eq('status', 'approved')
-          .textSearch('symptoms', searchTerm, {
-            type: 'plain',
-            config: 'italian'
+          .textSearch('symptoms_searchable', searchTerm, {
+            config: 'italian_unaccent',
+            type: 'websearch'
           })
           .order('created_at', { ascending: false });
 
