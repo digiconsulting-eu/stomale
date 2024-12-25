@@ -19,11 +19,12 @@ const REVIEWS_PER_PAGE = 20;
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['reviews', currentPage, REVIEWS_PER_PAGE],
     queryFn: async () => {
       console.log('Starting reviews fetch for page:', currentPage);
       try {
+        // First get total count of approved reviews
         const { count: totalCount, error: countError } = await supabase
           .from('reviews')
           .select('*', { count: 'exact', head: true })
@@ -31,7 +32,8 @@ const Reviews = () => {
 
         if (countError) throw countError;
 
-        const { data, error } = await supabase
+        // Then get paginated reviews with user data
+        const { data: reviews, error } = await supabase
           .from('reviews')
           .select(`
             id,
@@ -56,8 +58,10 @@ const Reviews = () => {
 
         if (error) throw error;
 
+        console.log('Fetched reviews:', reviews);
+        
         return {
-          reviews: data || [],
+          reviews: reviews || [],
           totalCount: totalCount || 0,
           totalPages: Math.ceil((totalCount || 0) / REVIEWS_PER_PAGE)
         };
@@ -77,12 +81,21 @@ const Reviews = () => {
     setPageTitle(getDefaultPageTitle("Ultime Recensioni"));
   }, []);
 
+  if (error) {
+    console.error('Error loading reviews:', error);
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-red-500">Si è verificato un errore nel caricamento delle recensioni.</p>
+      </div>
+    );
+  }
+
   const reviews = data?.reviews || [];
   const totalPages = data?.totalPages || 0;
 
   // Function to get visible page numbers
   const getVisiblePages = () => {
-    const delta = 2; // Number of pages to show before and after current page
+    const delta = 2;
     const range = [];
     const rangeWithDots = [];
     let l;
@@ -125,7 +138,15 @@ const Reviews = () => {
             ))}
           </div>
         ) : (
-          <ReviewsGrid reviews={reviews} isLoading={isLoading} />
+          <>
+            {reviews.length > 0 ? (
+              <ReviewsGrid reviews={reviews} isLoading={isLoading} />
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Non ci sono ancora recensioni.</p>
+              </div>
+            )}
+          </>
         )}
 
         {totalPages > 1 && (
