@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
+import { setPageTitle, getDefaultPageTitle, setMetaDescription, getSearchMetaDescription } from "@/utils/pageTitle";
 import { Link } from "react-router-dom";
 import { useConditions } from "@/hooks/useConditions";
 import { 
@@ -34,12 +34,12 @@ export default function SearchCondition() {
     page: currentPage,
     limit: ITEMS_PER_PAGE,
     searchTerm,
-    // Only apply letter filter if there's no search term
     letter: searchTerm ? "TUTTE" : selectedLetter
   });
 
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Cerca Patologia"));
+    setMetaDescription(getSearchMetaDescription());
   }, []);
 
   useEffect(() => {
@@ -49,7 +49,6 @@ export default function SearchCondition() {
     }
   }, [error]);
 
-  // Reset alla prima pagina quando cambiano i filtri
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedLetter]);
@@ -74,7 +73,6 @@ export default function SearchCondition() {
             variant={selectedLetter === letter ? "default" : "outline"}
             onClick={() => {
               setSelectedLetter(letter);
-              // Clear search term when selecting a letter
               setSearchTerm("");
             }}
             className="min-w-[40px]"
@@ -125,7 +123,6 @@ export default function SearchCondition() {
                   
                   {[...Array(totalPages)].map((_, i) => {
                     const pageNumber = i + 1;
-                    // Mostra solo le pagine vicine a quella corrente
                     if (
                       pageNumber === 1 ||
                       pageNumber === totalPages ||
@@ -142,7 +139,6 @@ export default function SearchCondition() {
                         </PaginationItem>
                       );
                     }
-                    // Mostra i puntini di sospensione
                     if (
                       (pageNumber === currentPage - 3 && pageNumber > 2) ||
                       (pageNumber === currentPage + 3 && pageNumber < totalPages - 1)

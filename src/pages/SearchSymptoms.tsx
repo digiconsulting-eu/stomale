@@ -8,12 +8,18 @@ import { ReviewsGrid } from "@/components/reviews/ReviewsGrid";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
+import { setPageTitle, getDefaultPageTitle, setMetaDescription } from "@/utils/pageTitle";
 
 export default function SearchSymptoms() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearchTerm = searchParams.get('q') || '';
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [isSearching, setIsSearching] = useState(!!initialSearchTerm);
+
+  useEffect(() => {
+    setPageTitle(getDefaultPageTitle("Cerca Sintomi"));
+    setMetaDescription("Cerca recensioni ed esperienze in base ai sintomi. Trova testimonianze di persone che hanno avuto sintomi simili ai tuoi su StoMale.info.");
+  }, []);
 
   const { data: reviews, isLoading } = useQuery({
     queryKey: ['symptom-reviews', searchTerm],

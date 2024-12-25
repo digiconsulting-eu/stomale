@@ -5,13 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewContent } from "@/components/review/ReviewContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { setPageTitle } from "@/utils/pageTitle";
+import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
 
 const ReviewDetail = () => {
   const { condition, title } = useParams();
 
   useEffect(() => {
-    setPageTitle(`${title} | Recensione su ${condition}`);
+    if (condition && title) {
+      setPageTitle(`${title} | Recensione su ${condition}`);
+      setMetaDescription(getReviewMetaDescription(condition, title));
+    }
   }, [title, condition]);
 
   const { data: review, isLoading, error } = useQuery({
