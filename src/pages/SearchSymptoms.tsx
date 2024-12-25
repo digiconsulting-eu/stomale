@@ -41,10 +41,18 @@ export default function SearchSymptoms() {
             )
           `)
           .eq('status', 'approved')
-          .ilike('symptoms', `%${searchTerm}%`)
+          .textSearch('symptoms', searchTerm, {
+            type: 'plain',
+            config: 'italian'
+          })
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          throw error;
+        }
+
+        console.log('Found reviews:', data);
         return data || [];
       } catch (error) {
         console.error('Error searching reviews:', error);
