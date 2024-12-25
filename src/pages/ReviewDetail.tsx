@@ -23,7 +23,7 @@ const ReviewDetail = () => {
       try {
         console.log('Searching for review with title:', title);
         
-        // Get all reviews for this condition to find the matching one
+        // Get all reviews for this condition
         const { data: reviews, error: queryError } = await supabase
           .from('reviews')
           .select(`
@@ -35,7 +35,6 @@ const ReviewDetail = () => {
               Patologia
             )
           `)
-          .eq('status', 'approved')
           .eq('PATOLOGIE.Patologia', condition?.toUpperCase());
 
         if (queryError) throw queryError;
