@@ -62,6 +62,8 @@ const AuthModal = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      
+      // Only show modal if user is not authenticated
       if (!session) {
         const timer = setTimeout(() => {
           // Don't show modal on login or register pages
