@@ -6,6 +6,7 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { NotificationsTab } from "@/components/dashboard/NotificationsTab";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { FavoritesTab } from "@/components/dashboard/FavoritesTab";
+import { Badge } from "@/components/ui/badge";
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("reviews");
@@ -28,12 +29,12 @@ const UserDashboard = () => {
           medication_effectiveness,
           healing_possibility,
           social_discomfort,
+          status,
           condition:PATOLOGIE (
             Patologia
           )
         `)
         .eq('user_id', session.session.user.id)
-        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -59,19 +60,28 @@ const UserDashboard = () => {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {reviews?.map((review) => (
-                <ReviewCard
-                  key={review.id}
-                  id={review.id.toString()}
-                  title={review.title}
-                  condition={review.condition.Patologia}
-                  experience={review.experience}
-                  diagnosisDifficulty={review.diagnosis_difficulty}
-                  symptomsSeverity={review.symptoms_severity}
-                  hasMedication={review.has_medication}
-                  medicationEffectiveness={review.medication_effectiveness}
-                  healingPossibility={review.healing_possibility}
-                  socialDiscomfort={review.social_discomfort}
-                />
+                <div key={review.id} className="relative">
+                  <ReviewCard
+                    id={review.id.toString()}
+                    title={review.title}
+                    condition={review.condition.Patologia}
+                    experience={review.experience}
+                    diagnosisDifficulty={review.diagnosis_difficulty}
+                    symptomsSeverity={review.symptoms_severity}
+                    hasMedication={review.has_medication}
+                    medicationEffectiveness={review.medication_effectiveness}
+                    healingPossibility={review.healing_possibility}
+                    socialDiscomfort={review.social_discomfort}
+                  />
+                  {review.status === 'pending' && (
+                    <Badge 
+                      variant="secondary" 
+                      className="absolute top-2 right-2"
+                    >
+                      In attesa di approvazione
+                    </Badge>
+                  )}
+                </div>
               ))}
             </div>
           )}
