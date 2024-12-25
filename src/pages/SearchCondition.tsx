@@ -34,7 +34,8 @@ export default function SearchCondition() {
     page: currentPage,
     limit: ITEMS_PER_PAGE,
     searchTerm,
-    letter: selectedLetter
+    // Only apply letter filter if there's no search term
+    letter: searchTerm ? "TUTTE" : selectedLetter
   });
 
   useEffect(() => {
@@ -73,6 +74,7 @@ export default function SearchCondition() {
             variant={selectedLetter === letter ? "default" : "outline"}
             onClick={() => {
               setSelectedLetter(letter);
+              // Clear search term when selecting a letter
               setSearchTerm("");
             }}
             className="min-w-[40px]"
