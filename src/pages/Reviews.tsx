@@ -15,6 +15,10 @@ const Reviews = () => {
     setPageTitle(getDefaultPageTitle("Ultime Recensioni"));
   }, []);
 
+  console.log('Reviews data:', data);
+  console.log('Reviews loading:', isLoading);
+  console.log('Reviews error:', error);
+
   if (error) {
     console.error('Error loading reviews:', error);
     return (
