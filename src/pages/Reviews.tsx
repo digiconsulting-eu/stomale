@@ -80,6 +80,39 @@ const Reviews = () => {
   const reviews = data?.reviews || [];
   const totalPages = data?.totalPages || 0;
 
+  // Function to get visible page numbers
+  const getVisiblePages = () => {
+    const delta = 2; // Number of pages to show before and after current page
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 || 
+        i === totalPages || 
+        i >= currentPage - delta && 
+        i <= currentPage + delta
+      ) {
+        range.push(i);
+      }
+    }
+
+    range.forEach(i => {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    });
+
+    return rangeWithDots;
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-8">
@@ -98,34 +131,43 @@ const Reviews = () => {
         {totalPages > 1 && (
           <div className="flex justify-center my-8">
             <Pagination>
-              <PaginationContent>
+              <PaginationContent className="gap-2">
                 <PaginationItem>
                   <PaginationPrevious 
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} bg-white hover:bg-gray-50`}
-                  />
+                  >
+                    Precedente
+                  </PaginationPrevious>
                 </PaginationItem>
                 
-                {[...Array(totalPages)].map((_, i) => {
-                  const pageNumber = i + 1;
-                  return (
-                    <PaginationItem key={pageNumber}>
+                {getVisiblePages().map((pageNum, i) => (
+                  <PaginationItem key={i}>
+                    {pageNum === '...' ? (
+                      <span className="px-4 py-2">...</span>
+                    ) : (
                       <PaginationLink
-                        onClick={() => setCurrentPage(pageNumber)}
-                        isActive={currentPage === pageNumber}
-                        className={`${currentPage === pageNumber ? 'bg-primary text-white' : 'bg-white hover:bg-gray-50'}`}
+                        onClick={() => setCurrentPage(Number(pageNum))}
+                        isActive={currentPage === pageNum}
+                        className={`${
+                          currentPage === pageNum 
+                            ? 'bg-primary text-white hover:bg-primary-hover' 
+                            : 'bg-white hover:bg-gray-50'
+                        }`}
                       >
-                        {pageNumber}
+                        {pageNum}
                       </PaginationLink>
-                    </PaginationItem>
-                  );
-                })}
+                    )}
+                  </PaginationItem>
+                ))}
                 
                 <PaginationItem>
                   <PaginationNext 
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} bg-white hover:bg-gray-50`}
-                  />
+                  >
+                    Successiva
+                  </PaginationNext>
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
