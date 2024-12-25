@@ -14,7 +14,7 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
   const { data: reviewsData, isLoading } = useQuery({
     queryKey: ['reviews', page, limit],
     queryFn: async () => {
-      console.log('Fetching reviews with pagination:', { page, limit, offset });
+      console.log('Starting to fetch reviews...');
       
       // First get total count
       const { count: totalCount, error: countError } = await supabase
@@ -27,9 +27,9 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
         throw countError;
       }
 
-      console.log('Total approved reviews count:', totalCount);
+      console.log('Total count of approved reviews:', totalCount);
 
-      // Then get paginated data
+      // Then get paginated data with all necessary relations
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -42,7 +42,8 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
           users (
             username
           ),
-          PATOLOGIE (
+          PATOLOGIE!inner (
+            id,
             Patologia
           )
         `)
@@ -55,13 +56,19 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
         throw error;
       }
 
-      console.log('Fetched reviews:', data);
+      console.log('Successfully fetched reviews:', data);
       
       return {
         reviews: data || [],
         totalCount: totalCount || 0,
         totalPages: Math.ceil((totalCount || 0) / limit)
       };
+    },
+    meta: {
+      onError: (error: Error) => {
+        console.error('Query error:', error);
+        toast.error("Errore nel caricamento delle recensioni");
+      }
     }
   });
 
