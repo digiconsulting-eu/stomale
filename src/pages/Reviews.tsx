@@ -82,7 +82,7 @@ const Reviews = () => {
 
   // Function to get visible page numbers
   const getVisiblePages = () => {
-    const delta = 2; // Number of pages to show before and after current page
+    const delta = 1; // Reduced from 2 to 1 to show fewer numbers
     const range = [];
     const rangeWithDots = [];
     let l;
@@ -129,13 +129,13 @@ const Reviews = () => {
         )}
 
         {totalPages > 1 && (
-          <div className="flex justify-center my-8">
+          <div className="flex justify-center mt-12 mb-16">
             <Pagination>
-              <PaginationContent className="gap-2">
+              <PaginationContent className="gap-1 items-center">
                 <PaginationItem>
                   <PaginationPrevious 
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} bg-white hover:bg-gray-50`}
+                    className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} bg-white hover:bg-gray-50 px-3`}
                   >
                     Precedente
                   </PaginationPrevious>
@@ -144,16 +144,16 @@ const Reviews = () => {
                 {getVisiblePages().map((pageNum, i) => (
                   <PaginationItem key={i}>
                     {pageNum === '...' ? (
-                      <span className="px-4 py-2">...</span>
+                      <span className="px-2 py-2 text-gray-500">...</span>
                     ) : (
                       <PaginationLink
                         onClick={() => setCurrentPage(Number(pageNum))}
                         isActive={currentPage === pageNum}
                         className={`${
                           currentPage === pageNum 
-                            ? 'bg-primary text-white hover:bg-primary-hover' 
+                            ? 'bg-primary text-white hover:bg-primary/90' 
                             : 'bg-white hover:bg-gray-50'
-                        }`}
+                        } min-w-[40px] h-10 flex items-center justify-center`}
                       >
                         {pageNum}
                       </PaginationLink>
@@ -164,7 +164,7 @@ const Reviews = () => {
                 <PaginationItem>
                   <PaginationNext 
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} bg-white hover:bg-gray-50`}
+                    className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} bg-white hover:bg-gray-50 px-3`}
                   >
                     Successiva
                   </PaginationNext>
@@ -174,7 +174,7 @@ const Reviews = () => {
           </div>
         )}
 
-        <div className="mt-12 bg-white rounded-lg p-6 text-sm text-text-light">
+        <div className="mt-16 bg-white rounded-lg p-6 text-sm text-text-light">
           <p className="mb-4">
             Su StoMale.info puoi leggere le esperienze di utenti che hanno o hanno avuto a che fare con diverse patologie. 
             Puoi leggere le loro esperienze, commentarle o fare domande e scoprire quali sintomi hanno o come si stanno curando.
