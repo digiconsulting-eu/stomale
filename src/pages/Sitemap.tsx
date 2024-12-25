@@ -9,7 +9,7 @@ export default function Sitemap() {
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const isTxtFormat = location.pathname === '/sitemap.txt';
-  const isXmlFormat = location.pathname === '/sitemap.xml';
+  const isXmlFormat = location.pathname === '/sitemap.xml' || location.pathname === '/sitemap-google.xml';
 
   useEffect(() => {
     const fetchSitemap = async () => {
