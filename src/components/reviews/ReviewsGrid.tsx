@@ -30,7 +30,7 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
   if (reviews.length === 0 && !isLoading) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">Non ci sono ancora recensioni.</p>
+        <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
       </div>
     );
   }
