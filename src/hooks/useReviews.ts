@@ -26,15 +26,7 @@ export const useReviews = (page: number, limit: number) => {
         const { data: reviews, error } = await supabase
           .from('reviews')
           .select(`
-            id,
-            title,
-            experience,
-            diagnosis_difficulty,
-            symptoms_severity,
-            has_medication,
-            medication_effectiveness,
-            healing_possibility,
-            social_discomfort,
+            *,
             users (
               username
             ),
