@@ -17,15 +17,25 @@ export default function Index() {
   const { data: latestReviews = [], isLoading, isError } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
-      console.log('Fetching random reviews...');
+      console.log('Starting reviews fetch...');
       try {
         // First get total count of approved reviews
-        const { count } = await supabase
+        const { count, error: countError } = await supabase
           .from('reviews')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'approved');
 
-        if (!count) return [];
+        console.log('Total approved reviews count:', count);
+        
+        if (countError) {
+          console.error('Error getting count:', countError);
+          throw countError;
+        }
+
+        if (!count) {
+          console.log('No approved reviews found');
+          return [];
+        }
 
         // Then get paginated reviews with user data
         const { data, error } = await supabase
@@ -65,7 +75,7 @@ export default function Index() {
     },
     meta: {
       onError: (error: Error) => {
-        console.error('Error fetching reviews:', error);
+        console.error('Error in reviews query:', error);
         toast.error("Errore nel caricamento delle recensioni");
       }
     },
@@ -122,7 +132,7 @@ export default function Index() {
               />
             ))}
 
-            {latestReviews.length === 0 && (
+            {latestReviews.length === 0 && !isLoading && (
               <div className="col-span-full text-center py-8">
                 <p className="text-gray-500">Non ci sono ancora recensioni.</p>
               </div>
