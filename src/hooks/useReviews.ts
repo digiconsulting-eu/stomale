@@ -6,7 +6,7 @@ export const useReviews = (page: number, limit: number) => {
   return useQuery({
     queryKey: ['reviews', page, limit],
     queryFn: async () => {
-      console.log('Fetching reviews for page:', page);
+      console.log('Starting reviews fetch with params:', { page, limit });
       
       try {
         // First get total count of approved reviews
@@ -58,15 +58,14 @@ export const useReviews = (page: number, limit: number) => {
           totalCount: count || 0,
           totalPages: Math.ceil((count || 0) / limit)
         };
-      } catch (error) {
-        console.error('Error in query execution:', error);
+      } catch (error: any) {
+        console.error('Error in reviews query:', error);
+        toast.error("Errore nel caricamento delle recensioni");
         throw error;
       }
     },
-    meta: {
-      onError: () => {
-        toast.error("Errore nel caricamento delle recensioni");
-      }
-    }
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
