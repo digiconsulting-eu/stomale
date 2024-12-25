@@ -1,97 +1,169 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminTabs } from "@/components/admin/AdminTabs";
-
-// Temporary mock data
-const MOCK_REVIEWS = [
-  {
-    id: "1",
-    title: "La mia esperienza con l'emicrania cronica",
-    author: "Mario Rossi",
-    condition: "Emicrania",
-    status: "pending",
-    date: "2024-02-20",
-  },
-  {
-    id: "2",
-    title: "Gestire l'artrite reumatoide",
-    author: "Laura Bianchi",
-    condition: "Artrite Reumatoide",
-    status: "approved",
-    date: "2024-02-19",
-  },
-];
-
-const MOCK_COMMENTS = [
-  {
-    id: "1",
-    content: "Grazie per aver condiviso la tua esperienza...",
-    author: "Giuseppe Verdi",
-    reviewTitle: "La mia esperienza con l'emicrania cronica",
-    status: "pending",
-    date: "2024-02-21",
-  },
-];
-
-const MOCK_ADMINS = [
-  {
-    id: "1",
-    email: "franca.castelli@jobreference.it",
-    dateAdded: "2024-02-01",
-  },
-];
-
-const MOCK_NOTIFICATIONS = [
-  {
-    id: "1",
-    type: "review",
-    title: "Nuova recensione",
-    content: "Mario Rossi ha pubblicato una nuova recensione",
-    date: "2024-02-20",
-    read: false,
-  },
-  {
-    id: "2",
-    type: "comment",
-    title: "Nuovo commento",
-    content: "Giuseppe Verdi ha commentato una recensione",
-    date: "2024-02-21",
-    read: false,
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
   const { toast } = useToast();
-  const [reviews, setReviews] = useState(MOCK_REVIEWS);
-  const [comments, setComments] = useState(MOCK_COMMENTS);
-  const [admins, setAdmins] = useState(MOCK_ADMINS);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [admins, setAdmins] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [newAdminEmail, setNewAdminEmail] = useState("");
 
-  const handleReviewAction = (id: string, action: "approve" | "reject") => {
-    setReviews(reviews.map(review => 
-      review.id === id ? { ...review, status: action === "approve" ? "approved" : "rejected" } : review
-    ));
-    
-    toast({
-      title: action === "approve" ? "Recensione approvata" : "Recensione rifiutata",
-      description: `La recensione è stata ${action === "approve" ? "approvata" : "rifiutata"} con successo.`,
-    });
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          toast({
+            title: "Accesso negato",
+            description: "Devi effettuare l'accesso come amministratore",
+            variant: "destructive",
+          });
+          navigate('/');
+          return;
+        }
+
+        // Fetch reviews
+        const { data: reviewsData, error: reviewsError } = await supabase
+          .from('reviews')
+          .select(`
+            *,
+            users (username),
+            PATOLOGIE (Patologia)
+          `)
+          .order('created_at', { ascending: false });
+
+        if (reviewsError) throw reviewsError;
+
+        // Fetch comments
+        const { data: commentsData, error: commentsError } = await supabase
+          .from('comments')
+          .select(`
+            *,
+            users (username),
+            reviews (title)
+          `)
+          .order('created_at', { ascending: false });
+
+        if (commentsError) throw commentsError;
+
+        // Fetch admins
+        const { data: adminsData, error: adminsError } = await supabase
+          .from('admin')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (adminsError) throw adminsError;
+
+        // Transform the data to match the expected format
+        const formattedReviews = reviewsData.map(review => ({
+          id: review.id.toString(),
+          title: review.title,
+          author: review.users?.username || 'Utente anonimo',
+          condition: review.PATOLOGIE?.Patologia || 'N/A',
+          status: review.status,
+          date: new Date(review.created_at).toISOString().split('T')[0],
+        }));
+
+        const formattedComments = commentsData.map(comment => ({
+          id: comment.id.toString(),
+          content: comment.content,
+          author: comment.users?.username || 'Utente anonimo',
+          reviewTitle: comment.reviews?.title || 'N/A',
+          status: comment.status,
+          date: new Date(comment.created_at).toISOString().split('T')[0],
+        }));
+
+        const formattedAdmins = adminsData.map(admin => ({
+          id: admin.id.toString(),
+          email: admin.email,
+          dateAdded: new Date(admin.created_at).toISOString().split('T')[0],
+        }));
+
+        setReviews(formattedReviews);
+        setComments(formattedComments);
+        setAdmins(formattedAdmins);
+        setIsAdmin(true);
+      } catch (error) {
+        console.error('Error loading admin data:', error);
+        toast({
+          title: "Errore",
+          description: "Si è verificato un errore nel caricamento dei dati",
+          variant: "destructive",
+        });
+        navigate('/');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [navigate, toast]);
+
+  const handleReviewAction = async (id: string, action: "approve" | "reject") => {
+    try {
+      const { error } = await supabase
+        .from('reviews')
+        .update({ status: action })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setReviews(reviews.map(review => 
+        review.id === id ? { ...review, status: action } : review
+      ));
+      
+      toast({
+        title: action === "approve" ? "Recensione approvata" : "Recensione rifiutata",
+        description: `La recensione è stata ${action === "approve" ? "approvata" : "rifiutata"} con successo.`,
+      });
+    } catch (error) {
+      console.error('Error updating review:', error);
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore nell'aggiornamento della recensione",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleCommentAction = (id: string, action: "approve" | "reject") => {
-    setComments(comments.map(comment => 
-      comment.id === id ? { ...comment, status: action === "approve" ? "approved" : "rejected" } : comment
-    ));
-    
-    toast({
-      title: action === "approve" ? "Commento approvato" : "Commento rifiutato",
-      description: `Il commento è stato ${action === "approve" ? "approvato" : "rifiutato"} con successo.`,
-    });
+  const handleCommentAction = async (id: string, action: "approve" | "reject") => {
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .update({ status: action })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setComments(comments.map(comment => 
+        comment.id === id ? { ...comment, status: action } : comment
+      ));
+      
+      toast({
+        title: action === "approve" ? "Commento approvato" : "Commento rifiutato",
+        description: `Il commento è stato ${action === "approve" ? "approvato" : "rifiutato"} con successo.`,
+      });
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore nell'aggiornamento del commento",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleAddAdmin = () => {
+  const handleAddAdmin = async () => {
     if (!newAdminEmail || !newAdminEmail.includes("@")) {
       toast({
         title: "Errore",
@@ -101,19 +173,36 @@ const Admin = () => {
       return;
     }
 
-    const newAdmin = {
-      id: (admins.length + 1).toString(),
-      email: newAdminEmail,
-      dateAdded: new Date().toISOString().split("T")[0],
-    };
+    try {
+      const { data, error } = await supabase
+        .from('admin')
+        .insert([{ email: newAdminEmail }])
+        .select()
+        .single();
 
-    setAdmins([...admins, newAdmin]);
-    setNewAdminEmail("");
-    
-    toast({
-      title: "Amministratore aggiunto",
-      description: "Il nuovo amministratore è stato aggiunto con successo.",
-    });
+      if (error) throw error;
+
+      const newAdmin = {
+        id: data.id.toString(),
+        email: data.email,
+        dateAdded: new Date(data.created_at).toISOString().split('T')[0],
+      };
+
+      setAdmins([...admins, newAdmin]);
+      setNewAdminEmail("");
+      
+      toast({
+        title: "Amministratore aggiunto",
+        description: "Il nuovo amministratore è stato aggiunto con successo.",
+      });
+    } catch (error) {
+      console.error('Error adding admin:', error);
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore nell'aggiunta dell'amministratore",
+        variant: "destructive",
+      });
+    }
   };
 
   const markNotificationAsRead = (id: string) => {
@@ -121,6 +210,20 @@ const Admin = () => {
       notification.id === id ? { ...notification, read: true } : notification
     ));
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center">
+          <div className="text-xl">Caricamento...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <div className="container mx-auto px-4 py-4 md:py-8">
