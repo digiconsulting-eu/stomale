@@ -18,16 +18,6 @@ export const SearchBar = () => {
       console.log('Fetching conditions for SearchBar...');
       
       try {
-        // Check rate limit before making the request
-        const rateLimitResponse = await supabase.functions.invoke('rate-limit');
-        const rateLimitData = await rateLimitResponse.data;
-        
-        if (rateLimitResponse.error) {
-          throw new Error(rateLimitResponse.error.message);
-        }
-
-        console.log('Rate limit remaining:', rateLimitData.remaining);
-
         const { data, error } = await supabase
           .from('PATOLOGIE')
           .select('Patologia')
@@ -38,18 +28,15 @@ export const SearchBar = () => {
           throw error;
         }
 
+        console.log('Fetched conditions:', data);
         return data?.map(item => item.Patologia) || [];
       } catch (error: any) {
-        if (error.status === 429) {
-          toast.error("Troppe richieste. Riprova tra qualche secondo.");
-        } else {
-          console.error('Error:', error);
-          toast.error("Errore durante il caricamento delle patologie");
-        }
+        console.error('Error:', error);
+        toast.error("Errore durante il caricamento delle patologie");
         throw error;
       }
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
