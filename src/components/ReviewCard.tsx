@@ -63,7 +63,7 @@ export const ReviewCard = ({
           {truncateExperience(experience)}
         </p>
 
-        <Link to={`/patologia/${condition.toLowerCase()}/recensione/${createSlug(title)}`}>
+        <Link to={`/patologia/${condition}/recensione/${createSlug(title)}`}>
           <Button 
             className="w-full bg-primary text-white hover:bg-primary-hover"
           >
