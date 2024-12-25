@@ -1,81 +1,15 @@
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 import { ReviewsGrid } from "@/components/reviews/ReviewsGrid";
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationItem, 
-  PaginationLink, 
-  PaginationNext, 
-  PaginationPrevious 
-} from "@/components/ui/pagination";
+import { ReviewsPagination } from "@/components/reviews/ReviewsPagination";
+import { useReviews } from "@/hooks/useReviews";
 
 const REVIEWS_PER_PAGE = 20;
 
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['reviews', currentPage, REVIEWS_PER_PAGE],
-    queryFn: async () => {
-      console.log('Starting reviews fetch for page:', currentPage);
-      try {
-        // First get total count of approved reviews
-        const { count: totalCount, error: countError } = await supabase
-          .from('reviews')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'approved');
-
-        if (countError) throw countError;
-
-        // Then get paginated reviews with user data
-        const { data: reviews, error } = await supabase
-          .from('reviews')
-          .select(`
-            id,
-            title,
-            experience,
-            diagnosis_difficulty,
-            symptoms_severity,
-            has_medication,
-            medication_effectiveness,
-            healing_possibility,
-            social_discomfort,
-            users (
-              username
-            ),
-            PATOLOGIE (
-              Patologia
-            )
-          `)
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false })
-          .range((currentPage - 1) * REVIEWS_PER_PAGE, currentPage * REVIEWS_PER_PAGE - 1);
-
-        if (error) throw error;
-
-        console.log('Fetched reviews:', reviews);
-        
-        return {
-          reviews: reviews || [],
-          totalCount: totalCount || 0,
-          totalPages: Math.ceil((totalCount || 0) / REVIEWS_PER_PAGE)
-        };
-      } catch (error) {
-        console.error('Error in reviews query:', error);
-        throw error;
-      }
-    },
-    meta: {
-      onError: () => {
-        toast.error("Errore nel caricamento delle recensioni");
-      }
-    }
-  });
+  const { data, isLoading, error } = useReviews(currentPage, REVIEWS_PER_PAGE);
 
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Ultime Recensioni"));
@@ -92,39 +26,6 @@ const Reviews = () => {
 
   const reviews = data?.reviews || [];
   const totalPages = data?.totalPages || 0;
-
-  // Function to get visible page numbers
-  const getVisiblePages = () => {
-    const delta = 2;
-    const range = [];
-    const rangeWithDots = [];
-    let l;
-
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 || 
-        i === totalPages || 
-        i >= currentPage - delta && 
-        i <= currentPage + delta
-      ) {
-        range.push(i);
-      }
-    }
-
-    range.forEach(i => {
-      if (l) {
-        if (i - l === 2) {
-          rangeWithDots.push(l + 1);
-        } else if (i - l !== 1) {
-          rangeWithDots.push('...');
-        }
-      }
-      rangeWithDots.push(i);
-      l = i;
-    });
-
-    return rangeWithDots;
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -151,47 +52,11 @@ const Reviews = () => {
 
         {totalPages > 1 && (
           <div className="flex justify-center my-8">
-            <Pagination>
-              <PaginationContent className="gap-2">
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} bg-white hover:bg-gray-50`}
-                  >
-                    Precedente
-                  </PaginationPrevious>
-                </PaginationItem>
-                
-                {getVisiblePages().map((pageNum, i) => (
-                  <PaginationItem key={i}>
-                    {pageNum === '...' ? (
-                      <span className="px-4 py-2">...</span>
-                    ) : (
-                      <PaginationLink
-                        onClick={() => setCurrentPage(Number(pageNum))}
-                        isActive={currentPage === pageNum}
-                        className={`${
-                          currentPage === pageNum 
-                            ? 'bg-primary text-white hover:bg-primary-hover' 
-                            : 'bg-white hover:bg-gray-50'
-                        }`}
-                      >
-                        {pageNum}
-                      </PaginationLink>
-                    )}
-                  </PaginationItem>
-                ))}
-                
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} bg-white hover:bg-gray-50`}
-                  >
-                    Successiva
-                  </PaginationNext>
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            <ReviewsPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         )}
 
