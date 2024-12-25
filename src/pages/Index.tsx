@@ -19,7 +19,7 @@ export default function Index() {
     queryFn: async () => {
       console.log('Fetching random reviews...');
       try {
-        // Prima otteniamo il conteggio totale delle recensioni approvate
+        // First get total count of approved reviews
         const { count } = await supabase
           .from('reviews')
           .select('*', { count: 'exact', head: true })
@@ -27,7 +27,7 @@ export default function Index() {
 
         if (!count) return [];
 
-        // Poi prendiamo 12 recensioni casuali con i dati dell'utente
+        // Then get paginated reviews with user data
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -63,13 +63,15 @@ export default function Index() {
         throw error;
       }
     },
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error fetching reviews:', error);
+        toast.error("Errore nel caricamento delle recensioni");
+      }
+    },
     retry: 1,
-    staleTime: 1000 * 60 * 5, // Cache per 5 minuti
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
-
-  if (isError) {
-    toast.error("Errore nel caricamento delle recensioni");
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
