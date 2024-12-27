@@ -23,7 +23,7 @@ const ReviewDetail = () => {
       try {
         console.log('Searching for review with title:', title);
         
-        // Get all reviews for this condition
+        // Get all reviews for this condition with user data
         const { data: reviews, error: queryError } = await supabase
           .from('reviews')
           .select(`
