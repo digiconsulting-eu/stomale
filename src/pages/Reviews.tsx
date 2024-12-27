@@ -49,6 +49,7 @@ const Reviews = () => {
               username
             ),
             PATOLOGIE (
+              id,
               Patologia
             )
           `)
