@@ -35,15 +35,10 @@ export default function Sitemap() {
 
         if (typeof data === 'string') {
           if (isXmlFormat) {
-            // For XML format, set the content type and serve raw XML
-            document.documentElement.innerHTML = data;
-            document.querySelector('html')?.setAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
-            document.querySelector('html')?.removeAttribute('class');
-            document.querySelector('html')?.removeAttribute('style');
-            const meta = document.createElement('meta');
-            meta.setAttribute('http-equiv', 'Content-Type');
-            meta.setAttribute('content', 'application/xml; charset=utf-8');
-            document.head.appendChild(meta);
+            // Per il formato XML, servi direttamente il contenuto XML
+            document.open('text/xml');
+            document.write(data);
+            document.close();
             return;
           }
           setContent(data);
@@ -77,7 +72,7 @@ export default function Sitemap() {
     return null;
   }
 
-  // Per il formato XML, il contenuto è già stato impostato direttamente nel DOM
+  // Per il formato XML, il contenuto è già stato impostato direttamente nel documento
   if (isXmlFormat) {
     return null;
   }
