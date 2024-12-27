@@ -34,14 +34,19 @@ export default function Sitemap() {
         }
 
         if (typeof data === 'string') {
-          setContent(data);
-          
-          // If XML format is requested, set the content type and serve the raw XML
           if (isXmlFormat) {
-            const xmlDoc = new DOMParser().parseFromString(data, 'application/xml');
-            document.documentElement.innerHTML = '';
-            document.documentElement.appendChild(xmlDoc.documentElement);
+            // For XML format, set the content type and serve raw XML
+            document.documentElement.innerHTML = data;
+            document.querySelector('html')?.setAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
+            document.querySelector('html')?.removeAttribute('class');
+            document.querySelector('html')?.removeAttribute('style');
+            const meta = document.createElement('meta');
+            meta.setAttribute('http-equiv', 'Content-Type');
+            meta.setAttribute('content', 'application/xml; charset=utf-8');
+            document.head.appendChild(meta);
+            return;
           }
+          setContent(data);
         } else if (data?.error) {
           throw new Error(data.error);
         } else {
@@ -59,8 +64,8 @@ export default function Sitemap() {
     fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // Se è richiesto il formato TXT o XML, restituisci direttamente il contenuto
-  if (isTxtFormat || isXmlFormat) {
+  // Se è richiesto il formato TXT, restituisci direttamente il contenuto
+  if (isTxtFormat) {
     if (isLoading) return "Generating sitemap...";
     if (error) return error;
     return content;
@@ -69,6 +74,11 @@ export default function Sitemap() {
   // Redirect to XML format if accessed directly
   if (location.pathname === '/sitemap') {
     window.location.href = '/sitemap-google.xml';
+    return null;
+  }
+
+  // Per il formato XML, il contenuto è già stato impostato direttamente nel DOM
+  if (isXmlFormat) {
     return null;
   }
 
