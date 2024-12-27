@@ -23,6 +23,8 @@ const Reviews = () => {
 
         if (countError) throw countError;
 
+        console.log('Total approved reviews count:', totalCount);
+
         // Then get paginated reviews with user data
         const { data, error } = await supabase
           .from('reviews')
@@ -36,11 +38,10 @@ const Reviews = () => {
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
-            users (
-              id,
+            users!reviews_user_id_fkey (
               username
             ),
-            PATOLOGIE (
+            PATOLOGIE!reviews_condition_id_fkey (
               id,
               Patologia
             )
@@ -56,8 +57,14 @@ const Reviews = () => {
 
         console.log('Fetched reviews:', data);
         
+        // Transform the data to match the expected format
+        const transformedReviews = data.map(review => ({
+          ...review,
+          username: review.users?.username
+        }));
+
         return {
-          reviews: data || [],
+          reviews: transformedReviews || [],
           totalCount: totalCount || 0,
           totalPages: Math.ceil((totalCount || 0) / REVIEWS_PER_PAGE)
         };
