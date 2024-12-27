@@ -38,10 +38,11 @@ const Reviews = () => {
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
-            users!reviews_user_id_fkey (
+            user_id,
+            users (
               username
             ),
-            PATOLOGIE!reviews_condition_id_fkey (
+            PATOLOGIE (
               id,
               Patologia
             )
@@ -55,16 +56,22 @@ const Reviews = () => {
           throw error;
         }
 
-        console.log('Fetched reviews:', data);
+        console.log('Raw reviews data:', data);
+        console.log('Sample user data from first review:', data?.[0]?.users);
         
         // Transform the data to match the expected format
-        const transformedReviews = data.map(review => ({
-          ...review,
-          username: review.users?.username
-        }));
+        const transformedReviews = data?.map(review => {
+          console.log('Processing review:', review.id, 'User data:', review.users);
+          return {
+            ...review,
+            username: review.users?.username
+          };
+        }) || [];
+
+        console.log('Transformed reviews:', transformedReviews);
 
         return {
-          reviews: transformedReviews || [],
+          reviews: transformedReviews,
           totalCount: totalCount || 0,
           totalPages: Math.ceil((totalCount || 0) / REVIEWS_PER_PAGE)
         };
