@@ -63,11 +63,11 @@ const AuthModal = () => {
     const checkAuthStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
-      // Only show modal if user is not authenticated and not on sitemap pages
+      // Only show modal if user is not authenticated
       if (!session) {
         const timer = setTimeout(() => {
-          // Don't show modal on login, register, or sitemap pages
-          if (!['/login', '/registrati', '/sitemap', '/sitemap.txt', '/sitemap-google.xml'].includes(location.pathname)) {
+          // Don't show modal on login or register pages
+          if (!['/login', '/registrati'].includes(location.pathname)) {
             setIsOpen(true);
           }
         }, 90000); // 90 seconds
