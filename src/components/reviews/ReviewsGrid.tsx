@@ -14,6 +14,7 @@ interface Review {
     username: string;
   };
   PATOLOGIE?: {
+    id: number;
     Patologia: string;
   };
 }
@@ -24,9 +25,6 @@ interface ReviewsGridProps {
 }
 
 export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
-  console.log('ReviewsGrid - reviews:', reviews);
-  console.log('ReviewsGrid - isLoading:', isLoading);
-
   if (reviews.length === 0 && !isLoading) {
     return (
       <div className="text-center py-8">

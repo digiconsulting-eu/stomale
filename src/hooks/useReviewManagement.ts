@@ -16,60 +16,74 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
     queryFn: async () => {
       console.log('Starting to fetch reviews...');
       
-      // First get total count
-      const { count: totalCount, error: countError } = await supabase
-        .from('reviews')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'approved');
+      try {
+        // First get total count
+        const { count: totalCount, error: countError } = await supabase
+          .from('reviews')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'approved');
 
-      if (countError) {
-        console.error('Error getting count:', countError);
-        throw countError;
-      }
+        if (countError) {
+          console.error('Error getting count:', countError);
+          throw countError;
+        }
 
-      console.log('Total count of approved reviews:', totalCount);
+        console.log('Total count of approved reviews:', totalCount);
 
-      // Then get paginated data with all necessary relations
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          title,
-          experience,
-          status,
-          created_at,
-          user_id,
-          users (
-            username
-          ),
-          PATOLOGIE!inner (
+        // Then get paginated data with all necessary relations
+        const { data, error } = await supabase
+          .from('reviews')
+          .select(`
             id,
-            Patologia
-          )
-        `)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
+            title,
+            experience,
+            diagnosis_difficulty,
+            symptoms_severity,
+            has_medication,
+            medication_effectiveness,
+            healing_possibility,
+            social_discomfort,
+            users (
+              username
+            ),
+            PATOLOGIE (
+              id,
+              Patologia
+            )
+          `)
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1);
 
-      if (error) {
-        console.error('Error fetching reviews:', error);
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          throw error;
+        }
+
+        console.log('Successfully fetched reviews:', data);
+        
+        return {
+          reviews: data || [],
+          totalCount: totalCount || 0,
+          totalPages: Math.ceil((totalCount || 0) / limit)
+        };
+      } catch (error: any) {
+        console.error('Error in review fetch:', error);
+        // Check if it's an authentication error
+        if (error.message?.includes('JWT')) {
+          toast.error("Sessione scaduta. Effettua nuovamente l'accesso.");
+        } else {
+          toast.error("Errore nel caricamento delle recensioni");
+        }
         throw error;
       }
-
-      console.log('Successfully fetched reviews:', data);
-      
-      return {
-        reviews: data || [],
-        totalCount: totalCount || 0,
-        totalPages: Math.ceil((totalCount || 0) / limit)
-      };
     },
     meta: {
       onError: (error: Error) => {
         console.error('Query error:', error);
-        toast.error("Errore nel caricamento delle recensioni");
       }
-    }
+    },
+    retry: 1
   });
 
   const updateReviewStatus = useMutation({
