@@ -21,24 +21,22 @@ const Reviews = () => {
           .select('*', { count: 'exact', head: true })
           .eq('status', 'approved');
 
-        if (countError) throw countError;
+        if (countError) {
+          console.error('Error getting count:', countError);
+          throw countError;
+        }
 
         console.log('Total approved reviews count:', totalCount);
 
+        // Calculate the range for pagination
+        const from = (currentPage - 1) * REVIEWS_PER_PAGE;
+        const to = from + REVIEWS_PER_PAGE - 1;
+
         // Then get paginated reviews with user data
-        const { data, error } = await supabase
+        const { data: reviewsData, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
-            id,
-            title,
-            experience,
-            diagnosis_difficulty,
-            symptoms_severity,
-            has_medication,
-            medication_effectiveness,
-            healing_possibility,
-            social_discomfort,
-            user_id,
+            *,
             users (
               username
             ),
@@ -49,24 +47,32 @@ const Reviews = () => {
           `)
           .eq('status', 'approved')
           .order('created_at', { ascending: false })
-          .range((currentPage - 1) * REVIEWS_PER_PAGE, currentPage * REVIEWS_PER_PAGE - 1);
+          .range(from, to);
 
-        if (error) {
-          console.error('Error fetching reviews:', error);
-          throw error;
+        if (reviewsError) {
+          console.error('Error fetching reviews:', reviewsError);
+          throw reviewsError;
         }
 
-        console.log('Raw reviews data:', data);
-        console.log('Sample user data from first review:', data?.[0]?.users);
+        console.log('Raw reviews data:', reviewsData);
         
+        if (!reviewsData) {
+          console.log('No reviews data returned');
+          return {
+            reviews: [],
+            totalCount: 0,
+            totalPages: 0
+          };
+        }
+
         // Transform the data to match the expected format
-        const transformedReviews = data?.map(review => {
+        const transformedReviews = reviewsData.map(review => {
           console.log('Processing review:', review.id, 'User data:', review.users);
           return {
             ...review,
             username: review.users?.username
           };
-        }) || [];
+        });
 
         console.log('Transformed reviews:', transformedReviews);
 
@@ -81,7 +87,8 @@ const Reviews = () => {
       }
     },
     meta: {
-      onError: () => {
+      onError: (error: Error) => {
+        console.error('Query error:', error);
         toast.error("Errore nel caricamento delle recensioni");
       }
     }
@@ -102,15 +109,12 @@ const Reviews = () => {
     );
   }
 
-  const reviews = data?.reviews || [];
-  const totalPages = data?.totalPages || 0;
-
   return (
     <ReviewsContent
-      reviews={reviews}
+      reviews={data?.reviews || []}
       isLoading={isLoading}
       currentPage={currentPage}
-      totalPages={totalPages}
+      totalPages={data?.totalPages || 0}
       setCurrentPage={setCurrentPage}
     />
   );
