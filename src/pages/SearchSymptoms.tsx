@@ -46,6 +46,7 @@ export default function SearchSymptoms() {
               username
             ),
             PATOLOGIE (
+              id,
               Patologia
             )
           `)
