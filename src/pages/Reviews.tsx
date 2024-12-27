@@ -37,6 +37,7 @@ const Reviews = () => {
             healing_possibility,
             social_discomfort,
             users (
+              id,
               username
             ),
             PATOLOGIE (
