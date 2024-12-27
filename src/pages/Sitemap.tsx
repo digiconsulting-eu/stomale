@@ -35,6 +35,13 @@ export default function Sitemap() {
 
         if (typeof data === 'string') {
           setContent(data);
+          
+          // If XML format is requested, set the content type and serve the raw XML
+          if (isXmlFormat) {
+            const xmlDoc = new DOMParser().parseFromString(data, 'application/xml');
+            document.documentElement.innerHTML = '';
+            document.documentElement.appendChild(xmlDoc.documentElement);
+          }
         } else if (data?.error) {
           throw new Error(data.error);
         } else {
