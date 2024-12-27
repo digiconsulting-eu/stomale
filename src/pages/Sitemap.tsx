@@ -20,10 +20,6 @@ export default function Sitemap() {
         
         const { data, error: fetchError } = await supabase.functions.invoke('sitemap', {
           method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Content-Type': isXmlFormat ? 'application/xml' : 'text/plain'
-          }
         });
         
         console.log('Sitemap response:', { data, error: fetchError });
@@ -35,10 +31,7 @@ export default function Sitemap() {
 
         if (typeof data === 'string') {
           if (isXmlFormat) {
-            // Per il formato XML, servi direttamente il contenuto XML
-            document.open('text/xml');
-            document.write(data);
-            document.close();
+            window.location.href = '/sitemap-google.xml';
             return;
           }
           setContent(data);
@@ -72,7 +65,7 @@ export default function Sitemap() {
     return null;
   }
 
-  // Per il formato XML, il contenuto è già stato impostato direttamente nel documento
+  // Per il formato XML, redirigi direttamente all'URL
   if (isXmlFormat) {
     return null;
   }
