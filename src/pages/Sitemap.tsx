@@ -17,12 +17,14 @@ export default function Sitemap() {
             }
           });
 
-          // For XML formats, serve the content directly
           if (typeof data === 'string') {
-            // Clear the current document
-            document.open('text/xml');
-            document.write(data);
-            document.close();
+            // Create a new window/tab with the XML content
+            const xmlWindow = window.open('', '_self');
+            if (xmlWindow) {
+              xmlWindow.document.write(data);
+              xmlWindow.document.contentType = 'application/xml';
+              xmlWindow.document.close();
+            }
           }
         } catch (error) {
           console.error('Error fetching sitemap:', error);
@@ -33,16 +35,16 @@ export default function Sitemap() {
     fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // For XML formats, return null as we handle the content directly
-  if (isXmlFormat) {
-    return null;
+  // For non-XML formats (like /sitemap), render a simple message
+  if (!isXmlFormat) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
+        <p>Please visit /sitemap.xml or /sitemap-google.xml for the XML version.</p>
+      </div>
+    );
   }
 
-  // For non-XML formats (like /sitemap), render a simple message
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
-      <p>Please visit /sitemap.xml or /sitemap-google.xml for the XML version.</p>
-    </div>
-  );
+  // Return null for XML formats as we handle the content directly
+  return null;
 }
