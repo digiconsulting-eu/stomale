@@ -8,6 +8,7 @@ const corsHeaders = {
 const BASE_URL = 'https://stomale.info';
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       headers: corsHeaders,
@@ -98,37 +99,14 @@ Deno.serve(async (req) => {
 
     xml += '</urlset>';
 
-    // Store the sitemap in Supabase Storage
-    const timestamp = new Date().getTime();
-    const fileName = `sitemap-${timestamp}.xml`;
-    
-    const { data: uploadData, error: uploadError } = await supabase
-      .storage
-      .from('sitemaps')
-      .upload(fileName, xml, {
-        contentType: 'application/xml',
-        cacheControl: '3600',
-        upsert: true
-      });
-
-    if (uploadError) throw uploadError;
-
-    // Get public URL for the uploaded sitemap
-    const { data: { publicUrl } } = supabase
-      .storage
-      .from('sitemaps')
-      .getPublicUrl(fileName);
-
-    // Return the public URL
-    return new Response(
-      JSON.stringify({ url: publicUrl }), 
-      { 
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
+    // Return the XML directly with proper headers
+    return new Response(xml, {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600'
       }
-    );
+    });
 
   } catch (error) {
     console.error('Error generating sitemap:', error);

@@ -10,15 +10,17 @@ export default function Sitemap() {
     const fetchSitemap = async () => {
       if (isXmlFormat) {
         try {
-          const { data: { url } } = await supabase.functions.invoke('sitemap', {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/xml'
-            }
-          });
-
-          // Redirect to the function URL
-          window.location.href = url;
+          const { data } = await supabase.functions.invoke('sitemap');
+          
+          // Create a new blob with the XML content
+          const blob = new Blob([data], { type: 'application/xml' });
+          const url = URL.createObjectURL(blob);
+          
+          // Open the XML in a new tab
+          window.open(url, '_self');
+          
+          // Clean up the URL object
+          URL.revokeObjectURL(url);
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
