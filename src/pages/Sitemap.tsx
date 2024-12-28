@@ -52,40 +52,32 @@ export default function Sitemap() {
     fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // Se è richiesto il formato XML, restituisci direttamente il contenuto XML
+  // Per i formati XML, serviamo direttamente il contenuto XML
   if (isXmlFormat) {
-    if (isLoading) return null;
-    if (error) return null;
+    if (isLoading || error) return null;
     
-    // Imposta il content type per XML
-    const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>${content}`;
-    
-    // Crea un blob XML e scaricalo automaticamente
+    // Serve direttamente il contenuto XML
     useEffect(() => {
       if (content) {
-        const blob = new Blob([xmlContent], { type: 'application/xml' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = location.pathname.substring(1); // Rimuove lo slash iniziale
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+        // Imposta il content type corretto
+        document.contentType = 'application/xml';
+        // Scrivi direttamente il contenuto XML
+        document.open('text/xml');
+        document.write(content);
+        document.close();
       }
     }, [content]);
 
     return null;
   }
 
-  // Se è richiesto il formato TXT, restituisci direttamente il contenuto
+  // Per il formato TXT, restituisci direttamente il contenuto
   if (isTxtFormat) {
-    if (isLoading) return null;
-    if (error) return null;
+    if (isLoading || error) return null;
     return content;
   }
 
-  // Altrimenti, mostra l'interfaccia HTML
+  // Interfaccia HTML per la visualizzazione del sitemap
   return (
     <div className="container mx-auto px-4 py-8">
       {isLoading ? (
