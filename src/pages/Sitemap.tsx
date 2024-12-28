@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 
 export default function Sitemap() {
   const location = useLocation();
@@ -18,27 +17,11 @@ export default function Sitemap() {
 
           const xmlText = await response.text();
           
-          // Create a new HTML document
-          const doc = document.implementation.createHTMLDocument("");
-          const xml = new DOMParser().parseFromString(xmlText, "text/xml");
-          
           // Clear the current document
-          while (document.firstChild) {
-            document.removeChild(document.firstChild);
-          }
+          document.open('text/xml');
+          document.write(xmlText);
+          document.close();
           
-          // Create and append XML processing instruction
-          const pi = document.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"');
-          document.appendChild(pi);
-          
-          // Append the XML content
-          document.appendChild(xml.documentElement);
-          
-          // Set the content type
-          const meta = document.createElement('meta');
-          meta.setAttribute('http-equiv', 'Content-Type');
-          meta.setAttribute('content', 'text/xml; charset=utf-8');
-          document.head.appendChild(meta);
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
