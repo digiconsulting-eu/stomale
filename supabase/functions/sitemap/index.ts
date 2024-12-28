@@ -77,19 +77,23 @@ Deno.serve(async (req) => {
     const isXml = acceptHeader.includes('application/xml');
 
     if (isXml) {
-      // Generate XML sitemap
+      // Generate XML sitemap with proper XML declaration and namespace
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n';
+      xml += '        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n';
+      xml += '        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9\n';
+      xml += '        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n';
       
-      // Add homepage
-      xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/recensioni</loc>\n  </url>\n`;
+      // Add homepage with lastmod and changefreq
+      const currentDate = new Date().toISOString().split('T')[0];
+      xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n    <lastmod>${currentDate}</lastmod>\n    <changefreq>daily</changefreq>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/recensioni</loc>\n    <lastmod>${currentDate}</lastmod>\n    <changefreq>daily</changefreq>\n  </url>\n`;
       
       // Add conditions
       conditions?.forEach((condition) => {
         if (condition.Patologia) {
           const encodedCondition = encodeUrl(condition.Patologia);
-          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n  </url>\n`;
+          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n    <lastmod>${currentDate}</lastmod>\n    <changefreq>weekly</changefreq>\n  </url>\n`;
         }
       });
 
@@ -101,18 +105,24 @@ Deno.serve(async (req) => {
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
-          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n  </url>\n`;
+          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n    <lastmod>${currentDate}</lastmod>\n    <changefreq>monthly</changefreq>\n  </url>\n`;
         }
       });
 
       // Add static pages
-      xml += `  <url>\n    <loc>${BASE_URL}/cerca-patologia</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/nuova-recensione</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/inserisci-patologia</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/cerca-sintomi</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/cookie-policy</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/privacy-policy</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/terms</loc>\n  </url>\n`;
+      const staticPages = [
+        'cerca-patologia',
+        'nuova-recensione',
+        'inserisci-patologia',
+        'cerca-sintomi',
+        'cookie-policy',
+        'privacy-policy',
+        'terms'
+      ];
+
+      staticPages.forEach(page => {
+        xml += `  <url>\n    <loc>${BASE_URL}/${page}</loc>\n    <lastmod>${currentDate}</lastmod>\n    <changefreq>monthly</changefreq>\n  </url>\n`;
+      });
 
       xml += '</urlset>';
 
