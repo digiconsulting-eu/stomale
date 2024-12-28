@@ -9,7 +9,6 @@ const corsHeaders = {
 const BASE_URL = 'https://stomale.info';
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       headers: corsHeaders,
@@ -46,7 +45,6 @@ Deno.serve(async (req) => {
     const conditions = conditionsResponse.data;
     const reviews = reviewsResponse.data;
 
-    // Function to properly encode URLs
     const encodeUrl = (str: string) => {
       return str.toLowerCase()
         .normalize('NFD')
@@ -55,9 +53,7 @@ Deno.serve(async (req) => {
         .replace(/(^-|-$)/g, '');
     };
 
-    // Generate XML sitemap with proper XML declaration and DOCTYPE
-    const xmlContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
+    const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${BASE_URL}/</loc>
@@ -106,10 +102,7 @@ ${['cerca-patologia', 'cerca-sintomi', 'nuova-recensione', 'inserisci-patologia'
 </urlset>`;
 
     return new Response(xmlContent, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/xml; charset=utf-8',
-      }
+      headers: corsHeaders
     });
 
   } catch (error) {

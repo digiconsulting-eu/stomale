@@ -15,13 +15,15 @@ export default function Sitemap() {
             },
           });
 
+          if (!response.ok) {
+            throw new Error('Failed to fetch sitemap');
+          }
+
           const xmlText = await response.text();
           
-          // Clear the current document
-          document.open('text/xml');
+          // Replace the entire document with the XML content
+          document.documentElement.innerHTML = '';
           document.write(xmlText);
-          document.close();
-          
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
