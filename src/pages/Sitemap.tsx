@@ -18,13 +18,11 @@ export default function Sitemap() {
           }
 
           if (data) {
-            // Set content type and write XML
-            const xmlDoc = new XMLSerializer().serializeToString(
-              new DOMParser().parseFromString(data, 'text/xml')
-            );
-            const blob = new Blob([xmlDoc], { type: 'text/xml' });
-            const url = URL.createObjectURL(blob);
-            window.location.href = url;
+            // Create a new document with XML content type
+            document.open('text/xml');
+            // Write the XML content directly
+            document.write(data);
+            document.close();
           }
         } catch (error) {
           console.error('Error fetching sitemap:', error);
