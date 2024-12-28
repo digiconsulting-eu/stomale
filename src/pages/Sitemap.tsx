@@ -18,11 +18,20 @@ export default function Sitemap() {
           }
 
           if (data) {
-            // Create a new document with XML content type
-            document.open('text/xml');
-            // Write the XML content directly
-            document.write(data);
-            document.close();
+            // Set the XML content type
+            const xmlBlob = new Blob([data], { type: 'application/xml;charset=utf-8' });
+            const xmlUrl = URL.createObjectURL(xmlBlob);
+            
+            // Download the XML file
+            const link = document.createElement('a');
+            link.href = xmlUrl;
+            link.download = location.pathname.substring(1); // Remove leading slash
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up
+            URL.revokeObjectURL(xmlUrl);
           }
         } catch (error) {
           console.error('Error fetching sitemap:', error);
