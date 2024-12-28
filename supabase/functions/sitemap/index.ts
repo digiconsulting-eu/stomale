@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, cache-control',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, cache-control, accept',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
 }
 
@@ -73,13 +73,12 @@ Deno.serve(async (req) => {
     };
 
     // Determine format based on Accept header
-    const acceptHeader = req.headers.get('Content-Type') || '';
+    const acceptHeader = req.headers.get('Accept') || '';
     const isXml = acceptHeader.includes('application/xml');
 
     if (isXml) {
       // Generate XML sitemap
-      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+      let xml = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
       
       // Add homepage
       xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n  </url>\n`;
