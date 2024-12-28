@@ -18,13 +18,12 @@ export default function Sitemap() {
           }
 
           if (data) {
-            // Set the content type header
-            document.contentType = 'application/xml';
+            // Create a new blob with the XML content and correct MIME type
+            const blob = new Blob([data], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
             
-            // Write the XML content directly to the document
-            document.open();
-            document.write(data);
-            document.close();
+            // Redirect to the blob URL
+            window.location.href = url;
           }
         } catch (error) {
           console.error('Error fetching sitemap:', error);
