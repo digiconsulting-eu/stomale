@@ -12,15 +12,21 @@ export default function Sitemap() {
         try {
           const { data } = await supabase.functions.invoke('sitemap');
           
-          // Create a new blob with the XML content
-          const blob = new Blob([data], { type: 'application/xml' });
-          const url = URL.createObjectURL(blob);
+          // Create a new document with the XML content
+          const xmlDoc = new DOMParser().parseFromString(data, 'application/xml');
+          const xmlString = new XMLSerializer().serializeToString(xmlDoc);
           
-          // Open the XML in a new tab
-          window.open(url, '_self');
+          // Set the content type to XML
+          const xmlBlob = new Blob([xmlString], { type: 'application/xml' });
           
-          // Clean up the URL object
-          URL.revokeObjectURL(url);
+          // Download the file directly
+          const link = document.createElement('a');
+          link.href = window.URL.createObjectURL(xmlBlob);
+          link.download = location.pathname.substring(1); // Remove leading slash
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
@@ -40,6 +46,6 @@ export default function Sitemap() {
     );
   }
 
-  // Return null for XML formats as we handle the content via redirect
+  // Return null for XML formats as we handle the content via direct download
   return null;
 }
