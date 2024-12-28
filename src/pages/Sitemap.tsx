@@ -10,19 +10,15 @@ export default function Sitemap() {
     const fetchSitemap = async () => {
       if (isXmlFormat) {
         try {
-          const { data } = await supabase.functions.invoke('sitemap', {
+          const { data: { url } } = await supabase.functions.invoke('sitemap', {
             method: 'GET',
             headers: {
               'Accept': 'application/xml'
             }
           });
 
-          if (typeof data === 'string') {
-            // Create a new document with XML content
-            document.open('text/xml');
-            document.write(data);
-            document.close();
-          }
+          // Redirect to the function URL
+          window.location.href = url;
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
@@ -42,6 +38,6 @@ export default function Sitemap() {
     );
   }
 
-  // Return null for XML formats as we handle the content directly
+  // Return null for XML formats as we handle the content via redirect
   return null;
 }

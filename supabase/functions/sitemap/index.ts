@@ -98,14 +98,37 @@ Deno.serve(async (req) => {
 
     xml += '</urlset>';
 
-    // Return XML with correct headers
-    return new Response(xml, { 
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/xml; charset=utf-8',
-        'X-Robots-Tag': 'noindex'
+    // Store the sitemap in Supabase Storage
+    const timestamp = new Date().getTime();
+    const fileName = `sitemap-${timestamp}.xml`;
+    
+    const { data: uploadData, error: uploadError } = await supabase
+      .storage
+      .from('sitemaps')
+      .upload(fileName, xml, {
+        contentType: 'application/xml',
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (uploadError) throw uploadError;
+
+    // Get public URL for the uploaded sitemap
+    const { data: { publicUrl } } = supabase
+      .storage
+      .from('sitemaps')
+      .getPublicUrl(fileName);
+
+    // Return the public URL
+    return new Response(
+      JSON.stringify({ url: publicUrl }), 
+      { 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
-    });
+    );
 
   } catch (error) {
     console.error('Error generating sitemap:', error);
