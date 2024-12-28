@@ -10,21 +10,12 @@ export default function Sitemap() {
     const fetchSitemap = async () => {
       if (isXmlFormat) {
         try {
-          const { data } = await supabase.functions.invoke('sitemap');
+          const { data: { url } } = await supabase.functions.invoke('sitemap', {
+            responseType: 'json'
+          });
           
-          // Create a new document with the XML content
-          const xmlDoc = new DOMParser().parseFromString(data, 'application/xml');
-          
-          // Clear the current document and set the XML content
-          document.documentElement.innerHTML = '';
-          const xmlNode = document.importNode(xmlDoc.documentElement, true);
-          document.appendChild(xmlNode);
-          
-          // Set the content type meta tag
-          const meta = document.createElement('meta');
-          meta.setAttribute('http-equiv', 'Content-Type');
-          meta.setAttribute('content', 'application/xml; charset=utf-8');
-          document.head.appendChild(meta);
+          // Redirect to the edge function URL that serves the XML content
+          window.location.href = url;
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
@@ -44,6 +35,6 @@ export default function Sitemap() {
     );
   }
 
-  // Return null for XML formats as we handle the content via document manipulation
+  // Return null while redirecting for XML formats
   return null;
 }
