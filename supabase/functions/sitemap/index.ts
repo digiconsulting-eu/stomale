@@ -55,60 +55,53 @@ Deno.serve(async (req) => {
     };
 
     // Generate XML sitemap
-    const xmlContent = [
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-      // Add homepage
-      `  <url>
+    const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
     <loc>${BASE_URL}/</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-  </url>`,
-      // Add main sections
-      `  <url>
+  </url>
+  <url>
     <loc>${BASE_URL}/recensioni</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
-  </url>`,
-      // Add conditions
-      ...(conditions?.map(condition => {
-        if (condition.Patologia) {
-          const encodedCondition = encodeUrl(condition.Patologia);
-          return `  <url>
+  </url>
+${conditions?.map(condition => {
+  if (condition.Patologia) {
+    const encodedCondition = encodeUrl(condition.Patologia);
+    return `  <url>
     <loc>${BASE_URL}/patologia/${encodedCondition}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`;
-        }
-        return '';
-      }) || []),
-      // Add reviews
-      ...(reviews?.map(review => {
-        if (review.PATOLOGIE?.Patologia && review.title) {
-          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
-          const encodedTitle = encodeUrl(review.title);
-          return `  <url>
+  }
+  return '';
+}).join('\n')}
+${reviews?.map(review => {
+  if (review.PATOLOGIE?.Patologia && review.title) {
+    const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
+    const encodedTitle = encodeUrl(review.title);
+    return `  <url>
     <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${encodedTitle}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>`;
-        }
-        return '';
-      }) || []),
-      // Add static pages
-      ...['cerca-patologia', 'cerca-sintomi', 'nuova-recensione', 'inserisci-patologia', 'cookie-policy', 'privacy-policy', 'terms']
-        .map(page => `  <url>
+  }
+  return '';
+}).join('\n')}
+${['cerca-patologia', 'cerca-sintomi', 'nuova-recensione', 'inserisci-patologia', 'cookie-policy', 'privacy-policy', 'terms']
+  .map(page => `  <url>
     <loc>${BASE_URL}/${page}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>`),
-      '</urlset>'
-    ].join('\n');
+  </url>`).join('\n')}
+</urlset>`;
 
     // Return the XML with proper headers
     return new Response(xmlContent, {

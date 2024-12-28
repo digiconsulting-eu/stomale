@@ -18,9 +18,17 @@ export default function Sitemap() {
           }
 
           if (data) {
-            // Create a new document with XML content type
-            document.open('text/xml');
-            // Write the XML content
+            // Remove any existing content
+            document.documentElement.innerHTML = '';
+            // Set the XML content type
+            document.appendChild(
+              document.implementation.createDocumentType(
+                'xml',
+                '',
+                ''
+              )
+            );
+            // Write the XML content directly
             document.write(data);
             document.close();
           }
