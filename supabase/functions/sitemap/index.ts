@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Content-Type': 'application/xml; charset=utf-8',
 }
 
 const BASE_URL = 'https://stomale.info';
@@ -54,7 +55,7 @@ Deno.serve(async (req) => {
         .replace(/(^-|-$)/g, '');
     };
 
-    // Generate XML sitemap with proper XML declaration
+    // Generate XML sitemap
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -103,13 +104,10 @@ ${['cerca-patologia', 'cerca-sintomi', 'nuova-recensione', 'inserisci-patologia'
   </url>`).join('\n')}
 </urlset>`;
 
-    // Return the XML with proper headers
     return new Response(xmlContent, {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/xml; charset=utf-8',
-        'X-Robots-Tag': 'all',
-        'Cache-Control': 'public, max-age=3600'
       }
     });
 

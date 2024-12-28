@@ -10,21 +10,35 @@ export default function Sitemap() {
     const fetchSitemap = async () => {
       if (isXmlFormat) {
         try {
-          const { data, error } = await supabase.functions.invoke('sitemap');
-          
-          if (error) {
-            console.error('Error fetching sitemap:', error);
-            return;
-          }
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sitemap`, {
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            },
+          });
 
-          if (data) {
-            // Create a new document with XML content type
-            const xmlDoc = new DOMParser().parseFromString(data, 'text/xml');
-            // Clear the current document
-            document.documentElement.remove();
-            // Append the XML document
-            document.appendChild(xmlDoc.documentElement);
+          const xmlText = await response.text();
+          
+          // Create a new HTML document
+          const doc = document.implementation.createHTMLDocument("");
+          const xml = new DOMParser().parseFromString(xmlText, "text/xml");
+          
+          // Clear the current document
+          while (document.firstChild) {
+            document.removeChild(document.firstChild);
           }
+          
+          // Create and append XML processing instruction
+          const pi = document.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"');
+          document.appendChild(pi);
+          
+          // Append the XML content
+          document.appendChild(xml.documentElement);
+          
+          // Set the content type
+          const meta = document.createElement('meta');
+          meta.setAttribute('http-equiv', 'Content-Type');
+          meta.setAttribute('content', 'text/xml; charset=utf-8');
+          document.head.appendChild(meta);
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
