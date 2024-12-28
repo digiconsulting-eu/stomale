@@ -35,6 +35,14 @@ export default function Sitemap() {
 
         if (typeof data === 'string') {
           setContent(data);
+          
+          // Per i formati XML, serviamo direttamente il contenuto
+          if (isXmlFormat) {
+            const doc = new DOMParser().parseFromString(data, 'application/xml');
+            document.documentElement.innerHTML = '';
+            document.appendChild(doc.documentElement);
+            return;
+          }
         } else if (data?.error) {
           throw new Error(data.error);
         } else {
@@ -52,29 +60,15 @@ export default function Sitemap() {
     fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // Per i formati XML, serviamo direttamente il contenuto XML
-  if (isXmlFormat) {
-    if (isLoading || error) return null;
-    
-    // Serve direttamente il contenuto XML
-    useEffect(() => {
-      if (content) {
-        // Imposta l'intestazione Content-Type per XML
-        const blob = new Blob([content], { type: 'application/xml' });
-        const url = window.URL.createObjectURL(blob);
-        
-        // Reindirizza al blob XML
-        window.location.href = url;
-      }
-    }, [content]);
-
-    return null;
-  }
-
   // Per il formato TXT, restituisci direttamente il contenuto
   if (isTxtFormat) {
     if (isLoading || error) return null;
-    return content;
+    return <pre>{content}</pre>;
+  }
+
+  // Per i formati XML, il contenuto viene gestito nell'useEffect
+  if (isXmlFormat) {
+    return null;
   }
 
   // Interfaccia HTML per la visualizzazione del sitemap
