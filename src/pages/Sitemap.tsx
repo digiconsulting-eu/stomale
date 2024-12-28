@@ -10,12 +10,12 @@ export default function Sitemap() {
     const fetchSitemap = async () => {
       if (isXmlFormat) {
         try {
-          const { data: { url } } = await supabase.functions.invoke('sitemap', {
-            responseType: 'json'
-          });
+          const { data } = await supabase.functions.invoke('sitemap');
           
-          // Redirect to the edge function URL that serves the XML content
-          window.location.href = url;
+          if (data?.url) {
+            // Redirect to the edge function URL that serves the XML content
+            window.location.href = data.url;
+          }
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
