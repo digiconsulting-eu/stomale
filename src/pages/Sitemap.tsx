@@ -18,15 +18,10 @@ export default function Sitemap() {
           }
 
           if (data) {
-            // Create XML document with proper headers
-            const xmlDoc = `<?xml version="1.0" encoding="UTF-8"?>${data}`;
-            
-            // Set content type and write XML
-            const blob = new Blob([xmlDoc], { type: 'application/xml' });
-            const url = URL.createObjectURL(blob);
-            
-            // Redirect to the XML content
-            window.location.href = url;
+            // Create a new document for XML content
+            document.documentElement.innerHTML = '';
+            document.write(data);
+            document.close();
           }
         } catch (error) {
           console.error('Error fetching sitemap:', error);

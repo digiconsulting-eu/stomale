@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
         .replace(/(^-|-$)/g, '');
     };
 
-    // Generate XML sitemap with proper XML declaration
+    // Generate XML sitemap
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     
@@ -99,10 +99,10 @@ Deno.serve(async (req) => {
     xml += '</urlset>';
 
     // Return the XML with proper headers
-    return new Response(xml, {
+    return new Response(xml.trim(), {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'application/xml; charset=UTF-8',
+        'Content-Type': 'application/xml',
         'Cache-Control': 'public, max-age=3600'
       }
     });
