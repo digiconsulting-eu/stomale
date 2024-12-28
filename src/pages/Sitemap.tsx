@@ -18,13 +18,12 @@ export default function Sitemap() {
           });
 
           if (typeof data === 'string') {
-            // Create a new window/tab with the XML content
-            const xmlWindow = window.open('', '_self');
-            if (xmlWindow) {
-              xmlWindow.document.write(data);
-              xmlWindow.document.contentType = 'application/xml';
-              xmlWindow.document.close();
-            }
+            // Create a blob with XML content and correct MIME type
+            const blob = new Blob([data], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
+            
+            // Redirect to the blob URL to display XML
+            window.location.href = url;
           }
         } catch (error) {
           console.error('Error fetching sitemap:', error);
