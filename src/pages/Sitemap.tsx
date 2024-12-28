@@ -18,9 +18,10 @@ export default function Sitemap() {
           }
 
           if (data) {
-            // Clear any existing content
+            // Set the content type
+            document.contentType = 'application/xml';
+            // Clear any existing content and write the XML
             document.open('text/xml');
-            // Write the XML content
             document.write(data);
             document.close();
           }
