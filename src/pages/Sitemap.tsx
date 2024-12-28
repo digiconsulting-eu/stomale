@@ -18,17 +18,14 @@ export default function Sitemap() {
           }
 
           if (data) {
-            // Create a new XML document
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(data, 'application/xml');
+            // Set content type to XML
+            const xmlContent = new XMLSerializer().serializeToString(
+              new DOMParser().parseFromString('<?xml version="1.0" encoding="UTF-8"?>' + data, 'application/xml')
+            );
             
-            // Clear the current document content
-            document.documentElement.innerHTML = '';
-            
-            // Append the XML content to the document
-            const serializer = new XMLSerializer();
-            const xmlString = serializer.serializeToString(xmlDoc);
-            document.write(xmlString);
+            // Clear existing document content
+            document.open('text/xml');
+            document.write(xmlContent);
             document.close();
           }
         } catch (error) {
