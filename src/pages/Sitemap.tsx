@@ -59,12 +59,12 @@ export default function Sitemap() {
     // Serve direttamente il contenuto XML
     useEffect(() => {
       if (content) {
-        // Imposta il content type corretto
-        document.contentType = 'application/xml';
-        // Scrivi direttamente il contenuto XML
-        document.open('text/xml');
-        document.write(content);
-        document.close();
+        // Imposta l'intestazione Content-Type per XML
+        const blob = new Blob([content], { type: 'application/xml' });
+        const url = window.URL.createObjectURL(blob);
+        
+        // Reindirizza al blob XML
+        window.location.href = url;
       }
     }, [content]);
 
