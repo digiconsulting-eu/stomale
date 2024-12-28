@@ -1,10 +1,9 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Sitemap() {
   const location = useLocation();
-  const navigate = useNavigate();
   const isXmlFormat = ['/sitemap.xml', '/sitemap-google.xml'].includes(location.pathname);
 
   useEffect(() => {
@@ -19,18 +18,13 @@ export default function Sitemap() {
           }
 
           if (data) {
-            // Create a new document with the XML content
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(data, 'application/xml');
+            // Set the content type header
+            document.contentType = 'application/xml';
             
-            // Set the XML content type
-            const meta = document.createElement('meta');
-            meta.setAttribute('http-equiv', 'Content-Type');
-            meta.setAttribute('content', 'application/xml');
-            document.head.appendChild(meta);
-            
-            // Replace the current document content with the XML
-            document.documentElement.innerHTML = new XMLSerializer().serializeToString(xmlDoc);
+            // Write the XML content directly to the document
+            document.open();
+            document.write(data);
+            document.close();
           }
         } catch (error) {
           console.error('Error fetching sitemap:', error);

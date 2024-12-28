@@ -54,22 +54,21 @@ Deno.serve(async (req) => {
         .replace(/(^-|-$)/g, '');
     };
 
-    // Generate XML sitemap
-    const currentDate = new Date().toISOString().split('T')[0];
+    // Generate XML sitemap with proper XML declaration
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     
     // Add homepage
-    xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n    <lastmod>${currentDate}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
     
     // Add main sections
-    xml += `  <url>\n    <loc>${BASE_URL}/recensioni</loc>\n    <lastmod>${currentDate}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${BASE_URL}/recensioni</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
     
     // Add conditions
     conditions?.forEach((condition) => {
       if (condition.Patologia) {
         const encodedCondition = encodeUrl(condition.Patologia);
-        xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n    <lastmod>${currentDate}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+        xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
       }
     });
 
@@ -78,7 +77,7 @@ Deno.serve(async (req) => {
       if (review.PATOLOGIE?.Patologia && review.title) {
         const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
         const encodedTitle = encodeUrl(review.title);
-        xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${encodedTitle}</loc>\n    <lastmod>${currentDate}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+        xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${encodedTitle}</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
       }
     });
 
@@ -94,7 +93,7 @@ Deno.serve(async (req) => {
     ];
 
     staticPages.forEach(page => {
-      xml += `  <url>\n    <loc>${BASE_URL}/${page}</loc>\n    <lastmod>${currentDate}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/${page}</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
     });
 
     xml += '</urlset>';
@@ -103,7 +102,7 @@ Deno.serve(async (req) => {
     return new Response(xml, {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'application/xml',
+        'Content-Type': 'application/xml; charset=UTF-8',
         'Cache-Control': 'public, max-age=3600'
       }
     });
