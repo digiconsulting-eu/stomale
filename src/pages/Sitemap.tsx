@@ -18,11 +18,12 @@ export default function Sitemap() {
           }
 
           if (data) {
-            // Clear any existing content
-            document.open('text/xml');
-            // Write the XML content directly to the document
-            document.write(data);
-            document.close();
+            // Create a new document with XML content type
+            const xmlDoc = new DOMParser().parseFromString(data, 'text/xml');
+            // Clear the current document
+            document.documentElement.remove();
+            // Append the XML document
+            document.appendChild(xmlDoc.documentElement);
           }
         } catch (error) {
           console.error('Error fetching sitemap:', error);
