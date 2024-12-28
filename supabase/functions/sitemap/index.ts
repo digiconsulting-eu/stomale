@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
 
     xml += '</urlset>';
 
-    // Return the XML directly with proper headers
+    // Return the XML with proper headers
     return new Response(xml, {
       headers: {
         ...corsHeaders,
