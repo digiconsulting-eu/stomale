@@ -14,19 +14,17 @@ export default function Sitemap() {
           
           // Create a new document with the XML content
           const xmlDoc = new DOMParser().parseFromString(data, 'application/xml');
-          const xmlString = new XMLSerializer().serializeToString(xmlDoc);
           
-          // Set the content type to XML
-          const xmlBlob = new Blob([xmlString], { type: 'application/xml' });
+          // Clear the current document and set the XML content
+          document.documentElement.innerHTML = '';
+          const xmlNode = document.importNode(xmlDoc.documentElement, true);
+          document.appendChild(xmlNode);
           
-          // Download the file directly
-          const link = document.createElement('a');
-          link.href = window.URL.createObjectURL(xmlBlob);
-          link.download = location.pathname.substring(1); // Remove leading slash
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(link.href);
+          // Set the content type meta tag
+          const meta = document.createElement('meta');
+          meta.setAttribute('http-equiv', 'Content-Type');
+          meta.setAttribute('content', 'application/xml; charset=utf-8');
+          document.head.appendChild(meta);
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
@@ -46,6 +44,6 @@ export default function Sitemap() {
     );
   }
 
-  // Return null for XML formats as we handle the content via direct download
+  // Return null for XML formats as we handle the content via document manipulation
   return null;
 }
