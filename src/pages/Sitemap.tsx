@@ -12,9 +12,20 @@ export default function Sitemap() {
         try {
           const { data } = await supabase.functions.invoke('sitemap');
           
-          if (data?.url) {
-            // Redirect to the edge function URL that serves the XML content
-            window.location.href = data.url;
+          if (data) {
+            // Create a new document with the XML content
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(data, 'application/xml');
+            
+            // Clear the current document and append the XML content
+            document.documentElement.innerHTML = '';
+            document.documentElement.appendChild(xmlDoc.documentElement);
+            
+            // Set the content type
+            const meta = document.createElement('meta');
+            meta.setAttribute('http-equiv', 'Content-Type');
+            meta.setAttribute('content', 'application/xml');
+            document.head.appendChild(meta);
           }
         } catch (error) {
           console.error('Error fetching sitemap:', error);
@@ -35,6 +46,6 @@ export default function Sitemap() {
     );
   }
 
-  // Return null while redirecting for XML formats
+  // Return null while loading XML content
   return null;
 }
