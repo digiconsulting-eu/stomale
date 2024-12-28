@@ -18,8 +18,9 @@ export default function Sitemap() {
           }
 
           if (data) {
-            // Create a new document for XML content
-            document.documentElement.innerHTML = '';
+            // Clear any existing content
+            document.open('text/xml');
+            // Write the XML content
             document.write(data);
             document.close();
           }

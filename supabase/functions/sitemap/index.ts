@@ -55,51 +55,63 @@ Deno.serve(async (req) => {
     };
 
     // Generate XML sitemap
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-    
-    // Add homepage
-    xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
-    
-    // Add main sections
-    xml += `  <url>\n    <loc>${BASE_URL}/recensioni</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
-    
-    // Add conditions
-    conditions?.forEach((condition) => {
-      if (condition.Patologia) {
-        const encodedCondition = encodeUrl(condition.Patologia);
-        xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
-      }
-    });
-
-    // Add reviews
-    reviews?.forEach((review) => {
-      if (review.PATOLOGIE?.Patologia && review.title) {
-        const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
-        const encodedTitle = encodeUrl(review.title);
-        xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${encodedTitle}</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
-      }
-    });
-
-    // Add static pages
-    const staticPages = [
-      'cerca-patologia',
-      'cerca-sintomi',
-      'nuova-recensione',
-      'inserisci-patologia',
-      'cookie-policy',
-      'privacy-policy',
-      'terms'
-    ];
-
-    staticPages.forEach(page => {
-      xml += `  <url>\n    <loc>${BASE_URL}/${page}</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
-    });
-
-    xml += '</urlset>';
+    const xmlContent = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+      // Add homepage
+      `  <url>
+    <loc>${BASE_URL}/</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>`,
+      // Add main sections
+      `  <url>
+    <loc>${BASE_URL}/recensioni</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>`,
+      // Add conditions
+      ...(conditions?.map(condition => {
+        if (condition.Patologia) {
+          const encodedCondition = encodeUrl(condition.Patologia);
+          return `  <url>
+    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+        }
+        return '';
+      }) || []),
+      // Add reviews
+      ...(reviews?.map(review => {
+        if (review.PATOLOGIE?.Patologia && review.title) {
+          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
+          const encodedTitle = encodeUrl(review.title);
+          return `  <url>
+    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${encodedTitle}</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+        }
+        return '';
+      }) || []),
+      // Add static pages
+      ...['cerca-patologia', 'cerca-sintomi', 'nuova-recensione', 'inserisci-patologia', 'cookie-policy', 'privacy-policy', 'terms']
+        .map(page => `  <url>
+    <loc>${BASE_URL}/${page}</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`),
+      '</urlset>'
+    ].join('\n');
 
     // Return the XML with proper headers
-    return new Response(xml.trim(), {
+    return new Response(xmlContent, {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/xml',
