@@ -7,8 +7,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminReviewsList } from "./notifications/AdminReviewsList";
 import { AdminNotificationsList } from "./notifications/AdminNotificationsList";
+import { Review } from "@/types/review";
 
-export const NotificationsTab = () => {
+interface NotificationsTabProps {
+  notifications?: any[];
+  markNotificationAsRead?: (id: string) => void;
+}
+
+export const NotificationsTab = ({ notifications, markNotificationAsRead }: NotificationsTabProps) => {
   const { data: pendingReviews, refetch: refetchPendingReviews } = useQuery({
     queryKey: ['pending-reviews'],
     queryFn: async () => {
