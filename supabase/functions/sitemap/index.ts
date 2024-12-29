@@ -26,7 +26,6 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch conditions and reviews
     const [conditionsResponse, reviewsResponse] = await Promise.all([
       supabase.from('PATOLOGIE').select('Patologia'),
       supabase.from('reviews')

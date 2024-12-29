@@ -21,9 +21,14 @@ export default function Sitemap() {
 
           const xmlText = await response.text();
           
-          // Replace the entire document with the XML content
-          document.documentElement.innerHTML = '';
-          document.write(xmlText);
+          // Set content type meta tag
+          const meta = document.createElement('meta');
+          meta.httpEquiv = 'Content-Type';
+          meta.content = 'text/xml; charset=UTF-8';
+          document.head.appendChild(meta);
+          
+          // Clear and write XML content
+          document.documentElement.innerHTML = xmlText;
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
