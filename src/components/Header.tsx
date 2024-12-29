@@ -84,6 +84,8 @@ export const Header = () => {
       setIsLoggedIn(false);
       setIsAdmin(false);
       setIsMenuOpen(false);
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('isAdmin');
       navigate('/', { replace: true });
       toast.success("Logout effettuato con successo");
     } catch (error) {

@@ -19,25 +19,6 @@ export default function Index() {
     queryFn: async () => {
       console.log('Starting reviews fetch...');
       try {
-        // First get total count of approved reviews
-        const { count, error: countError } = await supabase
-          .from('reviews')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'approved');
-
-        console.log('Total approved reviews count:', count);
-        
-        if (countError) {
-          console.error('Error getting count:', countError);
-          throw countError;
-        }
-
-        if (!count) {
-          console.log('No approved reviews found');
-          return [];
-        }
-
-        // Then get paginated reviews with user data
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -69,14 +50,16 @@ export default function Index() {
 
         console.log('Fetched reviews:', data);
         
-        // Transform the data to ensure we have all required fields
-        const transformedReviews = data?.map(review => ({
-          ...review,
-          username: review.users?.username,
-          condition: review.PATOLOGIE?.Patologia
-        })) || [];
+        if (!data) {
+          console.log('No reviews data returned');
+          return [];
+        }
 
-        return transformedReviews;
+        return data.map(review => ({
+          ...review,
+          username: review.users?.username || 'Anonimo',
+          condition: review.PATOLOGIE?.Patologia || 'Patologia non specificata'
+        }));
       } catch (error) {
         console.error('Error in query execution:', error);
         throw error;
@@ -87,9 +70,7 @@ export default function Index() {
         console.error('Error in reviews query:', error);
         toast.error("Errore nel caricamento delle recensioni");
       }
-    },
-    refetchOnMount: true,
-    refetchOnWindowFocus: true
+    }
   });
 
   return (
@@ -134,7 +115,7 @@ export default function Index() {
                   key={review.id}
                   id={review.id}
                   title={review.title}
-                  condition={review.condition || ''}
+                  condition={review.condition}
                   experience={review.experience}
                   diagnosisDifficulty={review.diagnosis_difficulty}
                   symptomsSeverity={review.symptoms_severity}

@@ -46,13 +46,17 @@ const AuthStateHandler = () => {
               .eq('email', session.user.email);
             
             if (Array.isArray(adminData) && adminData.length > 0) {
+              localStorage.setItem('isAdmin', 'true');
               navigate('/admin', { replace: true });
             } else {
+              localStorage.setItem('isAdmin', 'false');
               navigate('/dashboard', { replace: true });
             }
           }
         }
       } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
         const protectedRoutes = ['/dashboard', '/admin'];
         if (protectedRoutes.some(route => location.pathname.startsWith(route))) {
           navigate('/', { replace: true });
