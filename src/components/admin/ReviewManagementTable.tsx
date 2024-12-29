@@ -13,10 +13,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export const ReviewManagementTable = () => {
-  const { data: reviews, isLoading, refetch } = useQuery({
-    queryKey: ['all-reviews'],
+  const { data: reviews, isLoading, error } = useQuery({
+    queryKey: ['admin-reviews'],
     queryFn: async () => {
-      console.log('Fetching all reviews...');
+      console.log('Fetching all reviews for admin...');
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -39,14 +39,22 @@ export const ReviewManagementTable = () => {
         throw error;
       }
 
-      console.log('Fetched reviews:', data);
+      console.log('Fetched reviews for admin:', data);
       return data;
     },
+    refetchInterval: 5000, // Refetch every 5 seconds
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    staleTime: 0,
-    gcTime: 0
+    refetchOnWindowFocus: true
   });
+
+  if (error) {
+    console.error('Error loading reviews:', error);
+    return (
+      <div className="text-center text-red-500 p-4">
+        Si è verificato un errore nel caricamento delle recensioni.
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -58,11 +66,19 @@ export const ReviewManagementTable = () => {
     );
   }
 
+  if (!reviews || reviews.length === 0) {
+    return (
+      <div className="text-center text-gray-500 p-4">
+        Non ci sono recensioni da gestire.
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-4">
         <p className="text-sm text-gray-500">
-          Totale recensioni: {reviews?.length || 0}
+          Totale recensioni: {reviews.length}
         </p>
       </div>
       
@@ -78,9 +94,9 @@ export const ReviewManagementTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {reviews?.map((review) => (
+          {reviews.map((review) => (
             <TableRow key={review.id}>
-              <TableCell>{review.title}</TableCell>
+              <TableCell className="font-medium">{review.title}</TableCell>
               <TableCell>{review.PATOLOGIE?.Patologia}</TableCell>
               <TableCell>{review.users?.username}</TableCell>
               <TableCell>
