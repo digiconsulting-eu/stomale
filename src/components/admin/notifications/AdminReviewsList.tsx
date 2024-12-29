@@ -3,17 +3,7 @@ import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-
-interface Review {
-  id: number;
-  title: string;
-  symptoms: string;
-  experience: string;
-  PATOLOGIE: {
-    Patologia: string;
-  };
-  created_at: string;
-}
+import { Review } from "@/types/review";
 
 interface AdminReviewsListProps {
   reviews: Review[];
@@ -61,7 +51,7 @@ export const AdminReviewsList = ({ reviews }: AdminReviewsListProps) => {
                   Patologia: {review.PATOLOGIE?.Patologia}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {new Date(review.created_at).toLocaleDateString('it-IT')}
+                  {new Date(review.created_at || '').toLocaleDateString('it-IT')}
                 </p>
               </div>
               <Button
@@ -74,15 +64,19 @@ export const AdminReviewsList = ({ reviews }: AdminReviewsListProps) => {
               </Button>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium mb-2">Sintomi:</h4>
-              <p className="text-sm whitespace-pre-wrap">{review.symptoms}</p>
-            </div>
+            {review.symptoms && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Sintomi:</h4>
+                <p className="text-sm whitespace-pre-wrap">{review.symptoms}</p>
+              </div>
+            )}
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium mb-2">Esperienza:</h4>
-              <p className="text-sm whitespace-pre-wrap">{review.experience}</p>
-            </div>
+            {review.experience && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Esperienza:</h4>
+                <p className="text-sm whitespace-pre-wrap">{review.experience}</p>
+              </div>
+            )}
           </div>
         </div>
       ))}
