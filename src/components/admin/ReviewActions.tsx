@@ -13,12 +13,17 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
 
   const handleStatusChange = async (newStatus: 'approved' | 'rejected') => {
     try {
+      console.log('Updating review status:', { reviewId, newStatus });
+      
       const { error } = await supabase
         .from('reviews')
         .update({ status: newStatus })
         .eq('id', reviewId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating review status:', error);
+        throw error;
+      }
 
       // Invalidate all relevant queries to force a refresh
       await Promise.all([
