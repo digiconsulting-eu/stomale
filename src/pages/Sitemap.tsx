@@ -22,24 +22,18 @@ export default function Sitemap() {
 
           const xmlText = await response.text();
           
-          // Create a new document with proper XML declaration
-          const xmlDoc = document.implementation.createDocument(null, 'root', null);
-          const xmlDeclaration = document.implementation.createDocument(null, null, null)
-            .createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"');
-          
-          // Clear existing document content
-          while (document.documentElement.firstChild) {
-            document.documentElement.firstChild.remove();
-          }
-          
           // Set XML content type
-          const meta = document.createElement('meta');
-          meta.setAttribute('http-equiv', 'Content-Type');
-          meta.setAttribute('content', 'application/xml; charset=UTF-8');
-          document.head.appendChild(meta);
+          document.contentType = 'application/xml';
           
-          // Write XML content
-          document.documentElement.innerHTML = xmlText;
+          // Create XML document
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+          
+          // Replace entire document content
+          document.open();
+          document.write('<?xml version="1.0" encoding="UTF-8"?>\n');
+          document.write(xmlText);
+          document.close();
           
         } catch (error) {
           console.error('Error fetching sitemap:', error);
