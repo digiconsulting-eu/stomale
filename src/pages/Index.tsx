@@ -50,10 +50,10 @@ export default function Index() {
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
-            users!inner (
+            users (
               username
             ),
-            PATOLOGIE!inner (
+            PATOLOGIE (
               Patologia
             )
           `)

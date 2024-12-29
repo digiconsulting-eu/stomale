@@ -37,10 +37,10 @@ const Reviews = () => {
           .from('reviews')
           .select(`
             *,
-            users!inner (
+            users (
               username
             ),
-            PATOLOGIE!inner (
+            PATOLOGIE (
               id,
               Patologia
             )
