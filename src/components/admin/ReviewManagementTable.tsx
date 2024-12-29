@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export const ReviewManagementTable = () => {
-  const { data: reviews, isLoading } = useQuery({
+  const { data: reviews, isLoading, refetch } = useQuery({
     queryKey: ['all-reviews'],
     queryFn: async () => {
       console.log('Fetching all reviews...');
@@ -42,7 +42,10 @@ export const ReviewManagementTable = () => {
       console.log('Fetched reviews:', data);
       return data;
     },
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    cacheTime: 0
   });
 
   if (isLoading) {

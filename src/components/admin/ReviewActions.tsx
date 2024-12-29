@@ -3,6 +3,7 @@ import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 interface ReviewActionsProps {
   reviewId: number;
@@ -11,6 +12,7 @@ interface ReviewActionsProps {
 
 export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const handleUpdateStatus = async (newStatus: 'approved' | 'rejected') => {
     try {
@@ -21,11 +23,20 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
 
       if (error) throw error;
 
+      // Invalidate all relevant queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['all-reviews'] }),
+        queryClient.invalidateQueries({ queryKey: ['pending-reviews'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-reviews'] }),
+        queryClient.invalidateQueries({ queryKey: ['reviews'] })
+      ]);
+
+      // Force a navigation refresh to trigger data reload
+      const currentPath = window.location.pathname;
+      navigate('/', { replace: true });
+      setTimeout(() => navigate(currentPath, { replace: true }), 0);
+
       toast.success(`Recensione ${newStatus === 'approved' ? 'ripubblicata' : 'rimossa'} con successo`);
-      
-      // Invalidate both queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ['all-reviews'] });
-      queryClient.invalidateQueries({ queryKey: ['pending-reviews'] });
     } catch (error) {
       console.error('Error updating review status:', error);
       toast.error(`Errore durante l'aggiornamento dello stato della recensione`);
