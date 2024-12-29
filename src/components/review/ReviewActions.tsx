@@ -13,7 +13,7 @@ export const ReviewActions = ({ condition }: ReviewActionsProps) => {
     <div className="mb-8">
       <Link to={`/nuova-recensione?patologia=${condition}`}>
         <Button 
-          className="w-full py-6 text-xl font-semibold bg-primary hover:bg-primary-hover text-white shadow-xl rounded-lg transition-all duration-200"
+          className="w-full py-8 text-2xl font-bold bg-primary hover:bg-primary-hover text-white shadow-2xl rounded-xl transition-all duration-200 border-2 border-primary-hover"
         >
           Racconta la tua Esperienza con {conditionName}
         </Button>
