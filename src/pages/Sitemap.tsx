@@ -22,12 +22,17 @@ export default function Sitemap() {
           const xmlText = await response.text();
           console.log('Sitemap content:', xmlText);
 
-          // Create a blob with XML content and correct content type
-          const blob = new Blob([xmlText], { type: 'application/xml' });
-          const url = window.URL.createObjectURL(blob);
-
-          // Redirect to the blob URL
-          window.location.href = url;
+          // Clear existing document content
+          document.documentElement.innerHTML = '';
+          
+          // Write XML content directly
+          document.write(xmlText);
+          
+          // Set content type
+          const meta = document.createElement('meta');
+          meta.httpEquiv = 'Content-Type';
+          meta.content = 'application/xml; charset=UTF-8';
+          document.head.appendChild(meta);
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
