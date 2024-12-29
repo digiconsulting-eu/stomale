@@ -50,10 +50,10 @@ export default function Index() {
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
-            users (
+            users!inner (
               username
             ),
-            PATOLOGIE (
+            PATOLOGIE!inner (
               Patologia
             )
           `)
@@ -81,6 +81,8 @@ export default function Index() {
     },
     retry: 1,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
 
   return (

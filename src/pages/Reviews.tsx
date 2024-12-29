@@ -37,10 +37,10 @@ const Reviews = () => {
           .from('reviews')
           .select(`
             *,
-            users (
+            users!inner (
               username
             ),
-            PATOLOGIE (
+            PATOLOGIE!inner (
               id,
               Patologia
             )
@@ -91,7 +91,9 @@ const Reviews = () => {
         console.error('Query error:', error);
         toast.error("Errore nel caricamento delle recensioni");
       }
-    }
+    },
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
 
   useEffect(() => {
