@@ -39,7 +39,7 @@ export default function Index() {
               Patologia
             )
           `)
-          .eq('status', 'approved')
+          .eq('status', 'approved')  // Only fetch approved reviews
           .order('created_at', { ascending: false })
           .limit(12);
 
