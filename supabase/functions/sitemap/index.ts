@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-    console.log('Fetching data for sitemap...'); // Debug log
+    console.log('Fetching data for sitemap...');
 
     const [conditionsResponse, reviewsResponse] = await Promise.all([
       supabase.from('PATOLOGIE').select('Patologia'),
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     const conditions = conditionsResponse.data || [];
     const reviews = reviewsResponse.data || [];
     
-    console.log(`Found ${conditions.length} conditions and ${reviews.length} reviews`); // Debug log
+    console.log(`Found ${conditions.length} conditions and ${reviews.length} reviews`);
 
     const encodeUrl = (str: string) => {
       return str.toLowerCase()
@@ -62,7 +62,6 @@ Deno.serve(async (req) => {
     };
 
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${BASE_URL}/</loc>
@@ -110,7 +109,7 @@ ${['cerca-patologia', 'cerca-sintomi', 'nuova-recensione', 'inserisci-patologia'
   </url>`).join('\n')}
 </urlset>`;
 
-    console.log('Generated XML content length:', xmlContent.length); // Debug log
+    console.log('Generated XML content length:', xmlContent.length);
 
     return new Response(xmlContent, {
       headers: corsHeaders

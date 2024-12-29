@@ -20,22 +20,14 @@ export default function Sitemap() {
           }
 
           const xmlText = await response.text();
-          console.log('Sitemap content:', xmlText); // Debug log
-          
-          // Create a new document with XML content type
-          const xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
-          
-          // Replace the entire document content
-          document.open();
-          document.write('<?xml version="1.0" encoding="UTF-8"?>\n');
-          document.write(xmlDoc.documentElement.outerHTML);
-          document.close();
-          
-          // Set the content type using meta tag
-          const meta = document.createElement('meta');
-          meta.setAttribute('http-equiv', 'Content-Type');
-          meta.setAttribute('content', 'text/xml; charset=UTF-8');
-          document.head.appendChild(meta);
+          console.log('Sitemap content:', xmlText);
+
+          // Create a blob with XML content and correct content type
+          const blob = new Blob([xmlText], { type: 'application/xml' });
+          const url = window.URL.createObjectURL(blob);
+
+          // Redirect to the blob URL
+          window.location.href = url;
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
