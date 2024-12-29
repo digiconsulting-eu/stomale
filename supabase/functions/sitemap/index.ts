@@ -2,125 +2,193 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'application/xml; charset=utf-8',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, cache-control',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
 }
 
 const BASE_URL = 'https://stomale.info';
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       headers: corsHeaders,
       status: 204
-    });
+    })
   }
 
   try {
+    console.log('[Sitemap Function] Starting sitemap generation...');
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing environment variables');
+      console.error('[Sitemap Function] Missing environment variables');
+      throw new Error('Configuration error: Missing environment variables');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-    console.log('Fetching data for sitemap...');
 
-    const [conditionsResponse, reviewsResponse] = await Promise.all([
-      supabase.from('PATOLOGIE').select('Patologia'),
-      supabase.from('reviews')
-        .select(`
-          title,
-          PATOLOGIE (
-            Patologia
-          )
-        `)
-        .eq('status', 'approved')
-    ]);
+    // Test database connection with a simple query
+    const { data: testData, error: testError } = await supabase
+      .from('PATOLOGIE')
+      .select('id')
+      .limit(1);
 
-    if (conditionsResponse.error) {
-      console.error('Error fetching conditions:', conditionsResponse.error);
-      throw conditionsResponse.error;
-    }
-    if (reviewsResponse.error) {
-      console.error('Error fetching reviews:', reviewsResponse.error);
-      throw reviewsResponse.error;
+    if (testError) {
+      console.error('[Sitemap Function] Database connection test failed:', testError);
+      throw new Error(`Database connection failed: ${testError.message}`);
     }
 
-    const conditions = conditionsResponse.data || [];
-    const reviews = reviewsResponse.data || [];
-    
-    console.log(`Found ${conditions.length} conditions and ${reviews.length} reviews`);
+    // Fetch conditions
+    const { data: conditions, error: conditionsError } = await supabase
+      .from('PATOLOGIE')
+      .select('Patologia');
 
+    if (conditionsError) {
+      console.error('[Sitemap Function] Error fetching conditions:', conditionsError);
+      throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
+    }
+
+    // Fetch approved reviews
+    const { data: reviews, error: reviewsError } = await supabase
+      .from('reviews')
+      .select(`
+        title,
+        PATOLOGIE (
+          Patologia
+        )
+      `)
+      .eq('status', 'approved');
+
+    if (reviewsError) {
+      console.error('[Sitemap Function] Error fetching reviews:', reviewsError);
+      throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
+    }
+
+    // Function to properly encode URLs
     const encodeUrl = (str: string) => {
-      return str.toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
+      return str.toLowerCase().split(' ').map(part => encodeURIComponent(part)).join('%20');
     };
 
-    const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${BASE_URL}/</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${BASE_URL}/recensioni</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-${conditions.map(condition => {
-  if (condition.Patologia) {
-    const encodedCondition = encodeUrl(condition.Patologia);
-    return `  <url>
-    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-  }
-  return '';
-}).join('\n')}
-${reviews.map(review => {
-  if (review.PATOLOGIE?.Patologia && review.title) {
-    const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
-    const encodedTitle = encodeUrl(review.title);
-    return `  <url>
-    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${encodedTitle}</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
-  }
-  return '';
-}).join('\n')}
-${['cerca-patologia', 'cerca-sintomi', 'nuova-recensione', 'inserisci-patologia', 'cookie-policy', 'privacy-policy', 'terms']
-  .map(page => `  <url>
-    <loc>${BASE_URL}/${page}</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>`).join('\n')}
-</urlset>`;
+    // Determine format based on Accept header
+    const acceptHeader = req.headers.get('Content-Type') || '';
+    const isXml = acceptHeader.includes('application/xml');
 
-    console.log('Generated XML content length:', xmlContent.length);
+    if (isXml) {
+      // Generate XML sitemap
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+      
+      // Add homepage
+      xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/recensioni</loc>\n  </url>\n`;
+      
+      // Add conditions
+      conditions?.forEach((condition) => {
+        if (condition.Patologia) {
+          const encodedCondition = encodeUrl(condition.Patologia);
+          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n  </url>\n`;
+        }
+      });
 
-    return new Response(xmlContent, {
-      headers: corsHeaders
-    });
+      // Add reviews
+      reviews?.forEach((review) => {
+        if (review.PATOLOGIE?.Patologia && review.title) {
+          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
+          const reviewSlug = review.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n  </url>\n`;
+        }
+      });
+
+      // Add static pages
+      xml += `  <url>\n    <loc>${BASE_URL}/cerca-patologia</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/nuova-recensione</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/inserisci-patologia</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/cerca-sintomi</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/cookie-policy</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/privacy-policy</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/terms</loc>\n  </url>\n`;
+
+      xml += '</urlset>';
+
+      console.log('[Sitemap Function] XML sitemap generation completed successfully');
+
+      return new Response(xml, { 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600'
+        },
+        status: 200
+      });
+    } else {
+      // Generate text sitemap
+      let sitemap = 'SITEMAP STOMALE.INFO\n\n';
+      sitemap += `Homepage:\n${BASE_URL}/\n\n`;
+      sitemap += `Recensioni:\n${BASE_URL}/recensioni\n\n`;
+
+      // Add conditions
+      sitemap += 'Patologie:\n';
+      conditions?.forEach((condition) => {
+        if (condition.Patologia) {
+          const encodedCondition = encodeUrl(condition.Patologia);
+          sitemap += `${BASE_URL}/patologia/${encodedCondition}\n`;
+        }
+      });
+      sitemap += '\n';
+
+      // Add reviews
+      sitemap += 'Recensioni per patologia:\n';
+      reviews?.forEach((review) => {
+        if (review.PATOLOGIE?.Patologia && review.title) {
+          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
+          const reviewSlug = review.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+          sitemap += `${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
+        }
+      });
+      sitemap += '\n';
+
+      // Add static pages
+      sitemap += 'Altre pagine:\n';
+      sitemap += `${BASE_URL}/cerca-patologia\n`;
+      sitemap += `${BASE_URL}/nuova-recensione\n`;
+      sitemap += `${BASE_URL}/inserisci-patologia\n`;
+      sitemap += `${BASE_URL}/cerca-sintomi\n`;
+      sitemap += `${BASE_URL}/cookie-policy\n`;
+      sitemap += `${BASE_URL}/privacy-policy\n`;
+      sitemap += `${BASE_URL}/terms\n`;
+
+      console.log('[Sitemap Function] Text sitemap generation completed successfully');
+
+      return new Response(sitemap, { 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600'
+        },
+        status: 200
+      });
+    }
 
   } catch (error) {
-    console.error('Error generating sitemap:', error);
+    console.error('[Sitemap Function] Fatal error:', error);
+    
     return new Response(
-      JSON.stringify({ error: 'Failed to generate sitemap' }), 
+      JSON.stringify({ 
+        error: 'Failed to generate sitemap',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      }), 
       { 
-        status: 500,
+        status: 500, 
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'

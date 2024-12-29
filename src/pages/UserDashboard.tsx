@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,16 +6,11 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { NotificationsTab } from "@/components/dashboard/NotificationsTab";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { FavoritesTab } from "@/components/dashboard/FavoritesTab";
-import { Badge } from "@/components/ui/badge";
-import { useLocation } from "react-router-dom";
 
 const UserDashboard = () => {
-  const location = useLocation();
-  const [activeTab, setActiveTab] = useState(
-    location.state?.activeTab || "reviews"
-  );
+  const [activeTab, setActiveTab] = useState("reviews");
 
-  const { data: reviews, isLoading } = useQuery({
+  const { data: reviews } = useQuery({
     queryKey: ['user-reviews'],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -33,28 +28,18 @@ const UserDashboard = () => {
           medication_effectiveness,
           healing_possibility,
           social_discomfort,
-          status,
           condition:PATOLOGIE (
             Patologia
           )
         `)
         .eq('user_id', session.session.user.id)
+        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching reviews:', error);
-        throw error;
-      }
-      return data || [];
+      if (error) throw error;
+      return data;
     }
   });
-
-  // Update active tab when location state changes
-  useEffect(() => {
-    if (location.state?.activeTab) {
-      setActiveTab(location.state.activeTab);
-    }
-  }, [location.state]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -69,35 +54,24 @@ const UserDashboard = () => {
         </TabsList>
 
         <TabsContent value="reviews" className="space-y-6">
-          {isLoading ? (
-            <p className="text-gray-500">Caricamento recensioni...</p>
-          ) : reviews?.length === 0 ? (
+          {reviews?.length === 0 ? (
             <p className="text-gray-500">Non hai ancora scritto recensioni.</p>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {reviews?.map((review) => (
-                <div key={review.id} className="relative">
-                  <ReviewCard
-                    id={review.id.toString()}
-                    title={review.title}
-                    condition={review.condition.Patologia}
-                    experience={review.experience}
-                    diagnosisDifficulty={review.diagnosis_difficulty}
-                    symptomsSeverity={review.symptoms_severity}
-                    hasMedication={review.has_medication}
-                    medicationEffectiveness={review.medication_effectiveness}
-                    healingPossibility={review.healing_possibility}
-                    socialDiscomfort={review.social_discomfort}
-                  />
-                  {review.status === 'pending' && (
-                    <Badge 
-                      variant="secondary" 
-                      className="absolute top-2 right-2"
-                    >
-                      In attesa di approvazione
-                    </Badge>
-                  )}
-                </div>
+                <ReviewCard
+                  key={review.id}
+                  id={review.id.toString()}
+                  title={review.title}
+                  condition={review.condition.Patologia}
+                  experience={review.experience}
+                  diagnosisDifficulty={review.diagnosis_difficulty}
+                  symptomsSeverity={review.symptoms_severity}
+                  hasMedication={review.has_medication}
+                  medicationEffectiveness={review.medication_effectiveness}
+                  healingPossibility={review.healing_possibility}
+                  socialDiscomfort={review.social_discomfort}
+                />
               ))}
             </div>
           )}

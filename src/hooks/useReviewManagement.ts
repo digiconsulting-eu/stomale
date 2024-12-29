@@ -14,80 +14,72 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
   const { data: reviewsData, isLoading } = useQuery({
     queryKey: ['reviews', page, limit],
     queryFn: async () => {
-      console.log('Starting to fetch reviews...');
+      console.log('Fetching reviews with pagination:', { page, limit, offset });
       
-      try {
-        // First get total count
-        const { count: totalCount, error: countError } = await supabase
-          .from('reviews')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'approved');
+      // First get total count
+      const { count: totalCount, error: countError } = await supabase
+        .from('reviews')
+        .select('*', { count: 'exact', head: true });
 
-        if (countError) {
-          console.error('Error getting count:', countError);
-          throw countError;
-        }
+      if (countError) throw countError;
 
-        console.log('Total count of approved reviews:', totalCount);
+      // Then get paginated data
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          title,
+          experience,
+          status,
+          created_at,
+          user_id,
+          PATOLOGIE (
+            Patologia
+          )
+        `)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
 
-        // Then get paginated data with all necessary relations
-        const { data, error } = await supabase
-          .from('reviews')
-          .select(`
-            id,
-            title,
-            experience,
-            diagnosis_difficulty,
-            symptoms_severity,
-            has_medication,
-            medication_effectiveness,
-            healing_possibility,
-            social_discomfort,
-            users (
-              username
-            ),
-            PATOLOGIE (
-              id,
-              Patologia
-            )
-          `)
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false })
-          .range(offset, offset + limit - 1);
+      if (error) throw error;
 
-        if (error) {
-          console.error('Error fetching reviews:', error);
-          throw error;
-        }
-
-        console.log('Successfully fetched reviews:', data);
-        
-        return {
-          reviews: data || [],
-          totalCount: totalCount || 0,
-          totalPages: Math.ceil((totalCount || 0) / limit)
-        };
-      } catch (error: any) {
-        console.error('Error in review fetch:', error);
-        // Check if it's an authentication error
-        if (error.message?.includes('JWT')) {
-          toast.error("Sessione scaduta. Effettua nuovamente l'accesso.");
-        } else {
-          toast.error("Errore nel caricamento delle recensioni");
-        }
-        throw error;
-      }
-    },
-    meta: {
-      onError: (error: Error) => {
-        console.error('Query error:', error);
-      }
-    },
-    retry: 1
+      return {
+        reviews: data || [],
+        totalCount: totalCount || 0,
+        totalPages: Math.ceil((totalCount || 0) / limit)
+      };
+    }
   });
 
   const updateReviewStatus = useMutation({
     mutationFn: async ({ reviewId, status }: { reviewId: number, status: string }) => {
+      // First check if the review exists and get its user_id
+      const { data: reviewData, error: reviewError } = await supabase
+        .from('reviews')
+        .select('user_id')
+        .eq('id', reviewId)
+        .single();
+
+      if (reviewError) throw reviewError;
+
+      // If there's no user_id, create a default user
+      if (!reviewData.user_id) {
+        const { data: userData, error: userError } = await supabase.auth.signUp({
+          email: `anonymous${Date.now()}@example.com`,
+          password: Math.random().toString(36).slice(-8),
+        });
+
+        if (userError) throw userError;
+
+        // Update the review with the new user_id
+        const { error: updateUserError } = await supabase
+          .from('reviews')
+          .update({ user_id: userData.user?.id })
+          .eq('id', reviewId);
+
+        if (updateUserError) throw updateUserError;
+      }
+
+      // Now update the status
       const { error } = await supabase
         .from('reviews')
         .update({ status })

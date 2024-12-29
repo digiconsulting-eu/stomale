@@ -4,7 +4,6 @@ import Index from "@/pages/Index";
 import ReviewDetail from "@/pages/ReviewDetail";
 import Register from "@/pages/Register";
 import SearchCondition from "@/pages/SearchCondition";
-import SearchSymptoms from "@/pages/SearchSymptoms";
 import NewReview from "@/pages/NewReview";
 import ConditionDetail from "@/pages/ConditionDetail";
 import Admin from "@/pages/Admin";
@@ -30,7 +29,7 @@ export const AppRoutes = () => {
       <Route path="/recensioni" element={<Reviews />} />
       <Route path="/nuova-recensione" element={<NewReview />} />
       <Route path="/cerca-patologia" element={<SearchCondition />} />
-      <Route path="/cerca-sintomi" element={<SearchSymptoms />} />
+      <Route path="/cerca-sintomi" element={<div>Cerca Sintomi Page</div>} />
       <Route path="/inserisci-patologia" element={<InsertCondition />} />
       <Route path="/login" element={<Login />} />
       <Route path="/registrati" element={<Register />} />
@@ -45,7 +44,6 @@ export const AppRoutes = () => {
       <Route path="/sitemap" element={<Sitemap />} />
       <Route path="/sitemap.txt" element={<Sitemap />} />
       <Route path="/sitemap.xml" element={<Sitemap />} />
-      <Route path="/sitemap-google.xml" element={<Sitemap />} />
 
       {/* Protected routes */}
       <Route path="/admin" element={<Admin />} />

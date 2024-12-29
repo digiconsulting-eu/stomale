@@ -12,13 +12,6 @@ interface Review {
   medication_effectiveness?: number;
   healing_possibility?: number;
   social_discomfort?: number;
-  PATOLOGIE?: {
-    id: number;
-    Patologia: string;
-  };
-  users?: {
-    username: string;
-  };
 }
 
 interface ConditionReviewsProps {
@@ -52,7 +45,6 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
           medicationEffectiveness={review.medication_effectiveness}
           healingPossibility={review.healing_possibility}
           socialDiscomfort={review.social_discomfort}
-          username={review.users?.username}
         />
       ))}
     </div>
