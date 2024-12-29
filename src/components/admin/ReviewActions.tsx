@@ -21,7 +21,7 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
 
       if (error) throw error;
 
-      toast.success(`Recensione ${newStatus === 'approved' ? 'approvata' : 'rifiutata'} con successo`);
+      toast.success(`Recensione ${newStatus === 'approved' ? 'ripubblicata' : 'rimossa'} con successo`);
       
       // Invalidate both queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ['all-reviews'] });
@@ -40,7 +40,7 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         onClick={() => handleUpdateStatus('rejected')}
       >
         <X className="h-4 w-4 mr-1" />
-        Rifiuta
+        Rimuovi
       </Button>
     );
   }
@@ -53,29 +53,10 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         onClick={() => handleUpdateStatus('approved')}
       >
         <Check className="h-4 w-4 mr-1" />
-        Approva
+        Ripubblica
       </Button>
     );
   }
 
-  return (
-    <div className="flex gap-2">
-      <Button
-        variant="default"
-        size="sm"
-        onClick={() => handleUpdateStatus('approved')}
-      >
-        <Check className="h-4 w-4 mr-1" />
-        Approva
-      </Button>
-      <Button
-        variant="destructive"
-        size="sm"
-        onClick={() => handleUpdateStatus('rejected')}
-      >
-        <X className="h-4 w-4 mr-1" />
-        Rifiuta
-      </Button>
-    </div>
-  );
+  return null;
 };

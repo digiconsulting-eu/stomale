@@ -91,9 +91,9 @@ export const ReviewManagementTable = () => {
                   }
                 >
                   {review.status === 'approved'
-                    ? 'Approvata'
+                    ? 'Pubblicata'
                     : review.status === 'rejected'
-                    ? 'Rifiutata'
+                    ? 'Rimossa'
                     : 'In attesa'}
                 </Badge>
               </TableCell>
