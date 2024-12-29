@@ -70,7 +70,8 @@ export default function Index() {
         console.error('Error in reviews query:', error);
         toast.error("Errore nel caricamento delle recensioni");
       }
-    }
+    },
+    refetchInterval: 5000 // Refetch every 5 seconds to ensure we have latest status
   });
 
   return (

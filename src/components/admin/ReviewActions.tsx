@@ -23,18 +23,14 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
 
       if (error) throw error;
 
-      // Invalidate all relevant queries
+      // Invalidate all relevant queries to force a refresh
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['all-reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['pending-reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['user-reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['reviews'] })
+        queryClient.invalidateQueries({ queryKey: ['reviews'] }),
+        queryClient.invalidateQueries({ queryKey: ['latestReviews'] })
       ]);
-
-      // Force a navigation refresh to trigger data reload
-      const currentPath = window.location.pathname;
-      navigate('/', { replace: true });
-      setTimeout(() => navigate(currentPath, { replace: true }), 0);
 
       toast.success(`Recensione ${newStatus === 'approved' ? 'ripubblicata' : 'rimossa'} con successo`);
     } catch (error) {
