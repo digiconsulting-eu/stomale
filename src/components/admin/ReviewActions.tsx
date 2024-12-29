@@ -23,14 +23,11 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
       // Invalidate all relevant queries to force a refresh
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['all-reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['pending-reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['user-reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['latestReviews'] })
       ]);
 
-      toast.success(`Recensione ${newStatus === 'approved' ? 'ripubblicata' : 'rimossa'} con successo`);
+      toast.success(`Recensione ${newStatus === 'approved' ? 'approvata' : 'rimossa'} con successo`);
     } catch (error) {
       console.error('Error updating review status:', error);
       toast.error("Errore durante l'aggiornamento della recensione");
@@ -39,22 +36,24 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
 
   return (
     <div className="flex gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleStatusChange('approved')}
-        disabled={status === 'approved'}
-      >
-        Approva
-      </Button>
-      <Button
-        variant="destructive"
-        size="sm"
-        onClick={() => handleStatusChange('rejected')}
-        disabled={status === 'rejected'}
-      >
-        Rimuovi
-      </Button>
+      {status !== 'approved' && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleStatusChange('approved')}
+        >
+          Approva
+        </Button>
+      )}
+      {status !== 'rejected' && (
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => handleStatusChange('rejected')}
+        >
+          Rimuovi
+        </Button>
+      )}
     </div>
   );
 };
