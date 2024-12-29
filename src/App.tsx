@@ -36,8 +36,22 @@ const AuthStateHandler = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session?.user?.email);
       
-      if (event === 'SIGNED_IN' && location.pathname === '/login') {
-        navigate('/dashboard', { replace: true });
+      if (event === 'SIGNED_IN') {
+        if (location.pathname === '/login') {
+          // Check if user is admin
+          if (session?.user?.email) {
+            const { data: adminData } = await supabase
+              .from('admin')
+              .select('email')
+              .eq('email', session.user.email);
+            
+            if (Array.isArray(adminData) && adminData.length > 0) {
+              navigate('/admin', { replace: true });
+            } else {
+              navigate('/dashboard', { replace: true });
+            }
+          }
+        }
       } else if (event === 'SIGNED_OUT') {
         const protectedRoutes = ['/dashboard', '/admin'];
         if (protectedRoutes.some(route => location.pathname.startsWith(route))) {

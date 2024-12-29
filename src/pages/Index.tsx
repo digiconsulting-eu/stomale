@@ -54,6 +54,7 @@ export default function Index() {
               username
             ),
             PATOLOGIE (
+              id,
               Patologia
             )
           `)
@@ -67,7 +68,15 @@ export default function Index() {
         }
 
         console.log('Fetched reviews:', data);
-        return data || [];
+        
+        // Transform the data to ensure we have all required fields
+        const transformedReviews = data?.map(review => ({
+          ...review,
+          username: review.users?.username,
+          condition: review.PATOLOGIE?.Patologia
+        })) || [];
+
+        return transformedReviews;
       } catch (error) {
         console.error('Error in query execution:', error);
         throw error;
@@ -79,8 +88,6 @@ export default function Index() {
         toast.error("Errore nel caricamento delle recensioni");
       }
     },
-    retry: 1,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     refetchOnMount: true,
     refetchOnWindowFocus: true
   });
@@ -115,26 +122,30 @@ export default function Index() {
               <Skeleton key={i} className="h-[300px]" />
             ))}
           </div>
+        ) : isError ? (
+          <div className="text-center py-8 text-red-500">
+            Si è verificato un errore nel caricamento delle recensioni.
+          </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {latestReviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                id={review.id}
-                title={review.title}
-                condition={review.PATOLOGIE?.Patologia || ''}
-                experience={review.experience}
-                diagnosisDifficulty={review.diagnosis_difficulty}
-                symptomsSeverity={review.symptoms_severity}
-                hasMedication={review.has_medication}
-                medicationEffectiveness={review.medication_effectiveness}
-                healingPossibility={review.healing_possibility}
-                socialDiscomfort={review.social_discomfort}
-                username={review.users?.username}
-              />
-            ))}
-
-            {latestReviews.length === 0 && !isLoading && (
+            {latestReviews.length > 0 ? (
+              latestReviews.map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  id={review.id}
+                  title={review.title}
+                  condition={review.condition || ''}
+                  experience={review.experience}
+                  diagnosisDifficulty={review.diagnosis_difficulty}
+                  symptomsSeverity={review.symptoms_severity}
+                  hasMedication={review.has_medication}
+                  medicationEffectiveness={review.medication_effectiveness}
+                  healingPossibility={review.healing_possibility}
+                  socialDiscomfort={review.social_discomfort}
+                  username={review.username}
+                />
+              ))
+            ) : (
               <div className="col-span-full text-center py-8">
                 <p className="text-gray-500">Non ci sono ancora recensioni.</p>
               </div>
