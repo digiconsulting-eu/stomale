@@ -8,6 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface Review {
   id: string;
@@ -24,6 +27,34 @@ interface ReviewsTabProps {
 }
 
 export const ReviewsTab = ({ reviews, handleReviewAction }: ReviewsTabProps) => {
+  const queryClient = useQueryClient();
+
+  const handleAction = async (reviewId: string, action: "approve" | "reject") => {
+    try {
+      console.log(`Attempting to ${action} review ${reviewId}`);
+      
+      const { error } = await supabase
+        .from('reviews')
+        .update({ status: action === 'approve' ? 'approved' : 'removed' })
+        .eq('id', reviewId);
+
+      if (error) {
+        console.error('Error updating review:', error);
+        toast.error(`Errore durante l'${action === 'approve' ? 'approvazione' : 'rimozione'} della recensione`);
+        return;
+      }
+
+      // Invalidate and refetch reviews
+      await queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      await queryClient.invalidateQueries({ queryKey: ['latestReviews'] });
+      
+      toast.success(`Recensione ${action === 'approve' ? 'approvata' : 'rimossa'} con successo`);
+    } catch (error) {
+      console.error('Error in handleAction:', error);
+      toast.error("Si è verificato un errore durante l'operazione");
+    }
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -46,27 +77,29 @@ export const ReviewsTab = ({ reviews, handleReviewAction }: ReviewsTabProps) => 
               <TableCell>{review.date}</TableCell>
               <TableCell>
                 <Badge variant={review.status === "approved" ? "default" : "secondary"}>
-                  {review.status === "approved" ? "Approvata" : "In attesa"}
+                  {review.status === "approved" ? "Approvata" : "Rimossa"}
                 </Badge>
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleReviewAction(review.id, "approve")}
-                    disabled={review.status === "approved"}
-                  >
-                    Approva
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleReviewAction(review.id, "reject")}
-                    disabled={review.status === "rejected"}
-                  >
-                    Rifiuta
-                  </Button>
+                  {review.status !== "approved" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAction(review.id, "approve")}
+                    >
+                      Approva
+                    </Button>
+                  )}
+                  {review.status !== "removed" && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleAction(review.id, "reject")}
+                    >
+                      Rimuovi
+                    </Button>
+                  )}
                 </div>
               </TableCell>
             </TableRow>
