@@ -25,6 +25,7 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('Fetching data for sitemap...'); // Debug log
 
     const [conditionsResponse, reviewsResponse] = await Promise.all([
       supabase.from('PATOLOGIE').select('Patologia'),
@@ -38,11 +39,19 @@ Deno.serve(async (req) => {
         .eq('status', 'approved')
     ]);
 
-    if (conditionsResponse.error) throw conditionsResponse.error;
-    if (reviewsResponse.error) throw reviewsResponse.error;
+    if (conditionsResponse.error) {
+      console.error('Error fetching conditions:', conditionsResponse.error);
+      throw conditionsResponse.error;
+    }
+    if (reviewsResponse.error) {
+      console.error('Error fetching reviews:', reviewsResponse.error);
+      throw reviewsResponse.error;
+    }
 
-    const conditions = conditionsResponse.data;
-    const reviews = reviewsResponse.data;
+    const conditions = conditionsResponse.data || [];
+    const reviews = reviewsResponse.data || [];
+    
+    console.log(`Found ${conditions.length} conditions and ${reviews.length} reviews`); // Debug log
 
     const encodeUrl = (str: string) => {
       return str.toLowerCase()
@@ -53,6 +62,7 @@ Deno.serve(async (req) => {
     };
 
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${BASE_URL}/</loc>
@@ -66,7 +76,7 @@ Deno.serve(async (req) => {
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-${conditions?.map(condition => {
+${conditions.map(condition => {
   if (condition.Patologia) {
     const encodedCondition = encodeUrl(condition.Patologia);
     return `  <url>
@@ -78,7 +88,7 @@ ${conditions?.map(condition => {
   }
   return '';
 }).join('\n')}
-${reviews?.map(review => {
+${reviews.map(review => {
   if (review.PATOLOGIE?.Patologia && review.title) {
     const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
     const encodedTitle = encodeUrl(review.title);
@@ -99,6 +109,8 @@ ${['cerca-patologia', 'cerca-sintomi', 'nuova-recensione', 'inserisci-patologia'
     <priority>0.6</priority>
   </url>`).join('\n')}
 </urlset>`;
+
+    console.log('Generated XML content length:', xmlContent.length); // Debug log
 
     return new Response(xmlContent, {
       headers: corsHeaders

@@ -20,15 +20,15 @@ export default function Sitemap() {
           }
 
           const xmlText = await response.text();
+          console.log('Sitemap content:', xmlText); // Debug log
           
-          // Set content type meta tag
-          const meta = document.createElement('meta');
-          meta.httpEquiv = 'Content-Type';
-          meta.content = 'text/xml; charset=UTF-8';
-          document.head.appendChild(meta);
+          // Set XML content type
+          document.contentType = 'text/xml';
           
-          // Clear and write XML content
-          document.documentElement.innerHTML = xmlText;
+          // Clear document and write XML
+          document.open('text/xml');
+          document.write(xmlText);
+          document.close();
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
