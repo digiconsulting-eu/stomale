@@ -45,7 +45,7 @@ export const ReviewManagementTable = () => {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     staleTime: 0,
-    cacheTime: 0
+    gcTime: 0
   });
 
   if (isLoading) {
