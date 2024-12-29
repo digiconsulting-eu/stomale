@@ -5,13 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewContent } from "@/components/review/ReviewContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { setPageTitle } from "@/utils/pageTitle";
+import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
 
 const ReviewDetail = () => {
   const { condition, title } = useParams();
 
   useEffect(() => {
-    setPageTitle(`${title} | Recensione su ${condition}`);
+    if (condition && title) {
+      setPageTitle(`${title} | Recensione su ${condition}`);
+      setMetaDescription(getReviewMetaDescription(condition, title));
+    }
   }, [title, condition]);
 
   const { data: review, isLoading, error } = useQuery({
@@ -20,7 +23,7 @@ const ReviewDetail = () => {
       try {
         console.log('Searching for review with title:', title);
         
-        // Get all reviews for this condition to find the matching one
+        // Get all reviews for this condition with user data
         const { data: reviews, error: queryError } = await supabase
           .from('reviews')
           .select(`
@@ -32,7 +35,6 @@ const ReviewDetail = () => {
               Patologia
             )
           `)
-          .eq('status', 'approved')
           .eq('PATOLOGIE.Patologia', condition?.toUpperCase());
 
         if (queryError) throw queryError;

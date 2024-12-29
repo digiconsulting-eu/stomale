@@ -88,7 +88,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         "La tua esperienza è stata inviata con successo! Sarà pubblicata entro 48 ore dopo la revisione.",
         { duration: 5000 }
       );
-      navigate("/");
+      navigate("/dashboard", { state: { activeTab: "reviews" } });
     } catch (error) {
       console.error('Error submitting review:', error);
       toast.error("Si è verificato un errore durante l'invio della recensione. Riprova più tardi.");

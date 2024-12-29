@@ -99,7 +99,7 @@ export const SearchBar = () => {
             value={searchTerm}
             onChange={(e) => updateSuggestions(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full pl-4 pr-10 py-2"
+            className="w-full pl-4 pr-10 py-2 bg-white"
           />
           {suggestions.length > 0 && (
             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">

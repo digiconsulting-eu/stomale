@@ -198,6 +198,7 @@ export type Database = {
           social_discomfort: number | null
           status: string | null
           symptoms: string
+          symptoms_searchable: unknown | null
           symptoms_severity: number | null
           title: string
           updated_at: string | null
@@ -215,6 +216,7 @@ export type Database = {
           social_discomfort?: number | null
           status?: string | null
           symptoms: string
+          symptoms_searchable?: unknown | null
           symptoms_severity?: number | null
           title: string
           updated_at?: string | null
@@ -232,6 +234,7 @@ export type Database = {
           social_discomfort?: number | null
           status?: string | null
           symptoms?: string
+          symptoms_searchable?: unknown | null
           symptoms_severity?: number | null
           title?: string
           updated_at?: string | null
@@ -321,6 +324,18 @@ export type Database = {
           user_id: string
         }
         Returns: boolean
+      }
+      unaccent: {
+        Args: {
+          "": string
+        }
+        Returns: string
+      }
+      unaccent_init: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
       }
     }
     Enums: {

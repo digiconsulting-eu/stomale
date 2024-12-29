@@ -3,7 +3,7 @@ import { Bell, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Review {
@@ -37,7 +37,9 @@ export const NotificationsTab = ({
   notifications, 
   markNotificationAsRead 
 }: NotificationsTabProps) => {
-  // Query to fetch pending reviews
+  const queryClient = useQueryClient();
+
+  // Query to fetch only pending reviews
   const { data: pendingReviews, refetch: refetchPendingReviews } = useQuery({
     queryKey: ['pending-reviews'],
     queryFn: async () => {
@@ -80,7 +82,9 @@ export const NotificationsTab = ({
       if (error) throw error;
       
       toast.success("Recensione approvata con successo");
-      refetchPendingReviews();
+      // Invalidate both queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['pending-reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['all-reviews'] });
     } catch (error) {
       console.error('Error approving review:', error);
       toast.error("Errore durante l'approvazione della recensione");
@@ -97,7 +101,9 @@ export const NotificationsTab = ({
       if (error) throw error;
       
       toast.success("Recensione rifiutata con successo");
-      refetchPendingReviews();
+      // Invalidate both queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['pending-reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['all-reviews'] });
     } catch (error) {
       console.error('Error rejecting review:', error);
       toast.error("Errore durante il rifiuto della recensione");
