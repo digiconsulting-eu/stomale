@@ -12,6 +12,7 @@ export default function Sitemap() {
           const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sitemap`, {
             headers: {
               'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+              'Accept': 'application/xml',
             },
           });
 
@@ -20,19 +21,26 @@ export default function Sitemap() {
           }
 
           const xmlText = await response.text();
-          console.log('Sitemap content:', xmlText);
-
+          
+          // Create a new document with proper XML declaration
+          const xmlDoc = document.implementation.createDocument(null, 'root', null);
+          const xmlDeclaration = document.implementation.createDocument(null, null, null)
+            .createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"');
+          
           // Clear existing document content
-          document.documentElement.innerHTML = '';
+          while (document.documentElement.firstChild) {
+            document.documentElement.firstChild.remove();
+          }
           
-          // Write XML content directly
-          document.write(xmlText);
-          
-          // Set content type
+          // Set XML content type
           const meta = document.createElement('meta');
-          meta.httpEquiv = 'Content-Type';
-          meta.content = 'application/xml; charset=UTF-8';
+          meta.setAttribute('http-equiv', 'Content-Type');
+          meta.setAttribute('content', 'application/xml; charset=UTF-8');
           document.head.appendChild(meta);
+          
+          // Write XML content
+          document.documentElement.innerHTML = xmlText;
+          
         } catch (error) {
           console.error('Error fetching sitemap:', error);
         }
