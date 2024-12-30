@@ -23,12 +23,13 @@ const ReviewDetail = () => {
       try {
         console.log('Searching for review with title:', title);
         
-        // Get all reviews for this condition with user data
+        // Updated query to properly join with users table
         const { data: reviews, error: queryError } = await supabase
           .from('reviews')
           .select(`
             *,
             users (
+              id,
               username
             ),
             PATOLOGIE (
