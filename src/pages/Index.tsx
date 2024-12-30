@@ -57,7 +57,7 @@ export default function Index() {
 
         return data.map(review => ({
           ...review,
-          username: review.users?.username,
+          username: review.users?.username || 'Anonimo',
           condition: review.PATOLOGIE?.Patologia || 'Patologia non specificata'
         }));
       } catch (error) {
@@ -123,7 +123,7 @@ export default function Index() {
                   medicationEffectiveness={review.medication_effectiveness}
                   healingPossibility={review.healing_possibility}
                   socialDiscomfort={review.social_discomfort}
-                  username={review.users?.username}
+                  username={review.username}
                 />
               ))
             ) : (
