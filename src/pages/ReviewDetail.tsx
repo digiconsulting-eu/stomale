@@ -21,7 +21,7 @@ const ReviewDetail = () => {
     queryKey: ['review', condition, title],
     queryFn: async () => {
       try {
-        console.log('Searching for review with title:', title);
+        console.log('Searching for review with condition:', condition);
         
         const { data: reviews, error: queryError } = await supabase
           .from('reviews')
@@ -34,13 +34,16 @@ const ReviewDetail = () => {
               Patologia
             )
           `)
-          .eq('PATOLOGIE.Patologia', condition?.toUpperCase());
+          .eq('PATOLOGIE.Patologia', condition?.toUpperCase())
+          .eq('status', 'approved');
 
         if (queryError) throw queryError;
         
         console.log('Reviews fetched:', reviews);
         
-        const matchingReview = reviews?.find(review => {
+        if (!reviews) return null;
+
+        const matchingReview = reviews.find(review => {
           const reviewTitleSlug = review.title
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
@@ -93,21 +96,23 @@ const ReviewDetail = () => {
   }
 
   return (
-    <ReviewContent
-      username={review.users?.username}
-      title={review.title}
-      condition={review.PATOLOGIE?.Patologia?.toLowerCase()}
-      symptoms={review.symptoms}
-      experience={review.experience}
-      diagnosisDifficulty={review.diagnosis_difficulty}
-      symptomSeverity={review.symptoms_severity}
-      hasMedication={review.has_medication}
-      medicationEffectiveness={review.medication_effectiveness}
-      healingPossibility={review.healing_possibility}
-      socialDiscomfort={review.social_discomfort}
-      reviewId={review.id.toString()}
-      date={new Date(review.created_at).toLocaleDateString('it-IT')}
-    />
+    <div className="container mx-auto px-4 py-8">
+      <ReviewContent
+        username={review.users?.username}
+        title={review.title}
+        condition={review.PATOLOGIE?.Patologia?.toLowerCase()}
+        symptoms={review.symptoms}
+        experience={review.experience}
+        diagnosisDifficulty={review.diagnosis_difficulty}
+        symptomSeverity={review.symptoms_severity}
+        hasMedication={review.has_medication}
+        medicationEffectiveness={review.medication_effectiveness}
+        healingPossibility={review.healing_possibility}
+        socialDiscomfort={review.social_discomfort}
+        reviewId={review.id.toString()}
+        date={new Date(review.created_at).toLocaleDateString('it-IT')}
+      />
+    </div>
   );
 };
 

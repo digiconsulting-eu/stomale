@@ -43,7 +43,9 @@ export const ReviewCard = ({
       <div className="space-y-4">
         <div>
           <h3 className="text-xl font-semibold mb-2">{title}</h3>
-          <p className="text-sm text-gray-600 mb-2">Scritto da {username || 'Anonimo'}</p>
+          <p className="text-sm text-gray-600 mb-2">
+            Scritto da {username || 'Anonimo'}
+          </p>
           <Link 
             to={`/patologia/${condition.toLowerCase()}`}
             className="inline-block"
