@@ -55,11 +55,7 @@ export default function Index() {
           return [];
         }
 
-        return data.map(review => ({
-          ...review,
-          username: review.users?.username || 'Anonimo',
-          condition: review.PATOLOGIE?.Patologia || 'Patologia non specificata'
-        }));
+        return data;
       } catch (error) {
         console.error('Error in query execution:', error);
         throw error;
@@ -115,7 +111,7 @@ export default function Index() {
                   key={review.id}
                   id={review.id}
                   title={review.title}
-                  condition={review.condition}
+                  condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
                   experience={review.experience}
                   diagnosisDifficulty={review.diagnosis_difficulty}
                   symptomsSeverity={review.symptoms_severity}
@@ -123,7 +119,7 @@ export default function Index() {
                   medicationEffectiveness={review.medication_effectiveness}
                   healingPossibility={review.healing_possibility}
                   socialDiscomfort={review.social_discomfort}
-                  username={review.username}
+                  username={review.users?.username || 'Anonimo'}
                 />
               ))
             ) : (

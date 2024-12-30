@@ -13,37 +13,31 @@ const ReviewDetail = () => {
   const { data: review, isLoading, error } = useQuery({
     queryKey: ['review', id],
     queryFn: async () => {
-      try {
-        console.log('Searching for review with id:', id);
-        
-        const { data: reviews, error: queryError } = await supabase
-          .from('reviews')
-          .select(`
-            *,
-            users (
-              username
-            ),
-            PATOLOGIE (
-              Patologia
-            )
-          `)
-          .eq('id', id)
-          .eq('status', 'approved')
-          .single();
+      console.log('Fetching review with ID:', id);
+      
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          *,
+          users (
+            username
+          ),
+          PATOLOGIE (
+            Patologia
+          )
+        `)
+        .eq('id', id)
+        .eq('status', 'approved')
+        .maybeSingle();
 
-        if (queryError) throw queryError;
-        
-        console.log('Review fetched:', reviews);
-        
-        if (!reviews) return null;
-        return reviews;
-        
-      } catch (error) {
-        console.error('Error in review query:', error);
+      if (error) {
+        console.error('Error fetching review:', error);
         throw error;
       }
-    },
-    retry: 1
+      
+      console.log('Fetched review:', data);
+      return data;
+    }
   });
 
   useEffect(() => {
@@ -85,7 +79,7 @@ const ReviewDetail = () => {
 
   return (
     <ReviewContent
-      username={review.users?.username}
+      username={review.users?.username || 'Anonimo'}
       title={review.title}
       condition={review.PATOLOGIE?.Patologia?.toLowerCase()}
       symptoms={review.symptoms}
