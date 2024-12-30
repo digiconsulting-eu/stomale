@@ -11,13 +11,26 @@ export const ReviewActions = ({ condition }: ReviewActionsProps) => {
   
   return (
     <div className="mb-8">
-      <Link to={`/nuova-recensione?patologia=${condition}`}>
-        <Button 
-          className="w-full py-8 text-xl font-semibold bg-primary hover:bg-primary-hover text-white shadow-lg rounded-lg transition-all duration-200 border border-primary-hover"
+      {/* Mobile: solo testo */}
+      <div className="block md:hidden">
+        <Link 
+          to={`/nuova-recensione?patologia=${condition}`}
+          className="block text-xl font-semibold text-primary hover:text-primary-hover text-center"
         >
           Racconta la tua Esperienza con {conditionName}
-        </Button>
-      </Link>
+        </Link>
+      </div>
+
+      {/* Desktop: pulsante */}
+      <div className="hidden md:block">
+        <Link to={`/nuova-recensione?patologia=${condition}`}>
+          <Button 
+            className="w-full py-8 text-xl font-semibold bg-primary hover:bg-primary-hover text-white shadow-lg rounded-lg transition-all duration-200 border border-primary-hover"
+          >
+            Racconta la tua Esperienza con {conditionName}
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 };
