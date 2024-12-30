@@ -31,10 +31,10 @@ export default function Index() {
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
-            users (
+            users!inner (
               username
             ),
-            PATOLOGIE (
+            PATOLOGIE!inner (
               id,
               Patologia
             )
@@ -67,7 +67,7 @@ export default function Index() {
     },
     meta: {
       onError: (error: Error) => {
-        console.error('Error in reviews query:', error);
+        console.error('Query error:', error);
         toast.error("Errore nel caricamento delle recensioni");
       }
     }
@@ -123,7 +123,7 @@ export default function Index() {
                   medicationEffectiveness={review.medication_effectiveness}
                   healingPossibility={review.healing_possibility}
                   socialDiscomfort={review.social_discomfort}
-                  username={review.username}
+                  username={review.users?.username}
                 />
               ))
             ) : (

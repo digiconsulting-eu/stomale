@@ -30,21 +30,13 @@ export const ReviewCard = ({
     return text.slice(0, 150).trim() + "...";
   };
 
-  // Function to create URL-friendly slug from title
-  const createSlug = (text: string) => {
-    return text
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  };
-
   return (
     <Card className="bg-white p-6 hover:shadow-lg transition-shadow">
       <div className="space-y-4">
         <div>
           <h3 className="text-xl font-semibold mb-2">{title}</h3>
           <p className="text-sm text-gray-600 mb-2">
-            Scritto da {username || 'Anonimo'}
+            Scritto da {username}
           </p>
           <Link 
             to={`/patologia/${condition.toLowerCase()}`}
