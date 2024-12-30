@@ -1,4 +1,3 @@
-import { Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
@@ -10,48 +9,37 @@ interface ReviewHeaderProps {
   username?: string;
 }
 
-export const ReviewHeader = ({ title, condition, date, username }: ReviewHeaderProps) => {
-  const conditionName = capitalizeFirstLetter(condition);
-  
-  console.log('ReviewHeader received username:', username);
+export const ReviewHeader = ({ 
+  title, 
+  condition,
+  date,
+  username 
+}: ReviewHeaderProps) => {
+  // Function to format the username
+  const formatUsername = (username?: string) => {
+    if (!username) return 'Anonimo';
+    // If username starts with 'Anonimo', return just 'Anonimo'
+    if (username.startsWith('Anonimo')) return 'Anonimo';
+    return username;
+  };
 
   return (
-    <div className="mb-6">
-      <div className="flex justify-between items-start mb-6">
+    <div className="mb-8">
+      <h1 className="text-3xl font-bold mb-4">{title}</h1>
+      <div className="flex flex-col gap-2">
+        <p className="text-sm text-gray-600">
+          Scritto da {formatUsername(username)}
+        </p>
+        <p className="text-sm text-gray-600 mb-4">{date}</p>
         <Link 
-          to={`/patologia/${condition}`}
-          className="text-primary hover:underline"
-        >
-          ← Leggi tutte le recensioni su {conditionName}
-        </Link>
-      </div>
-
-      <h1 className="text-3xl font-bold text-primary mb-4">
-        {title || `Esperienza con ${conditionName}`}
-      </h1>
-
-      <div className="flex flex-col gap-3">
-        {username && (
-          <p className="text-gray-600 font-medium">
-            {username}
-          </p>
-        )}
-        <div className="flex items-center text-gray-500">
-          <Calendar size={16} className="mr-2" />
-          <span>{date}</span>
-        </div>
-      </div>
-      
-      <div className="mt-4">
-        <Link 
-          to={`/patologia/${condition}`}
-          className="block"
+          to={`/patologia/${condition.toLowerCase()}`}
+          className="inline-block"
         >
           <Badge 
-            variant="secondary" 
-            className="inline-flex px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+            variant="outline" 
+            className="text-[#0EA5E9] hover:text-[#0EA5E9]/80 bg-[#0EA5E9]/10 border-[#0EA5E9]/20 hover:bg-[#0EA5E9]/20 cursor-pointer transition-colors"
           >
-            {conditionName}
+            {capitalizeFirstLetter(condition)}
           </Badge>
         </Link>
       </div>
