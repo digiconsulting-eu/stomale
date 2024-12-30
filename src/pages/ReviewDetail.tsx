@@ -11,7 +11,7 @@ const ReviewDetail = () => {
   const { condition, id } = useParams();
 
   const { data: review, isLoading, error } = useQuery({
-    queryKey: ['review', condition, id],
+    queryKey: ['review', id],
     queryFn: async () => {
       try {
         console.log('Searching for review with id:', id);

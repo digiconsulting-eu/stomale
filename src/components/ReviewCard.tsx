@@ -24,7 +24,6 @@ export const ReviewCard = ({
   experience,
   username,
 }: ReviewCardProps) => {
-  // Function to truncate text to roughly 2 lines (approximately 150 characters)
   const truncateExperience = (text: string = '') => {
     if (text.length <= 150) return text;
     return text.slice(0, 150).trim() + "...";
