@@ -23,13 +23,11 @@ const ReviewDetail = () => {
       try {
         console.log('Searching for review with title:', title);
         
-        // Updated query to properly join with users table
         const { data: reviews, error: queryError } = await supabase
           .from('reviews')
           .select(`
             *,
-            users (
-              id,
+            users!inner (
               username
             ),
             PATOLOGIE (
@@ -40,7 +38,8 @@ const ReviewDetail = () => {
 
         if (queryError) throw queryError;
         
-        // Find the review whose URL-friendly title matches our parameter
+        console.log('Reviews fetched:', reviews); // Debug log
+        
         const matchingReview = reviews?.find(review => {
           const reviewTitleSlug = review.title
             .toLowerCase()
@@ -50,7 +49,7 @@ const ReviewDetail = () => {
           return reviewTitleSlug === title;
         });
 
-        console.log('Found matching review:', matchingReview);
+        console.log('Found matching review:', matchingReview); // Debug log
         
         if (!matchingReview) return null;
         return matchingReview;
