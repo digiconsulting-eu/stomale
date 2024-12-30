@@ -15,20 +15,12 @@ export const ReviewHeader = ({
   date,
   username 
 }: ReviewHeaderProps) => {
-  // Function to format the username
-  const formatUsername = (username?: string) => {
-    if (!username) return 'Anonimo';
-    // If username starts with 'Anonimo', return just 'Anonimo'
-    if (username.startsWith('Anonimo')) return 'Anonimo';
-    return username;
-  };
-
   return (
     <div className="mb-8">
       <h1 className="text-3xl font-bold mb-4">{title}</h1>
       <div className="flex flex-col gap-2">
         <p className="text-sm text-gray-600">
-          Scritto da {formatUsername(username)}
+          Scritto da {username || 'Anonimo'}
         </p>
         <p className="text-sm text-gray-600 mb-4">{date}</p>
         <Link 

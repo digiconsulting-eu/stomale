@@ -26,13 +26,6 @@ export const ReviewCard = ({
 }: ReviewCardProps) => {
   console.log('ReviewCard received username:', username);
 
-  // Function to format the username
-  const formatUsername = (username?: string) => {
-    if (!username) return 'Anonimo';
-    if (username.startsWith('Anonimo')) return 'Anonimo';
-    return username;
-  };
-
   // Function to truncate text to roughly 2 lines (approximately 150 characters)
   const truncateExperience = (text: string = '') => {
     if (text.length <= 150) return text;
@@ -53,7 +46,7 @@ export const ReviewCard = ({
         <div>
           <h3 className="text-xl font-semibold mb-2">{title}</h3>
           {username && (
-            <p className="text-sm text-gray-600 mb-2">Scritto da {formatUsername(username)}</p>
+            <p className="text-sm text-gray-600 mb-2">Scritto da {username}</p>
           )}
           <Link 
             to={`/patologia/${condition.toLowerCase()}`}
