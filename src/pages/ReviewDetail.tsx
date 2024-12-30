@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
 
 const ReviewDetail = () => {
-  const { condition, id } = useParams();
+  const { id } = useParams();
 
   const { data: review, isLoading, error } = useQuery({
     queryKey: ['review', id],
@@ -28,7 +28,7 @@ const ReviewDetail = () => {
         `)
         .eq('id', id)
         .eq('status', 'approved')
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error('Error fetching review:', error);
@@ -41,17 +41,19 @@ const ReviewDetail = () => {
   });
 
   useEffect(() => {
-    if (condition && review?.title) {
-      setPageTitle(`${review.title} | Recensione su ${condition}`);
-      setMetaDescription(getReviewMetaDescription(condition, review.title));
+    if (review?.title) {
+      setPageTitle(`${review.title} | Recensione`);
+      setMetaDescription(getReviewMetaDescription(review.PATOLOGIE?.Patologia, review.title));
     }
-  }, [review?.title, condition]);
+  }, [review?.title, review?.PATOLOGIE?.Patologia]);
 
   if (error) {
-    toast.error("Si è verificato un errore nel caricamento della recensione");
+    console.error('Error loading review:', error);
     return (
       <div className="container mx-auto px-4 py-8">
-        <p className="text-red-500">Si è verificato un errore nel caricamento della recensione.</p>
+        <div className="text-center text-red-500">
+          Si è verificato un errore nel caricamento della recensione.
+        </div>
       </div>
     );
   }
