@@ -44,7 +44,7 @@ export const ReviewCard = ({
         <div>
           <h3 className="text-xl font-semibold mb-2">{title}</h3>
           <p className="text-sm text-gray-600 mb-2">
-            Scritto da {username || 'Anonimo'}
+            Scritto da {username}
           </p>
           <Link 
             to={`/patologia/${condition.toLowerCase()}`}

@@ -31,15 +31,15 @@ export default function Index() {
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
-            users (
+            users!inner (
               username
             ),
-            PATOLOGIE (
+            PATOLOGIE!inner (
               id,
               Patologia
             )
           `)
-          .eq('status', 'approved')  // Only fetch approved reviews
+          .eq('status', 'approved')
           .order('created_at', { ascending: false })
           .limit(12);
 
@@ -57,7 +57,7 @@ export default function Index() {
 
         return data.map(review => ({
           ...review,
-          username: review.users?.username || 'Anonimo',
+          username: review.users?.username,
           condition: review.PATOLOGIE?.Patologia || 'Patologia non specificata'
         }));
       } catch (error) {
@@ -70,8 +70,7 @@ export default function Index() {
         console.error('Error in reviews query:', error);
         toast.error("Errore nel caricamento delle recensioni");
       }
-    },
-    refetchInterval: 5000 // Refetch every 5 seconds to ensure we have latest status
+    }
   });
 
   return (
