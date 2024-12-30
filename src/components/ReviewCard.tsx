@@ -24,8 +24,6 @@ export const ReviewCard = ({
   experience,
   username,
 }: ReviewCardProps) => {
-  console.log('ReviewCard received username:', username);
-
   // Function to truncate text to roughly 2 lines (approximately 150 characters)
   const truncateExperience = (text: string = '') => {
     if (text.length <= 150) return text;
@@ -45,9 +43,7 @@ export const ReviewCard = ({
       <div className="space-y-4">
         <div>
           <h3 className="text-xl font-semibold mb-2">{title}</h3>
-          {username && (
-            <p className="text-sm text-gray-600 mb-2">Scritto da {username}</p>
-          )}
+          <p className="text-sm text-gray-600 mb-2">Scritto da {username || 'Anonimo'}</p>
           <Link 
             to={`/patologia/${condition.toLowerCase()}`}
             className="inline-block"
@@ -65,7 +61,7 @@ export const ReviewCard = ({
           {truncateExperience(experience)}
         </p>
 
-        <Link to={`/patologia/${condition}/recensione/${createSlug(title)}`}>
+        <Link to={`/patologia/${condition.toLowerCase()}/recensione/${createSlug(title)}`}>
           <Button 
             className="w-full bg-primary text-white hover:bg-primary-hover"
           >
