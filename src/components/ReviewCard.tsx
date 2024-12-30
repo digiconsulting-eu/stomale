@@ -44,7 +44,7 @@ export const ReviewCard = ({
         <div>
           <h3 className="text-xl font-semibold mb-2">{title}</h3>
           <p className="text-sm text-gray-600 mb-2">
-            Scritto da {username}
+            Scritto da {username || 'Anonimo'}
           </p>
           <Link 
             to={`/patologia/${condition.toLowerCase()}`}
@@ -63,7 +63,7 @@ export const ReviewCard = ({
           {truncateExperience(experience)}
         </p>
 
-        <Link to={`/patologia/${condition.toLowerCase()}/recensione/${createSlug(title)}`}>
+        <Link to={`/patologia/${condition.toLowerCase()}/recensione/${id}`}>
           <Button 
             className="w-full bg-primary text-white hover:bg-primary-hover"
           >
