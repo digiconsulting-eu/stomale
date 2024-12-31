@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewContent } from "@/components/review/ReviewContent";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
 import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
 
 const ReviewDetail = () => {
@@ -19,9 +18,7 @@ const ReviewDetail = () => {
         .from('reviews')
         .select(`
           *,
-          users (
-            username
-          ),
+          username,
           PATOLOGIE (
             Patologia
           )
@@ -81,7 +78,7 @@ const ReviewDetail = () => {
 
   return (
     <ReviewContent
-      username={review.users?.username || 'Anonimo'}
+      username={review.username}
       title={review.title}
       condition={review.PATOLOGIE?.Patologia?.toLowerCase()}
       symptoms={review.symptoms}
