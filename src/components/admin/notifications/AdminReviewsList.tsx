@@ -3,10 +3,10 @@ import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Review } from "@/types/review";
+import { DatabaseReview } from "@/types/review";
 
 interface AdminReviewsListProps {
-  reviews: Review[];
+  reviews: DatabaseReview[];
 }
 
 export const AdminReviewsList = ({ reviews }: AdminReviewsListProps) => {

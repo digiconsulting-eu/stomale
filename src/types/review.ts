@@ -5,15 +5,19 @@ export interface DatabaseReview {
   experience: string;
   created_at: string;
   symptoms: string;
-  diagnosis_difficulty: number;
-  symptoms_severity: number;
-  has_medication: boolean;
-  medication_effectiveness: number;
-  healing_possibility: number;
-  social_discomfort: number;
-  username: string;
+  diagnosis_difficulty?: number;
+  symptoms_severity?: number;
+  has_medication?: boolean;
+  medication_effectiveness?: number;
+  healing_possibility?: number;
+  social_discomfort?: number;
+  username?: string;
+  status?: string;
+  PATOLOGIE?: {
+    Patologia: string;
+  };
 }
 
-export interface Review extends Omit<DatabaseReview, 'condition_id'> {
+export interface Review extends Omit<DatabaseReview, 'condition_id' | 'PATOLOGIE'> {
   condition: string;
 }

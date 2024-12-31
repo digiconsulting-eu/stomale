@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminReviewsList } from "./notifications/AdminReviewsList";
 import { AdminNotificationsList } from "./notifications/AdminNotificationsList";
-import { Review } from "@/types/review";
+import { DatabaseReview } from "@/types/review";
 
 interface NotificationsTabProps {
   notifications?: any[];
@@ -42,7 +42,7 @@ export const NotificationsTab = ({ notifications, markNotificationAsRead }: Noti
       }
 
       console.log('Fetched pending reviews:', data);
-      return data as Review[];
+      return data as DatabaseReview[];
     },
     refetchInterval: 30000, // Refetch every 30 seconds
   });
