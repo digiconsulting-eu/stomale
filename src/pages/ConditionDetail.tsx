@@ -1,38 +1,16 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ConditionOverview } from "@/components/condition/ConditionOverview";
 import { supabase } from "@/integrations/supabase/client";
 import { ConditionHeader } from "@/components/condition/ConditionHeader";
 import { ConditionActions } from "@/components/condition/ConditionActions";
 import { ConditionReviews } from "@/components/condition/ConditionReviews";
+import { ConditionStats } from "@/components/condition/ConditionStats";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
-import { toast } from "sonner";
 import { setPageTitle, getConditionPageTitle } from "@/utils/pageTitle";
-
-interface DatabaseReview {
-  id: number;
-  condition_id: number;
-  title: string;
-  experience: string;
-  created_at: string;
-  symptoms: string;
-  diagnosis_difficulty: number;
-  symptoms_severity: number;
-  has_medication: boolean;
-  medication_effectiveness: number;
-  healing_possibility: number;
-  social_discomfort: number;
-  username: string;
-}
-
-interface Review extends Omit<DatabaseReview, 'condition_id'> {
-  condition: string;
-}
+import { DatabaseReview, Review } from "@/types/review";
 
 interface Stats {
   diagnosisDifficulty: number;
@@ -78,57 +56,10 @@ const calculateStats = (reviews: Review[]): Stats => {
   };
 };
 
-const StatItem = ({ label, value, description }: { label: string, value: number, description: string }) => (
-  <div>
-    <p className="text-sm text-gray-500">{label}</p>
-    <div className="flex items-center gap-2">
-      <span className="text-2xl font-bold">{value.toFixed(1)}</span>
-      <Badge variant="secondary" className="border border-primary/50 text-text">
-        {description}
-      </Badge>
-    </div>
-  </div>
-);
-
-const getDescriptionForValue = (value: number): string => {
-  if (value === 0) return "Nessun dato";
-  if (value <= 2) return "Basso";
-  if (value <= 3.5) return "Moderato";
-  return "Alto";
-};
-
 export default function ConditionDetail() {
   const { condition } = useParams();
   const navigate = useNavigate();
-  const [isFavorite, setIsFavorite] = useState(false);
   const isAdmin = localStorage.getItem("isAdmin") === "true";
-
-  useEffect(() => {
-    const favorites = JSON.parse(localStorage.getItem('favoriteConditions') || '[]');
-    setIsFavorite(favorites.includes(condition));
-  }, [condition]);
-
-  const toggleFavorite = () => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (!isLoggedIn) {
-      toast.error("Devi effettuare l'accesso per salvare le patologie preferite");
-      return;
-    }
-
-    const favorites = JSON.parse(localStorage.getItem('favoriteConditions') || '[]');
-    let newFavorites;
-    
-    if (isFavorite) {
-      newFavorites = favorites.filter((fav: string) => fav !== condition);
-      toast.success("Patologia rimossa dai preferiti");
-    } else {
-      newFavorites = [...favorites, condition];
-      toast.success("Patologia aggiunta ai preferiti");
-    }
-    
-    localStorage.setItem('favoriteConditions', JSON.stringify(newFavorites));
-    setIsFavorite(!isFavorite);
-  };
 
   useEffect(() => {
     if (condition) {
@@ -188,36 +119,7 @@ export default function ConditionDetail() {
 
       <div className="grid md:grid-cols-12 gap-6">
         <div className="md:col-span-4">
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Statistiche</h2>
-            <div className="space-y-6">
-              <StatItem 
-                label="Difficoltà di Diagnosi" 
-                value={stats.diagnosisDifficulty} 
-                description={getDescriptionForValue(stats.diagnosisDifficulty)} 
-              />
-              <StatItem 
-                label="Fastidio Sintomi" 
-                value={stats.symptomsDiscomfort} 
-                description={getDescriptionForValue(stats.symptomsDiscomfort)} 
-              />
-              <StatItem 
-                label="Efficacia Cura Farmacologica" 
-                value={stats.medicationEffectiveness} 
-                description={getDescriptionForValue(stats.medicationEffectiveness)} 
-              />
-              <StatItem 
-                label="Possibilità di Guarigione" 
-                value={stats.healingPossibility} 
-                description={getDescriptionForValue(stats.healingPossibility)} 
-              />
-              <StatItem 
-                label="Disagio Sociale" 
-                value={stats.socialDiscomfort} 
-                description={getDescriptionForValue(stats.socialDiscomfort)} 
-              />
-            </div>
-          </Card>
+          <ConditionStats stats={stats} />
         </div>
 
         <div className="md:col-span-8">
