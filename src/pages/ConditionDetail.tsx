@@ -72,7 +72,7 @@ export default function ConditionDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('PATOLOGIE')
-        .select('id')
+        .select('id, Patologia')
         .eq('Patologia', condition?.toUpperCase())
         .single();
       
@@ -85,12 +85,23 @@ export default function ConditionDetail() {
     queryKey: ["reviews", patologiaData?.id],
     enabled: !!patologiaData?.id,
     queryFn: async () => {
+      console.log('Fetching reviews for condition:', patologiaData?.id);
       const { data, error } = await supabase
         .from('reviews')
-        .select('*, PATOLOGIE(id, Patologia)')
+        .select(`
+          *,
+          PATOLOGIE (
+            id,
+            Patologia
+          )
+        `)
         .eq('condition_id', patologiaData.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        throw error;
+      }
+      console.log('Fetched reviews:', data);
       return data as DatabaseReview[];
     }
   });
@@ -106,7 +117,6 @@ export default function ConditionDetail() {
   const reviews: Review[] = reviewsData?.map(review => ({
     ...review,
     condition: condition || '',
-    PATOLOGIE: undefined // Remove PATOLOGIE from the Review type
   })) || [];
 
   const stats = calculateStats(reviews);

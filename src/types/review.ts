@@ -19,6 +19,6 @@ export interface DatabaseReview {
   };
 }
 
-export interface Review extends Omit<DatabaseReview, 'condition_id' | 'PATOLOGIE'> {
+export interface Review extends Omit<DatabaseReview, 'condition_id'> {
   condition: string;
 }
