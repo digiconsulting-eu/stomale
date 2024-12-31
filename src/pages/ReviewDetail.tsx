@@ -20,6 +20,7 @@ const ReviewDetail = () => {
           *,
           username,
           PATOLOGIE (
+            id,
             Patologia
           )
         `)
