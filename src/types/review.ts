@@ -14,6 +14,7 @@ export interface DatabaseReview {
   username?: string;
   status?: string;
   PATOLOGIE?: {
+    id: number;
     Patologia: string;
   };
 }

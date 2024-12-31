@@ -87,7 +87,7 @@ export default function ConditionDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('reviews')
-        .select('*')
+        .select('*, PATOLOGIE(id, Patologia)')
         .eq('condition_id', patologiaData.id);
       
       if (error) throw error;
@@ -103,9 +103,10 @@ export default function ConditionDetail() {
     navigate(`/nuova-recensione?patologia=${condition}`);
   };
 
-  const reviews = reviewsData?.map(review => ({
+  const reviews: Review[] = reviewsData?.map(review => ({
     ...review,
-    condition: condition || ''
+    condition: condition || '',
+    PATOLOGIE: undefined // Remove PATOLOGIE from the Review type
   })) || [];
 
   const stats = calculateStats(reviews);
