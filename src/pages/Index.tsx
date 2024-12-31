@@ -31,9 +31,7 @@ export default function Index() {
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
-            users (
-              username
-            ),
+            username,
             PATOLOGIE (
               id,
               Patologia
@@ -119,7 +117,7 @@ export default function Index() {
                   medicationEffectiveness={review.medication_effectiveness}
                   healingPossibility={review.healing_possibility}
                   socialDiscomfort={review.social_discomfort}
-                  username={review.users?.username || 'Anonimo'}
+                  username={review.username}
                 />
               ))
             ) : (
