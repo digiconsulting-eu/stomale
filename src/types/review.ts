@@ -6,6 +6,7 @@ export interface Review {
   created_at?: string;
   symptoms?: string;
   experience?: string;
+  username?: string;
   PATOLOGIE?: {
     Patologia: string;
   };

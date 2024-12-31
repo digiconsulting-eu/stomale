@@ -202,7 +202,7 @@ export type Database = {
           symptoms_severity: number | null
           title: string
           updated_at: string | null
-          user_id: string | null
+          username: string | null
         }
         Insert: {
           condition_id?: number | null
@@ -220,7 +220,7 @@ export type Database = {
           symptoms_severity?: number | null
           title: string
           updated_at?: string | null
-          user_id?: string | null
+          username?: string | null
         }
         Update: {
           condition_id?: number | null
@@ -238,7 +238,7 @@ export type Database = {
           symptoms_severity?: number | null
           title?: string
           updated_at?: string | null
-          user_id?: string | null
+          username?: string | null
         }
         Relationships: [
           {
@@ -249,11 +249,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "reviews_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "reviews_username_fkey"
+            columns: ["username"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
+            referencedColumns: ["username"]
           },
         ]
       }

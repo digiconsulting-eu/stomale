@@ -45,11 +45,24 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Get the current user
+      // Get the current user's username
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
         toast.error("Devi effettuare l'accesso per inviare una recensione");
         navigate("/login");
+        return;
+      }
+
+      // Get user's username
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('username')
+        .eq('id', session.user.id)
+        .single();
+
+      if (userError || !userData) {
+        console.error('Error fetching username:', userError);
+        toast.error("Errore nel recupero dei dati utente");
         return;
       }
 
@@ -62,12 +75,12 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
 
       if (patologiaError) throw patologiaError;
 
-      // Insert review with user_id
+      // Insert review with username
       const { error: reviewError } = await supabase
         .from('reviews')
         .insert([
           {
-            user_id: session.user.id,
+            username: userData.username,
             condition_id: patologiaData.id,
             title: data.title,
             symptoms: data.symptoms,

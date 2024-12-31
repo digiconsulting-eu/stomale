@@ -24,12 +24,9 @@ export const ReviewManagementTable = () => {
           title,
           status,
           created_at,
+          username,
           PATOLOGIE (
             Patologia
-          ),
-          users (
-            username,
-            email
           )
         `)
         .order('created_at', { ascending: false });
@@ -42,7 +39,7 @@ export const ReviewManagementTable = () => {
       console.log('Fetched reviews for admin:', data);
       return data;
     },
-    refetchInterval: 5000, // Refetch every 5 seconds
+    refetchInterval: 5000,
     refetchOnMount: true,
     refetchOnWindowFocus: true
   });
@@ -98,7 +95,7 @@ export const ReviewManagementTable = () => {
             <TableRow key={review.id}>
               <TableCell className="font-medium">{review.title}</TableCell>
               <TableCell>{review.PATOLOGIE?.Patologia}</TableCell>
-              <TableCell>{review.users?.username}</TableCell>
+              <TableCell>{review.username}</TableCell>
               <TableCell>
                 <Badge
                   variant={
