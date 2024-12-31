@@ -27,7 +27,7 @@ interface DatabaseReview {
   medication_effectiveness: number;
   healing_possibility: number;
   social_discomfort: number;
-  user_id: string;
+  username: string;
 }
 
 interface Review extends Omit<DatabaseReview, 'condition_id'> {
@@ -136,7 +136,6 @@ export default function ConditionDetail() {
     }
   }, [condition]);
 
-  // Query per ottenere l'ID della patologia
   const { data: patologiaData } = useQuery({
     queryKey: ["patologia", condition],
     queryFn: async () => {
@@ -151,7 +150,6 @@ export default function ConditionDetail() {
     }
   });
 
-  // Query per ottenere le recensioni
   const { data: reviewsData, isLoading } = useQuery({
     queryKey: ["reviews", patologiaData?.id],
     enabled: !!patologiaData?.id,
@@ -255,4 +253,3 @@ export default function ConditionDetail() {
     </div>
   );
 }
-

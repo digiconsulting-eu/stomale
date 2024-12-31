@@ -10,7 +10,4 @@ export interface Review {
   PATOLOGIE?: {
     Patologia: string;
   };
-  users?: {
-    username: string;
-  };
 }
