@@ -39,8 +39,8 @@ export const ReviewContent = ({
 }: ReviewContentProps) => {
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="col-span-1 lg:col-span-8">
           <ReviewHeader 
             title={title}
             condition={condition}
@@ -73,7 +73,8 @@ export const ReviewContent = ({
           <Disclaimer condition={capitalizeFirstLetter(condition)} />
         </div>
         
-        <div className="col-span-4">
+        {/* Banner column only visible on desktop */}
+        <div className="hidden lg:block lg:col-span-4">
           {/* Space for banners */}
         </div>
       </div>
