@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +5,8 @@ import { ReviewContent } from "@/components/review/ReviewContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
 import { slugify } from "@/utils/urlUtils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const ReviewDetail = () => {
   const { slug, condition } = useParams();
@@ -27,15 +28,25 @@ const ReviewDetail = () => {
         .eq('status', 'approved')
         .filter('PATOLOGIE.Patologia', 'ilike', condition)
         .filter('title', 'ilike', slug?.split('-').join(' '))
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching review:', error);
         throw error;
       }
       
+      if (!data) {
+        console.log('No review found with these parameters');
+        return null;
+      }
+
       console.log('Fetched review:', data);
       return data;
+    },
+    meta: {
+      onError: (error: Error) => {
+        console.error('Query error:', error);
+      }
     }
   });
 
@@ -50,9 +61,12 @@ const ReviewDetail = () => {
     console.error('Error loading review:', error);
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-500">
-          Si è verificato un errore nel caricamento della recensione.
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Si è verificato un errore nel caricamento della recensione.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -73,7 +87,12 @@ const ReviewDetail = () => {
   if (!review) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p className="text-gray-500">Recensione non trovata.</p>
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            La recensione richiesta non è stata trovata.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
