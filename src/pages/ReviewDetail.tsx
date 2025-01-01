@@ -17,8 +17,13 @@ const ReviewDetail = () => {
       console.log('Fetching review with slug:', slug);
       console.log('Condition:', condition);
       
-      // Decodifica il titolo dallo slug
-      const decodedTitle = slug?.split('-').join(' ');
+      // Decodifica il titolo dallo slug e ripristina gli apostrofi
+      const decodedTitle = decodeURIComponent(slug || '')
+        .split('-')
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      
       console.log('Decoded title:', decodedTitle);
 
       const { data, error } = await supabase
@@ -31,8 +36,8 @@ const ReviewDetail = () => {
           )
         `)
         .eq('status', 'approved')
-        .eq('PATOLOGIE.Patologia', condition)
-        .ilike('title', decodedTitle)
+        .eq('PATOLOGIE.Patologia', decodeURIComponent(condition || '').toUpperCase())
+        .or(`title.ilike.%${decodedTitle}%,title.ilike.%${decodedTitle.replace(/[']/g, '')}%`)
         .maybeSingle();
 
       if (error) {
