@@ -22,6 +22,8 @@ const ReviewDetail = () => {
         .split('-')
         .join(' ')
         .replace(/\s+/g, ' ')
+        .replace(/allovaio/g, "all'ovaio")
+        .replace(/loperazione/g, "l'operazione")
         .trim();
       
       console.log('Decoded title:', decodedTitle);
@@ -37,7 +39,7 @@ const ReviewDetail = () => {
         `)
         .eq('status', 'approved')
         .eq('PATOLOGIE.Patologia', decodeURIComponent(condition || '').toUpperCase())
-        .or(`title.ilike.%${decodedTitle}%,title.ilike.%${decodedTitle.replace(/[']/g, '')}%`)
+        .eq('title', decodedTitle)
         .maybeSingle();
 
       if (error) {
