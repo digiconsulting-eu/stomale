@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewContent } from "@/components/review/ReviewContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
-import { slugify } from "@/utils/urlUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
@@ -16,7 +15,12 @@ const ReviewDetail = () => {
     queryKey: ['review', slug, condition],
     queryFn: async () => {
       console.log('Fetching review with slug:', slug);
+      console.log('Condition:', condition);
       
+      // Decodifica il titolo dallo slug
+      const decodedTitle = slug?.split('-').join(' ');
+      console.log('Decoded title:', decodedTitle);
+
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -27,8 +31,8 @@ const ReviewDetail = () => {
           )
         `)
         .eq('status', 'approved')
-        .filter('PATOLOGIE.Patologia', 'ilike', condition)
-        .filter('title', 'ilike', slug?.split('-').join(' '))
+        .eq('PATOLOGIE.Patologia', condition)
+        .ilike('title', decodedTitle)
         .maybeSingle();
 
       if (error) {
