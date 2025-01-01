@@ -5,27 +5,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewContent } from "@/components/review/ReviewContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
+import { slugify } from "@/utils/urlUtils";
 
 const ReviewDetail = () => {
-  const { id } = useParams();
+  const { slug, condition } = useParams();
 
   const { data: review, isLoading, error } = useQuery({
-    queryKey: ['review', id],
+    queryKey: ['review', slug, condition],
     queryFn: async () => {
-      console.log('Fetching review with ID:', id);
+      console.log('Fetching review with slug:', slug);
       
       const { data, error } = await supabase
         .from('reviews')
         .select(`
           *,
-          username,
           PATOLOGIE (
             id,
             Patologia
           )
         `)
-        .eq('id', id)
         .eq('status', 'approved')
+        .filter('PATOLOGIE.Patologia', 'ilike', condition)
+        .filter('title', 'ilike', slug?.split('-').join(' '))
         .single();
 
       if (error) {

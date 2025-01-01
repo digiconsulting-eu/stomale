@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
+import { slugify } from "@/utils/urlUtils";
 
 interface ReviewCardProps {
   id: string | number;
@@ -56,7 +57,7 @@ export const ReviewCard = ({
           {truncateExperience(experience)}
         </p>
 
-        <Link to={`/patologia/${condition.toLowerCase()}/recensione/${id}`}>
+        <Link to={`/patologia/${condition.toLowerCase()}/recensione/${slugify(title)}`}>
           <Button 
             className="w-full bg-primary text-white hover:bg-primary-hover"
           >
