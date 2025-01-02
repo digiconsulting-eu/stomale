@@ -33,6 +33,9 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         queryClient.invalidateQueries({ queryKey: ['review'] })
       ]);
 
+      // Refetch immediately to update the UI
+      await queryClient.refetchQueries({ queryKey: ['admin-reviews'] });
+      
       toast.success(`Recensione ${newStatus === 'approved' ? 'approvata' : 'rimossa'} con successo`);
     } catch (error) {
       console.error('Error updating review status:', error);

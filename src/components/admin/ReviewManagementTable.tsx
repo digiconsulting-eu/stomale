@@ -41,7 +41,8 @@ export const ReviewManagementTable = () => {
     },
     refetchInterval: 5000,
     refetchOnMount: true,
-    refetchOnWindowFocus: true
+    refetchOnWindowFocus: true,
+    staleTime: 0 // Always consider data stale to ensure fresh data
   });
 
   if (error) {
