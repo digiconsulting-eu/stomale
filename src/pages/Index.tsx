@@ -122,7 +122,7 @@ export default function Index() {
               ))
             ) : (
               <div className="col-span-full text-center py-8">
-                <p className="text-gray-500">Non ci sono ancora recensioni.</p>
+                <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
               </div>
             )}
           </div>
