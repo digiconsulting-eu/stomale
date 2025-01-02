@@ -1,66 +1,14 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { ReviewContent } from "@/components/review/ReviewContent";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ReviewLoader } from "@/components/review/ReviewLoader";
+import { ReviewError } from "@/components/review/ReviewError";
+import { useReviewQuery } from "@/hooks/useReviewQuery";
 import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 
 const ReviewDetail = () => {
   const { slug, condition } = useParams();
-
-  const { data: review, isLoading, error } = useQuery({
-    queryKey: ['review', slug, condition],
-    queryFn: async () => {
-      console.log('Fetching review with slug:', slug);
-      console.log('Condition:', condition);
-      
-      // Decodifica il titolo dallo slug e ripristina gli apostrofi
-      const decodedTitle = decodeURIComponent(slug || '')
-        .split('-')
-        .join(' ')
-        .replace(/\s+/g, ' ')
-        .replace(/allovaio/g, "all'ovaio")
-        .replace(/loperazione/g, "l'operazione")
-        .trim();
-      
-      console.log('Decoded title:', decodedTitle);
-
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          *,
-          PATOLOGIE (
-            id,
-            Patologia
-          )
-        `)
-        .eq('status', 'approved')
-        .eq('PATOLOGIE.Patologia', decodeURIComponent(condition || '').toUpperCase())
-        .eq('title', decodedTitle)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching review:', error);
-        throw error;
-      }
-      
-      if (!data) {
-        console.log('No review found with these parameters');
-        return null;
-      }
-
-      console.log('Fetched review:', data);
-      return data;
-    },
-    meta: {
-      onError: (error: Error) => {
-        console.error('Query error:', error);
-      }
-    }
-  });
+  const { data: review, isLoading, error } = useReviewQuery(slug, condition);
 
   useEffect(() => {
     if (review?.title) {
@@ -71,42 +19,15 @@ const ReviewDetail = () => {
 
   if (error) {
     console.error('Error loading review:', error);
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Si è verificato un errore nel caricamento della recensione.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
+    return <ReviewError message="Si è verificato un errore nel caricamento della recensione." />;
   }
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-8 w-3/4 mb-4" />
-        <Skeleton className="h-4 w-1/4 mb-8" />
-        <div className="space-y-4">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-      </div>
-    );
+    return <ReviewLoader />;
   }
 
   if (!review) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            La recensione richiesta non è stata trovata.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
+    return <ReviewError message="La recensione richiesta non è stata trovata." />;
   }
 
   return (
