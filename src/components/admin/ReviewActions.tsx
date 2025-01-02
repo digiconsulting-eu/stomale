@@ -33,7 +33,7 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         queryClient.invalidateQueries({ queryKey: ['review'] })
       ]);
 
-      // Force an immediate refetch
+      // Force an immediate refetch of admin reviews
       await queryClient.refetchQueries({ 
         queryKey: ['admin-reviews'],
         type: 'active',
