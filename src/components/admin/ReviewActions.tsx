@@ -29,12 +29,17 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
 
       console.log('Review status updated successfully:', data);
 
-      // Invalidate and refetch ALL queries that might contain reviews
+      // Force refetch ALL queries that might contain reviews
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['pending-reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['review'] })
+        queryClient.invalidateQueries({ queryKey: ['review'] }),
+        // Force refetch the specific review
+        queryClient.refetchQueries({ queryKey: ['admin-reviews'] }),
+        queryClient.refetchQueries({ queryKey: ['reviews'] }),
+        queryClient.refetchQueries({ queryKey: ['pending-reviews'] }),
+        queryClient.refetchQueries({ queryKey: ['review'] })
       ]);
 
       toast.success(`Recensione ${newStatus === 'approved' ? 'approvata' : 'rimossa'} con successo`);

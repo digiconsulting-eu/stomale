@@ -44,7 +44,7 @@ export const ReviewManagementTable = () => {
         throw error;
       }
     },
-    refetchInterval: 5000,
+    refetchInterval: 1000, // Refetch every second
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     staleTime: 0
