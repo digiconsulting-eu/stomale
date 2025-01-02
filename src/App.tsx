@@ -94,16 +94,19 @@ const AuthModal = () => {
     const checkAuthStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
-      // Only show modal if user is not authenticated
+      // Only show modal if user is not authenticated and not an admin
       if (!session) {
-        const timer = setTimeout(() => {
-          // Don't show modal on login or register pages
-          if (!['/login', '/registrati'].includes(location.pathname)) {
-            setIsOpen(true);
-          }
-        }, 90000); // 90 seconds
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        if (!isAdmin) {
+          const timer = setTimeout(() => {
+            // Don't show modal on login or register pages
+            if (!['/login', '/registrati'].includes(location.pathname)) {
+              setIsOpen(true);
+            }
+          }, 90000); // 90 seconds
 
-        return () => clearTimeout(timer);
+          return () => clearTimeout(timer);
+        }
       }
     };
 
