@@ -94,7 +94,6 @@ const AuthModal = () => {
     const checkAuthStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
-      // Only show modal if user is not authenticated
       if (!session) {
         const timer = setTimeout(() => {
           // Don't show modal on login or register pages
@@ -102,8 +101,21 @@ const AuthModal = () => {
             setIsOpen(true);
           }
         }, 90000); // 90 seconds
-
         return () => clearTimeout(timer);
+      } else {
+        // Check if user is admin
+        const { data: adminData } = await supabase
+          .from('admin')
+          .select('email')
+          .eq('email', session.user.email);
+        
+        // If user is not admin and not on protected pages, show modal
+        if (!adminData?.length && !['/login', '/registrati', '/admin', '/dashboard'].includes(location.pathname)) {
+          const timer = setTimeout(() => {
+            setIsOpen(true);
+          }, 90000);
+          return () => clearTimeout(timer);
+        }
       }
     };
 
