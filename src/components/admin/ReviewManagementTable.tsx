@@ -17,32 +17,37 @@ export const ReviewManagementTable = () => {
     queryKey: ['admin-reviews'],
     queryFn: async () => {
       console.log('Fetching all reviews for admin...');
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          title,
-          status,
-          created_at,
-          username,
-          PATOLOGIE (
-            Patologia
-          )
-        `)
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select(`
+            id,
+            title,
+            status,
+            created_at,
+            username,
+            PATOLOGIE (
+              Patologia
+            )
+          `)
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching reviews:', error);
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          throw error;
+        }
+
+        console.log('Fetched reviews for admin:', data);
+        return data;
+      } catch (error) {
+        console.error('Error in query execution:', error);
         throw error;
       }
-
-      console.log('Fetched reviews for admin:', data);
-      return data;
     },
-    refetchInterval: 5000, // Refetch every 5 seconds
+    refetchInterval: 5000,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    staleTime: 0 // Always consider data stale
+    staleTime: 0
   });
 
   if (error) {
