@@ -38,16 +38,13 @@ export const ReviewManagementTable = () => {
         }
 
         console.log('Fetched reviews for admin:', data);
-        return data;
+        return data || [];
       } catch (error) {
         console.error('Error in query execution:', error);
         throw error;
       }
     },
-    refetchInterval: 1000, // Refetch every second
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    staleTime: 0
+    refetchInterval: 1000
   });
 
   if (error) {

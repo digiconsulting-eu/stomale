@@ -15,11 +15,10 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
     try {
       console.log('Attempting to update review status:', { reviewId, newStatus, currentStatus: status });
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('reviews')
         .update({ status: newStatus })
-        .eq('id', reviewId)
-        .select();
+        .eq('id', reviewId);
 
       if (error) {
         console.error('Error updating review status:', error);
@@ -27,15 +26,16 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         throw error;
       }
 
-      console.log('Review status updated successfully:', data);
-
       // Force refetch ALL queries that might contain reviews
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['pending-reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['review'] }),
-        // Force refetch the specific review
+      ]);
+
+      // Force immediate refetch
+      await Promise.all([
         queryClient.refetchQueries({ queryKey: ['admin-reviews'] }),
         queryClient.refetchQueries({ queryKey: ['reviews'] }),
         queryClient.refetchQueries({ queryKey: ['pending-reviews'] }),
