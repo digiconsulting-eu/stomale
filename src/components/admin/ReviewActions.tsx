@@ -13,32 +13,30 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
 
   const handleStatusChange = async (newStatus: 'approved' | 'removed') => {
     try {
-      console.log('Updating review status:', { reviewId, newStatus, currentStatus: status });
+      console.log('Attempting to update review status:', { reviewId, newStatus, currentStatus: status });
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('reviews')
         .update({ status: newStatus })
-        .eq('id', reviewId);
+        .eq('id', reviewId)
+        .select();
 
       if (error) {
         console.error('Error updating review status:', error);
+        toast.error("Errore durante l'aggiornamento della recensione");
         throw error;
       }
+
+      console.log('Review status updated successfully:', data);
 
       // Invalidate and refetch ALL queries that might contain reviews
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['latestReviews'] }),
+        queryClient.invalidateQueries({ queryKey: ['pending-reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['review'] })
       ]);
 
-      // Force an immediate refetch of admin reviews
-      await queryClient.refetchQueries({ 
-        queryKey: ['admin-reviews'],
-        type: 'active',
-      });
-      
       toast.success(`Recensione ${newStatus === 'approved' ? 'approvata' : 'rimossa'} con successo`);
     } catch (error) {
       console.error('Error in handleStatusChange:', error);
