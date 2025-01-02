@@ -55,6 +55,7 @@ const AuthStateHandler = () => {
           }
         }
       } else if (event === 'SIGNED_OUT') {
+        console.log('Cleaning up auth state...');
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('isAdmin');
         const protectedRoutes = ['/dashboard', '/admin'];
@@ -63,6 +64,18 @@ const AuthStateHandler = () => {
         }
       }
     });
+
+    // Check initial auth state
+    const checkInitialAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log('No active session found, cleaning up...');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+      }
+    };
+
+    checkInitialAuth();
 
     return () => {
       subscription.unsubscribe();
