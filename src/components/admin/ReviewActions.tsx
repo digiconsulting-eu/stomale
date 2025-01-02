@@ -11,7 +11,7 @@ interface ReviewActionsProps {
 export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
   const queryClient = useQueryClient();
 
-  const handleStatusChange = async (newStatus: 'approved' | 'rejected') => {
+  const handleStatusChange = async (newStatus: 'approved' | 'removed') => {
     try {
       console.log('Updating review status:', { reviewId, newStatus });
       
@@ -54,11 +54,11 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
           Approva
         </Button>
       )}
-      {status !== 'rejected' && (
+      {status !== 'removed' && (
         <Button
           variant="destructive"
           size="sm"
-          onClick={() => handleStatusChange('rejected')}
+          onClick={() => handleStatusChange('removed')}
         >
           Rimuovi
         </Button>

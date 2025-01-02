@@ -102,14 +102,14 @@ export const ReviewManagementTable = () => {
                   variant={
                     review.status === 'approved'
                       ? 'secondary'
-                      : review.status === 'rejected'
+                      : review.status === 'removed'
                       ? 'destructive'
                       : 'default'
                   }
                 >
                   {review.status === 'approved'
                     ? 'Pubblicata'
-                    : review.status === 'rejected'
+                    : review.status === 'removed'
                     ? 'Rimossa'
                     : 'In attesa'}
                 </Badge>
