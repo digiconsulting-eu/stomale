@@ -44,7 +44,9 @@ export const ReviewManagementTable = () => {
         throw error;
       }
     },
-    refetchInterval: 1000
+    refetchInterval: 1000,
+    staleTime: 0,
+    cacheTime: 0
   });
 
   if (error) {
@@ -75,21 +77,15 @@ export const ReviewManagementTable = () => {
   }
 
   return (
-    <div>
-      <div className="mb-4">
-        <p className="text-sm text-gray-500">
-          Totale recensioni: {reviews.length}
-        </p>
-      </div>
-      
+    <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Titolo</TableHead>
             <TableHead>Patologia</TableHead>
             <TableHead>Autore</TableHead>
-            <TableHead>Stato</TableHead>
             <TableHead>Data</TableHead>
+            <TableHead>Stato</TableHead>
             <TableHead>Azioni</TableHead>
           </TableRow>
         </TableHeader>
@@ -99,6 +95,9 @@ export const ReviewManagementTable = () => {
               <TableCell className="font-medium">{review.title}</TableCell>
               <TableCell>{review.PATOLOGIE?.Patologia}</TableCell>
               <TableCell>{review.username}</TableCell>
+              <TableCell>
+                {new Date(review.created_at).toLocaleDateString('it-IT')}
+              </TableCell>
               <TableCell>
                 <Badge
                   variant={
@@ -115,9 +114,6 @@ export const ReviewManagementTable = () => {
                     ? 'Rimossa'
                     : 'In attesa'}
                 </Badge>
-              </TableCell>
-              <TableCell>
-                {new Date(review.created_at).toLocaleDateString('it-IT')}
               </TableCell>
               <TableCell>
                 <ReviewActions

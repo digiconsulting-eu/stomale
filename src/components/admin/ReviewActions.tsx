@@ -26,21 +26,9 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         throw error;
       }
 
-      // Force refetch ALL queries that might contain reviews
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['admin-reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['pending-reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['review'] }),
-      ]);
-
-      // Force immediate refetch
-      await Promise.all([
-        queryClient.refetchQueries({ queryKey: ['admin-reviews'] }),
-        queryClient.refetchQueries({ queryKey: ['reviews'] }),
-        queryClient.refetchQueries({ queryKey: ['pending-reviews'] }),
-        queryClient.refetchQueries({ queryKey: ['review'] })
-      ]);
+      // Invalidate and immediately refetch
+      await queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
+      await queryClient.refetchQueries({ queryKey: ['admin-reviews'] });
 
       toast.success(`Recensione ${newStatus === 'approved' ? 'approvata' : 'rimossa'} con successo`);
     } catch (error) {
