@@ -39,10 +39,10 @@ export const ReviewManagementTable = () => {
       console.log('Fetched reviews for admin:', data);
       return data;
     },
-    refetchInterval: 5000,
+    refetchInterval: 5000, // Refetch every 5 seconds
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    staleTime: 0 // Always consider data stale to ensure fresh data
+    staleTime: 0 // Always consider data stale
   });
 
   if (error) {

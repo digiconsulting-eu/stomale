@@ -13,7 +13,7 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
 
   const handleStatusChange = async (newStatus: 'approved' | 'removed') => {
     try {
-      console.log('Updating review status:', { reviewId, newStatus });
+      console.log('Updating review status:', { reviewId, newStatus, currentStatus: status });
       
       const { error } = await supabase
         .from('reviews')
@@ -33,12 +33,15 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         queryClient.invalidateQueries({ queryKey: ['review'] })
       ]);
 
-      // Refetch immediately to update the UI
-      await queryClient.refetchQueries({ queryKey: ['admin-reviews'] });
+      // Force an immediate refetch
+      await queryClient.refetchQueries({ 
+        queryKey: ['admin-reviews'],
+        type: 'active',
+      });
       
       toast.success(`Recensione ${newStatus === 'approved' ? 'approvata' : 'rimossa'} con successo`);
     } catch (error) {
-      console.error('Error updating review status:', error);
+      console.error('Error in handleStatusChange:', error);
       toast.error("Errore durante l'aggiornamento della recensione");
     }
   };
