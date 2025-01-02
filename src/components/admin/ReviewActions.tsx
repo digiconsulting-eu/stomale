@@ -25,11 +25,12 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         throw error;
       }
 
-      // Invalidate all relevant queries to force a refresh
+      // Invalidate and refetch ALL queries that might contain reviews
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['latestReviews'] })
+        queryClient.invalidateQueries({ queryKey: ['latestReviews'] }),
+        queryClient.invalidateQueries({ queryKey: ['review'] })
       ]);
 
       toast.success(`Recensione ${newStatus === 'approved' ? 'approvata' : 'rimossa'} con successo`);
