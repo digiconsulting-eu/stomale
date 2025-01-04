@@ -46,7 +46,7 @@ export const ReviewManagementTable = () => {
     },
     refetchInterval: 1000,
     staleTime: 0,
-    cacheTime: 0
+    gcTime: 0
   });
 
   if (error) {
