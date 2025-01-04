@@ -35,9 +35,15 @@ export default function Sitemap() {
 
         if (typeof data === 'string') {
           setContent(data);
-          // Se è un formato XML, impostiamo direttamente il content type
+          // For XML format, set the content type using meta tag
           if (isXmlFormat && typeof document !== 'undefined') {
-            document.contentType = 'application/xml';
+            const meta = document.querySelector('meta[http-equiv="Content-Type"]');
+            if (!meta) {
+              const newMeta = document.createElement('meta');
+              newMeta.setAttribute('http-equiv', 'Content-Type');
+              newMeta.setAttribute('content', 'application/xml; charset=UTF-8');
+              document.head.appendChild(newMeta);
+            }
           }
         } else if (data?.error) {
           throw new Error(data.error);
