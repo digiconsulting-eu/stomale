@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 }
 
 interface RateLimit {
@@ -17,13 +18,32 @@ const MAX_REQUESTS = 60; // 60 requests per minute
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      headers: corsHeaders,
+      status: 204
+    });
+  }
+
+  // Accept both GET and POST methods
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      {
+        status: 405,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
   }
 
   try {
+    console.log(`[Rate Limit] Processing ${req.method} request`);
+    
     // Get client IP
     const ip = req.headers.get('x-forwarded-for') || 'unknown';
-    console.log(`Checking rate limit for IP: ${ip}`);
+    console.log(`[Rate Limit] Checking rate limit for IP: ${ip}`);
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -41,7 +61,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (selectError && selectError.code !== 'PGRST116') {
-      console.error('Error checking rate limit:', selectError);
+      console.error('[Rate Limit] Error checking rate limit:', selectError);
       throw selectError;
     }
 
@@ -60,11 +80,12 @@ Deno.serve(async (req) => {
         .single();
 
       if (insertError) {
-        console.error('Error creating rate limit:', insertError);
+        console.error('[Rate Limit] Error creating rate limit:', insertError);
         throw insertError;
       }
 
       rateLimit = newLimit;
+      console.log('[Rate Limit] Created new rate limit entry:', newLimit);
     } else {
       rateLimit = limits;
 
@@ -79,15 +100,17 @@ Deno.serve(async (req) => {
           .eq('ip_address', ip);
 
         if (updateError) {
-          console.error('Error resetting rate limit:', updateError);
+          console.error('[Rate Limit] Error resetting rate limit:', updateError);
           throw updateError;
         }
 
         rateLimit.request_count = 1;
         rateLimit.last_request = now;
+        console.log('[Rate Limit] Reset rate limit for IP:', ip);
       } else {
         // Increment count if within window
         if (rateLimit.request_count >= MAX_REQUESTS) {
+          console.log('[Rate Limit] Rate limit exceeded for IP:', ip);
           return new Response(
             JSON.stringify({
               error: 'Too many requests',
@@ -113,12 +136,13 @@ Deno.serve(async (req) => {
           .eq('ip_address', ip);
 
         if (incrementError) {
-          console.error('Error incrementing rate limit:', incrementError);
+          console.error('[Rate Limit] Error incrementing rate limit:', incrementError);
           throw incrementError;
         }
 
         rateLimit.request_count++;
         rateLimit.last_request = now;
+        console.log('[Rate Limit] Updated rate limit for IP:', ip);
       }
     }
 
@@ -139,9 +163,12 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Rate limiting error:', error);
+    console.error('[Rate Limit] Fatal error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        error: 'Internal server error',
+        message: error.message 
+      }),
       {
         status: 500,
         headers: {
