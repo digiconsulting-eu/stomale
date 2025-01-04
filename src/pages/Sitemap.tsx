@@ -9,7 +9,7 @@ export default function Sitemap() {
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const isTxtFormat = location.pathname === '/sitemap.txt';
-  const isXmlFormat = location.pathname === '/sitemap.xml';
+  const isXmlFormat = location.pathname === '/sitemap.xml' || location.pathname === '/sitemap-google.xml';
 
   useEffect(() => {
     const fetchSitemap = async () => {
@@ -52,8 +52,21 @@ export default function Sitemap() {
     fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // Se è richiesto il formato TXT o XML, restituisci direttamente il contenuto
-  if (isTxtFormat || isXmlFormat) {
+  // If it's XML format, set the content type and return raw XML
+  if (isXmlFormat) {
+    if (typeof document !== 'undefined') {
+      const contentType = document.createElement('meta');
+      contentType.setAttribute('http-equiv', 'Content-Type');
+      contentType.setAttribute('content', 'application/xml; charset=utf-8');
+      document.head.appendChild(contentType);
+    }
+    if (isLoading) return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n<url><loc>Loading...</loc></url></urlset>";
+    if (error) return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>Error: ${error}</loc></url></urlset>`;
+    return content;
+  }
+
+  // If it's TXT format, return plain text
+  if (isTxtFormat) {
     if (isLoading) return "Generating sitemap...";
     if (error) return error;
     return content;
