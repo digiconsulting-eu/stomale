@@ -35,6 +35,10 @@ export default function Sitemap() {
 
         if (typeof data === 'string') {
           setContent(data);
+          // Se è un formato XML, impostiamo direttamente il content type
+          if (isXmlFormat && typeof document !== 'undefined') {
+            document.contentType = 'application/xml';
+          }
         } else if (data?.error) {
           throw new Error(data.error);
         } else {
@@ -52,24 +56,18 @@ export default function Sitemap() {
     fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // If it's XML format, set the content type and return raw XML
+  // Se è formato XML, ritorna direttamente il contenuto XML senza mostrare lo stato di caricamento
   if (isXmlFormat) {
-    if (typeof document !== 'undefined') {
-      const contentType = document.createElement('meta');
-      contentType.setAttribute('http-equiv', 'Content-Type');
-      contentType.setAttribute('content', 'application/xml; charset=utf-8');
-      document.head.appendChild(contentType);
+    if (error) {
+      return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>Error: ${error}</loc></url></urlset>`;
     }
-    if (isLoading) return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n<url><loc>Loading...</loc></url></urlset>";
-    if (error) return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>Error: ${error}</loc></url></urlset>`;
-    return content;
+    return content || `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`;
   }
 
-  // If it's TXT format, return plain text
+  // Se è formato TXT, ritorna il contenuto testuale
   if (isTxtFormat) {
-    if (isLoading) return "Generating sitemap...";
     if (error) return error;
-    return content;
+    return content || '';
   }
 
   // Redirect to XML format if accessed directly
@@ -78,7 +76,7 @@ export default function Sitemap() {
     return null;
   }
 
-  // Altrimenti, mostra l'interfaccia HTML (questo non dovrebbe mai essere raggiunto)
+  // Interfaccia HTML per visualizzazione diretta nel browser
   return (
     <div className="container mx-auto px-4 py-8">
       {isLoading ? (
