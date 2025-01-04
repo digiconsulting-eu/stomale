@@ -72,9 +72,9 @@ Deno.serve(async (req) => {
       return str.toLowerCase().split(' ').map(part => encodeURIComponent(part)).join('%20');
     };
 
-    // Determine format based on Accept header
-    const acceptHeader = req.headers.get('Content-Type') || '';
-    const isXml = acceptHeader.includes('application/xml');
+    // Determine format based on URL path
+    const url = new URL(req.url);
+    const isXml = url.pathname.endsWith('.xml');
 
     if (isXml) {
       // Generate XML sitemap
