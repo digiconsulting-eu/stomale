@@ -47,10 +47,33 @@ export const AppRoutes = () => {
       <Route path="/sitemap.xml" element={<Sitemap />} />
       <Route path="/sitemap-google.xml" element={<Sitemap />} />
 
-      {/* Protected routes */}
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/admin/recensioni" element={<ReviewManagement />} />
-      <Route path="/admin/utenti" element={<UserManagement />} />
+      {/* Protected Admin routes */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/recensioni"
+        element={
+          <ProtectedRoute>
+            <ReviewManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/utenti"
+        element={
+          <ProtectedRoute>
+            <UserManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected User routes */}
       <Route 
         path="/dashboard" 
         element={
