@@ -18,14 +18,21 @@ export const UsersTab = () => {
   const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ['users'],
     queryFn: async () => {
+      console.log('Fetching users for admin...');
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+      }
+
+      console.log('Fetched users for admin:', data);
       return data;
     },
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   if (isLoading) {

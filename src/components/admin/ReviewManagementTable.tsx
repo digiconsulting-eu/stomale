@@ -44,9 +44,7 @@ export const ReviewManagementTable = () => {
         throw error;
       }
     },
-    refetchInterval: 1000,
-    staleTime: 0,
-    gcTime: 0
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   if (error) {
