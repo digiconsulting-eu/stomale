@@ -11,6 +11,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ReviewActions } from "./ReviewActions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export const ReviewManagementTable = () => {
   const { data: reviews, isLoading, error } = useQuery({
@@ -23,6 +29,8 @@ export const ReviewManagementTable = () => {
           .select(`
             id,
             title,
+            symptoms,
+            experience,
             status,
             created_at,
             username,
@@ -90,7 +98,29 @@ export const ReviewManagementTable = () => {
         <TableBody>
           {reviews.map((review) => (
             <TableRow key={review.id}>
-              <TableCell className="font-medium">{review.title}</TableCell>
+              <TableCell className="font-medium">
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="review-content">
+                    <AccordionTrigger>{review.title}</AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4 mt-2">
+                        <div>
+                          <h4 className="font-semibold mb-1">Sintomi:</h4>
+                          <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                            {review.symptoms}
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-1">Esperienza:</h4>
+                          <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                            {review.experience}
+                          </p>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </TableCell>
               <TableCell>{review.PATOLOGIE?.Patologia}</TableCell>
               <TableCell>{review.username}</TableCell>
               <TableCell>
@@ -109,7 +139,7 @@ export const ReviewManagementTable = () => {
                   {review.status === 'approved'
                     ? 'Pubblicata'
                     : review.status === 'removed'
-                    ? 'Rimossa'
+                    ? 'Non pubblicata'
                     : 'In attesa'}
                 </Badge>
               </TableCell>

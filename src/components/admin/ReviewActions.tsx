@@ -30,7 +30,7 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
       await queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
       await queryClient.refetchQueries({ queryKey: ['admin-reviews'] });
 
-      toast.success(`Recensione ${newStatus === 'approved' ? 'approvata' : 'rimossa'} con successo`);
+      toast.success(`Recensione ${newStatus === 'approved' ? 'pubblicata' : 'rimossa dalla pubblicazione'} con successo`);
     } catch (error) {
       console.error('Error in handleStatusChange:', error);
       toast.error("Errore durante l'aggiornamento della recensione");
@@ -45,7 +45,7 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
           size="sm"
           onClick={() => handleStatusChange('approved')}
         >
-          Approva
+          Pubblica
         </Button>
       )}
       {status !== 'removed' && (
