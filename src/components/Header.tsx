@@ -81,11 +81,14 @@ export const Header = () => {
         return;
       }
       
+      // Clear all auth-related state
       setIsLoggedIn(false);
       setIsAdmin(false);
       setIsMenuOpen(false);
       localStorage.removeItem('isLoggedIn');
       localStorage.removeItem('isAdmin');
+      
+      // Navigate to home page
       navigate('/', { replace: true });
       toast.success("Logout effettuato con successo");
     } catch (error) {
