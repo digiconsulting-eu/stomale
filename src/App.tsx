@@ -33,25 +33,29 @@ const AuthStateHandler = () => {
   const location = useLocation();
 
   useEffect(() => {
+    const checkAdminStatus = async (email: string) => {
+      console.log('Checking admin status for:', email);
+      const { data: adminData } = await supabase
+        .from('admin')
+        .select('email')
+        .eq('email', email);
+      
+      const isAdmin = Array.isArray(adminData) && adminData.length > 0;
+      console.log('Is admin?', isAdmin);
+      localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+      return isAdmin;
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session?.user?.email);
       
       if (event === 'SIGNED_IN') {
-        if (location.pathname === '/login') {
-          // Check if user is admin
-          if (session?.user?.email) {
-            const { data: adminData } = await supabase
-              .from('admin')
-              .select('email')
-              .eq('email', session.user.email);
-            
-            if (Array.isArray(adminData) && adminData.length > 0) {
-              localStorage.setItem('isAdmin', 'true');
-              navigate('/admin', { replace: true });
-            } else {
-              localStorage.setItem('isAdmin', 'false');
-              navigate('/dashboard', { replace: true });
-            }
+        localStorage.setItem('isLoggedIn', 'true');
+        if (session?.user?.email) {
+          const isAdmin = await checkAdminStatus(session.user.email);
+          
+          if (location.pathname === '/login') {
+            navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
           }
         }
       } else if (event === 'SIGNED_OUT') {
@@ -68,7 +72,10 @@ const AuthStateHandler = () => {
     // Check initial auth state
     const checkInitialAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      if (session?.user?.email) {
+        localStorage.setItem('isLoggedIn', 'true');
+        await checkAdminStatus(session.user.email);
+      } else {
         console.log('No active session found, cleaning up...');
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('isAdmin');
