@@ -28,19 +28,8 @@ export const AuthModal = () => {
         }, 90000); // 90 seconds
         return () => clearTimeout(timer);
       } else {
-        // Check if user is admin
-        const { data: adminData } = await supabase
-          .from('admin')
-          .select('email')
-          .eq('email', session.user.email);
-        
-        // If user is not admin and not on protected pages, show modal
-        if (!adminData?.length && !['/login', '/registrati', '/admin', '/dashboard'].includes(location.pathname)) {
-          const timer = setTimeout(() => {
-            setIsOpen(true);
-          }, 90000);
-          return () => clearTimeout(timer);
-        }
+        // If user is logged in, don't show modal
+        setIsOpen(false);
       }
     };
 
