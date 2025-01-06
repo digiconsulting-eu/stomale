@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "./components/ui/button";
+import { toast } from "sonner";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -34,29 +35,46 @@ const AuthStateHandler = () => {
 
   useEffect(() => {
     const checkAdminStatus = async (email: string) => {
-      console.log('Checking admin status for:', email);
-      const { data: adminData } = await supabase
-        .from('admin')
-        .select('email')
-        .eq('email', email);
-      
-      const isAdmin = Array.isArray(adminData) && adminData.length > 0;
-      console.log('Is admin?', isAdmin);
-      localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-      return isAdmin;
+      try {
+        console.log('Checking admin status for:', email);
+        const { data: adminData, error } = await supabase
+          .from('admin')
+          .select('email')
+          .eq('email', email);
+        
+        if (error) {
+          console.error('Error checking admin status:', error);
+          return false;
+        }
+        
+        const isAdmin = Array.isArray(adminData) && adminData.length > 0;
+        console.log('Is admin?', isAdmin);
+        localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+        return isAdmin;
+      } catch (error) {
+        console.error('Error in checkAdminStatus:', error);
+        return false;
+      }
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session?.user?.email);
       
       if (event === 'SIGNED_IN') {
-        localStorage.setItem('isLoggedIn', 'true');
-        if (session?.user?.email) {
-          const isAdmin = await checkAdminStatus(session.user.email);
-          
-          if (location.pathname === '/login') {
-            navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
+        try {
+          localStorage.setItem('isLoggedIn', 'true');
+          if (session?.user?.email) {
+            const isAdmin = await checkAdminStatus(session.user.email);
+            
+            // Only redirect if we're on the login page
+            if (location.pathname === '/login') {
+              navigate(isAdmin ? '/admin' : '/dashboard');
+              toast.success('Accesso effettuato con successo');
+            }
           }
+        } catch (error) {
+          console.error('Error handling sign in:', error);
+          toast.error('Errore durante l\'accesso');
         }
       } else if (event === 'SIGNED_OUT') {
         console.log('Cleaning up auth state...');
@@ -64,21 +82,31 @@ const AuthStateHandler = () => {
         localStorage.removeItem('isAdmin');
         const protectedRoutes = ['/dashboard', '/admin'];
         if (protectedRoutes.some(route => location.pathname.startsWith(route))) {
-          navigate('/', { replace: true });
+          navigate('/');
+          toast.success('Logout effettuato con successo');
         }
       }
     });
 
     // Check initial auth state
     const checkInitialAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.email) {
-        localStorage.setItem('isLoggedIn', 'true');
-        await checkAdminStatus(session.user.email);
-      } else {
-        console.log('No active session found, cleaning up...');
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('isAdmin');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting session:', error);
+          return;
+        }
+        
+        if (session?.user?.email) {
+          localStorage.setItem('isLoggedIn', 'true');
+          await checkAdminStatus(session.user.email);
+        } else {
+          console.log('No active session found, cleaning up...');
+          localStorage.removeItem('isLoggedIn');
+          localStorage.removeItem('isAdmin');
+        }
+      } catch (error) {
+        console.error('Error in checkInitialAuth:', error);
       }
     };
 
