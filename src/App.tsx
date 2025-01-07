@@ -10,14 +10,14 @@ import { AppRoutes } from "./components/AppRoutes";
 import { AuthStateHandler } from "./components/auth/AuthStateHandler";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { AuthModal } from "./components/auth/AuthModal";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { toast } from "sonner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: 0,
       refetchOnWindowFocus: false,
       staleTime: 30000,
       gcTime: 5 * 60 * 1000,
@@ -29,49 +29,33 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const initializeAuth = async () => {
+  // Simple initialization check
+  useState(() => {
+    const checkSession = async () => {
       try {
         const { error } = await supabase.auth.getSession();
-        
         if (error) {
-          console.error("Error checking initial session:", error);
-          if (mounted) {
-            setIsError(true);
-            setIsLoading(false);
-            toast.error("Errore durante l'inizializzazione dell'applicazione");
-          }
-          return;
-        }
-
-        if (mounted) {
-          setIsLoading(false);
+          console.error("Session check failed:", error);
+          setIsError(true);
+          toast.error("Errore durante l'inizializzazione dell'applicazione");
         }
       } catch (error) {
-        console.error("Critical error during initialization:", error);
-        if (mounted) {
-          setIsError(true);
-          setIsLoading(false);
-          toast.error("Errore critico durante l'inizializzazione");
-        }
-      }
-    };
-
-    initializeAuth();
-
-    // Ensure we clear loading state after 2 seconds maximum
-    const timeoutId = setTimeout(() => {
-      if (mounted) {
+        console.error("Critical initialization error:", error);
+        setIsError(true);
+        toast.error("Errore critico durante l'inizializzazione");
+      } finally {
         setIsLoading(false);
       }
-    }, 2000);
-
-    return () => {
-      mounted = false;
-      clearTimeout(timeoutId);
     };
+
+    checkSession();
+
+    // Fallback timeout to ensure we don't get stuck loading
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   if (isLoading) {
