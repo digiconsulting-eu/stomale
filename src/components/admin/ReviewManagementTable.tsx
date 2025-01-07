@@ -44,11 +44,11 @@ export const ReviewManagementTable = () => {
         throw error;
       }
     },
-    gcTime: 0,
     staleTime: 0,
+    gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    refetchInterval: 5000 // Refetch every 5 seconds to ensure we have the latest data
+    refetchInterval: 1000 // Refetch every second to ensure we have the latest data
   });
 
   if (error) {
