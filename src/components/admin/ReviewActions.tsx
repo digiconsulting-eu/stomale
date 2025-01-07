@@ -19,16 +19,19 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
     try {
       console.log('Attempting to update review status:', { reviewId, newStatus, currentStatus: status });
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('reviews')
         .update({ status: newStatus })
-        .eq('id', reviewId);
+        .eq('id', reviewId)
+        .select();
 
       if (error) {
         console.error('Error updating review status:', error);
         toast.error("Errore durante l'aggiornamento della recensione");
         return;
       }
+
+      console.log('Review status updated successfully:', data);
 
       // Invalidate and immediately refetch all relevant queries
       await Promise.all([
