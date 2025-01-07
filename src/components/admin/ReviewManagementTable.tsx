@@ -53,7 +53,7 @@ export const ReviewManagementTable = () => {
       }
     },
     staleTime: 1000, // Consider data fresh for 1 second
-    cacheTime: 0, // Disable caching to ensure we always get fresh data
+    gcTime: 0, // Disable garbage collection to ensure we always get fresh data
   });
 
   if (error) {
