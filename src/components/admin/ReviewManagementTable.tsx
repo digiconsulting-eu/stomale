@@ -44,10 +44,11 @@ export const ReviewManagementTable = () => {
         throw error;
       }
     },
-    gcTime: 0, // Disable garbage collection to ensure we always get fresh data
-    staleTime: 0, // Consider data immediately stale
-    refetchOnMount: true, // Always refetch on mount
-    refetchOnWindowFocus: true // Refetch when window regains focus
+    gcTime: 0,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 5000 // Refetch every 5 seconds to ensure we have the latest data
   });
 
   if (error) {

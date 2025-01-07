@@ -30,12 +30,13 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         return;
       }
 
-      // Force an immediate refetch of all relevant queries
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['admin-reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['reviews'] }),
-        queryClient.invalidateQueries({ queryKey: ['latestReviews'] })
-      ]);
+      // Immediately invalidate all relevant queries
+      await queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
+      await queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      await queryClient.invalidateQueries({ queryKey: ['latestReviews'] });
+
+      // Force a refetch
+      await queryClient.refetchQueries({ queryKey: ['admin-reviews'] });
 
       toast.success(`Recensione ${newStatus === 'approved' ? 'pubblicata' : 'rimossa dalla pubblicazione'} con successo`);
       setIsConfirmDialogOpen(false);
