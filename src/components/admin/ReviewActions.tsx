@@ -19,6 +19,7 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
     try {
       console.log('Attempting to update review status:', { reviewId, newStatus, currentStatus: status });
       
+      // Perform the update without select()
       const { error } = await supabase
         .from('reviews')
         .update({ status: newStatus })
@@ -30,7 +31,7 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         return;
       }
 
-      // Force an immediate refetch of all relevant queries
+      // Invalidate and refetch all relevant queries
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['admin-reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['reviews'] }),
