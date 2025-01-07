@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -22,7 +21,6 @@ const formSchema = z.object({
   patologia: z.string().min(2, {
     message: "La patologia deve contenere almeno 2 caratteri",
   }),
-  descrizione: z.string().optional(),
 });
 
 export default function InsertCondition() {
@@ -33,7 +31,6 @@ export default function InsertCondition() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       patologia: "",
-      descrizione: "",
     },
   });
 
@@ -74,7 +71,6 @@ export default function InsertCondition() {
         .insert([
           {
             Patologia: values.patologia.toUpperCase(),
-            Descrizione: values.descrizione || '',
           }
         ])
         .select()
@@ -118,24 +114,6 @@ export default function InsertCondition() {
                       <Input 
                         placeholder="Inserisci il nome della patologia" 
                         {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="descrizione"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrizione</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Inserisci una descrizione della patologia (opzionale)"
-                        className="min-h-[100px]"
-                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
