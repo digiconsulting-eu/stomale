@@ -30,7 +30,7 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         return;
       }
 
-      // Invalidate and immediately refetch all relevant queries
+      // Force an immediate refetch of the reviews
       await queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
       await queryClient.invalidateQueries({ queryKey: ['reviews'] });
       await queryClient.invalidateQueries({ queryKey: ['latestReviews'] });

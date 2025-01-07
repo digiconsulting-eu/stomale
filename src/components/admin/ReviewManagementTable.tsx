@@ -52,8 +52,8 @@ export const ReviewManagementTable = () => {
         throw error;
       }
     },
-    refetchInterval: 0, // Disable automatic refetching
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    staleTime: 1000, // Consider data fresh for 1 second
+    cacheTime: 0, // Disable caching to ensure we always get fresh data
   });
 
   if (error) {
@@ -145,10 +145,7 @@ export const ReviewManagementTable = () => {
                 </Badge>
               </TableCell>
               <TableCell>
-                <ReviewActions
-                  reviewId={review.id}
-                  status={review.status}
-                />
+                <ReviewActions reviewId={review.id} status={review.status} />
               </TableCell>
             </TableRow>
           ))}
