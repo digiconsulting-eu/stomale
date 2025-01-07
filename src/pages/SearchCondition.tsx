@@ -22,15 +22,13 @@ export default function SearchCondition() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const { 
-    conditions, 
-    totalPages,
+    data,
     isLoading,
     error 
   } = useConditions({
     page: currentPage,
     limit: ITEMS_PER_PAGE,
     searchTerm,
-    // Only apply letter filter when there's no search term
     letter: searchTerm ? "" : selectedLetter
   });
 
@@ -70,11 +68,11 @@ export default function SearchCondition() {
       />
 
       <ConditionsGrid 
-        conditions={conditions}
+        conditions={data?.conditions || []}
         isLoading={isLoading}
       />
 
-      {totalPages > 1 && (
+      {data?.totalPages > 1 && (
         <div className="mt-8 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -86,11 +84,11 @@ export default function SearchCondition() {
                 </PaginationItem>
               )}
               
-              {[...Array(totalPages)].map((_, i) => {
+              {[...Array(data.totalPages)].map((_, i) => {
                 const pageNumber = i + 1;
                 if (
                   pageNumber === 1 ||
-                  pageNumber === totalPages ||
+                  pageNumber === data.totalPages ||
                   (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2)
                 ) {
                   return (
@@ -106,17 +104,17 @@ export default function SearchCondition() {
                 }
                 if (
                   (pageNumber === currentPage - 3 && pageNumber > 2) ||
-                  (pageNumber === currentPage + 3 && pageNumber < totalPages - 1)
+                  (pageNumber === currentPage + 3 && pageNumber < data.totalPages - 1)
                 ) {
                   return <PaginationItem key={pageNumber}>...</PaginationItem>;
                 }
                 return null;
               })}
 
-              {currentPage < totalPages && (
+              {currentPage < data.totalPages && (
                 <PaginationItem>
                   <PaginationNext 
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    onClick={() => setCurrentPage(prev => Math.min(data.totalPages, prev + 1))}
                   />
                 </PaginationItem>
               )}

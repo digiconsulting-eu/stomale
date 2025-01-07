@@ -22,7 +22,7 @@ export const ConditionsGrid = ({ conditions, isLoading }: ConditionsGridProps) =
     );
   }
 
-  if (conditions.length === 0) {
+  if (!conditions || conditions.length === 0) {
     return (
       <div className="col-span-full text-center py-8">
         <p className="text-gray-500">Nessuna patologia trovata.</p>
