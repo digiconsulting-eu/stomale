@@ -17,7 +17,7 @@ import { toast } from "sonner";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: false,
       refetchOnWindowFocus: false,
       staleTime: 30000,
       gcTime: 5 * 60 * 1000,
@@ -28,65 +28,35 @@ const queryClient = new QueryClient({
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [initializationAttempts, setInitializationAttempts] = useState(0);
 
   useEffect(() => {
+    let timeoutId: number;
+
     const initializeAuth = async () => {
       try {
-        console.log("Starting initialization attempt:", initializationAttempts + 1);
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Error checking initial session:", error);
-          if (initializationAttempts < 3) {
-            setInitializationAttempts(prev => prev + 1);
-            return;
-          }
           setIsError(true);
           toast.error("Errore durante l'inizializzazione dell'applicazione");
           return;
         }
         
-        console.log("Initial session check:", session ? "Session found" : "No session");
-        
-        if (session) {
-          try {
-            const { data: adminData, error: adminError } = await supabase
-              .from('admin')
-              .select('email')
-              .eq('email', session.user.email)
-              .single();
-            
-            if (adminError && adminError.code !== 'PGRST116') {
-              console.error("Error checking admin status:", adminError);
-              toast.error("Errore durante la verifica dei permessi");
-            } else {
-              console.log("Admin check complete:", adminData ? "Is admin" : "Not admin");
-            }
-          } catch (adminCheckError) {
-            console.error("Error in admin status check:", adminCheckError);
-          }
-        }
+        console.log("Initial session check complete");
+        setIsLoading(false);
       } catch (error) {
         console.error("Critical error during initialization:", error);
-        if (initializationAttempts < 3) {
-          setInitializationAttempts(prev => prev + 1);
-          return;
-        }
         setIsError(true);
+        setIsLoading(false);
         toast.error("Errore critico durante l'inizializzazione");
-      } finally {
-        if (initializationAttempts >= 2 || !isError) {
-          setIsLoading(false);
-        }
       }
     };
 
-    const timeoutId = setTimeout(() => {
-      if (isLoading && initializationAttempts < 3) {
-        console.log("Initialization timeout, retrying...");
-        initializeAuth();
-      } else if (isLoading) {
+    // Set a timeout to prevent infinite loading
+    timeoutId = window.setTimeout(() => {
+      if (isLoading) {
+        console.log("Initialization timeout reached");
         setIsLoading(false);
         setIsError(true);
         toast.error("Timeout durante l'inizializzazione dell'applicazione");
@@ -95,8 +65,10 @@ const App = () => {
 
     initializeAuth();
 
-    return () => clearTimeout(timeoutId);
-  }, [initializationAttempts, isError]);
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, []);
 
   if (isLoading) {
     return (
