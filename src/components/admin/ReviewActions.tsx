@@ -19,13 +19,21 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
     try {
       console.log('Attempting to update review status:', { reviewId, newStatus, currentStatus: status });
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('reviews')
         .update({ status: newStatus })
-        .eq('id', reviewId);
+        .eq('id', reviewId)
+        .select()
+        .single();
 
       if (error) {
         console.error('Error updating review status:', error);
+        toast.error("Errore durante l'aggiornamento della recensione");
+        return;
+      }
+
+      if (!data) {
+        console.error('No data returned after update');
         toast.error("Errore durante l'aggiornamento della recensione");
         return;
       }
