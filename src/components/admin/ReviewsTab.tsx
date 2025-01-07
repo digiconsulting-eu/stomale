@@ -13,7 +13,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface Review {
-  id: string;
+  id: number; // Changed from string to number to match the database type
   title: string;
   author: string;
   condition: string;
@@ -23,13 +23,13 @@ interface Review {
 
 interface ReviewsTabProps {
   reviews: Review[];
-  handleReviewAction: (id: string, action: "approve" | "reject") => void;
+  handleReviewAction: (id: number, action: "approve" | "reject") => void; // Changed parameter type to number
 }
 
 export const ReviewsTab = ({ reviews, handleReviewAction }: ReviewsTabProps) => {
   const queryClient = useQueryClient();
 
-  const handleAction = async (reviewId: string, action: "approve" | "reject") => {
+  const handleAction = async (reviewId: number, action: "approve" | "reject") => {
     try {
       console.log(`Attempting to ${action} review ${reviewId}`);
       
