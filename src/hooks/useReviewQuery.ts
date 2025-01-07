@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 const extractReviewId = (slug: string) => {
   const parts = slug.split('-');
-  return parts[0];
+  // Convert the ID part to a number
+  return parseInt(parts[0], 10);
 };
 
 export const useReviewQuery = (slug: string | undefined, condition: string | undefined) => {
@@ -20,6 +21,11 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
 
       const reviewId = extractReviewId(slug);
       console.log('Extracted review ID:', reviewId);
+
+      if (isNaN(reviewId)) {
+        console.log('Invalid review ID');
+        return null;
+      }
 
       const { data, error } = await supabase
         .from('reviews')
