@@ -30,7 +30,8 @@ export default function SearchCondition() {
     page: currentPage,
     limit: ITEMS_PER_PAGE,
     searchTerm,
-    letter: searchTerm ? "TUTTE" : selectedLetter
+    // Only apply letter filter when there's no search term
+    letter: searchTerm ? "" : selectedLetter
   });
 
   useEffect(() => {
