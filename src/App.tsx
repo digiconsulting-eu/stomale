@@ -10,7 +10,7 @@ import { AppRoutes } from "./components/AppRoutes";
 import { AuthStateHandler } from "./components/auth/AuthStateHandler";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { AuthModal } from "./components/auth/AuthModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -29,8 +29,8 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
-  // Simple initialization check
-  useState(() => {
+  // Initialization check
+  useEffect(() => {
     const checkSession = async () => {
       try {
         const { error } = await supabase.auth.getSession();
