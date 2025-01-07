@@ -12,6 +12,7 @@ import { ScrollToTop } from "./components/ScrollToTop";
 import { AuthModal } from "./components/auth/AuthModal";
 import { useState, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
+import { toast } from "sonner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,14 +28,22 @@ const queryClient = new QueryClient({
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [initializationAttempts, setInitializationAttempts] = useState(0);
 
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        console.log("Starting initialization attempt:", initializationAttempts + 1);
         const { data: { session }, error } = await supabase.auth.getSession();
+        
         if (error) {
           console.error("Error checking initial session:", error);
+          if (initializationAttempts < 3) {
+            setInitializationAttempts(prev => prev + 1);
+            return;
+          }
           setIsError(true);
+          toast.error("Errore durante l'inizializzazione dell'applicazione");
           return;
         }
         
@@ -45,12 +54,14 @@ const App = () => {
             const { data: adminData, error: adminError } = await supabase
               .from('admin')
               .select('email')
-              .eq('email', session.user.email);
+              .eq('email', session.user.email)
+              .single();
             
-            if (adminError) {
+            if (adminError && adminError.code !== 'PGRST116') {
               console.error("Error checking admin status:", adminError);
+              toast.error("Errore durante la verifica dei permessi");
             } else {
-              console.log("Admin check complete:", adminData?.length > 0 ? "Is admin" : "Not admin");
+              console.log("Admin check complete:", adminData ? "Is admin" : "Not admin");
             }
           } catch (adminCheckError) {
             console.error("Error in admin status check:", adminCheckError);
@@ -58,32 +69,53 @@ const App = () => {
         }
       } catch (error) {
         console.error("Critical error during initialization:", error);
+        if (initializationAttempts < 3) {
+          setInitializationAttempts(prev => prev + 1);
+          return;
+        }
         setIsError(true);
+        toast.error("Errore critico durante l'inizializzazione");
       } finally {
-        setIsLoading(false);
+        if (initializationAttempts >= 2 || !isError) {
+          setIsLoading(false);
+        }
       }
     };
 
+    const timeoutId = setTimeout(() => {
+      if (isLoading && initializationAttempts < 3) {
+        console.log("Initialization timeout, retrying...");
+        initializeAuth();
+      } else if (isLoading) {
+        setIsLoading(false);
+        setIsError(true);
+        toast.error("Timeout durante l'inizializzazione dell'applicazione");
+      }
+    }, 5000);
+
     initializeAuth();
-  }, []);
+
+    return () => clearTimeout(timeoutId);
+  }, [initializationAttempts, isError]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-secondary to-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mb-4"></div>
+        <p className="text-gray-600">Caricamento in corso...</p>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-xl font-semibold text-red-600 mb-2">Errore di caricamento</h1>
-          <p className="text-gray-600">Si è verificato un errore durante il caricamento dell'applicazione.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-secondary to-white">
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
+          <h1 className="text-xl font-semibold text-red-600 mb-4">Errore di caricamento</h1>
+          <p className="text-gray-600 mb-6">Si è verificato un errore durante il caricamento dell'applicazione.</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
           >
             Riprova
           </button>
