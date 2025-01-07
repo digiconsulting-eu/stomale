@@ -16,7 +16,7 @@ export const useConditions = ({
 }: UseConditionsProps = {}) => {
   const offset = (page - 1) * limit;
 
-  const { data, isLoading, error } = useQuery({
+  return useQuery({
     queryKey: ['conditions', page, limit, searchTerm, letter],
     queryFn: async () => {
       console.log('Fetching conditions with pagination:', { page, limit, offset, searchTerm, letter });
@@ -25,21 +25,23 @@ export const useConditions = ({
         .from('PATOLOGIE')
         .select('id, Patologia', { count: 'exact' });
 
-      // Applica i filtri se presenti
+      // Apply search filter if present
       if (searchTerm) {
         query = query.ilike('Patologia', `%${searchTerm}%`);
-      }
-      
-      if (letter && letter !== "TUTTE") {
+      } 
+      // Only apply letter filter if no search term and letter is not "TUTTE"
+      else if (letter && letter !== "TUTTE") {
         query = query.ilike('Patologia', `${letter}%`);
       }
 
-      // Applica paginazione
       const { data, count, error } = await query
         .order('Patologia')
         .range(offset, offset + limit - 1);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching conditions:', error);
+        throw error;
+      }
 
       return {
         conditions: data || [],
@@ -47,14 +49,8 @@ export const useConditions = ({
         totalPages: Math.ceil((count || 0) / limit)
       };
     },
-    staleTime: 1000 * 60 * 5, // Cache per 5 minuti
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    retry: 2, // Reduce number of retries
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Cap retry delay at 10 seconds
   });
-
-  return {
-    conditions: data?.conditions || [],
-    totalCount: data?.totalCount || 0,
-    totalPages: data?.totalPages || 0,
-    isLoading,
-    error
-  };
 };
