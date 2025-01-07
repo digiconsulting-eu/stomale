@@ -52,7 +52,8 @@ export const ReviewManagementTable = () => {
         throw error;
       }
     },
-    refetchInterval: 5000, // Refetch every 5 seconds to ensure we have the latest data
+    refetchInterval: 0, // Disable automatic refetching
+    staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
   if (error) {
