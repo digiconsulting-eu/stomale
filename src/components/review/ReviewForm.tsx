@@ -45,9 +45,13 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Get the current user's username
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
+      console.log('Starting review submission with data:', data);
+
+      // Get the current user's session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.user) {
+        console.error('Session error:', sessionError);
         toast.error("Devi effettuare l'accesso per inviare una recensione");
         navigate("/login");
         return;
@@ -60,7 +64,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         .eq('id', session.user.id)
         .single();
 
-      if (userError || !userData) {
+      if (userError || !userData?.username) {
         console.error('Error fetching username:', userError);
         toast.error("Errore nel recupero dei dati utente");
         return;
@@ -73,9 +77,15 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         .eq('Patologia', data.condition.toUpperCase())
         .single();
 
-      if (patologiaError) throw patologiaError;
+      if (patologiaError || !patologiaData) {
+        console.error('Error fetching condition:', patologiaError);
+        toast.error("Errore nel recupero della patologia");
+        return;
+      }
 
-      // Insert review with username
+      console.log('Inserting review with condition_id:', patologiaData.id);
+
+      // Insert review
       const { error: reviewError } = await supabase
         .from('reviews')
         .insert([
@@ -95,13 +105,16 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           }
         ]);
 
-      if (reviewError) throw reviewError;
+      if (reviewError) {
+        console.error('Error inserting review:', reviewError);
+        throw reviewError;
+      }
 
       toast.success(
-        "La tua esperienza è stata inviata con successo! Sarà pubblicata entro 48 ore dopo la revisione.",
+        "La tua esperienza è stata inviata con successo! Sarà pubblicata dopo la revisione.",
         { duration: 5000 }
       );
-      navigate("/dashboard", { state: { activeTab: "reviews" } });
+      navigate("/dashboard");
     } catch (error) {
       console.error('Error submitting review:', error);
       toast.error("Si è verificato un errore durante l'invio della recensione. Riprova più tardi.");
