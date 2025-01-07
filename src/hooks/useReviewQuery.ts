@@ -1,14 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-const decodeReviewTitle = (slug: string) => {
-  return decodeURIComponent(slug)
-    .split('-')
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .replace(/allovaio/g, "all'ovaio")
-    .replace(/loperazione/g, "l'operazione")
-    .trim();
+const extractReviewId = (slug: string) => {
+  const parts = slug.split('-');
+  return parts[0];
 };
 
 export const useReviewQuery = (slug: string | undefined, condition: string | undefined) => {
@@ -18,8 +13,13 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
       console.log('Fetching review with slug:', slug);
       console.log('Condition:', condition);
       
-      const decodedTitle = decodeReviewTitle(slug || '');
-      console.log('Decoded title:', decodedTitle);
+      if (!slug || !condition) {
+        console.log('Missing slug or condition');
+        return null;
+      }
+
+      const reviewId = extractReviewId(slug);
+      console.log('Extracted review ID:', reviewId);
 
       const { data, error } = await supabase
         .from('reviews')
@@ -32,7 +32,7 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
         `)
         .eq('status', 'approved')
         .eq('PATOLOGIE.Patologia', decodeURIComponent(condition || '').toUpperCase())
-        .eq('title', decodedTitle)
+        .eq('id', reviewId)
         .maybeSingle();
 
       if (error) {
