@@ -22,9 +22,7 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
       const { error } = await supabase
         .from('reviews')
         .update({ status: newStatus })
-        .eq('id', reviewId)
-        .select()
-        .single();
+        .eq('id', reviewId);
 
       if (error) {
         console.error('Error updating review status:', error);
@@ -32,17 +30,12 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         return;
       }
 
-      // Invalidate and refetch queries
-      await queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
-      await queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      await queryClient.invalidateQueries({ queryKey: ['latestReviews'] });
-
-      // Force an immediate refetch
-      await queryClient.refetchQueries({ 
-        queryKey: ['admin-reviews'],
-        exact: true,
-        type: 'active'
-      });
+      // Force an immediate refetch of all relevant queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-reviews'] }),
+        queryClient.invalidateQueries({ queryKey: ['reviews'] }),
+        queryClient.invalidateQueries({ queryKey: ['latestReviews'] })
+      ]);
 
       toast.success(`Recensione ${newStatus === 'approved' ? 'pubblicata' : 'rimossa dalla pubblicazione'} con successo`);
       setIsConfirmDialogOpen(false);
