@@ -26,10 +26,12 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
         return;
       }
 
-      // Invalidate and immediately refetch
-      await queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
-      await queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      await queryClient.invalidateQueries({ queryKey: ['latestReviews'] });
+      // Invalidate and immediately refetch all relevant queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-reviews'] }),
+        queryClient.invalidateQueries({ queryKey: ['reviews'] }),
+        queryClient.invalidateQueries({ queryKey: ['latestReviews'] })
+      ]);
 
       toast.success(`Recensione ${newStatus === 'approved' ? 'pubblicata' : 'rimossa dalla pubblicazione'} con successo`);
     } catch (error) {
