@@ -31,6 +31,10 @@ export const ReviewCard = ({
     return text.slice(0, 150).trim() + "...";
   };
 
+  // Ensure condition is properly formatted for the URL
+  const formattedCondition = condition.toLowerCase();
+  const formattedTitle = slugify(title);
+
   return (
     <Card className="bg-white p-6 hover:shadow-lg transition-shadow">
       <div className="space-y-4">
@@ -41,7 +45,7 @@ export const ReviewCard = ({
             <span>{username || 'Anonimo'}</span>
           </div>
           <Link 
-            to={`/patologia/${condition.toLowerCase()}`}
+            to={`/patologia/${formattedCondition}`}
             className="inline-block"
           >
             <Badge 
@@ -57,7 +61,7 @@ export const ReviewCard = ({
           {truncateExperience(experience)}
         </p>
 
-        <Link to={`/patologia/${condition.toLowerCase()}/recensione/${slugify(title)}`}>
+        <Link to={`/patologia/${formattedCondition}/recensione/${formattedTitle}`}>
           <Button 
             className="w-full bg-primary text-white hover:bg-primary-hover"
           >
