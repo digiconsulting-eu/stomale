@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -6,8 +7,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ReviewActions } from "./ReviewActions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +16,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const ReviewManagementTable = () => {
   const { data: reviews, isLoading, error } = useQuery({
@@ -52,7 +52,7 @@ export const ReviewManagementTable = () => {
         throw error;
       }
     },
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 5000, // Refetch every 5 seconds to ensure we have the latest data
   });
 
   if (error) {

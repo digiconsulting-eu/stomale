@@ -23,12 +23,13 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
       if (error) {
         console.error('Error updating review status:', error);
         toast.error("Errore durante l'aggiornamento della recensione");
-        throw error;
+        return;
       }
 
       // Invalidate and immediately refetch
       await queryClient.invalidateQueries({ queryKey: ['admin-reviews'] });
-      await queryClient.refetchQueries({ queryKey: ['admin-reviews'] });
+      await queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      await queryClient.invalidateQueries({ queryKey: ['latestReviews'] });
 
       toast.success(`Recensione ${newStatus === 'approved' ? 'pubblicata' : 'rimossa dalla pubblicazione'} con successo`);
     } catch (error) {
