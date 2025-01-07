@@ -10,6 +10,8 @@ import { AppRoutes } from "./components/AppRoutes";
 import { AuthStateHandler } from "./components/auth/AuthStateHandler";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { AuthModal } from "./components/auth/AuthModal";
+import { useState, useEffect } from "react";
+import { supabase } from "./integrations/supabase/client";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,26 +24,53 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter>
-        <ScrollToTop />
-        <AuthStateHandler />
-        <AuthModal />
-        <div className="min-h-screen flex flex-col">
-          <Header />
-          <main className="flex-1">
-            <AppRoutes />
-          </main>
-          <Footer />
-          <CookieConsent />
-        </div>
-        <Toaster />
-        <Sonner />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Initial session check:", session ? "Session found" : "No session");
+      } catch (error) {
+        console.error("Error checking initial session:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <AuthStateHandler />
+          <AuthModal />
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="flex-1">
+              <AppRoutes />
+            </main>
+            <Footer />
+            <CookieConsent />
+          </div>
+          <Toaster />
+          <Sonner />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
