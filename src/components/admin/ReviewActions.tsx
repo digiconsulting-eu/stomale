@@ -19,16 +19,26 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
     try {
       console.log('Attempting to update review status:', { reviewId, newStatus, currentStatus: status });
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('reviews')
         .update({ status: newStatus })
-        .eq('id', reviewId);
+        .eq('id', reviewId)
+        .select('status')
+        .single();
 
       if (error) {
         console.error('Error updating review status:', error);
         toast.error("Errore durante l'aggiornamento della recensione");
         return;
       }
+
+      if (!data) {
+        console.error('No data returned after update');
+        toast.error("Errore: nessun dato restituito dopo l'aggiornamento");
+        return;
+      }
+
+      console.log('Review status updated successfully:', data);
 
       // Invalidate and refetch all relevant queries
       await Promise.all([
