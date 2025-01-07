@@ -30,20 +30,18 @@ const App = () => {
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    let timeoutId: number;
-
     const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Error checking initial session:", error);
           setIsError(true);
+          setIsLoading(false);
           toast.error("Errore durante l'inizializzazione dell'applicazione");
           return;
         }
-        
-        console.log("Initial session check complete");
+
         setIsLoading(false);
       } catch (error) {
         console.error("Critical error during initialization:", error);
@@ -53,21 +51,14 @@ const App = () => {
       }
     };
 
-    // Set a timeout to prevent infinite loading
-    timeoutId = window.setTimeout(() => {
-      if (isLoading) {
-        console.log("Initialization timeout reached");
-        setIsLoading(false);
-        setIsError(true);
-        toast.error("Timeout durante l'inizializzazione dell'applicazione");
-      }
-    }, 5000);
+    // Set a maximum timeout for initialization
+    const timeoutId = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
 
     initializeAuth();
 
-    return () => {
-      if (timeoutId) window.clearTimeout(timeoutId);
-    };
+    return () => clearTimeout(timeoutId);
   }, []);
 
   if (isLoading) {
