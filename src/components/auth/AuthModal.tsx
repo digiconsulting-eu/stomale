@@ -28,25 +28,23 @@ export const AuthModal = () => {
         }, 90000); // 90 seconds
         return () => clearTimeout(timer);
       } else {
-        // Check if user is admin
-        try {
-          const { data: adminData } = await supabase
-            .from('admin')
-            .select('email')
-            .eq('email', session.user.email);
-          
-          const isAdmin = Array.isArray(adminData) && adminData.length > 0;
-          
-          // If user is logged in (either as admin or regular user), don't show modal
-          setIsOpen(false);
-        } catch (error) {
-          console.error("Error checking admin status:", error);
-          setIsOpen(false); // In case of error, don't show modal
-        }
+        setIsOpen(false);
       }
     };
 
     checkAuthStatus();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed in modal:", event);
+      if (session) {
+        setIsOpen(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [location.pathname]);
 
   const handleLogin = () => {
