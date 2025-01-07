@@ -47,7 +47,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
     try {
       console.log('Starting review submission with data:', data);
 
-      // Get the current user's session
+      // Check authentication
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session?.user) {
@@ -70,7 +70,9 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         return;
       }
 
-      // Get condition_id from PATOLOGIE table
+      console.log('Found username:', userData.username);
+
+      // Get condition ID
       const { data: patologiaData, error: patologiaError } = await supabase
         .from('PATOLOGIE')
         .select('id')
@@ -83,10 +85,10 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         return;
       }
 
-      console.log('Inserting review with condition_id:', patologiaData.id);
+      console.log('Found condition ID:', patologiaData.id);
 
       // Insert review
-      const { error: reviewError } = await supabase
+      const { data: reviewData, error: reviewError } = await supabase
         .from('reviews')
         .insert([
           {
@@ -103,12 +105,16 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
             social_discomfort: data.socialDiscomfort,
             status: 'pending'
           }
-        ]);
+        ])
+        .select()
+        .single();
 
       if (reviewError) {
         console.error('Error inserting review:', reviewError);
         throw reviewError;
       }
+
+      console.log('Review inserted successfully:', reviewData);
 
       toast.success(
         "La tua esperienza è stata inviata con successo! Sarà pubblicata dopo la revisione.",
