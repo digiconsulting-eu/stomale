@@ -59,13 +59,23 @@ export default function Index() {
         throw error;
       }
     },
-    meta: {
-      onError: (error: Error) => {
-        console.error('Query error:', error);
-        toast.error("Errore nel caricamento delle recensioni");
-      }
-    }
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
+
+  if (isError) {
+    console.error('Error loading reviews');
+    toast.error("Errore nel caricamento delle recensioni");
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center text-red-500">
+          Si è verificato un errore nel caricamento delle recensioni.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -97,34 +107,28 @@ export default function Index() {
               <Skeleton key={i} className="h-[300px]" />
             ))}
           </div>
-        ) : isError ? (
-          <div className="text-center py-8 text-red-500">
-            Si è verificato un errore nel caricamento delle recensioni.
+        ) : latestReviews.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {latestReviews.map((review) => (
+              <ReviewCard
+                key={review.id}
+                id={review.id}
+                title={review.title}
+                condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
+                experience={review.experience}
+                diagnosisDifficulty={review.diagnosis_difficulty}
+                symptomsSeverity={review.symptoms_severity}
+                hasMedication={review.has_medication}
+                medicationEffectiveness={review.medication_effectiveness}
+                healingPossibility={review.healing_possibility}
+                socialDiscomfort={review.social_discomfort}
+                username={review.username}
+              />
+            ))}
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {latestReviews.length > 0 ? (
-              latestReviews.map((review) => (
-                <ReviewCard
-                  key={review.id}
-                  id={review.id}
-                  title={review.title}
-                  condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
-                  experience={review.experience}
-                  diagnosisDifficulty={review.diagnosis_difficulty}
-                  symptomsSeverity={review.symptoms_severity}
-                  hasMedication={review.has_medication}
-                  medicationEffectiveness={review.medication_effectiveness}
-                  healingPossibility={review.healing_possibility}
-                  socialDiscomfort={review.social_discomfort}
-                  username={review.username}
-                />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-8">
-                <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
-              </div>
-            )}
+          <div className="text-center py-8">
+            <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
           </div>
         )}
       </section>
