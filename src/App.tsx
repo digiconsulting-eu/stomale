@@ -17,7 +17,7 @@ import { toast } from "sonner";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
+      retry: 1,
       refetchOnWindowFocus: false,
       staleTime: 30000,
       gcTime: 5 * 60 * 1000,
@@ -30,35 +30,48 @@ const App = () => {
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     const initializeAuth = async () => {
       try {
-        const { data, error } = await supabase.auth.getSession();
+        const { error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Error checking initial session:", error);
-          setIsError(true);
-          setIsLoading(false);
-          toast.error("Errore durante l'inizializzazione dell'applicazione");
+          if (mounted) {
+            setIsError(true);
+            setIsLoading(false);
+            toast.error("Errore durante l'inizializzazione dell'applicazione");
+          }
           return;
         }
 
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error("Critical error during initialization:", error);
-        setIsError(true);
-        setIsLoading(false);
-        toast.error("Errore critico durante l'inizializzazione");
+        if (mounted) {
+          setIsError(true);
+          setIsLoading(false);
+          toast.error("Errore critico durante l'inizializzazione");
+        }
       }
     };
 
-    // Set a maximum timeout for initialization
-    const timeoutId = setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-
     initializeAuth();
 
-    return () => clearTimeout(timeoutId);
+    // Ensure we clear loading state after 2 seconds maximum
+    const timeoutId = setTimeout(() => {
+      if (mounted) {
+        setIsLoading(false);
+      }
+    }, 2000);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   if (isLoading) {
