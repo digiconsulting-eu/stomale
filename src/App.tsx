@@ -29,33 +29,52 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
-  // Initialization check
   useEffect(() => {
-    const checkSession = async () => {
+    let isMounted = true;
+    let timeoutId: number;
+
+    const initializeApp = async () => {
       try {
-        const { error } = await supabase.auth.getSession();
+        console.log("Initializing app...");
+        const { data, error } = await supabase.auth.getSession();
+        
         if (error) {
           console.error("Session check failed:", error);
-          setIsError(true);
-          toast.error("Errore durante l'inizializzazione dell'applicazione");
+          if (isMounted) {
+            setIsError(true);
+            toast.error("Errore durante l'inizializzazione dell'applicazione");
+          }
         }
+        
+        console.log("Session check completed", data);
       } catch (error) {
         console.error("Critical initialization error:", error);
-        setIsError(true);
-        toast.error("Errore critico durante l'inizializzazione");
+        if (isMounted) {
+          setIsError(true);
+          toast.error("Errore critico durante l'inizializzazione");
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    checkSession();
+    // Start initialization
+    initializeApp();
 
-    // Fallback timeout to ensure we don't get stuck loading
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
+    // Set a backup timeout
+    timeoutId = window.setTimeout(() => {
+      if (isMounted) {
+        console.log("Initialization timeout reached");
+        setIsLoading(false);
+      }
+    }, 2000);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      isMounted = false;
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   if (isLoading) {
