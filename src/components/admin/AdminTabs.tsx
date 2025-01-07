@@ -15,7 +15,7 @@ interface AdminTabsProps {
   newAdminEmail: string;
   setNewAdminEmail: (email: string) => void;
   handleAddAdmin: () => void;
-  handleReviewAction: (id: string, action: "approve" | "reject") => void;
+  handleReviewAction: (id: number, action: "approve" | "reject") => void;
   handleCommentAction: (id: string, action: "approve" | "reject") => void;
   markNotificationAsRead: (id: string) => void;
 }
