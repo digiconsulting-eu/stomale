@@ -19,11 +19,10 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
     try {
       console.log('Attempting to update review status:', { reviewId, newStatus, currentStatus: status });
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('reviews')
         .update({ status: newStatus })
-        .eq('id', reviewId)
-        .select();
+        .eq('id', reviewId);
 
       if (error) {
         console.error('Error updating review status:', error);
