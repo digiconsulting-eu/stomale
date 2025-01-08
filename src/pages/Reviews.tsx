@@ -32,14 +32,20 @@ const Reviews = () => {
         const from = (currentPage - 1) * REVIEWS_PER_PAGE;
         const to = from + REVIEWS_PER_PAGE - 1;
 
-        // Then get paginated reviews with user data
+        // Then get paginated reviews
         const { data: reviewsData, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
-            *,
-            users (
-              username
-            ),
+            id,
+            title,
+            experience,
+            diagnosis_difficulty,
+            symptoms_severity,
+            has_medication,
+            medication_effectiveness,
+            healing_possibility,
+            social_discomfort,
+            username,
             PATOLOGIE (
               id,
               Patologia
@@ -65,14 +71,11 @@ const Reviews = () => {
           };
         }
 
-        // Transform the data to match the expected format
-        const transformedReviews = reviewsData.map(review => {
-          console.log('Processing review:', review.id, 'User data:', review.users);
-          return {
-            ...review,
-            username: review.users?.username
-          };
-        });
+        // Transform the data to ensure username is properly handled
+        const transformedReviews = reviewsData.map(review => ({
+          ...review,
+          username: review.username || 'Anonimo'
+        }));
 
         console.log('Transformed reviews:', transformedReviews);
 

@@ -36,7 +36,7 @@ export const ReviewsContent = ({
   totalPages,
   setCurrentPage
 }: ReviewsContentProps) => {
-  console.log('Reviews with usernames:', reviews);
+  console.log('Reviews in ReviewsContent:', reviews);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -51,10 +51,7 @@ export const ReviewsContent = ({
           </div>
         ) : (
           <ReviewsGrid 
-            reviews={reviews.map(review => ({
-              ...review,
-              username: review.username || 'Anonimo'
-            }))} 
+            reviews={reviews} 
             isLoading={isLoading} 
           />
         )}
