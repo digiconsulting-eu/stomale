@@ -9,7 +9,7 @@ import { ConditionActions } from "@/components/condition/ConditionActions";
 import { ConditionReviews } from "@/components/condition/ConditionReviews";
 import { ConditionStats } from "@/components/condition/ConditionStats";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
-import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
+import { setPageTitle, setMetaDescription, getConditionMetaDescription } from "@/utils/pageTitle";
 import { DatabaseReview, Review } from "@/types/review";
 
 interface Stats {
@@ -63,7 +63,9 @@ export default function ConditionDetail() {
 
   useEffect(() => {
     if (condition) {
-      setPageTitle(getConditionPageTitle(condition));
+      const title = `${condition.toUpperCase()} | Recensioni ed Esperienze`;
+      setPageTitle(title);
+      setMetaDescription(getConditionMetaDescription(condition));
     }
   }, [condition]);
 
