@@ -26,8 +26,6 @@ interface ReviewsGridProps {
 }
 
 export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
-  console.log('Reviews in ReviewsGrid:', reviews); // Debug log
-
   if (reviews.length === 0 && !isLoading) {
     return (
       <div className="text-center py-8">
@@ -39,8 +37,9 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {reviews.map((review) => {
-        // Add debug log for username
-        console.log('Review username:', review.username || review.users?.username);
+        // Get the username from either direct username property or users.username
+        const displayUsername = review.username || review.users?.username;
+        
         return (
           <ReviewCard
             key={review.id}
@@ -54,7 +53,7 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
             medicationEffectiveness={review.medication_effectiveness}
             healingPossibility={review.healing_possibility}
             socialDiscomfort={review.social_discomfort}
-            username={review.username || review.users?.username}
+            username={displayUsername}
           />
         );
       })}
