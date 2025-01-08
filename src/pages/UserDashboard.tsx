@@ -18,9 +18,28 @@ const UserDashboard = () => {
   const { data: reviews, isLoading } = useQuery({
     queryKey: ['user-reviews'],
     queryFn: async () => {
+      console.log('Starting to fetch user reviews...');
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) return [];
 
+      // First get the user's username
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('username')
+        .eq('id', session.session.user.id)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+        throw userError;
+      }
+
+      if (!userData?.username) {
+        console.log('No username found for user');
+        return [];
+      }
+
+      // Then fetch reviews using username
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -38,7 +57,7 @@ const UserDashboard = () => {
             Patologia
           )
         `)
-        .eq('user_id', session.session.user.id)
+        .eq('username', userData.username)
         .order('created_at', { ascending: false });
 
       if (error) {
