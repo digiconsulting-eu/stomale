@@ -1,7 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const Sitemap = () => {
+  const [xmlContent, setXmlContent] = useState<string>("");
+  const [error, setError] = useState<string>("");
+
   useEffect(() => {
     const fetchSitemapData = async () => {
       try {
@@ -12,35 +15,32 @@ const Sitemap = () => {
 
         if (error) {
           console.error('Error fetching sitemap:', error);
+          setError('Error loading sitemap');
           return;
         }
 
         if (typeof data === 'string') {
-          // Create a blob with the XML data
-          const blob = new Blob([data], { type: 'application/xml' });
-          const url = window.URL.createObjectURL(blob);
-          
-          // Create a link to download/view the XML
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'sitemap.xml'; // This will be ignored when viewing in browser
-          document.body.appendChild(a);
-          a.click();
-          
-          // Cleanup
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
+          setXmlContent(data);
         }
       } catch (error) {
         console.error('Error processing sitemap:', error);
+        setError('Error processing sitemap');
       }
     };
 
     fetchSitemapData();
   }, []);
 
-  // Return null as we're handling the XML display directly
-  return null;
+  if (error) {
+    return <div className="p-4 text-red-500">{error}</div>;
+  }
+
+  // Display XML content in a pre tag for proper formatting
+  return (
+    <pre className="p-4 overflow-x-auto whitespace-pre-wrap font-mono text-sm">
+      {xmlContent}
+    </pre>
+  );
 };
 
 export default Sitemap;
