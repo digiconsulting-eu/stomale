@@ -31,7 +31,6 @@ const App = () => {
 
   useEffect(() => {
     let isMounted = true;
-    let timeoutId: number;
 
     const initializeApp = async () => {
       try {
@@ -44,6 +43,7 @@ const App = () => {
             setIsError(true);
             toast.error("Errore durante l'inizializzazione dell'applicazione");
           }
+          return;
         }
         
         console.log("Session check completed", data);
@@ -63,17 +63,17 @@ const App = () => {
     // Start initialization
     initializeApp();
 
-    // Set a backup timeout
-    timeoutId = window.setTimeout(() => {
+    // Set a backup timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
       if (isMounted) {
         console.log("Initialization timeout reached");
         setIsLoading(false);
       }
-    }, 2000);
+    }, 1500);
 
     return () => {
       isMounted = false;
-      window.clearTimeout(timeoutId);
+      clearTimeout(timeoutId);
     };
   }, []);
 
