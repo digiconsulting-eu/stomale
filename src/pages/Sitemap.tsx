@@ -21,6 +21,15 @@ const Sitemap = () => {
 
         if (typeof data === 'string') {
           setXmlContent(data);
+          
+          // If this is an XML request, set the content type and return raw XML
+          if (window.location.pathname.endsWith('.xml')) {
+            document.documentElement.innerHTML = '';
+            const xmlDoc = new DOMParser().parseFromString(data, 'text/xml');
+            document.documentElement.appendChild(xmlDoc.documentElement);
+            document.contentType = 'application/xml';
+            return;
+          }
         }
       } catch (error) {
         console.error('Error processing sitemap:', error);
@@ -31,17 +40,16 @@ const Sitemap = () => {
     fetchSitemapData();
   }, []);
 
+  // For XML requests, we've already handled it in the useEffect
+  if (window.location.pathname.endsWith('.xml')) {
+    return null;
+  }
+
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
 
-  // For XML requests, return raw XML content
-  if (window.location.pathname.endsWith('.xml')) {
-    document.documentElement.innerHTML = xmlContent;
-    return null;
-  }
-
-  // For the HTML view, parse and display with clickable links
+  // Parse XML and create clickable links for HTML view
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
   const urls = xmlDoc.getElementsByTagName("url");
