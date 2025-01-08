@@ -8,6 +8,7 @@ const Sitemap = () => {
   useEffect(() => {
     const fetchSitemapData = async () => {
       try {
+        console.log('Fetching sitemap data...');
         const { data, error } = await supabase.functions.invoke('sitemap', {
           method: 'GET'
         });
@@ -20,11 +21,14 @@ const Sitemap = () => {
 
         if (typeof data === 'string') {
           if (window.location.pathname.endsWith('.xml')) {
-            // Create a new document with XML content
-            const doc = new DOMParser().parseFromString(data, 'text/xml');
-            // Replace the entire HTML content with the XML content
-            document.open();
-            document.write(data);
+            // Set the content type to XML
+            const xmlDoc = new DOMParser().parseFromString(data, 'text/xml');
+            const xmlString = new XMLSerializer().serializeToString(xmlDoc);
+            
+            // Create a new document for XML content
+            document.open('text/xml');
+            document.write('<?xml version="1.0" encoding="UTF-8"?>\n');
+            document.write(xmlString);
             document.close();
             return;
           }
