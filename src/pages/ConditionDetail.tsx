@@ -9,7 +9,7 @@ import { ConditionActions } from "@/components/condition/ConditionActions";
 import { ConditionReviews } from "@/components/condition/ConditionReviews";
 import { ConditionStats } from "@/components/condition/ConditionStats";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
-import { setPageTitle, getConditionPageTitle } from "@/utils/pageTitle";
+import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
 import { DatabaseReview, Review } from "@/types/review";
 
 interface Stats {
@@ -86,23 +86,29 @@ export default function ConditionDetail() {
     enabled: !!patologiaData?.id,
     queryFn: async () => {
       console.log('Fetching reviews for condition:', patologiaData?.id);
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          *,
-          PATOLOGIE (
-            id,
-            Patologia
-          )
-        `)
-        .eq('condition_id', patologiaData.id);
       
-      if (error) {
-        console.error('Error fetching reviews:', error);
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select(`
+            *,
+            PATOLOGIE (
+              id,
+              Patologia
+            )
+          `)
+          .eq('condition_id', patologiaData.id);
+        
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          throw error;
+        }
+        console.log('Fetched reviews:', data);
+        return data as DatabaseReview[];
+      } catch (error) {
+        console.error('Error in review fetch:', error);
         throw error;
       }
-      console.log('Fetched reviews:', data);
-      return data as DatabaseReview[];
     }
   });
 
@@ -117,6 +123,7 @@ export default function ConditionDetail() {
   const reviews: Review[] = reviewsData?.map(review => ({
     ...review,
     condition: condition || '',
+    username: review.username || 'Anonimo'
   })) || [];
 
   const stats = calculateStats(reviews);

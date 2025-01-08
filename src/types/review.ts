@@ -17,8 +17,12 @@ export interface DatabaseReview {
     id: number;
     Patologia: string;
   };
+  users?: {
+    username: string;
+  };
 }
 
-export interface Review extends Omit<DatabaseReview, 'condition_id'> {
+export interface Review extends Omit<DatabaseReview, 'condition_id' | 'users'> {
   condition: string;
+  username: string; // Make username required for the frontend
 }

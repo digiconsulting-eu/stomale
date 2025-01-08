@@ -42,9 +42,7 @@ export default function SearchSymptoms() {
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
-            users (
-              username
-            ),
+            username,
             PATOLOGIE (
               id,
               Patologia
@@ -62,8 +60,14 @@ export default function SearchSymptoms() {
           throw error;
         }
 
-        console.log('Found reviews:', data);
-        return data || [];
+        // Transform the data to ensure username is present
+        const transformedReviews = (data || []).map(review => ({
+          ...review,
+          username: review.username || 'Anonimo'
+        }));
+
+        console.log('Found reviews:', transformedReviews);
+        return transformedReviews;
       } catch (error) {
         console.error('Error searching reviews:', error);
         toast.error("Errore durante la ricerca delle recensioni");
