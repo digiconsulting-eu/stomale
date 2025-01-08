@@ -20,9 +20,12 @@ const Sitemap = () => {
 
         if (typeof data === 'string') {
           if (window.location.pathname.endsWith('.xml')) {
-            const doc = document.implementation.createHTMLDocument();
-            doc.documentElement.innerHTML = data;
-            document.documentElement.innerHTML = doc.documentElement.innerHTML;
+            // Create a new document with XML content
+            const doc = new DOMParser().parseFromString(data, 'text/xml');
+            // Replace the entire HTML content with the XML content
+            document.open();
+            document.write(data);
+            document.close();
             return;
           }
           setXmlContent(data);
