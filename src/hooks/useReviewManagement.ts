@@ -60,14 +60,21 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
 
         console.log('Successfully fetched reviews:', data);
         
+        // Transform the data to ensure username is properly handled
+        const transformedReviews = data?.map(review => ({
+          ...review,
+          username: review.username || 'Anonimo'
+        })) || [];
+
+        console.log('Transformed reviews:', transformedReviews);
+
         return {
-          reviews: data || [],
+          reviews: transformedReviews,
           totalCount: totalCount || 0,
           totalPages: Math.ceil((totalCount || 0) / limit)
         };
       } catch (error: any) {
         console.error('Error in review fetch:', error);
-        // Check if it's an authentication error
         if (error.message?.includes('JWT')) {
           toast.error("Sessione scaduta. Effettua nuovamente l'accesso.");
         } else {
