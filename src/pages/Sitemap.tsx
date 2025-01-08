@@ -20,31 +20,8 @@ const Sitemap = () => {
         }
 
         if (typeof data === 'string') {
-          // Parse XML string to create clickable links
-          const parser = new DOMParser();
-          const xmlDoc = parser.parseFromString(data, "text/xml");
-          const urls = xmlDoc.getElementsByTagName("url");
-          
-          let formattedXml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-          formattedXml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-          
-          for (let i = 0; i < urls.length; i++) {
-            const url = urls[i];
-            const loc = url.getElementsByTagName("loc")[0]?.textContent;
-            const lastmod = url.getElementsByTagName("lastmod")[0]?.textContent;
-            const changefreq = url.getElementsByTagName("changefreq")[0]?.textContent;
-            const priority = url.getElementsByTagName("priority")[0]?.textContent;
-            
-            formattedXml += '  <url>\n';
-            formattedXml += loc ? `    <loc><a href="${loc}" target="_blank">${loc}</a></loc>\n` : '';
-            formattedXml += lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : '';
-            formattedXml += changefreq ? `    <changefreq>${changefreq}</changefreq>\n` : '';
-            formattedXml += priority ? `    <priority>${priority}</priority>\n` : '';
-            formattedXml += '  </url>\n';
-          }
-          
-          formattedXml += '</urlset>';
-          setXmlContent(formattedXml);
+          // Set raw XML content
+          setXmlContent(data);
         }
       } catch (error) {
         console.error('Error processing sitemap:', error);
@@ -59,14 +36,52 @@ const Sitemap = () => {
     return <div className="text-red-500">{error}</div>;
   }
 
-  // Return raw XML content with clickable links
+  // Set the content type to XML
+  if (window.location.pathname.endsWith('.xml')) {
+    const blob = new Blob([xmlContent], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    window.location.href = url;
+    return null;
+  }
+
+  // For the HTML view, parse and display with clickable links
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
+  const urls = xmlDoc.getElementsByTagName("url");
+  const sitemapEntries = [];
+
+  for (let i = 0; i < urls.length; i++) {
+    const url = urls[i];
+    const loc = url.getElementsByTagName("loc")[0]?.textContent;
+    const lastmod = url.getElementsByTagName("lastmod")[0]?.textContent;
+    const changefreq = url.getElementsByTagName("changefreq")[0]?.textContent;
+    const priority = url.getElementsByTagName("priority")[0]?.textContent;
+
+    if (loc) {
+      sitemapEntries.push(
+        <div key={i} className="mb-4">
+          <a 
+            href={loc} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            {loc}
+          </a>
+          <div className="text-sm text-gray-600 ml-4">
+            {lastmod && <div>Last modified: {lastmod}</div>}
+            {changefreq && <div>Change frequency: {changefreq}</div>}
+            {priority && <div>Priority: {priority}</div>}
+          </div>
+        </div>
+      );
+    }
+  }
+
   return (
-    <pre 
-      className="font-mono text-sm whitespace-pre-wrap"
-      dangerouslySetInnerHTML={{ 
-        __html: xmlContent 
-      }} 
-    />
+    <div className="p-4 space-y-4">
+      {sitemapEntries}
+    </div>
   );
 };
 
