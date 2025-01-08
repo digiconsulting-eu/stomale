@@ -8,7 +8,6 @@ const Sitemap = () => {
   useEffect(() => {
     const fetchSitemapData = async () => {
       try {
-        console.log('Fetching sitemap data...');
         const { data, error } = await supabase.functions.invoke('sitemap', {
           method: 'GET'
         });
@@ -20,10 +19,10 @@ const Sitemap = () => {
         }
 
         if (typeof data === 'string') {
-          // For XML requests, set the content type and write directly to document
           if (window.location.pathname.endsWith('.xml')) {
-            const xmlDoc = new DOMParser().parseFromString(data, 'text/xml');
-            document.documentElement.replaceWith(xmlDoc.documentElement);
+            const doc = document.implementation.createHTMLDocument();
+            doc.documentElement.innerHTML = data;
+            document.documentElement.innerHTML = doc.documentElement.innerHTML;
             return;
           }
           setXmlContent(data);
@@ -37,7 +36,6 @@ const Sitemap = () => {
     fetchSitemapData();
   }, []);
 
-  // For XML requests, we've already handled it in the useEffect
   if (window.location.pathname.endsWith('.xml')) {
     return null;
   }
@@ -46,7 +44,6 @@ const Sitemap = () => {
     return <div className="text-red-500">{error}</div>;
   }
 
-  // Parse XML and create clickable links for HTML view
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
   const urls = xmlDoc.getElementsByTagName("url");
@@ -61,17 +58,17 @@ const Sitemap = () => {
 
     if (loc) {
       sitemapEntries.push(
-        <div key={i} className="mb-4">
+        <div key={i} className="mb-4 p-4 border rounded hover:bg-gray-50">
           <a 
             href={loc} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
+            className="text-blue-600 hover:underline text-lg"
           >
             {loc}
           </a>
-          <div className="text-sm text-gray-600 ml-4">
-            {lastmod && <div>Last modified: {lastmod}</div>}
+          <div className="text-sm text-gray-600 mt-2 space-y-1">
+            {lastmod && <div>Last modified: {new Date(lastmod).toLocaleDateString()}</div>}
             {changefreq && <div>Change frequency: {changefreq}</div>}
             {priority && <div>Priority: {priority}</div>}
           </div>
@@ -81,8 +78,13 @@ const Sitemap = () => {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      {sitemapEntries}
+    <div className="container mx-auto p-6 max-w-4xl">
+      <h1 className="text-2xl font-bold mb-6">Sitemap</h1>
+      <div className="space-y-4">
+        {sitemapEntries.length > 0 ? sitemapEntries : (
+          <div className="text-gray-500">No entries found in sitemap</div>
+        )}
+      </div>
     </div>
   );
 };
