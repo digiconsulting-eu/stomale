@@ -35,6 +35,9 @@ export const ReviewCard = ({
   const formattedCondition = condition.toLowerCase();
   const formattedTitle = slugify(title);
 
+  // Add console log to debug username
+  console.log('Review username:', username);
+
   return (
     <Card className="bg-white p-6 hover:shadow-lg transition-shadow">
       <div className="space-y-4">

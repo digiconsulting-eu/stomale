@@ -17,6 +17,7 @@ interface Review {
     id: number;
     Patologia: string;
   };
+  username?: string;
 }
 
 interface ReviewsGridProps {
@@ -38,7 +39,8 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {reviews.map((review) => {
-        console.log('Review username:', review.users?.username); // Debug log
+        // Add debug log for username
+        console.log('Review username:', review.username || review.users?.username);
         return (
           <ReviewCard
             key={review.id}
@@ -52,7 +54,7 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
             medicationEffectiveness={review.medication_effectiveness}
             healingPossibility={review.healing_possibility}
             socialDiscomfort={review.social_discomfort}
-            username={review.users?.username}
+            username={review.username || review.users?.username}
           />
         );
       })}
