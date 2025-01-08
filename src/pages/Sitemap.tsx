@@ -4,11 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 const Sitemap = () => {
   const [xmlContent, setXmlContent] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchSitemapData = async () => {
       try {
         console.log('Fetching sitemap data...');
+        setIsLoading(true);
+        
         const { data, error } = await supabase.functions.invoke('sitemap', {
           method: 'GET'
         });
@@ -21,14 +24,10 @@ const Sitemap = () => {
 
         if (typeof data === 'string') {
           if (window.location.pathname.endsWith('.xml')) {
-            // Set the content type to XML
-            const xmlDoc = new DOMParser().parseFromString(data, 'text/xml');
-            const xmlString = new XMLSerializer().serializeToString(xmlDoc);
-            
-            // Create a new document for XML content
+            // Set the content type to XML and replace the document content
             document.open('text/xml');
             document.write('<?xml version="1.0" encoding="UTF-8"?>\n');
-            document.write(xmlString);
+            document.write(data);
             document.close();
             return;
           }
@@ -37,6 +36,8 @@ const Sitemap = () => {
       } catch (error) {
         console.error('Error processing sitemap:', error);
         setError('Error processing sitemap');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -47,8 +48,22 @@ const Sitemap = () => {
     return null;
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return (
+      <div className="container mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      </div>
+    );
   }
 
   const parser = new DOMParser();

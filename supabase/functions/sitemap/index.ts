@@ -30,7 +30,8 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch conditions
+    // Fetch conditions with error handling
+    console.log('[Sitemap Function] Fetching conditions...');
     const { data: conditions, error: conditionsError } = await supabase
       .from('PATOLOGIE')
       .select('Patologia');
@@ -40,7 +41,8 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
     }
 
-    // Fetch approved reviews
+    // Fetch approved reviews with error handling
+    console.log('[Sitemap Function] Fetching reviews...');
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
       .select(`
@@ -67,6 +69,8 @@ Deno.serve(async (req) => {
       return new Date(date).toISOString();
     };
 
+    console.log('[Sitemap Function] Generating XML content...');
+    
     // Generate XML sitemap
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
@@ -126,7 +130,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('[Sitemap Function] Fatal error:', error);
     
-    // Return error in XML format
+    // Return error in XML format with proper headers
     const errorXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Error generating sitemap: ${error.message} -->
