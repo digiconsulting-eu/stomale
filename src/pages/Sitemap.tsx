@@ -20,7 +20,31 @@ const Sitemap = () => {
         }
 
         if (typeof data === 'string') {
-          setXmlContent(data);
+          // Parse XML string to create clickable links
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(data, "text/xml");
+          const urls = xmlDoc.getElementsByTagName("url");
+          
+          let formattedXml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+          formattedXml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+          
+          for (let i = 0; i < urls.length; i++) {
+            const url = urls[i];
+            const loc = url.getElementsByTagName("loc")[0]?.textContent;
+            const lastmod = url.getElementsByTagName("lastmod")[0]?.textContent;
+            const changefreq = url.getElementsByTagName("changefreq")[0]?.textContent;
+            const priority = url.getElementsByTagName("priority")[0]?.textContent;
+            
+            formattedXml += '  <url>\n';
+            formattedXml += loc ? `    <loc><a href="${loc}" target="_blank">${loc}</a></loc>\n` : '';
+            formattedXml += lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : '';
+            formattedXml += changefreq ? `    <changefreq>${changefreq}</changefreq>\n` : '';
+            formattedXml += priority ? `    <priority>${priority}</priority>\n` : '';
+            formattedXml += '  </url>\n';
+          }
+          
+          formattedXml += '</urlset>';
+          setXmlContent(formattedXml);
         }
       } catch (error) {
         console.error('Error processing sitemap:', error);
@@ -32,14 +56,17 @@ const Sitemap = () => {
   }, []);
 
   if (error) {
-    return <div className="p-4 text-red-500">{error}</div>;
+    return <div className="text-red-500">{error}</div>;
   }
 
-  // Display XML content in a pre tag for proper formatting
+  // Return raw XML content with clickable links
   return (
-    <pre className="p-4 overflow-x-auto whitespace-pre-wrap font-mono text-sm">
-      {xmlContent}
-    </pre>
+    <pre 
+      className="font-mono text-sm whitespace-pre-wrap"
+      dangerouslySetInnerHTML={{ 
+        __html: xmlContent 
+      }} 
+    />
   );
 };
 
