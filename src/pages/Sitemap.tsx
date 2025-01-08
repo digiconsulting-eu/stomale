@@ -20,9 +20,10 @@ const Sitemap = () => {
         }
 
         if (typeof data === 'string') {
-          // If this is an XML request, replace the entire document content
+          // For XML requests, set the content type and write directly to document
           if (window.location.pathname.endsWith('.xml')) {
-            document.documentElement.innerHTML = data;
+            const xmlDoc = new DOMParser().parseFromString(data, 'text/xml');
+            document.documentElement.replaceWith(xmlDoc.documentElement);
             return;
           }
           setXmlContent(data);
