@@ -20,7 +20,6 @@ const Sitemap = () => {
         }
 
         if (typeof data === 'string') {
-          // Set raw XML content
           setXmlContent(data);
         }
       } catch (error) {
@@ -36,11 +35,9 @@ const Sitemap = () => {
     return <div className="text-red-500">{error}</div>;
   }
 
-  // Set the content type to XML
+  // For XML requests, return raw XML content
   if (window.location.pathname.endsWith('.xml')) {
-    const blob = new Blob([xmlContent], { type: 'application/xml' });
-    const url = URL.createObjectURL(blob);
-    window.location.href = url;
+    document.documentElement.innerHTML = xmlContent;
     return null;
   }
 
