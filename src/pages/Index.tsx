@@ -46,14 +46,21 @@ export default function Index() {
           throw error;
         }
 
-        console.log('Fetched reviews:', data);
+        console.log('Fetched reviews with usernames:', data);
         
         if (!data) {
           console.log('No reviews data returned');
           return [];
         }
 
-        return data;
+        // Transform the data to ensure username is properly handled
+        const transformedReviews = data.map(review => ({
+          ...review,
+          username: review.username || 'Anonimo' // Fallback to 'Anonimo' if username is null
+        }));
+
+        console.log('Transformed reviews:', transformedReviews);
+        return transformedReviews;
       } catch (error) {
         console.error('Error in query execution:', error);
         throw error;
