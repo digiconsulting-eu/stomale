@@ -7,7 +7,7 @@ interface NavigationMenuProps {
 
 export const NavigationMenu = ({ isMobile = false, onItemClick }: NavigationMenuProps) => {
   const menuItems = [
-    { to: "/recensioni", label: "Recensioni" },
+    { to: "/recensioni", label: "Ultime Recensioni" },
     { to: "/nuova-recensione", label: "Racconta la tua esperienza" },
     { to: "/cerca-patologia", label: "Cerca Patologia" },
     { to: "/inserisci-patologia", label: "Inserisci Patologia" },
