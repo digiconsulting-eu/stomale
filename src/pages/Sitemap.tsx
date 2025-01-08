@@ -8,15 +8,13 @@ export default function Sitemap() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
-  const isTxtFormat = location.pathname === '/sitemap.txt';
-  const isXmlFormat = location.pathname === '/sitemap.xml' || location.pathname === '/sitemap-google.xml';
+  const isXmlFormat = location.pathname.endsWith('.xml');
 
   useEffect(() => {
     const fetchSitemap = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        console.log('Fetching sitemap data...', location.pathname);
         
         const { data, error: fetchError } = await supabase.functions.invoke('sitemap', {
           method: 'GET',
@@ -26,15 +24,13 @@ export default function Sitemap() {
           }
         });
         
-        console.log('Sitemap response:', { data, error: fetchError });
-        
         if (fetchError) {
-          console.error('Error fetching sitemap:', fetchError);
           throw new Error(fetchError.message);
         }
 
         if (typeof data === 'string') {
           setContent(data);
+          
           // For XML format, set the content type using meta tag
           if (isXmlFormat && typeof document !== 'undefined') {
             const meta = document.querySelector('meta[http-equiv="Content-Type"]');
@@ -45,15 +41,12 @@ export default function Sitemap() {
               document.head.appendChild(newMeta);
             }
           }
-        } else if (data?.error) {
-          throw new Error(data.error);
         } else {
-          console.error('Unexpected response format:', data);
           throw new Error('Unexpected response format from sitemap function');
         }
       } catch (err) {
         console.error('Error in sitemap component:', err);
-        setError(err instanceof Error ? err.message : 'Failed to generate sitemap. Please try again later.');
+        setError(err instanceof Error ? err.message : 'Failed to generate sitemap');
       } finally {
         setIsLoading(false);
       }
@@ -62,27 +55,15 @@ export default function Sitemap() {
     fetchSitemap();
   }, [location.pathname, isXmlFormat]);
 
-  // Se è formato XML, ritorna direttamente il contenuto XML senza mostrare lo stato di caricamento
+  // For XML format, return raw XML content
   if (isXmlFormat) {
     if (error) {
       return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>Error: ${error}</loc></url></urlset>`;
     }
-    return content || `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`;
+    return content;
   }
 
-  // Se è formato TXT, ritorna il contenuto testuale
-  if (isTxtFormat) {
-    if (error) return error;
-    return content || '';
-  }
-
-  // Redirect to XML format if accessed directly
-  if (location.pathname === '/sitemap') {
-    window.location.href = '/sitemap.xml';
-    return null;
-  }
-
-  // Interfaccia HTML per visualizzazione diretta nel browser
+  // For HTML format (when accessed directly via /sitemap)
   return (
     <div className="container mx-auto px-4 py-8">
       {isLoading ? (
@@ -94,14 +75,12 @@ export default function Sitemap() {
           {error}
         </div>
       ) : (
-        <>
+        <div className="bg-white p-6 rounded-lg shadow">
           <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <pre className="whitespace-pre-wrap break-words font-mono text-sm">
-              {content}
-            </pre>
-          </div>
-        </>
+          <pre className="whitespace-pre-wrap break-words font-mono text-sm">
+            {content}
+          </pre>
+        </div>
       )}
     </div>
   );

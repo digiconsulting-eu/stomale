@@ -30,17 +30,6 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Test database connection with a simple query
-    const { data: testData, error: testError } = await supabase
-      .from('PATOLOGIE')
-      .select('id')
-      .limit(1);
-
-    if (testError) {
-      console.error('[Sitemap Function] Database connection test failed:', testError);
-      throw new Error(`Database connection failed: ${testError.message}`);
-    }
-
     // Fetch conditions
     const { data: conditions, error: conditionsError } = await supabase
       .from('PATOLOGIE')
@@ -56,6 +45,7 @@ Deno.serve(async (req) => {
       .from('reviews')
       .select(`
         title,
+        created_at,
         PATOLOGIE (
           Patologia
         )
@@ -72,6 +62,11 @@ Deno.serve(async (req) => {
       return str.toLowerCase().split(' ').map(part => encodeURIComponent(part)).join('%20');
     };
 
+    // Function to format date for sitemap
+    const formatDate = (date: string) => {
+      return new Date(date).toISOString();
+    };
+
     // Determine format based on URL path
     const url = new URL(req.url);
     const isXml = url.pathname.endsWith('.xml');
@@ -79,17 +74,32 @@ Deno.serve(async (req) => {
     if (isXml) {
       // Generate XML sitemap
       let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
       
       // Add homepage
-      xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/recensioni</loc>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n  </url>\n`;
+      
+      // Add static pages
+      const staticPages = [
+        '/recensioni',
+        '/cerca-patologia',
+        '/nuova-recensione',
+        '/inserisci-patologia',
+        '/cerca-sintomi',
+        '/cookie-policy',
+        '/privacy-policy',
+        '/terms'
+      ];
+
+      staticPages.forEach(page => {
+        xml += `  <url>\n    <loc>${BASE_URL}${page}</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n  </url>\n`;
+      });
       
       // Add conditions
       conditions?.forEach((condition) => {
         if (condition.Patologia) {
           const encodedCondition = encodeUrl(condition.Patologia);
-          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n  </url>\n`;
+          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n  </url>\n`;
         }
       });
 
@@ -101,18 +111,9 @@ Deno.serve(async (req) => {
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
-          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n  </url>\n`;
+          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n    <lastmod>${formatDate(review.created_at)}</lastmod>\n  </url>\n`;
         }
       });
-
-      // Add static pages
-      xml += `  <url>\n    <loc>${BASE_URL}/cerca-patologia</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/nuova-recensione</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/inserisci-patologia</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/cerca-sintomi</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/cookie-policy</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/privacy-policy</loc>\n  </url>\n`;
-      xml += `  <url>\n    <loc>${BASE_URL}/terms</loc>\n  </url>\n`;
 
       xml += '</urlset>';
 
@@ -127,52 +128,11 @@ Deno.serve(async (req) => {
         status: 200
       });
     } else {
-      // Generate text sitemap
-      let sitemap = 'SITEMAP STOMALE.INFO\n\n';
-      sitemap += `Homepage:\n${BASE_URL}/\n\n`;
-      sitemap += `Recensioni:\n${BASE_URL}/recensioni\n\n`;
-
-      // Add conditions
-      sitemap += 'Patologie:\n';
-      conditions?.forEach((condition) => {
-        if (condition.Patologia) {
-          const encodedCondition = encodeUrl(condition.Patologia);
-          sitemap += `${BASE_URL}/patologia/${encodedCondition}\n`;
-        }
-      });
-      sitemap += '\n';
-
-      // Add reviews
-      sitemap += 'Recensioni per patologia:\n';
-      reviews?.forEach((review) => {
-        if (review.PATOLOGIE?.Patologia && review.title) {
-          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
-          const reviewSlug = review.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
-          sitemap += `${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}\n`;
-        }
-      });
-      sitemap += '\n';
-
-      // Add static pages
-      sitemap += 'Altre pagine:\n';
-      sitemap += `${BASE_URL}/cerca-patologia\n`;
-      sitemap += `${BASE_URL}/nuova-recensione\n`;
-      sitemap += `${BASE_URL}/inserisci-patologia\n`;
-      sitemap += `${BASE_URL}/cerca-sintomi\n`;
-      sitemap += `${BASE_URL}/cookie-policy\n`;
-      sitemap += `${BASE_URL}/privacy-policy\n`;
-      sitemap += `${BASE_URL}/terms\n`;
-
-      console.log('[Sitemap Function] Text sitemap generation completed successfully');
-
-      return new Response(sitemap, { 
+      // For non-XML requests, return a simple text response
+      return new Response('Please use sitemap.xml endpoint for XML format', { 
         headers: {
           ...corsHeaders,
           'Content-Type': 'text/plain; charset=utf-8',
-          'Cache-Control': 'public, max-age=3600'
         },
         status: 200
       });
