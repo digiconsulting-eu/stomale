@@ -43,9 +43,7 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
             medication_effectiveness,
             healing_possibility,
             social_discomfort,
-            users (
-              username
-            ),
+            username,
             PATOLOGIE (
               id,
               Patologia
