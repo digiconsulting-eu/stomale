@@ -20,16 +20,12 @@ const Sitemap = () => {
         }
 
         if (typeof data === 'string') {
-          setXmlContent(data);
-          
-          // If this is an XML request, set the content type and return raw XML
+          // If this is an XML request, replace the entire document content
           if (window.location.pathname.endsWith('.xml')) {
-            document.documentElement.innerHTML = '';
-            const xmlDoc = new DOMParser().parseFromString(data, 'text/xml');
-            document.documentElement.appendChild(xmlDoc.documentElement);
-            document.contentType = 'application/xml';
+            document.documentElement.innerHTML = data;
             return;
           }
+          setXmlContent(data);
         }
       } catch (error) {
         console.error('Error processing sitemap:', error);

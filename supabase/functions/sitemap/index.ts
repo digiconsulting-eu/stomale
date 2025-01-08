@@ -114,14 +114,14 @@ Deno.serve(async (req) => {
 
     console.log('[Sitemap Function] XML sitemap generation completed successfully');
 
-    return new Response(xml, { 
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600'
-      },
-      status: 200
-    });
+    // Set proper XML content type header
+    const headers = {
+      ...corsHeaders,
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600'
+    };
+
+    return new Response(xml, { headers, status: 200 });
 
   } catch (error) {
     console.error('[Sitemap Function] Fatal error:', error);
