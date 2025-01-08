@@ -25,14 +25,19 @@ export const ConditionHeader = ({ condition, conditionId }: ConditionHeaderProps
         return;
       }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('condition_follows')
         .select('id')
         .eq('condition_id', conditionId)
-        .eq('user_id', session.session.user.id)
-        .single();
+        .eq('user_id', session.session.user.id);
 
-      setIsFollowing(!!data);
+      if (error) {
+        console.error('Error checking follow status:', error);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsFollowing(data && data.length > 0);
       setIsLoading(false);
     } catch (error) {
       console.error('Error checking follow status:', error);
