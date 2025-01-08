@@ -67,76 +67,61 @@ Deno.serve(async (req) => {
       return new Date(date).toISOString();
     };
 
-    // Determine format based on URL path
-    const url = new URL(req.url);
-    const isXml = url.pathname.endsWith('.xml');
+    // Generate XML sitemap
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    
+    // Add homepage
+    xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+    
+    // Add static pages
+    const staticPages = [
+      { path: '/recensioni', priority: '0.8' },
+      { path: '/cerca-patologia', priority: '0.8' },
+      { path: '/nuova-recensione', priority: '0.7' },
+      { path: '/inserisci-patologia', priority: '0.6' },
+      { path: '/cerca-sintomi', priority: '0.8' },
+      { path: '/cookie-policy', priority: '0.3' },
+      { path: '/privacy-policy', priority: '0.3' },
+      { path: '/terms', priority: '0.3' }
+    ];
 
-    if (isXml) {
-      // Generate XML sitemap
-      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
-      
-      // Add homepage
-      xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n  </url>\n`;
-      
-      // Add static pages
-      const staticPages = [
-        '/recensioni',
-        '/cerca-patologia',
-        '/nuova-recensione',
-        '/inserisci-patologia',
-        '/cerca-sintomi',
-        '/cookie-policy',
-        '/privacy-policy',
-        '/terms'
-      ];
+    staticPages.forEach(page => {
+      xml += `  <url>\n    <loc>${BASE_URL}${page.path}</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${page.priority}</priority>\n  </url>\n`;
+    });
+    
+    // Add conditions
+    conditions?.forEach((condition) => {
+      if (condition.Patologia) {
+        const encodedCondition = encodeUrl(condition.Patologia);
+        xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+      }
+    });
 
-      staticPages.forEach(page => {
-        xml += `  <url>\n    <loc>${BASE_URL}${page}</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n  </url>\n`;
-      });
-      
-      // Add conditions
-      conditions?.forEach((condition) => {
-        if (condition.Patologia) {
-          const encodedCondition = encodeUrl(condition.Patologia);
-          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n  </url>\n`;
-        }
-      });
+    // Add reviews
+    reviews?.forEach((review) => {
+      if (review.PATOLOGIE?.Patologia && review.title) {
+        const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
+        const reviewSlug = review.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+        xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n    <lastmod>${formatDate(review.created_at)}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+      }
+    });
 
-      // Add reviews
-      reviews?.forEach((review) => {
-        if (review.PATOLOGIE?.Patologia && review.title) {
-          const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
-          const reviewSlug = review.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
-          xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n    <lastmod>${formatDate(review.created_at)}</lastmod>\n  </url>\n`;
-        }
-      });
+    xml += '</urlset>';
 
-      xml += '</urlset>';
+    console.log('[Sitemap Function] XML sitemap generation completed successfully');
 
-      console.log('[Sitemap Function] XML sitemap generation completed successfully');
-
-      return new Response(xml, { 
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/xml; charset=utf-8',
-          'Cache-Control': 'public, max-age=3600'
-        },
-        status: 200
-      });
-    } else {
-      // For non-XML requests, return a simple text response
-      return new Response('Please use sitemap.xml endpoint for XML format', { 
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'text/plain; charset=utf-8',
-        },
-        status: 200
-      });
-    }
+    return new Response(xml, { 
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600'
+      },
+      status: 200
+    });
 
   } catch (error) {
     console.error('[Sitemap Function] Fatal error:', error);
