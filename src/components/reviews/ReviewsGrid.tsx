@@ -10,7 +10,7 @@ interface Review {
   medication_effectiveness?: number;
   healing_possibility?: number;
   social_discomfort?: number;
-  username?: string;
+  username: string;
   PATOLOGIE?: {
     id: number;
     Patologia: string;
@@ -23,6 +23,8 @@ interface ReviewsGridProps {
 }
 
 export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
+  console.log('Reviews in grid:', reviews);
+
   if (reviews.length === 0 && !isLoading) {
     return (
       <div className="text-center py-8">

@@ -16,7 +16,7 @@ interface Review {
     id: number;
     Patologia: string;
   };
-  username?: string;
+  username: string;
 }
 
 interface ConditionReviewsProps {
@@ -26,6 +26,8 @@ interface ConditionReviewsProps {
 }
 
 export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionReviewsProps) => {
+  console.log('Condition reviews with usernames:', reviews);
+
   if (isLoading) {
     return (
       <div className="space-y-4">

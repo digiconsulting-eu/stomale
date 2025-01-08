@@ -14,9 +14,7 @@ interface Review {
   medication_effectiveness?: number;
   healing_possibility?: number;
   social_discomfort?: number;
-  users?: {
-    username: string;
-  };
+  username: string;
   PATOLOGIE?: {
     id: number;
     Patologia: string;
@@ -38,6 +36,8 @@ export const ReviewsContent = ({
   totalPages,
   setCurrentPage
 }: ReviewsContentProps) => {
+  console.log('Reviews with usernames:', reviews);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-8">
@@ -50,7 +50,13 @@ export const ReviewsContent = ({
             ))}
           </div>
         ) : (
-          <ReviewsGrid reviews={reviews} isLoading={isLoading} />
+          <ReviewsGrid 
+            reviews={reviews.map(review => ({
+              ...review,
+              username: review.username || 'Anonimo'
+            }))} 
+            isLoading={isLoading} 
+          />
         )}
 
         {totalPages > 1 && (
