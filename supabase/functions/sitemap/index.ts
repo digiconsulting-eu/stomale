@@ -126,19 +126,18 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('[Sitemap Function] Fatal error:', error);
     
-    return new Response(
-      JSON.stringify({ 
-        error: 'Failed to generate sitemap',
-        message: error.message,
-        timestamp: new Date().toISOString()
-      }), 
-      { 
-        status: 500, 
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    // Return error in XML format
+    const errorXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Error generating sitemap: ${error.message} -->
+</urlset>`;
+    
+    return new Response(errorXml, { 
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/xml; charset=utf-8'
+      },
+      status: 500
+    });
   }
 });
