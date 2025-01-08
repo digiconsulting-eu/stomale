@@ -7,7 +7,7 @@ const Sitemap = () => {
   useEffect(() => {
     const fetchSitemapData = async () => {
       try {
-        // Fetch sitemap data from Supabase Edge Function
+        console.log('Fetching sitemap data...');
         const { data, error } = await supabase.functions.invoke('sitemap', {
           method: 'GET'
         });
@@ -20,19 +20,24 @@ const Sitemap = () => {
         // Set the XML content
         if (typeof data === 'string') {
           setXmlContent(data);
+          
+          // Create a new document with XML content
+          const xmlDoc = new DOMParser().parseFromString(data, 'text/xml');
+          
+          // Remove any existing content
+          while (document.body.firstChild) {
+            document.body.removeChild(document.body.firstChild);
+          }
+          
+          // Create a pre element to display formatted XML
+          const pre = document.createElement('pre');
+          pre.style.margin = '0';
+          pre.style.padding = '20px';
+          pre.style.whiteSpace = 'pre-wrap';
+          pre.style.wordWrap = 'break-word';
+          pre.textContent = data;
+          document.body.appendChild(pre);
         }
-
-        // Set content type to XML
-        const xmlDoc = new DOMParser().parseFromString(xmlContent, 'text/xml');
-        document.contentType = 'text/xml';
-
-        // Remove any existing content
-        document.body.innerHTML = '';
-        
-        // Create a pre element to display formatted XML
-        const pre = document.createElement('pre');
-        pre.textContent = xmlContent;
-        document.body.appendChild(pre);
 
       } catch (error) {
         console.error('Error processing sitemap:', error);
@@ -40,7 +45,7 @@ const Sitemap = () => {
     };
 
     fetchSitemapData();
-  }, [xmlContent]);
+  }, []);
 
   // Return null as we're manipulating the document directly
   return null;
