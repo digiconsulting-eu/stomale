@@ -9,6 +9,8 @@ const corsHeaders = {
 const BASE_URL = 'https://stomale.info';
 
 Deno.serve(async (req) => {
+  console.log('[Sitemap Function] Starting request handling...');
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('[Sitemap Function] Handling CORS preflight request');
@@ -19,22 +21,23 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('[Sitemap Function] Starting sitemap generation...');
+    console.log('[Sitemap Function] Initializing sitemap generation...');
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseKey) {
-      console.error('[Sitemap Function] Missing environment variables');
       throw new Error('Configuration error: Missing environment variables');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('[Sitemap Function] Supabase client initialized');
 
-    // Fetch conditions with error handling and timeout
+    // Fetch conditions with timeout and error handling
     console.log('[Sitemap Function] Fetching conditions...');
+    const conditionsPromise = supabase.from('PATOLOGIE').select('Patologia');
     const { data: conditions, error: conditionsError } = await Promise.race([
-      supabase.from('PATOLOGIE').select('Patologia'),
+      conditionsPromise,
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Conditions fetch timeout')), 5000)
       )
@@ -45,19 +48,21 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
     }
 
-    // Fetch approved reviews with error handling and timeout
+    // Fetch approved reviews with timeout and error handling
     console.log('[Sitemap Function] Fetching reviews...');
+    const reviewsPromise = supabase
+      .from('reviews')
+      .select(`
+        title,
+        created_at,
+        PATOLOGIE (
+          Patologia
+        )
+      `)
+      .eq('status', 'approved');
+
     const { data: reviews, error: reviewsError } = await Promise.race([
-      supabase
-        .from('reviews')
-        .select(`
-          title,
-          created_at,
-          PATOLOGIE (
-            Patologia
-          )
-        `)
-        .eq('status', 'approved'),
+      reviewsPromise,
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Reviews fetch timeout')), 5000)
       )
@@ -68,9 +73,12 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
     }
 
-    // Function to properly encode URLs with validation
+    // Function to properly encode URLs
     const encodeUrl = (str: string) => {
-      if (!str) return '';
+      if (!str) {
+        console.warn('[Sitemap Function] Empty string passed to encodeUrl');
+        return '';
+      }
       return str.toLowerCase()
         .trim()
         .split(' ')
@@ -79,7 +87,7 @@ Deno.serve(async (req) => {
         .join('-');
     };
 
-    // Function to format date for sitemap with validation
+    // Function to format date for sitemap
     const formatDate = (date: string) => {
       try {
         return new Date(date).toISOString();
@@ -91,14 +99,14 @@ Deno.serve(async (req) => {
 
     console.log('[Sitemap Function] Generating XML content...');
     
-    // Generate XML sitemap with validation
+    // Generate XML sitemap
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     
     // Add homepage
     xml += `  <url>\n    <loc>${BASE_URL}/</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
     
-    // Add static pages with validation
+    // Add static pages
     const staticPages = [
       { path: '/recensioni', priority: '0.8' },
       { path: '/cerca-patologia', priority: '0.8' },
@@ -114,7 +122,7 @@ Deno.serve(async (req) => {
       xml += `  <url>\n    <loc>${BASE_URL}${page.path}</loc>\n    <lastmod>${formatDate(new Date().toISOString())}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${page.priority}</priority>\n  </url>\n`;
     });
     
-    // Add conditions with validation
+    // Add conditions
     conditions?.forEach((condition) => {
       if (condition.Patologia) {
         const encodedCondition = encodeUrl(condition.Patologia);
@@ -124,7 +132,7 @@ Deno.serve(async (req) => {
       }
     });
 
-    // Add reviews with validation
+    // Add reviews
     reviews?.forEach((review) => {
       if (review.PATOLOGIE?.Patologia && review.title) {
         const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
@@ -140,19 +148,19 @@ Deno.serve(async (req) => {
 
     console.log('[Sitemap Function] XML sitemap generation completed successfully');
 
-    // Set proper XML content type header and cache control
+    // Set proper headers for XML content and caching
     const headers = {
       ...corsHeaders,
       'Content-Type': 'application/xml; charset=utf-8',
       'Cache-Control': 'public, max-age=3600'
     };
 
-    return new Response(xml, { headers, status: 200 });
+    return new Response(xml, { headers });
 
   } catch (error) {
     console.error('[Sitemap Function] Fatal error:', error);
     
-    // Return error in XML format with proper headers
+    // Return error in XML format
     const errorXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Error generating sitemap: ${error.message} -->
