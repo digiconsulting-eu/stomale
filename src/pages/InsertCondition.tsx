@@ -26,6 +26,7 @@ const formSchema = z.object({
 export default function InsertCondition() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,26 +40,60 @@ export default function InsertCondition() {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error("Devi effettuare l'accesso per inserire una patologia");
-        navigate("/login");
-        return;
-      }
+      try {
+        console.log("Checking auth status...");
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          throw sessionError;
+        }
 
-      const { data: adminData } = await supabase
-        .from('admin')
-        .select('email')
-        .eq('email', session.user.email);
+        if (!session) {
+          console.log("No session found, redirecting to login");
+          toast.error("Devi effettuare l'accesso per inserire una patologia");
+          navigate("/login");
+          return;
+        }
 
-      if (!adminData || adminData.length === 0) {
-        toast.error("Non hai i permessi per accedere a questa pagina");
+        console.log("Checking admin status for:", session.user.email);
+        const { data: adminData, error: adminError } = await supabase
+          .from('admin')
+          .select('email')
+          .eq('email', session.user.email);
+
+        if (adminError) {
+          console.error("Admin check error:", adminError);
+          throw adminError;
+        }
+
+        if (!adminData || adminData.length === 0) {
+          console.log("User is not admin, redirecting to home");
+          toast.error("Non hai i permessi per accedere a questa pagina");
+          navigate("/");
+          return;
+        }
+
+        console.log("Auth check completed successfully");
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        toast.error("Si è verificato un errore durante il controllo dei permessi");
         navigate("/");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, [navigate]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -93,6 +128,14 @@ export default function InsertCondition() {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
