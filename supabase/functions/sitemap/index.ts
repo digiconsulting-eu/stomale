@@ -82,10 +82,12 @@ Deno.serve(async (req) => {
       }
       return str.toLowerCase()
         .trim()
-        .split(' ')
-        .filter(Boolean)
-        .map(part => encodeURIComponent(part))
-        .join('-');
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
     };
 
     // Function to format date for sitemap
@@ -149,14 +151,7 @@ Deno.serve(async (req) => {
 
     console.log('[Sitemap Function] XML sitemap generation completed successfully');
 
-    // Set proper headers for XML content and caching
-    const headers = {
-      ...corsHeaders,
-      'Content-Type': 'application/xml; charset=UTF-8',
-      'Cache-Control': 'public, max-age=3600'
-    };
-
-    return new Response(xml, { headers });
+    return new Response(xml, { headers: corsHeaders });
 
   } catch (error) {
     console.error('[Sitemap Function] Fatal error:', error);
@@ -168,10 +163,7 @@ Deno.serve(async (req) => {
 </urlset>`;
     
     return new Response(errorXml, { 
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/xml; charset=UTF-8'
-      },
+      headers: corsHeaders,
       status: 500
     });
   }

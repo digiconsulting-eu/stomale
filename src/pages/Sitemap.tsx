@@ -12,9 +12,16 @@ const Sitemap = () => {
         console.log('Fetching sitemap data...');
         setIsLoading(true);
         
-        const { data, error } = await supabase.functions.invoke('sitemap', {
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 10000)
+        );
+        
+        const fetchPromise = supabase.functions.invoke('sitemap', {
           method: 'GET'
         });
+
+        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
         if (error) {
           console.error('Error fetching sitemap:', error);
@@ -24,12 +31,11 @@ const Sitemap = () => {
 
         if (typeof data === 'string') {
           if (window.location.pathname.endsWith('.xml')) {
-            // Create a new document with XML content type
-            const xmlDoc = new Document();
-            xmlDoc.appendChild(xmlDoc.createElement('xml'));
-            document.documentElement.innerHTML = data;
+            // For direct XML access, set the content type and return raw XML
+            const xmlDoc = document;
+            xmlDoc.documentElement.innerHTML = data;
             
-            // Set XML content type
+            // Set proper XML content type
             const meta = document.createElement('meta');
             meta.httpEquiv = 'Content-Type';
             meta.content = 'application/xml; charset=UTF-8';
