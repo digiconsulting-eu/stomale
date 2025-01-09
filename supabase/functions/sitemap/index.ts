@@ -61,7 +61,11 @@ Deno.serve(async (req) => {
 
     // Function to properly encode URLs
     const encodeUrl = (str: string) => {
-      return str.toLowerCase().split(' ').map(part => encodeURIComponent(part)).join('%20');
+      return str.toLowerCase()
+        .trim()
+        .split(' ')
+        .map(part => encodeURIComponent(part))
+        .join('%20');
     };
 
     // Function to format date for sitemap
@@ -108,6 +112,7 @@ Deno.serve(async (req) => {
         const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
         const reviewSlug = review.title
           .toLowerCase()
+          .trim()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
         xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n    <lastmod>${formatDate(review.created_at)}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
