@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
         .split(' ')
         .filter(Boolean)
         .map(part => encodeURIComponent(part))
-        .join('%20');
+        .join('-');
     };
 
     // Function to format date for sitemap with validation
@@ -128,11 +128,7 @@ Deno.serve(async (req) => {
     reviews?.forEach((review) => {
       if (review.PATOLOGIE?.Patologia && review.title) {
         const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
-        const reviewSlug = review.title
-          .toLowerCase()
-          .trim()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
+        const reviewSlug = encodeUrl(review.title);
           
         if (encodedCondition && reviewSlug) {
           xml += `  <url>\n    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n    <lastmod>${formatDate(review.created_at)}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;

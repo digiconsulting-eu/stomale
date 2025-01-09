@@ -26,7 +26,6 @@ const Sitemap = () => {
           if (window.location.pathname.endsWith('.xml')) {
             // Set the content type to XML and replace the document content
             document.open('text/xml');
-            document.write('<?xml version="1.0" encoding="UTF-8"?>\n');
             document.write(data);
             document.close();
             return;
