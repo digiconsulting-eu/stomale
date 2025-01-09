@@ -13,7 +13,7 @@ const Sitemap = () => {
         setIsLoading(true);
         
         // Add timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) => 
+        const timeoutPromise = new Promise<never>((_, reject) => 
           setTimeout(() => reject(new Error('Request timeout')), 10000)
         );
         
@@ -21,7 +21,8 @@ const Sitemap = () => {
           method: 'GET'
         });
 
-        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
+        const { data, error } = response as { data: string | null; error: Error | null };
 
         if (error) {
           console.error('Error fetching sitemap:', error);
