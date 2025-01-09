@@ -4,6 +4,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, cache-control',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Content-Type': 'application/xml; charset=UTF-8'
 }
 
 const BASE_URL = 'https://stomale.info';
@@ -151,7 +152,7 @@ Deno.serve(async (req) => {
     // Set proper headers for XML content and caching
     const headers = {
       ...corsHeaders,
-      'Content-Type': 'application/xml; charset=utf-8',
+      'Content-Type': 'application/xml; charset=UTF-8',
       'Cache-Control': 'public, max-age=3600'
     };
 
@@ -160,7 +161,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('[Sitemap Function] Fatal error:', error);
     
-    // Return error in XML format
+    // Return error in XML format with correct content type
     const errorXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Error generating sitemap: ${error.message} -->
@@ -169,7 +170,7 @@ Deno.serve(async (req) => {
     return new Response(errorXml, { 
       headers: {
         ...corsHeaders,
-        'Content-Type': 'application/xml; charset=utf-8'
+        'Content-Type': 'application/xml; charset=UTF-8'
       },
       status: 500
     });

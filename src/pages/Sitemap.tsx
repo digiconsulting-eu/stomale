@@ -24,10 +24,17 @@ const Sitemap = () => {
 
         if (typeof data === 'string') {
           if (window.location.pathname.endsWith('.xml')) {
-            // Set the content type to XML and replace the document content
-            document.open('text/xml');
-            document.write(data);
-            document.close();
+            // Create a new document with XML content type
+            const xmlDoc = new Document();
+            xmlDoc.appendChild(xmlDoc.createElement('xml'));
+            document.documentElement.innerHTML = data;
+            
+            // Set XML content type
+            const meta = document.createElement('meta');
+            meta.httpEquiv = 'Content-Type';
+            meta.content = 'application/xml; charset=UTF-8';
+            document.head.appendChild(meta);
+            
             return;
           }
           setXmlContent(data);
