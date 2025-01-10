@@ -12,17 +12,9 @@ const Sitemap = () => {
         console.log('Fetching sitemap data...');
         setIsLoading(true);
         
-        // Add timeout to prevent hanging
-        const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Request timeout')), 10000)
-        );
-        
-        const fetchPromise = supabase.functions.invoke('sitemap', {
+        const { data, error } = await supabase.functions.invoke('sitemap', {
           method: 'GET'
         });
-
-        const response = await Promise.race([fetchPromise, timeoutPromise]);
-        const { data, error } = response as { data: string | null; error: Error | null };
 
         if (error) {
           console.error('Error fetching sitemap:', error);
@@ -30,22 +22,23 @@ const Sitemap = () => {
           return;
         }
 
-        if (typeof data === 'string') {
-          if (window.location.pathname.endsWith('.xml')) {
-            // For direct XML access, set the content type and return raw XML
-            const xmlDoc = document;
-            xmlDoc.documentElement.innerHTML = data;
-            
-            // Set proper XML content type
-            const meta = document.createElement('meta');
-            meta.httpEquiv = 'Content-Type';
-            meta.content = 'application/xml; charset=UTF-8';
-            document.head.appendChild(meta);
-            
-            return;
-          }
-          setXmlContent(data);
+        if (window.location.pathname.endsWith('.xml')) {
+          // For XML requests, set content type and return raw XML
+          document.body.innerHTML = '';  // Clear any existing HTML
+          const pre = document.createElement('pre');
+          pre.textContent = data;
+          document.body.appendChild(pre);
+          
+          // Set proper XML content type
+          const meta = document.createElement('meta');
+          meta.httpEquiv = 'Content-Type';
+          meta.content = 'application/xml; charset=UTF-8';
+          document.head.appendChild(meta);
+          
+          return;
         }
+
+        setXmlContent(data);
       } catch (error) {
         console.error('Error processing sitemap:', error);
         setError('Error processing sitemap');
@@ -57,10 +50,12 @@ const Sitemap = () => {
     fetchSitemapData();
   }, []);
 
+  // For XML requests, return null as we've already handled the content
   if (window.location.pathname.endsWith('.xml')) {
     return null;
   }
 
+  // For normal web requests, show a human-readable version
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
@@ -79,47 +74,13 @@ const Sitemap = () => {
     );
   }
 
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
-  const urls = xmlDoc.getElementsByTagName("url");
-  const sitemapEntries = [];
-
-  for (let i = 0; i < urls.length; i++) {
-    const url = urls[i];
-    const loc = url.getElementsByTagName("loc")[0]?.textContent;
-    const lastmod = url.getElementsByTagName("lastmod")[0]?.textContent;
-    const changefreq = url.getElementsByTagName("changefreq")[0]?.textContent;
-    const priority = url.getElementsByTagName("priority")[0]?.textContent;
-
-    if (loc) {
-      sitemapEntries.push(
-        <div key={i} className="mb-4 p-4 border rounded hover:bg-gray-50">
-          <a 
-            href={loc} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline text-lg"
-          >
-            {loc}
-          </a>
-          <div className="text-sm text-gray-600 mt-2 space-y-1">
-            {lastmod && <div>Last modified: {new Date(lastmod).toLocaleDateString()}</div>}
-            {changefreq && <div>Change frequency: {changefreq}</div>}
-            {priority && <div>Priority: {priority}</div>}
-          </div>
-        </div>
-      );
-    }
-  }
-
+  // For the HTML view, show a simple text representation
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Sitemap</h1>
-      <div className="space-y-4">
-        {sitemapEntries.length > 0 ? sitemapEntries : (
-          <div className="text-gray-500">No entries found in sitemap</div>
-        )}
-      </div>
+      <pre className="bg-gray-50 p-4 rounded overflow-x-auto">
+        {xmlContent}
+      </pre>
     </div>
   );
 };
