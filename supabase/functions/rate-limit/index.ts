@@ -1,180 +1,127 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { serve } from "https://deno.fresh.run/std@v9.6.1/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-}
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
 
-interface RateLimit {
-  ip_address: string;
-  request_count: number;
-  last_request: number;
-}
-
-const WINDOW_SIZE = 60 * 1000; // 1 minute window
-const MAX_REQUESTS = 60; // 60 requests per minute
-
-Deno.serve(async (req) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
+    return new Response(null, {
       headers: corsHeaders,
-      status: 204
     });
   }
 
-  // Accept both GET and POST methods
-  if (req.method !== 'GET' && req.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      {
-        status: 405,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-  }
-
   try {
-    console.log(`[Rate Limit] Processing ${req.method} request`);
-    
-    // Get client IP
-    const ip = req.headers.get('x-forwarded-for') || 'unknown';
-    console.log(`[Rate Limit] Checking rate limit for IP: ${ip}`);
+    // Get IP address from request headers
+    const clientIP = req.headers.get('x-forwarded-for') || 'unknown';
+    console.log('Client IP:', clientIP);
 
     // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
 
-    const now = Date.now();
-    const windowStart = now - WINDOW_SIZE;
-
-    // Check existing rate limit
-    const { data: limits, error: selectError } = await supabase
+    // Check if IP exists in rate_limits table
+    const { data: existingLimit, error: fetchError } = await supabaseClient
       .from('rate_limits')
       .select('*')
-      .eq('ip_address', ip)
+      .eq('ip_address', clientIP)
       .single();
 
-    if (selectError && selectError.code !== 'PGRST116') {
-      console.error('[Rate Limit] Error checking rate limit:', selectError);
-      throw selectError;
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('Error fetching rate limit:', fetchError);
+      throw fetchError;
     }
 
-    let rateLimit: RateLimit;
+    const now = Date.now();
+    const windowMs = 60 * 1000; // 1 minute window
+    const maxRequests = 60; // Max requests per minute
 
-    if (!limits) {
-      // Create new rate limit entry
-      const { data: newLimit, error: insertError } = await supabase
-        .from('rate_limits')
-        .insert({
-          ip_address: ip,
-          request_count: 1,
-          last_request: now
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        console.error('[Rate Limit] Error creating rate limit:', insertError);
-        throw insertError;
-      }
-
-      rateLimit = newLimit;
-      console.log('[Rate Limit] Created new rate limit entry:', newLimit);
-    } else {
-      rateLimit = limits;
-
-      // Reset count if window has passed
-      if (rateLimit.last_request < windowStart) {
-        const { error: updateError } = await supabase
+    if (existingLimit) {
+      // Check if window has expired
+      if (now - existingLimit.last_request > windowMs) {
+        // Reset counter for new window
+        const { error: updateError } = await supabaseClient
           .from('rate_limits')
           .update({
             request_count: 1,
-            last_request: now
+            last_request: now,
           })
-          .eq('ip_address', ip);
+          .eq('ip_address', clientIP);
 
-        if (updateError) {
-          console.error('[Rate Limit] Error resetting rate limit:', updateError);
-          throw updateError;
-        }
+        if (updateError) throw updateError;
 
-        rateLimit.request_count = 1;
-        rateLimit.last_request = now;
-        console.log('[Rate Limit] Reset rate limit for IP:', ip);
-      } else {
-        // Increment count if within window
-        if (rateLimit.request_count >= MAX_REQUESTS) {
-          console.log('[Rate Limit] Rate limit exceeded for IP:', ip);
-          return new Response(
-            JSON.stringify({
-              error: 'Too many requests',
-              retryAfter: Math.ceil((rateLimit.last_request + WINDOW_SIZE - now) / 1000)
-            }),
-            {
-              status: 429,
-              headers: {
-                ...corsHeaders,
-                'Content-Type': 'application/json',
-                'Retry-After': Math.ceil((rateLimit.last_request + WINDOW_SIZE - now) / 1000).toString()
-              }
+        return new Response(
+          JSON.stringify({ remaining: maxRequests - 1 }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Check if rate limit exceeded
+      if (existingLimit.request_count >= maxRequests) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded' }),
+          { 
+            status: 429,
+            headers: { 
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+              'Retry-After': '60'
             }
-          );
-        }
-
-        const { error: incrementError } = await supabase
-          .from('rate_limits')
-          .update({
-            request_count: rateLimit.request_count + 1,
-            last_request: now
-          })
-          .eq('ip_address', ip);
-
-        if (incrementError) {
-          console.error('[Rate Limit] Error incrementing rate limit:', incrementError);
-          throw incrementError;
-        }
-
-        rateLimit.request_count++;
-        rateLimit.last_request = now;
-        console.log('[Rate Limit] Updated rate limit for IP:', ip);
+          }
+        );
       }
+
+      // Increment counter
+      const { error: updateError } = await supabaseClient
+        .from('rate_limits')
+        .update({
+          request_count: existingLimit.request_count + 1,
+          last_request: now,
+        })
+        .eq('ip_address', clientIP);
+
+      if (updateError) throw updateError;
+
+      return new Response(
+        JSON.stringify({ remaining: maxRequests - (existingLimit.request_count + 1) }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } else {
+      // Create new rate limit entry
+      const { error: insertError } = await supabaseClient
+        .from('rate_limits')
+        .insert({
+          ip_address: clientIP,
+          request_count: 1,
+          last_request: now,
+        });
+
+      if (insertError) throw insertError;
+
+      return new Response(
+        JSON.stringify({ remaining: maxRequests - 1 }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
-
-    // Return remaining requests info
-    return new Response(
-      JSON.stringify({
-        remaining: MAX_REQUESTS - rateLimit.request_count,
-        reset: Math.ceil((rateLimit.last_request + WINDOW_SIZE - now) / 1000)
-      }),
-      {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-          'X-RateLimit-Remaining': (MAX_REQUESTS - rateLimit.request_count).toString(),
-          'X-RateLimit-Reset': Math.ceil((rateLimit.last_request + WINDOW_SIZE - now) / 1000).toString()
-        }
-      }
-    );
-
   } catch (error) {
-    console.error('[Rate Limit] Fatal error:', error);
+    console.error('Error in rate-limit function:', error);
     return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error',
-        message: error.message 
-      }),
-      {
+      JSON.stringify({ error: 'Internal Server Error' }),
+      { 
         status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
   }
