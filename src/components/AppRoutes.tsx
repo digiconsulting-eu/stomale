@@ -26,7 +26,7 @@ export const AppRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<Index />} />
-      <Route path="/patologia/:condition/recensione/:slug" element={<ReviewDetail />} />
+      <Route path="/patologia/:condition/esperienza/:slug" element={<ReviewDetail />} />
       <Route path="/recensioni" element={<Reviews />} />
       <Route path="/nuova-recensione" element={<NewReview />} />
       <Route path="/cerca-patologia" element={<SearchCondition />} />

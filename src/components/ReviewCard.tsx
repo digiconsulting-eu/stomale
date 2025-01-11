@@ -61,7 +61,7 @@ export const ReviewCard = ({
           {truncateExperience(experience)}
         </p>
 
-        <Link to={`/patologia/${formattedCondition}/recensione/${id}-${formattedTitle}`}>
+        <Link to={`/patologia/${formattedCondition}/esperienza/${id}-${formattedTitle}`}>
           <Button 
             className="w-full bg-primary text-white hover:bg-primary-hover"
           >

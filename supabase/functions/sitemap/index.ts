@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
           
         if (encodedCondition && reviewSlug) {
           xml += `  <url>\n`;
-          xml += `    <loc>${BASE_URL}/patologia/${encodedCondition}/recensione/${reviewSlug}</loc>\n`;
+          xml += `    <loc>${BASE_URL}/patologia/${encodedCondition}/esperienza/${reviewSlug}</loc>\n`;
           // Use updated_at if available, otherwise fall back to created_at
           xml += `    <lastmod>${formatDate(review.updated_at || review.created_at)}</lastmod>\n`;
           xml += `    <changefreq>monthly</changefreq>\n`;
