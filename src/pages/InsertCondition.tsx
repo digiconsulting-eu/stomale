@@ -59,18 +59,16 @@ export default function InsertCondition() {
           return;
         }
 
-        console.log("Checking admin status for:", session.user.email);
-        const { data: adminData, error: adminError } = await supabase
-          .from('admin')
-          .select('email')
-          .eq('email', session.user.email);
+        // Check if user is admin using the is_admin function
+        const { data: isAdminData, error: isAdminError } = await supabase
+          .rpc('is_admin', { user_id: session.user.id });
 
-        if (adminError) {
-          console.error("Admin check error:", adminError);
-          throw adminError;
+        if (isAdminError) {
+          console.error("Admin check error:", isAdminError);
+          throw isAdminError;
         }
 
-        if (!adminData || adminData.length === 0) {
+        if (!isAdminData) {
           console.log("User is not admin, redirecting to home");
           toast.error("Non hai i permessi per accedere a questa pagina");
           navigate("/");
