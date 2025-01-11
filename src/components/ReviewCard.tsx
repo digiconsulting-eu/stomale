@@ -31,8 +31,8 @@ export const ReviewCard = ({
     return text.slice(0, 150).trim() + "...";
   };
 
-  // Ensure both condition and title are properly slugified for the URL
-  const formattedCondition = slugify(condition);
+  // Ensure condition is properly formatted for the URL
+  const formattedCondition = condition.toLowerCase();
   const formattedTitle = slugify(title);
 
   return (
