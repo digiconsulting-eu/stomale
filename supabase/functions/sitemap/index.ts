@@ -4,9 +4,11 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Content-Type': 'application/xml; charset=utf-8'
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -42,20 +44,26 @@ serve(async (req) => {
     if (reviewsError) throw reviewsError
 
     const baseUrl = 'https://stomale.info'
-    const today = new Date().toISOString()
+    const today = new Date().toISOString().split('T')[0]
 
     // Start building the XML content
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
     // Add static pages
-    const staticPages = ['', 'privacy-policy', 'cookie-policy', 'terms']
+    const staticPages = [
+      { url: '', priority: '1.0' },
+      { url: 'recensioni', priority: '0.9' },
+      { url: 'cerca', priority: '0.8' },
+      { url: 'cerca-sintomi', priority: '0.8' }
+    ]
+
     staticPages.forEach(page => {
       xml += `  <url>
-    <loc>${baseUrl}${page ? '/' + page : ''}</loc>
+    <loc>${baseUrl}${page.url ? '/' + page.url : ''}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>${page ? '0.8' : '1.0'}</priority>
+    <priority>${page.priority}</priority>
   </url>\n`
     })
 
@@ -82,12 +90,10 @@ serve(async (req) => {
 
     xml += '</urlset>'
 
+    console.log('Generated sitemap successfully')
+
     return new Response(xml, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/xml',
-        'Cache-Control': 'public, max-age=3600'
-      }
+      headers: corsHeaders
     })
 
   } catch (error) {
