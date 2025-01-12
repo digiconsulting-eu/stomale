@@ -75,9 +75,9 @@ const Sitemap = () => {
 
         // If this is a direct XML request
         if (window.location.pathname.endsWith('.xml')) {
-          document.open('text/xml');
-          document.write(xml);
-          document.close();
+          const blob = new Blob([xml], { type: 'application/xml' });
+          const url = URL.createObjectURL(blob);
+          window.location.href = url;
           return;
         }
 
