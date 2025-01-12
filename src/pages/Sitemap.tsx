@@ -22,20 +22,25 @@ const Sitemap = () => {
           return;
         }
 
+        // If this is a direct XML request
         if (window.location.pathname.endsWith('.xml')) {
-          // For XML requests, set content type and return raw XML
-          document.body.innerHTML = '';  // Clear any existing HTML
-          const pre = document.createElement('pre');
-          pre.textContent = data;
-          document.body.appendChild(pre);
+          // Clear existing content
+          document.documentElement.innerHTML = '';
           
-          // Set proper XML content type
+          // Create and set XML declaration
+          const xmlDeclaration = document.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"');
+          document.insertBefore(xmlDeclaration, document.documentElement);
+          
+          // Set the XML content
+          document.documentElement.innerHTML = data;
+          
+          // Set proper content type
           const meta = document.createElement('meta');
           meta.httpEquiv = 'Content-Type';
           meta.content = 'application/xml; charset=UTF-8';
           document.head.appendChild(meta);
           
-          return;
+          return null;
         }
 
         setXmlContent(data);
