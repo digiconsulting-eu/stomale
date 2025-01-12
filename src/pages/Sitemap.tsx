@@ -79,9 +79,19 @@ export default function Sitemap() {
     const path = window.location.pathname;
     if (path.endsWith('.xml')) {
       const xml = generateXmlSitemap();
-      document.documentElement.innerHTML = xml;
-      document.querySelector('html')?.setAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
-      document.contentType = 'application/xml';
+      // Create a new document for XML content
+      const xmlDoc = new DOMParser().parseFromString(xml, 'application/xml');
+      // Clear the current document
+      document.documentElement.replaceChildren();
+      // Copy the XML content to the current document
+      document.appendChild(document.importNode(xmlDoc.documentElement, true));
+      // Set XML namespace
+      document.documentElement.setAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
+      // Set content type meta tag
+      const meta = document.createElement('meta');
+      meta.setAttribute('http-equiv', 'Content-Type');
+      meta.setAttribute('content', 'application/xml; charset=utf-8');
+      document.head.appendChild(meta);
     }
   }, [conditions]);
 
