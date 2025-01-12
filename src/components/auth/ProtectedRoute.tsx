@@ -5,9 +5,10 @@ import { toast } from "sonner";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  adminOnly?: boolean;
 }
 
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,9 +23,24 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
             description: "Devi effettuare l'accesso per visualizzare questa pagina"
           });
           navigate('/login');
-        } else {
-          setIsAuthenticated(true);
+          return;
         }
+
+        if (adminOnly) {
+          const { data: isAdmin } = await supabase.rpc('is_admin', {
+            user_id: session.user.id
+          });
+
+          if (!isAdmin) {
+            toast.error("Accesso negato", {
+              description: "Non hai i permessi necessari per accedere a questa pagina"
+            });
+            navigate('/');
+            return;
+          }
+        }
+
+        setIsAuthenticated(true);
       } catch (error) {
         console.error("Error checking auth:", error);
         navigate('/login');
@@ -47,7 +63,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, adminOnly]);
 
   if (isLoading) {
     return <div>Caricamento...</div>;
