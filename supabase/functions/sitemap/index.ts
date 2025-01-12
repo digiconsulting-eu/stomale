@@ -2,8 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, cache-control',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Content-Type': 'application/xml; charset=UTF-8'
 }
 
@@ -136,7 +135,7 @@ Deno.serve(async (req) => {
       }
     });
 
-    // Add reviews pages with more detailed metadata
+    // Add reviews pages
     reviews?.forEach(review => {
       if (review.PATOLOGIE?.Patologia && review.title) {
         const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
@@ -145,7 +144,6 @@ Deno.serve(async (req) => {
         if (encodedCondition && reviewSlug) {
           xml += `  <url>\n`;
           xml += `    <loc>${BASE_URL}/patologia/${encodedCondition}/esperienza/${reviewSlug}</loc>\n`;
-          // Use updated_at if available, otherwise fall back to created_at
           xml += `    <lastmod>${formatDate(review.updated_at || review.created_at)}</lastmod>\n`;
           xml += `    <changefreq>monthly</changefreq>\n`;
           xml += `    <priority>0.7</priority>\n`;
@@ -158,26 +156,13 @@ Deno.serve(async (req) => {
 
     console.log('[Sitemap Function] XML sitemap generation completed successfully');
 
-    // Store the sitemap in Supabase Storage for caching
-    const timestamp = new Date().toISOString();
-    const filename = `sitemap-${timestamp}.xml`;
-    
-    const { error: storageError } = await supabase
-      .storage
-      .from('sitemaps')
-      .upload(filename, xml, {
-        contentType: 'application/xml',
-        cacheControl: '3600',
-        upsert: true
-      });
-
-    if (storageError) {
-      console.error('[Sitemap Function] Error storing sitemap:', storageError);
-    } else {
-      console.log('[Sitemap Function] Sitemap stored successfully');
-    }
-
-    return new Response(xml, { headers: corsHeaders });
+    // Return the XML with proper headers
+    return new Response(xml, { 
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/xml; charset=UTF-8'
+      }
+    });
 
   } catch (error) {
     console.error('[Sitemap Function] Fatal error:', error);
@@ -189,7 +174,10 @@ Deno.serve(async (req) => {
 </urlset>`;
     
     return new Response(errorXml, { 
-      headers: corsHeaders,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/xml; charset=UTF-8'
+      },
       status: 500
     });
   }
