@@ -14,6 +14,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Generating sitemap...')
+    
     // Initialize Supabase client with service role key for internal access
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -32,7 +34,10 @@ serve(async (req) => {
       .select('Patologia')
       .order('Patologia')
 
-    if (conditionsError) throw conditionsError
+    if (conditionsError) {
+      console.error('Error fetching conditions:', conditionsError)
+      throw conditionsError
+    }
 
     // Fetch all approved reviews
     const { data: reviews, error: reviewsError } = await supabaseClient
@@ -41,7 +46,10 @@ serve(async (req) => {
       .eq('status', 'approved')
       .order('created_at', { ascending: false })
 
-    if (reviewsError) throw reviewsError
+    if (reviewsError) {
+      console.error('Error fetching reviews:', reviewsError)
+      throw reviewsError
+    }
 
     const baseUrl = 'https://stomale.info'
     const today = new Date().toISOString().split('T')[0]
