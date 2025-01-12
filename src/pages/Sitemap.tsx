@@ -1,125 +1,95 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { setPageTitle } from "@/utils/pageTitle";
-
-interface Route {
-  path: string;
-  priority: number;
-  changefreq: string;
-}
+import { Link } from "react-router-dom";
 
 export default function Sitemap() {
-  const [conditions, setConditions] = useState<{ Patologia: string }[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isXmlView, setIsXmlView] = useState(false);
 
-  const staticRoutes: Route[] = [
-    { path: "/", priority: 1.0, changefreq: "daily" },
-    { path: "/recensioni", priority: 0.9, changefreq: "daily" },
-    { path: "/cerca-patologia", priority: 0.8, changefreq: "weekly" },
-    { path: "/cerca-sintomi", priority: 0.8, changefreq: "weekly" },
-    { path: "/nuova-recensione", priority: 0.7, changefreq: "monthly" },
-    { path: "/inserisci-patologia", priority: 0.6, changefreq: "monthly" },
-    { path: "/cookie-policy", priority: 0.3, changefreq: "yearly" },
-    { path: "/privacy-policy", priority: 0.3, changefreq: "yearly" },
-    { path: "/terms", priority: 0.3, changefreq: "yearly" },
+  const { data: conditions = [] } = useQuery({
+    queryKey: ['conditions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('PATOLOGIE')
+        .select('id, Patologia')
+        .order('Patologia');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const staticRoutes = [
+    { url: '/', priority: '1.0' },
+    { url: '/recensioni', priority: '0.9' },
+    { url: '/cerca-patologia', priority: '0.8' },
+    { url: '/cerca-sintomi', priority: '0.8' },
+    { url: '/login', priority: '0.5' },
+    { url: '/registrati', priority: '0.5' },
+    { url: '/cookie-policy', priority: '0.3' },
+    { url: '/privacy-policy', priority: '0.3' },
+    { url: '/terms', priority: '0.3' }
   ];
 
-  useEffect(() => {
-    setPageTitle("Sitemap | StoMale.info");
-    fetchConditions();
-  }, []);
-
-  const fetchConditions = async () => {
-    try {
-      const { data, error: fetchError } = await supabase
-        .from("PATOLOGIE")
-        .select("Patologia")
-        .order("Patologia");
-
-      if (fetchError) throw fetchError;
-      setConditions(data || []);
-    } catch (err) {
-      console.error("Error fetching conditions:", err);
-      setError("Errore nel caricamento delle patologie");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const generateXmlSitemap = () => {
-    const baseUrl = window.location.origin;
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    const baseUrl = 'https://stomale.info';
+    const today = new Date().toISOString().split('T')[0];
 
-    // Add static routes
-    staticRoutes.forEach(route => {
-      xml += `  <url>\n`;
-      xml += `    <loc>${baseUrl}${route.path}</loc>\n`;
-      xml += `    <changefreq>${route.changefreq}</changefreq>\n`;
-      xml += `    <priority>${route.priority}</priority>\n`;
-      xml += `  </url>\n`;
-    });
+    const urlset = [
+      ...staticRoutes.map(route => `
+        <url>
+          <loc>${baseUrl}${route.url}</loc>
+          <lastmod>${today}</lastmod>
+          <changefreq>weekly</changefreq>
+          <priority>${route.priority}</priority>
+        </url>
+      `),
+      ...conditions.map(condition => `
+        <url>
+          <loc>${baseUrl}/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}</loc>
+          <lastmod>${today}</lastmod>
+          <changefreq>weekly</changefreq>
+          <priority>0.7</priority>
+        </url>
+      `)
+    ].join('');
 
-    // Add condition routes
-    conditions.forEach(condition => {
-      const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
-      xml += `  <url>\n`;
-      xml += `    <loc>${baseUrl}/patologia/${encodedCondition}</loc>\n`;
-      xml += `    <changefreq>weekly</changefreq>\n`;
-      xml += `    <priority>0.8</priority>\n`;
-      xml += `  </url>\n`;
-    });
-
-    xml += '</urlset>';
-    return xml;
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlset}
+</urlset>`;
   };
 
   useEffect(() => {
     const path = window.location.pathname;
-    if (path.endsWith('.xml')) {
-      const xml = generateXmlSitemap();
-      // Create a new document for XML content
-      const xmlDoc = new DOMParser().parseFromString(xml, 'application/xml');
-      // Clear the current document
-      document.documentElement.replaceChildren();
-      // Copy the XML content to the current document
-      document.appendChild(document.importNode(xmlDoc.documentElement, true));
-      // Set XML namespace
-      document.documentElement.setAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
-      // Set content type meta tag
-      const meta = document.createElement('meta');
-      meta.setAttribute('http-equiv', 'Content-Type');
-      meta.setAttribute('content', 'application/xml; charset=utf-8');
-      document.head.appendChild(meta);
-    }
-  }, [conditions]);
+    setIsXmlView(path.endsWith('.xml'));
+  }, []);
 
-  // If it's an XML request, don't render the React component
-  if (window.location.pathname.endsWith('.xml')) {
-    return null;
+  if (isXmlView) {
+    // For XML view, return a pre-formatted XML content
+    return (
+      <pre style={{ display: 'none' }}>
+        {generateXmlSitemap()}
+      </pre>
+    );
   }
 
-  if (isLoading) {
-    return <div className="container mx-auto px-4 py-8">Caricamento sitemap...</div>;
-  }
-
-  if (error) {
-    return <div className="container mx-auto px-4 py-8 text-red-500">{error}</div>;
-  }
-
+  // For HTML view (regular sitemap page)
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Sitemap</h1>
       <div className="space-y-6">
         <section>
           <h2 className="text-xl font-semibold mb-4">Pagine principali</h2>
-          <ul className="list-disc pl-5 space-y-2">
+          <ul className="space-y-2">
             {staticRoutes.map((route) => (
-              <li key={route.path}>
-                <a href={route.path} className="text-primary hover:underline">
-                  {route.path}
-                </a>
+              <li key={route.url}>
+                <Link 
+                  to={route.url}
+                  className="text-primary hover:underline"
+                >
+                  {route.url}
+                </Link>
               </li>
             ))}
           </ul>
@@ -127,15 +97,15 @@ export default function Sitemap() {
 
         <section>
           <h2 className="text-xl font-semibold mb-4">Patologie</h2>
-          <ul className="list-disc pl-5 space-y-2">
+          <ul className="space-y-2">
             {conditions.map((condition) => (
-              <li key={condition.Patologia}>
-                <a
-                  href={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
+              <li key={condition.id}>
+                <Link 
+                  to={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
                   className="text-primary hover:underline"
                 >
                   {condition.Patologia}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
