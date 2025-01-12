@@ -1,163 +1,103 @@
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'application/xml; charset=UTF-8'
 }
 
-const BASE_URL = 'https://stomale.info';
-
-const staticRoutes = [
-  { path: '/', priority: '1.0', changefreq: 'daily' },
-  { path: '/recensioni', priority: '0.9', changefreq: 'daily' },
-  { path: '/cerca-patologia', priority: '0.8', changefreq: 'weekly' },
-  { path: '/cerca-sintomi', priority: '0.8', changefreq: 'weekly' },
-  { path: '/nuova-recensione', priority: '0.7', changefreq: 'monthly' },
-  { path: '/inserisci-patologia', priority: '0.6', changefreq: 'monthly' },
-  { path: '/cookie-policy', priority: '0.3', changefreq: 'yearly' },
-  { path: '/privacy-policy', priority: '0.3', changefreq: 'yearly' },
-  { path: '/terms', priority: '0.3', changefreq: 'yearly' }
-];
-
-const formatDate = (date: string | Date) => {
-  try {
-    return new Date(date).toISOString();
-  } catch (error) {
-    console.error('Date formatting error:', error);
-    return new Date().toISOString();
-  }
-}
-
-const encodeUrl = (str: string) => {
-  if (!str) {
-    console.warn('Empty string passed to encodeUrl');
-    return '';
-  }
-  return str.toLowerCase()
-    .trim()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
-}
-
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
-      headers: corsHeaders,
-      status: 204
-    });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing environment variables');
-    }
+    // Initialize Supabase client with service role key for internal access
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const { data: conditions, error: conditionsError } = await supabase
+    // Fetch all approved conditions
+    const { data: conditions, error: conditionsError } = await supabaseClient
       .from('PATOLOGIE')
-      .select('Patologia, created_at')
-      .order('created_at', { ascending: false });
+      .select('Patologia')
+      .order('Patologia')
 
-    if (conditionsError) {
-      throw new Error(`Failed to fetch conditions: ${conditionsError.message}`);
-    }
+    if (conditionsError) throw conditionsError
 
-    const { data: reviews, error: reviewsError } = await supabase
+    // Fetch all approved reviews
+    const { data: reviews, error: reviewsError } = await supabaseClient
       .from('reviews')
-      .select(`
-        title,
-        created_at,
-        updated_at,
-        PATOLOGIE (
-          Patologia
-        )
-      `)
+      .select('id')
       .eq('status', 'approved')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
 
-    if (reviewsError) {
-      throw new Error(`Failed to fetch reviews: ${reviewsError.message}`);
-    }
+    if (reviewsError) throw reviewsError
 
-    // Generate XML sitemap with XML declaration
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-    
+    const baseUrl = 'https://stomale.info'
+    const today = new Date().toISOString()
+
+    // Start building the XML content
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+
     // Add static pages
-    staticRoutes.forEach(page => {
-      xml += `  <url>\n`;
-      xml += `    <loc>${BASE_URL}${page.path}</loc>\n`;
-      xml += `    <lastmod>${formatDate(new Date())}</lastmod>\n`;
-      xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
-      xml += `    <priority>${page.priority}</priority>\n`;
-      xml += `  </url>\n`;
-    });
-    
-    // Add conditions pages
+    const staticPages = ['', 'privacy-policy', 'cookie-policy', 'terms']
+    staticPages.forEach(page => {
+      xml += `  <url>
+    <loc>${baseUrl}${page ? '/' + page : ''}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>${page ? '0.8' : '1.0'}</priority>
+  </url>\n`
+    })
+
+    // Add condition pages
     conditions?.forEach(condition => {
-      if (condition.Patologia) {
-        const encodedCondition = encodeUrl(condition.Patologia);
-        if (encodedCondition) {
-          xml += `  <url>\n`;
-          xml += `    <loc>${BASE_URL}/patologia/${encodedCondition}</loc>\n`;
-          xml += `    <lastmod>${formatDate(condition.created_at)}</lastmod>\n`;
-          xml += `    <changefreq>weekly</changefreq>\n`;
-          xml += `    <priority>0.8</priority>\n`;
-          xml += `  </url>\n`;
-        }
-      }
-    });
+      const slug = encodeURIComponent(condition.Patologia.toLowerCase())
+      xml += `  <url>
+    <loc>${baseUrl}/patologia/${slug}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>\n`
+    })
 
-    // Add reviews pages
+    // Add review pages
     reviews?.forEach(review => {
-      if (review.PATOLOGIE?.Patologia && review.title) {
-        const encodedCondition = encodeUrl(review.PATOLOGIE.Patologia);
-        const reviewSlug = encodeUrl(review.title);
-          
-        if (encodedCondition && reviewSlug) {
-          xml += `  <url>\n`;
-          xml += `    <loc>${BASE_URL}/patologia/${encodedCondition}/esperienza/${reviewSlug}</loc>\n`;
-          xml += `    <lastmod>${formatDate(review.updated_at || review.created_at)}</lastmod>\n`;
-          xml += `    <changefreq>monthly</changefreq>\n`;
-          xml += `    <priority>0.7</priority>\n`;
-          xml += `  </url>\n`;
-        }
-      }
-    });
+      xml += `  <url>
+    <loc>${baseUrl}/recensione/${review.id}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>\n`
+    })
 
-    xml += '</urlset>';
+    xml += '</urlset>'
 
-    // Return the XML with proper headers
-    return new Response(xml, { 
+    return new Response(xml, {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'application/xml; charset=UTF-8'
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600'
       }
-    });
+    })
 
   } catch (error) {
-    console.error('Error generating sitemap:', error);
-    
-    const errorXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Error generating sitemap: ${error.message} -->
-</urlset>`;
-    
-    return new Response(errorXml, { 
+    console.error('Error generating sitemap:', error)
+    return new Response(JSON.stringify({ error: error.message }), {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'application/xml; charset=UTF-8'
+        'Content-Type': 'application/json'
       },
       status: 500
-    });
+    })
   }
-});
+})
