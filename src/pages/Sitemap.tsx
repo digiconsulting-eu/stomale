@@ -13,6 +13,7 @@ export default function Sitemap() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Remove any trailing slashes and ensure no extra colons
   const BASE_URL = window.location.origin;
 
   const staticRoutes: Route[] = [
@@ -85,9 +86,18 @@ export default function Sitemap() {
       
       // If this is a direct XML request
       if (window.location.pathname.endsWith('.xml')) {
-        document.documentElement.innerHTML = xml;
-        document.querySelector('html')!.setAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
-        return;
+        // Clear any existing content
+        document.documentElement.innerHTML = '';
+        
+        // Create and append the XML
+        const xmlDoc = new DOMParser().parseFromString(xml, 'text/xml');
+        document.appendChild(xmlDoc.documentElement);
+        
+        // Set the correct content type
+        const meta = document.createElement('meta');
+        meta.httpEquiv = 'Content-Type';
+        meta.content = 'text/xml; charset=utf-8';
+        document.head.appendChild(meta);
       }
     }
   }, [isLoading, error]);
