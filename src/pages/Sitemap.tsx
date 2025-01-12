@@ -50,49 +50,54 @@ export default function Sitemap() {
   };
 
   const generateSitemapXML = () => {
-    const xmlContent = [`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`];
-
-    // Add static routes
-    staticRoutes.forEach(route => {
-      xmlContent.push(`
-  <url>
+    const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${staticRoutes.map(route => `  <url>
     <loc>${BASE_URL}${route.path}</loc>
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>
-  </url>`);
-    });
-
-    // Add dynamic condition routes
-    conditions.forEach(condition => {
-      xmlContent.push(`
-  <url>
+  </url>`).join('\n')}
+${conditions.map(condition => `  <url>
     <loc>${BASE_URL}/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-  </url>`);
-    });
+  </url>`).join('\n')}
+</urlset>`;
 
-    xmlContent.push('\n</urlset>');
-    return xmlContent.join('');
+    return xmlContent;
   };
 
   useEffect(() => {
     if (!isLoading && !error) {
-      const isXMLRequest = window.location.pathname.endsWith('.xml');
-      
-      if (isXMLRequest) {
-        // For XML requests, set content type and replace entire document
-        document.open();
-        document.write(generateSitemapXML());
-        document.close();
+      const path = window.location.pathname;
+      if (path.endsWith('.xml')) {
+        const xmlContent = generateSitemapXML();
+        const blob = new Blob([xmlContent], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
+        
+        // Clean up any existing content
+        document.documentElement.innerHTML = '';
+        
+        // Create a pre element to display the XML
+        const pre = document.createElement('pre');
+        pre.textContent = xmlContent;
+        document.body.appendChild(pre);
+        
+        // Set the correct content type
+        const meta = document.createElement('meta');
+        meta.setAttribute('http-equiv', 'Content-Type');
+        meta.setAttribute('content', 'application/xml;charset=UTF-8');
+        document.head.appendChild(meta);
+        
+        // Clean up the blob URL
+        URL.revokeObjectURL(url);
       }
     }
   }, [isLoading, error]);
 
-  // For non-XML requests, show human-readable version
+  // Return null for XML requests as we handle the content directly
   if (window.location.pathname.endsWith('.xml')) {
-    return null; // Don't render React content for XML requests
+    return null;
   }
 
   if (isLoading) {
