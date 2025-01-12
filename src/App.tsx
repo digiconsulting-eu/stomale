@@ -35,7 +35,9 @@ const App = () => {
     const initializeApp = async () => {
       try {
         console.log("Initializing app...");
-        const { data, error } = await supabase.auth.getSession();
+        
+        // Get the current session without trying to refresh it
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Session check failed:", error);
@@ -46,7 +48,18 @@ const App = () => {
           return;
         }
         
-        console.log("Session check completed", data);
+        console.log("Session check completed", session);
+
+        // Set up auth state change listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          console.log("Auth state changed:", event, session?.user?.email);
+        });
+
+        // Clean up subscription on unmount
+        return () => {
+          subscription.unsubscribe();
+        };
+
       } catch (error) {
         console.error("Critical initialization error:", error);
         if (isMounted) {
@@ -69,7 +82,7 @@ const App = () => {
         console.log("Initialization timeout reached");
         setIsLoading(false);
       }
-    }, 1500);
+    }, 3000); // Increased timeout to 3 seconds
 
     return () => {
       isMounted = false;
