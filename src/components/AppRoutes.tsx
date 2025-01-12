@@ -21,6 +21,12 @@ import RecoverPassword from "@/pages/RecoverPassword";
 import UpdatePassword from "@/pages/UpdatePassword";
 
 export const AppRoutes = () => {
+  // Funzione per gestire il redirect della sitemap
+  const handleSitemapRedirect = () => {
+    window.location.href = 'https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap';
+    return null;
+  };
+
   return (
     <Routes>
       {/* Public routes */}
@@ -40,15 +46,9 @@ export const AppRoutes = () => {
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
 
-      {/* Sitemap routes - redirect to Supabase Edge Function */}
-      <Route 
-        path="/sitemap.xml" 
-        element={<Navigate to="https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap" replace />} 
-      />
-      <Route 
-        path="/sitemap-google.xml" 
-        element={<Navigate to="https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap" replace />} 
-      />
+      {/* Sitemap routes - using direct window.location for XML sitemaps */}
+      <Route path="/sitemap.xml" element={<div onLoad={handleSitemapRedirect} />} />
+      <Route path="/sitemap-google.xml" element={<div onLoad={handleSitemapRedirect} />} />
 
       {/* Protected Admin routes */}
       <Route
