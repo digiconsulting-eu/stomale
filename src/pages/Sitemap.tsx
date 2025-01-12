@@ -24,14 +24,11 @@ const Sitemap = () => {
 
         // If this is a direct XML request
         if (window.location.pathname.endsWith('.xml')) {
-          // Set proper content type
-          const meta = document.createElement('meta');
-          meta.httpEquiv = 'Content-Type';
-          meta.content = 'application/xml; charset=UTF-8';
-          document.head.appendChild(meta);
-          
-          // Return the raw XML
-          return document.write(data);
+          // Clear existing content and set XML content type
+          document.open('text/xml');
+          document.write(data);
+          document.close();
+          return null;
         }
 
         setXmlContent(data);
