@@ -41,7 +41,7 @@ export const AppRoutes = () => {
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
 
-      {/* Sitemap routes */}
+      {/* Sitemap routes - make sure these come before the catch-all */}
       <Route path="/sitemap" element={<Sitemap />} />
       <Route path="/sitemap.xml" element={<Sitemap />} />
       <Route path="/sitemap-google.xml" element={<Sitemap />} />
@@ -82,7 +82,7 @@ export const AppRoutes = () => {
         } 
       />
 
-      {/* Catch-all route for 404s - redirect to home */}
+      {/* Catch-all route for 404s - make sure this is last */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -47,13 +47,45 @@ export default function Sitemap() {
     }
   };
 
+  const generateXmlSitemap = () => {
+    const baseUrl = window.location.origin;
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+    // Add static routes
+    staticRoutes.forEach(route => {
+      xml += `  <url>\n`;
+      xml += `    <loc>${baseUrl}${route.path}</loc>\n`;
+      xml += `    <changefreq>${route.changefreq}</changefreq>\n`;
+      xml += `    <priority>${route.priority}</priority>\n`;
+      xml += `  </url>\n`;
+    });
+
+    // Add condition routes
+    conditions.forEach(condition => {
+      const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
+      xml += `  <url>\n`;
+      xml += `    <loc>${baseUrl}/patologia/${encodedCondition}</loc>\n`;
+      xml += `    <changefreq>weekly</changefreq>\n`;
+      xml += `    <priority>0.8</priority>\n`;
+      xml += `  </url>\n`;
+    });
+
+    xml += '</urlset>';
+    return xml;
+  };
+
   useEffect(() => {
     const path = window.location.pathname;
     if (path.endsWith('.xml')) {
-      window.location.href = '/api/sitemap';
+      const xml = generateXmlSitemap();
+      document.documentElement.innerHTML = xml;
+      document.querySelector('html')?.setAttribute('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
+      document.contentType = 'application/xml';
     }
-  }, []);
+  }, [conditions]);
 
+  // If it's an XML request, don't render the React component
   if (window.location.pathname.endsWith('.xml')) {
     return null;
   }
