@@ -1,6 +1,67 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+const BASE_URL = "https://stomale.info";
+
+const routes = [
+  { path: "/", lastmod: "2024-03-19", changefreq: "daily", priority: "1.0" },
+  { path: "/recensioni", lastmod: "2024-03-19", changefreq: "daily", priority: "0.9" },
+  { path: "/cerca-patologia", lastmod: "2024-03-19", changefreq: "weekly", priority: "0.8" },
+  { path: "/cerca-sintomi", lastmod: "2024-03-19", changefreq: "weekly", priority: "0.8" },
+  { path: "/nuova-recensione", lastmod: "2024-03-19", changefreq: "monthly", priority: "0.7" },
+  { path: "/inserisci-patologia", lastmod: "2024-03-19", changefreq: "monthly", priority: "0.7" },
+  { path: "/login", lastmod: "2024-03-19", changefreq: "monthly", priority: "0.5" },
+  { path: "/registrati", lastmod: "2024-03-19", changefreq: "monthly", priority: "0.5" },
+  { path: "/cookie-policy", lastmod: "2024-03-19", changefreq: "yearly", priority: "0.3" },
+  { path: "/privacy-policy", lastmod: "2024-03-19", changefreq: "yearly", priority: "0.3" },
+  { path: "/terms", lastmod: "2024-03-19", changefreq: "yearly", priority: "0.3" },
+];
+
+const generateSitemapXML = async () => {
+  try {
+    // Fetch all conditions for dynamic URLs
+    const { data: conditions } = await supabase
+      .from('PATOLOGIE')
+      .select('id, Patologia')
+      .order('Patologia');
+
+    const sitemap = [];
+    sitemap.push('<?xml version="1.0" encoding="UTF-8"?>');
+    sitemap.push('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+
+    // Add static routes
+    routes.forEach(route => {
+      sitemap.push(`
+  <url>
+    <loc>${BASE_URL}${route.path}</loc>
+    <lastmod>${route.lastmod}</lastmod>
+    <changefreq>${route.changefreq}</changefreq>
+    <priority>${route.priority}</priority>
+  </url>`);
+    });
+
+    // Add dynamic condition routes
+    if (conditions) {
+      conditions.forEach(condition => {
+        const path = `/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`;
+        sitemap.push(`
+  <url>
+    <loc>${BASE_URL}${path}</loc>
+    <lastmod>2024-03-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`);
+      });
+    }
+
+    sitemap.push('</urlset>');
+    return sitemap.join('\n');
+  } catch (error) {
+    console.error('Error generating sitemap:', error);
+    throw error;
+  }
+};
+
 const Sitemap = () => {
   const [xmlContent, setXmlContent] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -9,32 +70,21 @@ const Sitemap = () => {
   useEffect(() => {
     const fetchSitemapData = async () => {
       try {
-        console.log('Fetching sitemap data...');
         setIsLoading(true);
-        
-        const { data, error } = await supabase.functions.invoke('sitemap', {
-          method: 'GET'
-        });
-
-        if (error) {
-          console.error('Error fetching sitemap:', error);
-          setError('Error loading sitemap');
-          return;
-        }
+        const xml = await generateSitemapXML();
 
         // If this is a direct XML request
         if (window.location.pathname.endsWith('.xml')) {
-          // Clear existing content and set XML content type
           document.open('text/xml');
-          document.write(data);
+          document.write(xml);
           document.close();
-          return null;
+          return;
         }
 
-        setXmlContent(data);
+        setXmlContent(xml);
       } catch (error) {
         console.error('Error processing sitemap:', error);
-        setError('Error processing sitemap');
+        setError('Error generating sitemap');
       } finally {
         setIsLoading(false);
       }
@@ -48,7 +98,6 @@ const Sitemap = () => {
     return null;
   }
 
-  // For normal web requests, show a human-readable version
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
@@ -67,11 +116,10 @@ const Sitemap = () => {
     );
   }
 
-  // For the HTML view, show a simple text representation
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Sitemap</h1>
-      <pre className="bg-gray-50 p-4 rounded overflow-x-auto">
+      <pre className="bg-gray-50 p-4 rounded overflow-x-auto text-sm">
         {xmlContent}
       </pre>
     </div>
