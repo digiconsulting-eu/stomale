@@ -4,7 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'application/xml; charset=utf-8'
+  'Content-Type': 'text/plain; charset=utf-8'
 }
 
 serve(async (req) => {
@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Generating sitemap...')
+    console.log('Generating sitemap in text format...')
     
     // Initialize Supabase client with service role key for internal access
     const supabaseClient = createClient(
@@ -28,7 +28,7 @@ serve(async (req) => {
       }
     )
 
-    // Fetch all approved conditions
+    // Fetch all conditions
     const { data: conditions, error: conditionsError } = await supabaseClient
       .from('PATOLOGIE')
       .select('Patologia')
@@ -52,55 +52,41 @@ serve(async (req) => {
     }
 
     const baseUrl = 'https://stomale.info'
-    const today = new Date().toISOString().split('T')[0]
 
-    // Start building the XML content
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    // Start building the text content
+    let text = 'Sitemap URLs:\n\n'
 
     // Add static pages
     const staticPages = [
       { url: '', priority: '1.0' },
       { url: 'recensioni', priority: '0.9' },
-      { url: 'cerca', priority: '0.8' },
+      { url: 'cerca-patologia', priority: '0.8' },
       { url: 'cerca-sintomi', priority: '0.8' }
     ]
 
+    text += '--- Static Pages ---\n'
     staticPages.forEach(page => {
-      xml += `  <url>
-    <loc>${baseUrl}${page.url ? '/' + page.url : ''}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>${page.priority}</priority>
-  </url>\n`
+      text += `${baseUrl}${page.url ? '/' + page.url : ''} (Priority: ${page.priority})\n`
     })
 
     // Add condition pages
+    text += '\n--- Condition Pages ---\n'
     conditions?.forEach(condition => {
       const slug = encodeURIComponent(condition.Patologia.toLowerCase())
-      xml += `  <url>
-    <loc>${baseUrl}/patologia/${slug}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>\n`
+      text += `${baseUrl}/patologia/${slug} (Priority: 0.9)\n`
     })
 
     // Add review pages
+    text += '\n--- Review Pages ---\n'
     reviews?.forEach(review => {
-      xml += `  <url>
-    <loc>${baseUrl}/recensione/${review.id}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>\n`
+      text += `${baseUrl}/recensione/${review.id} (Priority: 0.7)\n`
     })
 
-    xml += '</urlset>'
+    console.log('Generated text sitemap successfully')
+    console.log('Number of conditions:', conditions?.length)
+    console.log('Number of reviews:', reviews?.length)
 
-    console.log('Generated sitemap successfully')
-
-    return new Response(xml, {
+    return new Response(text, {
       headers: corsHeaders
     })
 
