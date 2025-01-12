@@ -36,26 +36,32 @@ const App = () => {
       try {
         console.log("Initializing app...");
         
-        // Get the current session without trying to refresh it
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Initialize Supabase auth listener first
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          console.log("Auth state changed:", event, session?.user?.email);
+          if (event === 'SIGNED_IN') {
+            queryClient.invalidateQueries();
+          }
+        });
+
+        // Then get the current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error("Session check failed:", error);
+        if (sessionError) {
+          console.error("Session check failed:", sessionError);
           if (isMounted) {
             setIsError(true);
             toast.error("Errore durante l'inizializzazione dell'applicazione");
           }
           return;
         }
-        
+
         console.log("Session check completed", session);
 
-        // Set up auth state change listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-          console.log("Auth state changed:", event, session?.user?.email);
-        });
+        if (isMounted) {
+          setIsLoading(false);
+        }
 
-        // Clean up subscription on unmount
         return () => {
           subscription.unsubscribe();
         };
@@ -65,10 +71,6 @@ const App = () => {
         if (isMounted) {
           setIsError(true);
           toast.error("Errore critico durante l'inizializzazione");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
         }
       }
     };
@@ -82,7 +84,7 @@ const App = () => {
         console.log("Initialization timeout reached");
         setIsLoading(false);
       }
-    }, 3000); // Increased timeout to 3 seconds
+    }, 5000); // Increased timeout to 5 seconds
 
     return () => {
       isMounted = false;
