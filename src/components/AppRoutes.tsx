@@ -19,7 +19,6 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import Terms from "@/pages/Terms";
 import RecoverPassword from "@/pages/RecoverPassword";
 import UpdatePassword from "@/pages/UpdatePassword";
-import Sitemap from "@/pages/Sitemap";
 
 export const AppRoutes = () => {
   return (
@@ -41,10 +40,15 @@ export const AppRoutes = () => {
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
 
-      {/* Sitemap routes - make sure these come before the catch-all */}
-      <Route path="/sitemap" element={<Sitemap />} />
-      <Route path="/sitemap.xml" element={<Sitemap />} />
-      <Route path="/sitemap-google.xml" element={<Sitemap />} />
+      {/* Sitemap routes - redirect to Supabase Edge Function */}
+      <Route 
+        path="/sitemap.xml" 
+        element={<Navigate to="https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap" replace />} 
+      />
+      <Route 
+        path="/sitemap-google.xml" 
+        element={<Navigate to="https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap" replace />} 
+      />
 
       {/* Protected Admin routes */}
       <Route
