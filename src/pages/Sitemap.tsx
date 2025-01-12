@@ -24,23 +24,14 @@ const Sitemap = () => {
 
         // If this is a direct XML request
         if (window.location.pathname.endsWith('.xml')) {
-          // Clear existing content
-          document.documentElement.innerHTML = '';
-          
-          // Create and set XML declaration
-          const xmlDeclaration = document.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"');
-          document.insertBefore(xmlDeclaration, document.documentElement);
-          
-          // Set the XML content
-          document.documentElement.innerHTML = data;
-          
           // Set proper content type
           const meta = document.createElement('meta');
           meta.httpEquiv = 'Content-Type';
           meta.content = 'application/xml; charset=UTF-8';
           document.head.appendChild(meta);
           
-          return null;
+          // Return the raw XML
+          return document.write(data);
         }
 
         setXmlContent(data);
@@ -55,7 +46,7 @@ const Sitemap = () => {
     fetchSitemapData();
   }, []);
 
-  // For XML requests, return null as we've already handled the content
+  // For XML requests, we've already handled the content
   if (window.location.pathname.endsWith('.xml')) {
     return null;
   }
