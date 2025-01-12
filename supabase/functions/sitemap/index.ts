@@ -8,6 +8,18 @@ const corsHeaders = {
 
 const BASE_URL = 'https://stomale.info';
 
+const staticRoutes = [
+  { path: '/', priority: '1.0', changefreq: 'daily' },
+  { path: '/recensioni', priority: '0.9', changefreq: 'daily' },
+  { path: '/cerca-patologia', priority: '0.8', changefreq: 'weekly' },
+  { path: '/cerca-sintomi', priority: '0.8', changefreq: 'weekly' },
+  { path: '/nuova-recensione', priority: '0.7', changefreq: 'monthly' },
+  { path: '/inserisci-patologia', priority: '0.6', changefreq: 'monthly' },
+  { path: '/cookie-policy', priority: '0.3', changefreq: 'yearly' },
+  { path: '/privacy-policy', priority: '0.3', changefreq: 'yearly' },
+  { path: '/terms', priority: '0.3', changefreq: 'yearly' }
+];
+
 const formatDate = (date: string | Date) => {
   try {
     return new Date(date).toISOString();
@@ -31,18 +43,6 @@ const encodeUrl = (str: string) => {
     .replace(/-+/g, '-')
     .trim();
 }
-
-const staticPages = [
-  { path: '/', priority: '1.0', changefreq: 'daily' },
-  { path: '/recensioni', priority: '0.9', changefreq: 'daily' },
-  { path: '/cerca-patologia', priority: '0.8', changefreq: 'weekly' },
-  { path: '/cerca-sintomi', priority: '0.8', changefreq: 'weekly' },
-  { path: '/nuova-recensione', priority: '0.7', changefreq: 'monthly' },
-  { path: '/inserisci-patologia', priority: '0.6', changefreq: 'monthly' },
-  { path: '/cookie-policy', priority: '0.3', changefreq: 'yearly' },
-  { path: '/privacy-policy', priority: '0.3', changefreq: 'yearly' },
-  { path: '/terms', priority: '0.3', changefreq: 'yearly' }
-];
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     
     // Add static pages
-    staticPages.forEach(page => {
+    staticRoutes.forEach(page => {
       xml += `  <url>\n`;
       xml += `    <loc>${BASE_URL}${page.path}</loc>\n`;
       xml += `    <lastmod>${formatDate(new Date())}</lastmod>\n`;
