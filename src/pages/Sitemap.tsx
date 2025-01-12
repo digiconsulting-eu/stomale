@@ -1,65 +1,63 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { setPageTitle } from "@/utils/pageTitle";
 
 interface Route {
   path: string;
-  lastmod: string;
+  priority: number;
   changefreq: string;
-  priority: string;
 }
 
 export default function Sitemap() {
-  const [conditions, setConditions] = useState<any[]>([]);
+  const [conditions, setConditions] = useState<{ Patologia: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Remove any trailing slashes and ensure no extra colons
   const BASE_URL = window.location.origin;
 
   const staticRoutes: Route[] = [
-    { path: "/", lastmod: "2024-01-01", changefreq: "daily", priority: "1.0" },
-    { path: "/recensioni", lastmod: "2024-01-01", changefreq: "daily", priority: "0.9" },
-    { path: "/cerca-patologia", lastmod: "2024-01-01", changefreq: "weekly", priority: "0.8" },
-    { path: "/cerca-sintomi", lastmod: "2024-01-01", changefreq: "weekly", priority: "0.8" },
-    { path: "/nuova-recensione", lastmod: "2024-01-01", changefreq: "monthly", priority: "0.7" },
-    { path: "/login", lastmod: "2024-01-01", changefreq: "monthly", priority: "0.5" },
-    { path: "/registrati", lastmod: "2024-01-01", changefreq: "monthly", priority: "0.5" },
-    { path: "/privacy-policy", lastmod: "2024-01-01", changefreq: "yearly", priority: "0.3" },
-    { path: "/cookie-policy", lastmod: "2024-01-01", changefreq: "yearly", priority: "0.3" },
-    { path: "/terms", lastmod: "2024-01-01", changefreq: "yearly", priority: "0.3" },
+    { path: "/", priority: 1.0, changefreq: "daily" },
+    { path: "/recensioni", priority: 0.9, changefreq: "daily" },
+    { path: "/nuova-recensione", priority: 0.8, changefreq: "monthly" },
+    { path: "/cerca-patologia", priority: 0.8, changefreq: "weekly" },
+    { path: "/inserisci-patologia", priority: 0.7, changefreq: "monthly" },
+    { path: "/cerca-sintomi", priority: 0.8, changefreq: "weekly" },
+    { path: "/privacy-policy", priority: 0.3, changefreq: "yearly" },
+    { path: "/cookie-policy", priority: 0.3, changefreq: "yearly" },
+    { path: "/terms", priority: 0.3, changefreq: "yearly" },
   ];
 
   useEffect(() => {
-    const fetchConditions = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('PATOLOGIE')
-          .select('id, Patologia');
-        
-        if (error) throw error;
-        setConditions(data || []);
-      } catch (err: any) {
-        setError(err.message);
-        console.error('Error fetching conditions:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
+    setPageTitle("Sitemap | StoMale.info");
     fetchConditions();
   }, []);
 
+  const fetchConditions = async () => {
+    try {
+      const { data, error: fetchError } = await supabase
+        .from("PATOLOGIE")
+        .select("Patologia")
+        .order("Patologia");
+
+      if (fetchError) throw fetchError;
+      setConditions(data || []);
+    } catch (err) {
+      console.error("Error fetching conditions:", err);
+      setError("Errore nel caricamento delle patologie");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const generateSitemapXML = () => {
-    const sitemap = [];
-    sitemap.push(`<?xml version="1.0" encoding="UTF-8"?>`);
-    sitemap.push(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`);
+    const xmlContent = [`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`];
 
     // Add static routes
     staticRoutes.forEach(route => {
-      sitemap.push(`
+      xmlContent.push(`
   <url>
     <loc>${BASE_URL}${route.path}</loc>
-    <lastmod>${route.lastmod}</lastmod>
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>
   </url>`);
@@ -67,71 +65,77 @@ export default function Sitemap() {
 
     // Add dynamic condition routes
     conditions.forEach(condition => {
-      sitemap.push(`
+      xmlContent.push(`
   <url>
     <loc>${BASE_URL}/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}</loc>
-    <lastmod>2024-01-01</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>`);
     });
 
-    sitemap.push(`</urlset>`);
-    return sitemap.join('\n');
+    xmlContent.push('\n</urlset>');
+    return xmlContent.join('');
   };
 
   useEffect(() => {
     if (!isLoading && !error) {
-      const xml = generateSitemapXML();
+      const isXMLRequest = window.location.pathname.endsWith('.xml');
       
-      // If this is a direct XML request
-      if (window.location.pathname.endsWith('.xml')) {
-        // Clear any existing content
-        document.documentElement.innerHTML = '';
-        
-        // Create and append the XML
-        const xmlDoc = new DOMParser().parseFromString(xml, 'text/xml');
-        document.appendChild(xmlDoc.documentElement);
-        
-        // Set the correct content type
-        const meta = document.createElement('meta');
-        meta.httpEquiv = 'Content-Type';
-        meta.content = 'text/xml; charset=utf-8';
-        document.head.appendChild(meta);
+      if (isXMLRequest) {
+        // For XML requests, set content type and replace entire document
+        document.open();
+        document.write(generateSitemapXML());
+        document.close();
       }
     }
   }, [isLoading, error]);
 
+  // For non-XML requests, show human-readable version
+  if (window.location.pathname.endsWith('.xml')) {
+    return null; // Don't render React content for XML requests
+  }
+
   if (isLoading) {
-    return <div>Caricamento sitemap...</div>;
+    return <div className="container mx-auto px-4 py-8">Caricamento sitemap...</div>;
   }
 
   if (error) {
-    return <div>Errore nel caricamento della sitemap: {error}</div>;
+    return <div className="container mx-auto px-4 py-8 text-red-500">{error}</div>;
   }
 
-  // For non-XML requests, show a human-readable version
+  // Human-readable version
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
-      <div className="space-y-4">
-        {staticRoutes.map((route, index) => (
-          <div key={index}>
-            <a href={route.path} className="text-blue-600 hover:underline">
-              {BASE_URL}{route.path}
-            </a>
-          </div>
-        ))}
-        {conditions.map((condition, index) => (
-          <div key={index}>
-            <a 
-              href={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
-              className="text-blue-600 hover:underline"
-            >
-              {BASE_URL}/patologia/{condition.Patologia.toLowerCase()}
-            </a>
-          </div>
-        ))}
+      <h1 className="text-2xl font-bold mb-6">Sitemap</h1>
+      <div className="space-y-6">
+        <section>
+          <h2 className="text-xl font-semibold mb-4">Pagine principali</h2>
+          <ul className="list-disc pl-5 space-y-2">
+            {staticRoutes.map((route) => (
+              <li key={route.path}>
+                <a href={route.path} className="text-primary hover:underline">
+                  {route.path}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-semibold mb-4">Patologie</h2>
+          <ul className="list-disc pl-5 space-y-2">
+            {conditions.map((condition) => (
+              <li key={condition.Patologia}>
+                <a
+                  href={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
+                  className="text-primary hover:underline"
+                >
+                  {condition.Patologia}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </div>
   );
