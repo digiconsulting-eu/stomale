@@ -1,25 +1,24 @@
 export const ImportInstructions = () => {
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Istruzioni per l'importazione</h3>
-      <div className="prose prose-sm max-w-none">
-        <p>
-          Il file Excel deve contenere le seguenti colonne (non tutte sono obbligatorie):
-        </p>
-        <ul>
-          <li><strong>Patologia</strong> (obbligatorio) - Nome della patologia</li>
-          <li><strong>Titolo</strong> - Titolo della recensione</li>
-          <li><strong>Sintomi</strong> - Descrizione dei sintomi</li>
-          <li><strong>Esperienza</strong> (obbligatorio) - Descrizione dell'esperienza</li>
-          <li><strong>Difficoltà diagnosi</strong> - Valore da 1 a 5</li>
-          <li><strong>Fastidio sintomi</strong> - Valore da 1 a 5</li>
-          <li><strong>Cura Farmacologica</strong> - Y/N</li>
-          <li><strong>Efficacia farmaci</strong> - Valore da 1 a 5</li>
-          <li><strong>Possibilità guarigione</strong> - Valore da 1 a 5</li>
-          <li><strong>Disagio sociale</strong> - Valore da 1 a 5</li>
-          <li><strong>Data</strong> - Data della recensione (opzionale, default: data attuale)</li>
-        </ul>
-      </div>
+    <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+      <h3 className="font-semibold">Istruzioni per l'importazione:</h3>
+      <ul className="list-disc pl-5 space-y-2 text-sm text-gray-600">
+        <li>Il file deve essere in formato Excel (.xlsx)</li>
+        <li>Le colonne richieste sono:
+          <ul className="list-disc pl-5 mt-1">
+            <li>patologia (obbligatorio)</li>
+            <li>title (opzionale)</li>
+            <li>symptoms (opzionale)</li>
+            <li>experience (obbligatorio)</li>
+            <li>diagnosis_difficulty (opzionale, 1-5)</li>
+            <li>symptoms_severity (opzionale, 1-5)</li>
+            <li>has_medication (opzionale, Y/N)</li>
+            <li>medication_effectiveness (opzionale, 1-5)</li>
+            <li>healing_possibility (opzionale, 1-5)</li>
+            <li>social_discomfort (opzionale, 1-5)</li>
+          </ul>
+        </li>
+      </ul>
     </div>
   );
 };

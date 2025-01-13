@@ -1,7 +1,7 @@
 export const DescriptionsImport = () => {
   return (
-    <div>
-      <p>Funzionalità in arrivo...</p>
+    <div className="text-gray-500 italic">
+      Funzionalità in arrivo...
     </div>
   );
 };
