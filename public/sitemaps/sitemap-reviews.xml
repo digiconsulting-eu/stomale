@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://stomale.info/patologia/stenosi-lombare/esperienza/1000-mal-di-schiena</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/acne/esperienza/1-la-mia-esperienza-con-acne</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -47,6 +52,31 @@
   </url>
   <url>
     <loc>https://stomale.info/patologia/fibromialgia/esperienza/10-combattere-la-fibromialgia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/11-la-mia-lotta-quotidiana</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/artrite/esperienza/12-vivere-con-dolore-cronico</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/ansia/esperienza/13-superare-attacchi-panico</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/depressione/esperienza/14-ritrovare-la-speranza</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/acne/esperienza/15-trattamenti-naturali</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
