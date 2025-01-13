@@ -404,6 +404,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/asma</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/aspergillosi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
