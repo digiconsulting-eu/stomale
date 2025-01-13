@@ -38,6 +38,8 @@ Deno.serve(async (req) => {
       throw conditionsError;
     }
 
+    console.log(`[${startTime}] Found ${conditions?.length || 0} conditions for letter ${letter}`);
+
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
@@ -61,13 +63,19 @@ Deno.serve(async (req) => {
     xml += '\n</urlset>';
 
     // Update the last_modified timestamp for this sitemap
-    await supabaseClient
+    const { error: updateError } = await supabaseClient
       .from('sitemap_files')
       .update({ 
         last_modified: new Date().toISOString(),
         url_count: conditions?.length || 0
       })
       .eq('filename', `sitemap-conditions-${letter}.xml`);
+
+    if (updateError) {
+      console.error(`[${startTime}] Error updating sitemap file record:`, updateError);
+    }
+
+    console.log(`[${startTime}] Successfully generated sitemap for letter ${letter}`);
 
     return new Response(xml, {
       headers: {
@@ -77,7 +85,7 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error(`Error generating conditions sitemap:`, error);
+    console.error(`[${startTime}] Error generating conditions sitemap:`, error);
     return new Response(`Error generating conditions sitemap: ${error.message}`, {
       status: 500,
       headers: corsHeaders
