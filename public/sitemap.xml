@@ -36,6 +36,7 @@
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
+
   <!-- Patologie comuni -->
   <url>
     <loc>https://stomale.info/patologia/acne</loc>
