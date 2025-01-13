@@ -80,6 +80,7 @@ ${staticPages.map(page => `
       .from('reviews')
       .select(`
         id,
+        title,
         PATOLOGIE (
           Patologia
         )
@@ -101,7 +102,15 @@ ${staticPages.map(page => `
     if (reviews) {
       for (const review of reviews) {
         if (review.PATOLOGIE?.Patologia) {
-          const reviewUrl = `https://stomale.info/recensione/${review.id}/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}`;
+          const slug = review.title
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+          const reviewUrl = `https://stomale.info/patologia/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}/esperienza/${review.id}-${slug}`;
           console.log(`[${startTime}] Adding review URL: ${reviewUrl}`);
           xml += `
   <url>
