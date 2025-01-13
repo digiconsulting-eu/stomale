@@ -95,7 +95,7 @@ export default function Index() {
         </p>
         <SearchBar />
       </div>
-
+      
       <section className="mt-16">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-semibold text-primary">
@@ -122,13 +122,8 @@ export default function Index() {
                 id={review.id}
                 title={review.title}
                 condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
-                experience={review.experience}
-                diagnosisDifficulty={review.diagnosis_difficulty}
-                symptomsSeverity={review.symptoms_severity}
-                hasMedication={review.has_medication}
-                medicationEffectiveness={review.medication_effectiveness}
-                healingPossibility={review.healing_possibility}
-                socialDiscomfort={review.social_discomfort}
+                date={new Date(review.created_at).toLocaleDateString()}
+                preview={review.experience.slice(0, 200) + '...'}
                 username={review.username}
               />
             ))}

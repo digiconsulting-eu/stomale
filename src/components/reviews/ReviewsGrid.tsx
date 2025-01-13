@@ -11,6 +11,7 @@ interface Review {
   healing_possibility?: number;
   social_discomfort?: number;
   username: string;
+  created_at: string;
   PATOLOGIE?: {
     id: number;
     Patologia: string;
@@ -41,13 +42,8 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
           id={review.id}
           title={review.title}
           condition={review.PATOLOGIE?.Patologia || ''}
-          experience={review.experience}
-          diagnosisDifficulty={review.diagnosis_difficulty}
-          symptomsSeverity={review.symptoms_severity}
-          hasMedication={review.has_medication}
-          medicationEffectiveness={review.medication_effectiveness}
-          healingPossibility={review.healing_possibility}
-          socialDiscomfort={review.social_discomfort}
+          date={new Date(review.created_at).toLocaleDateString()}
+          preview={review.experience.slice(0, 200) + '...'}
           username={review.username}
         />
       ))}

@@ -17,6 +17,7 @@ interface Review {
     Patologia: string;
   };
   username: string;
+  created_at: string;
 }
 
 interface ConditionReviewsProps {
@@ -44,14 +45,9 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
           key={review.id}
           id={review.id}
           title={review.title}
-          experience={review.experience}
           condition={condition}
-          diagnosisDifficulty={review.diagnosis_difficulty}
-          symptomsSeverity={review.symptoms_severity}
-          hasMedication={review.has_medication}
-          medicationEffectiveness={review.medication_effectiveness}
-          healingPossibility={review.healing_possibility}
-          socialDiscomfort={review.social_discomfort}
+          date={new Date(review.created_at).toLocaleDateString()}
+          preview={review.experience.slice(0, 200) + '...'}
           username={review.username}
         />
       ))}

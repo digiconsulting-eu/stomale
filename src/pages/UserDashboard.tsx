@@ -97,16 +97,12 @@ const UserDashboard = () => {
               {reviews?.map((review) => (
                 <div key={review.id} className="relative">
                   <ReviewCard
-                    id={review.id.toString()}
+                    id={review.id}
                     title={review.title}
                     condition={review.condition.Patologia}
-                    experience={review.experience}
-                    diagnosisDifficulty={review.diagnosis_difficulty}
-                    symptomsSeverity={review.symptoms_severity}
-                    hasMedication={review.has_medication}
-                    medicationEffectiveness={review.medication_effectiveness}
-                    healingPossibility={review.healing_possibility}
-                    socialDiscomfort={review.social_discomfort}
+                    date={new Date(review.created_at).toLocaleDateString()}
+                    preview={review.experience.slice(0, 200) + '...'}
+                    username={review.username}
                   />
                   {review.status === 'pending' && (
                     <Badge 
