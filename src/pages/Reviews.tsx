@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 import { ReviewsContent } from "@/components/reviews/ReviewsContent";
+import { DatabaseReview } from "@/types/review";
 
 const REVIEWS_PER_PAGE = 20;
 
@@ -46,6 +47,9 @@ const Reviews = () => {
             healing_possibility,
             social_discomfort,
             username,
+            created_at,
+            symptoms,
+            condition_id,
             PATOLOGIE (
               id,
               Patologia
@@ -75,7 +79,7 @@ const Reviews = () => {
         const transformedReviews = reviewsData.map(review => ({
           ...review,
           username: review.username || 'Anonimo'
-        }));
+        })) as DatabaseReview[];
 
         console.log('Transformed reviews:', transformedReviews);
 
