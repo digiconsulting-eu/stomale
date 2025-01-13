@@ -16,63 +16,52 @@ const handleCors = (req: Request) => {
 const generateSitemap = async (supabase: any) => {
   console.log('Starting sitemap generation...')
 
-  // Fetch all conditions
-  const { data: conditions, error: conditionsError } = await supabase
-    .from('PATOLOGIE')
-    .select('Patologia')
-  
-  if (conditionsError) {
-    console.error('Error fetching conditions:', conditionsError)
-    throw conditionsError
-  }
-
-  console.log(`Fetched ${conditions?.length || 0} conditions`)
-  conditions?.forEach(condition => {
-    console.log('Adding condition URL:', `https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`)
-  })
-
-  // Fetch all approved reviews with their associated conditions
-  const { data: reviews, error: reviewsError } = await supabase
-    .from('reviews')
-    .select(`
-      id,
-      PATOLOGIE (
-        Patologia
-      )
-    `)
-    .eq('status', 'approved')
-  
-  if (reviewsError) {
-    console.error('Error fetching reviews:', reviewsError)
-    throw reviewsError
-  }
-
-  console.log(`Fetched ${reviews?.length || 0} approved reviews`)
-  
-  // Log review URLs being generated
-  reviews?.forEach(review => {
-    if (review.PATOLOGIE?.Patologia) {
-      console.log('Adding review URL:', `https://stomale.info/recensione/${review.id}/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}`)
-    } else {
-      console.warn('Skipping review due to missing condition:', review.id)
+  try {
+    // Fetch all conditions
+    const { data: conditions, error: conditionsError } = await supabase
+      .from('PATOLOGIE')
+      .select('id, Patologia')
+    
+    if (conditionsError) {
+      console.error('Error fetching conditions:', conditionsError)
+      throw conditionsError
     }
-  })
 
-  // Static pages
-  const staticPages = [
-    { path: '', priority: '1.0', changefreq: 'weekly' },
-    { path: 'recensioni', priority: '0.8', changefreq: 'weekly' },
-    { path: 'cerca-patologia', priority: '0.8', changefreq: 'weekly' },
-    { path: 'cerca-sintomi', priority: '0.8', changefreq: 'weekly' },
-    { path: 'privacy-policy', priority: '0.5', changefreq: 'monthly' },
-    { path: 'cookie-policy', priority: '0.5', changefreq: 'monthly' },
-    { path: 'terms', priority: '0.5', changefreq: 'monthly' }
-  ]
+    console.log(`Fetched ${conditions?.length || 0} conditions`)
 
-  console.log('Generating XML sitemap...')
+    // Fetch all approved reviews with their associated conditions
+    const { data: reviews, error: reviewsError } = await supabase
+      .from('reviews')
+      .select(`
+        id,
+        condition_id,
+        PATOLOGIE (
+          id,
+          Patologia
+        )
+      `)
+      .eq('status', 'approved')
+    
+    if (reviewsError) {
+      console.error('Error fetching reviews:', reviewsError)
+      throw reviewsError
+    }
 
-  // Build XML
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    console.log(`Fetched ${reviews?.length || 0} approved reviews`)
+
+    // Static pages
+    const staticPages = [
+      { path: '', priority: '1.0', changefreq: 'weekly' },
+      { path: 'recensioni', priority: '0.8', changefreq: 'weekly' },
+      { path: 'cerca-patologia', priority: '0.8', changefreq: 'weekly' },
+      { path: 'cerca-sintomi', priority: '0.8', changefreq: 'weekly' },
+      { path: 'privacy-policy', priority: '0.5', changefreq: 'monthly' },
+      { path: 'cookie-policy', priority: '0.5', changefreq: 'monthly' },
+      { path: 'terms', priority: '0.5', changefreq: 'monthly' }
+    ]
+
+    // Build XML
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${staticPages.map(page => `
   <url>
@@ -80,22 +69,33 @@ const generateSitemap = async (supabase: any) => {
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>`).join('')}
-  ${conditions?.map(condition => `
+  ${conditions?.map(condition => {
+    console.log('Adding condition URL:', `https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`)
+    return `
   <url>
     <loc>https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>`).join('')}
-  ${reviews?.filter(review => review.PATOLOGIE?.Patologia).map(review => `
+  </url>`
+  }).join('')}
+  ${reviews?.filter(review => review.PATOLOGIE?.Patologia).map(review => {
+    const url = `https://stomale.info/recensione/${review.id}/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}`
+    console.log('Adding review URL:', url)
+    return `
   <url>
-    <loc>https://stomale.info/recensione/${review.id}/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}</loc>
+    <loc>${url}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>`).join('')}
+  </url>`
+  }).join('')}
 </urlset>`
 
-  console.log('Sitemap generation completed')
-  return xml.trim()
+    console.log('Sitemap generation completed successfully')
+    return xml.trim()
+  } catch (error) {
+    console.error('Error generating sitemap:', error)
+    throw error
+  }
 }
 
 Deno.serve(async (req) => {
@@ -113,7 +113,6 @@ Deno.serve(async (req) => {
     )
 
     const xml = await generateSitemap(supabaseClient)
-    console.log('Sitemap successfully generated and ready to be served')
     
     return new Response(xml, {
       headers: {
@@ -122,7 +121,7 @@ Deno.serve(async (req) => {
       }
     })
   } catch (error) {
-    console.error('Error generating sitemap:', error)
+    console.error('Fatal error in sitemap generation:', error)
     return new Response('Error generating sitemap', { 
       status: 500,
       headers: corsHeaders
