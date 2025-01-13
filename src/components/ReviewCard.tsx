@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
-import { slugify } from "@/utils/urlUtils";
 
 interface ReviewCardProps {
   id: string | number;
@@ -33,7 +32,6 @@ export const ReviewCard = ({
 
   // Ensure condition is properly formatted for the URL
   const formattedCondition = condition.toLowerCase();
-  const formattedTitle = slugify(title);
 
   return (
     <Card className="bg-white p-6 hover:shadow-lg transition-shadow">
@@ -61,7 +59,7 @@ export const ReviewCard = ({
           {truncateExperience(experience)}
         </p>
 
-        <Link to={`/patologia/${formattedCondition}/esperienza/${id}-${formattedTitle}`}>
+        <Link to={`/recensione/${id}`}>
           <Button 
             className="w-full bg-primary text-white hover:bg-primary-hover"
           >
