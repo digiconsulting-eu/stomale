@@ -51,7 +51,7 @@ serve(async (req) => {
     const staticPages = [
       { url: '', priority: '1.0' },
       { url: 'recensioni', priority: '0.9' },
-      { url: 'cerca-patologia', priority: '0.8' },
+      { url: 'cerca', priority: '0.8' },
       { url: 'cerca-sintomi', priority: '0.8' }
     ]
 

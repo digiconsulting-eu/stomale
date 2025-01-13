@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const SitemapRedirect = () => {
   useEffect(() => {
-    const fetchAndDisplaySitemap = async () => {
+    const fetchAndServeSitemap = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('sitemap', {
           method: 'GET'
@@ -14,23 +14,18 @@ export const SitemapRedirect = () => {
           return;
         }
 
-        // Set the XML content type
-        const xmlContent = new Blob([data], { type: 'application/xml' });
+        // Create a new document with XML content type
+        document.open('text/xml');
+        // Write the XML content directly
+        document.write(data);
+        document.close();
         
-        // Create a temporary link and trigger download
-        const url = window.URL.createObjectURL(xmlContent);
-        window.location.href = url;
-        
-        // Cleanup the URL after navigation
-        setTimeout(() => {
-          window.URL.revokeObjectURL(url);
-        }, 100);
       } catch (err) {
         console.error('Error in sitemap fetch:', err);
       }
     };
 
-    fetchAndDisplaySitemap();
+    fetchAndServeSitemap();
   }, []);
 
   return null;
