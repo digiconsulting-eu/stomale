@@ -54,7 +54,12 @@ serve(async (req) => {
       { url: 'cerca-patologia', priority: '0.8' },
       { url: 'cerca-sintomi', priority: '0.8' },
       { url: 'nuova-recensione', priority: '0.7' },
-      { url: 'inserisci-patologia', priority: '0.7' }
+      { url: 'inserisci-patologia', priority: '0.7' },
+      { url: 'privacy-policy', priority: '0.5' },
+      { url: 'cookie-policy', priority: '0.5' },
+      { url: 'termini-e-condizioni', priority: '0.5' },
+      { url: 'registrati', priority: '0.6' },
+      { url: 'login', priority: '0.6' }
     ]
 
     staticPages.forEach(page => {
