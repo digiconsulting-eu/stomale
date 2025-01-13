@@ -21,61 +21,62 @@ export default function SearchSymptoms() {
     setMetaDescription("Cerca recensioni ed esperienze in base ai sintomi. Trova testimonianze di persone che hanno avuto sintomi simili ai tuoi su StoMale.info.");
   }, []);
 
-  const { data: reviews, isLoading } = useQuery({
-    queryKey: ['symptom-reviews', searchTerm],
-    queryFn: async () => {
-      if (!searchTerm) return [];
-      
-      console.log('Searching reviews with symptoms:', searchTerm);
-      
-      try {
-        const { data, error } = await supabase
-          .from('reviews')
-          .select(`
+const { data: reviews, isLoading } = useQuery({
+  queryKey: ['symptom-reviews', searchTerm],
+  queryFn: async () => {
+    if (!searchTerm) return [];
+    
+    console.log('Searching reviews with symptoms:', searchTerm);
+    
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          title,
+          experience,
+          symptoms,
+          diagnosis_difficulty,
+          symptoms_severity,
+          has_medication,
+          medication_effectiveness,
+          healing_possibility,
+          social_discomfort,
+          username,
+          created_at,
+          PATOLOGIE (
             id,
-            title,
-            experience,
-            symptoms,
-            diagnosis_difficulty,
-            symptoms_severity,
-            has_medication,
-            medication_effectiveness,
-            healing_possibility,
-            social_discomfort,
-            username,
-            PATOLOGIE (
-              id,
-              Patologia
-            )
-          `)
-          .eq('status', 'approved')
-          .textSearch('symptoms_searchable', searchTerm, {
-            config: 'italian_unaccent',
-            type: 'websearch'
-          })
-          .order('created_at', { ascending: false });
+            Patologia
+          )
+        `)
+        .eq('status', 'approved')
+        .textSearch('symptoms_searchable', searchTerm, {
+          config: 'italian_unaccent',
+          type: 'websearch'
+        })
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching reviews:', error);
-          throw error;
-        }
-
-        // Transform the data to ensure username is present
-        const transformedReviews = (data || []).map(review => ({
-          ...review,
-          username: review.username || 'Anonimo'
-        }));
-
-        console.log('Found reviews:', transformedReviews);
-        return transformedReviews;
-      } catch (error) {
-        console.error('Error searching reviews:', error);
-        toast.error("Errore durante la ricerca delle recensioni");
-        return [];
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        throw error;
       }
-    },
-    enabled: isSearching && searchTerm.length > 0
-  });
+
+      // Transform the data to ensure username is present
+      const transformedReviews = (data || []).map(review => ({
+        ...review,
+        username: review.username || 'Anonimo'
+      }));
+
+      console.log('Found reviews:', transformedReviews);
+      return transformedReviews;
+    } catch (error) {
+      console.error('Error searching reviews:', error);
+      toast.error("Errore durante la ricerca delle recensioni");
+      return [];
+    }
+  },
+  enabled: isSearching && searchTerm.length > 0
+});
 
   const handleSearch = () => {
     if (searchTerm.trim()) {

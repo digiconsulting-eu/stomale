@@ -3,26 +3,10 @@ import { ReviewsGrid } from "./ReviewsGrid";
 import { ReviewsPagination } from "./ReviewsPagination";
 import { ReviewsDisclaimer } from "./ReviewsDisclaimer";
 import { ReviewsHeader } from "./ReviewsHeader";
-
-interface Review {
-  id: number;
-  title: string;
-  experience: string;
-  diagnosis_difficulty?: number;
-  symptoms_severity?: number;
-  has_medication?: boolean;
-  medication_effectiveness?: number;
-  healing_possibility?: number;
-  social_discomfort?: number;
-  username: string;
-  PATOLOGIE?: {
-    id: number;
-    Patologia: string;
-  };
-}
+import { DatabaseReview } from "@/types/review";
 
 interface ReviewsContentProps {
-  reviews: Review[];
+  reviews: DatabaseReview[];
   isLoading: boolean;
   currentPage: number;
   totalPages: number;

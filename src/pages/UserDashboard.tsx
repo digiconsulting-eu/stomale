@@ -8,6 +8,7 @@ import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { FavoritesTab } from "@/components/dashboard/FavoritesTab";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "react-router-dom";
+import { DatabaseReview } from "@/types/review";
 
 const UserDashboard = () => {
   const location = useLocation();
@@ -53,7 +54,10 @@ const UserDashboard = () => {
           healing_possibility,
           social_discomfort,
           status,
+          created_at,
+          username,
           condition:PATOLOGIE (
+            id,
             Patologia
           )
         `)
@@ -102,7 +106,7 @@ const UserDashboard = () => {
                     condition={review.condition.Patologia}
                     date={new Date(review.created_at).toLocaleDateString()}
                     preview={review.experience.slice(0, 200) + '...'}
-                    username={review.username}
+                    username={review.username || 'Anonimo'}
                   />
                   {review.status === 'pending' && (
                     <Badge 
