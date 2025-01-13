@@ -57,7 +57,7 @@ serve(async (req) => {
       { url: 'inserisci-patologia', priority: '0.7' },
       { url: 'privacy-policy', priority: '0.5' },
       { url: 'cookie-policy', priority: '0.5' },
-      { url: 'termini-e-condizioni', priority: '0.5' },
+      { url: 'terms', priority: '0.5' },
       { url: 'registrati', priority: '0.6' },
       { url: 'login', priority: '0.6' }
     ]
