@@ -19,15 +19,18 @@ import ConditionDetail from "@/pages/ConditionDetail";
 import NewReview from "@/pages/NewReview";
 import ReviewDetail from "@/pages/ReviewDetail";
 import Reviews from "@/pages/Reviews";
+import { SitemapRedirect } from "./SitemapRedirect";
 
 export const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
+      
       <Route path="/login" element={<Login />} />
       <Route path="/registrati" element={<Register />} />
       <Route path="/recupera-password" element={<RecoverPassword />} />
       <Route path="/aggiorna-password" element={<UpdatePassword />} />
+      
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/cookie-policy" element={<CookiePolicy />} />
       <Route path="/terms" element={<Terms />} />
@@ -44,7 +47,7 @@ export const AppRoutes = () => {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute adminOnly>
+          <ProtectedRoute>
             <Admin />
           </ProtectedRoute>
         }
@@ -53,7 +56,7 @@ export const AppRoutes = () => {
       <Route
         path="/admin/reviews"
         element={
-          <ProtectedRoute adminOnly>
+          <ProtectedRoute>
             <ReviewManagement />
           </ProtectedRoute>
         }
@@ -62,19 +65,22 @@ export const AppRoutes = () => {
       <Route
         path="/admin/users"
         element={
-          <ProtectedRoute adminOnly>
+          <ProtectedRoute>
             <UserManagement />
           </ProtectedRoute>
         }
       />
       
       <Route path="/inserisci-patologia" element={<InsertCondition />} />
-      <Route path="/cerca" element={<SearchCondition />} />
+      <Route path="/cerca-patologia" element={<SearchCondition />} />
       <Route path="/cerca-sintomi" element={<SearchSymptoms />} />
       <Route path="/patologia/:condition" element={<ConditionDetail />} />
       <Route path="/recensione/:id" element={<ReviewDetail />} />
       <Route path="/recensioni" element={<Reviews />} />
       <Route path="/nuova-recensione" element={<NewReview />} />
+      
+      <Route path="/sitemap.xml" element={<SitemapRedirect />} />
+      <Route path="/sitemap-google.xml" element={<SitemapRedirect />} />
     </Routes>
   );
 };

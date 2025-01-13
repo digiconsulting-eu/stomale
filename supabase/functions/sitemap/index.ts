@@ -51,8 +51,10 @@ serve(async (req) => {
     const staticPages = [
       { url: '', priority: '1.0' },
       { url: 'recensioni', priority: '0.9' },
-      { url: 'cerca', priority: '0.8' },
-      { url: 'cerca-sintomi', priority: '0.8' }
+      { url: 'cerca-patologia', priority: '0.8' },
+      { url: 'cerca-sintomi', priority: '0.8' },
+      { url: 'nuova-recensione', priority: '0.7' },
+      { url: 'inserisci-patologia', priority: '0.7' }
     ]
 
     staticPages.forEach(page => {
@@ -90,9 +92,10 @@ serve(async (req) => {
 
     xml += '</urlset>'
 
-    console.log('Generated clean XML sitemap')
-    console.log('Number of conditions:', conditions?.length)
-    console.log('Number of reviews:', reviews?.length)
+    console.log('Generated sitemap with:')
+    console.log('- Static pages:', staticPages.length)
+    console.log('- Conditions:', conditions?.length)
+    console.log('- Reviews:', reviews?.length)
 
     return new Response(xml, { headers: corsHeaders })
 
