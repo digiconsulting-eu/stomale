@@ -29,7 +29,7 @@ const generateSitemap = async (supabase: any) => {
   // Fetch all approved reviews
   const { data: reviews, error: reviewsError } = await supabase
     .from('reviews')
-    .select('id')
+    .select('id, title')
     .eq('status', 'approved')
   
   if (reviewsError) {
