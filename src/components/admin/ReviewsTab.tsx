@@ -8,53 +8,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-
-interface Review {
-  id: number; // Changed from string to number to match the database type
-  title: string;
-  author: string;
-  condition: string;
-  status: string;
-  date: string;
-}
+import { DatabaseReview } from "@/types/review";
 
 interface ReviewsTabProps {
-  reviews: Review[];
-  handleReviewAction: (id: number, action: "approve" | "reject") => void; // Changed parameter type to number
+  reviews: DatabaseReview[];
+  handleReviewAction: (id: number, action: "approve" | "reject") => void;
 }
 
 export const ReviewsTab = ({ reviews, handleReviewAction }: ReviewsTabProps) => {
-  const queryClient = useQueryClient();
-
-  const handleAction = async (reviewId: number, action: "approve" | "reject") => {
-    try {
-      console.log(`Attempting to ${action} review ${reviewId}`);
-      
-      const { error } = await supabase
-        .from('reviews')
-        .update({ status: action === 'approve' ? 'approved' : 'removed' })
-        .eq('id', reviewId);
-
-      if (error) {
-        console.error('Error updating review:', error);
-        toast.error(`Errore durante l'${action === 'approve' ? 'approvazione' : 'rimozione'} della recensione`);
-        return;
-      }
-
-      // Invalidate and refetch reviews
-      await queryClient.invalidateQueries({ queryKey: ['reviews'] });
-      await queryClient.invalidateQueries({ queryKey: ['latestReviews'] });
-      
-      toast.success(`Recensione ${action === 'approve' ? 'approvata' : 'rimossa'} con successo`);
-    } catch (error) {
-      console.error('Error in handleAction:', error);
-      toast.error("Si è verificato un errore durante l'operazione");
-    }
-  };
-
   return (
     <div className="rounded-md border">
       <Table>
@@ -72,12 +33,14 @@ export const ReviewsTab = ({ reviews, handleReviewAction }: ReviewsTabProps) => 
           {reviews.map((review) => (
             <TableRow key={review.id}>
               <TableCell>{review.title}</TableCell>
-              <TableCell>{review.author}</TableCell>
-              <TableCell>{review.condition}</TableCell>
-              <TableCell>{review.date}</TableCell>
+              <TableCell>{review.username || 'Anonimo'}</TableCell>
+              <TableCell>{review.PATOLOGIE?.Patologia}</TableCell>
+              <TableCell>
+                {new Date(review.created_at).toLocaleDateString('it-IT')}
+              </TableCell>
               <TableCell>
                 <Badge variant={review.status === "approved" ? "default" : "secondary"}>
-                  {review.status === "approved" ? "Approvata" : "Rimossa"}
+                  {review.status === "approved" ? "Approvata" : "In attesa"}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -86,7 +49,7 @@ export const ReviewsTab = ({ reviews, handleReviewAction }: ReviewsTabProps) => 
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleAction(review.id, "approve")}
+                      onClick={() => handleReviewAction(review.id, "approve")}
                     >
                       Approva
                     </Button>
@@ -95,7 +58,7 @@ export const ReviewsTab = ({ reviews, handleReviewAction }: ReviewsTabProps) => 
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleAction(review.id, "reject")}
+                      onClick={() => handleReviewAction(review.id, "reject")}
                     >
                       Rimuovi
                     </Button>

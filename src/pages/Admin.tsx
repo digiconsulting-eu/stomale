@@ -1,58 +1,57 @@
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import { Card } from "@/components/ui/card";
+import { AdminTabs } from "@/components/admin/AdminTabs";
 import { useAdminData } from "@/hooks/useAdminData";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Link } from "react-router-dom";
-import { ClipboardList, Users } from "lucide-react";
+import { useState } from "react";
 
 const Admin = () => {
-  const { pendingReviews, users, isLoading } = useAdminData();
+  const {
+    pendingReviews,
+    users,
+    admins,
+    isLoading,
+    addAdmin,
+    updateReviewStatus,
+  } = useAdminData();
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <AdminHeader />
-        <div className="grid gap-6 md:grid-cols-2">
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-        </div>
-      </div>
-    );
-  }
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+
+  const handleAddAdmin = () => {
+    if (newAdminEmail) {
+      addAdmin(newAdminEmail);
+      setNewAdminEmail("");
+    }
+  };
+
+  const handleReviewAction = (id: number, action: "approve" | "reject") => {
+    updateReviewStatus({ reviewId: id, status: action === "approve" ? "approved" : "removed" });
+  };
+
+  const handleCommentAction = (id: string, action: "approve" | "reject") => {
+    // Implement comment moderation logic here
+    console.log("Comment action:", id, action);
+  };
+
+  const markNotificationAsRead = (id: string) => {
+    // Implement notification marking logic here
+    console.log("Marking notification as read:", id);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <AdminHeader />
       
-      <div className="grid gap-6 md:grid-cols-2">
-        <Link to="/admin/recensioni">
-          <Card className="p-6 hover:bg-gray-50 transition-colors">
-            <div className="flex items-center gap-4">
-              <ClipboardList className="h-8 w-8 text-primary" />
-              <div>
-                <h3 className="text-lg font-semibold">Recensioni da moderare</h3>
-                <p className="text-gray-500">
-                  {pendingReviews?.length || 0} recensioni in attesa
-                </p>
-              </div>
-            </div>
-          </Card>
-        </Link>
-
-        <Link to="/admin/utenti">
-          <Card className="p-6 hover:bg-gray-50 transition-colors">
-            <div className="flex items-center gap-4">
-              <Users className="h-8 w-8 text-primary" />
-              <div>
-                <h3 className="text-lg font-semibold">Gestione Utenti</h3>
-                <p className="text-gray-500">
-                  {users?.length || 0} utenti registrati
-                </p>
-              </div>
-            </div>
-          </Card>
-        </Link>
-      </div>
+      <AdminTabs
+        notifications={[]} // We'll implement notifications later
+        reviews={pendingReviews || []}
+        comments={[]} // We'll implement comments later
+        admins={admins || []}
+        newAdminEmail={newAdminEmail}
+        setNewAdminEmail={setNewAdminEmail}
+        handleAddAdmin={handleAddAdmin}
+        handleReviewAction={handleReviewAction}
+        handleCommentAction={handleCommentAction}
+        markNotificationAsRead={markNotificationAsRead}
+      />
     </div>
   );
 };
