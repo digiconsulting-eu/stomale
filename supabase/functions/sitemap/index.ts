@@ -46,6 +46,15 @@ const generateSitemap = async (supabase: any) => {
   }
 
   console.log('Fetched approved reviews:', reviews?.length)
+  
+  // Log review URLs being generated
+  reviews?.forEach(review => {
+    if (review.PATOLOGIE?.Patologia) {
+      console.log('Adding review URL:', `https://stomale.info/recensione/${review.id}/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}`)
+    } else {
+      console.log('Skipping review due to missing condition:', review.id)
+    }
+  })
 
   // Static pages
   const staticPages = [
