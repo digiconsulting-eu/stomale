@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { ReviewsPagination } from "@/components/reviews/ReviewsPagination";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 
 const ITEMS_PER_PAGE = 50;
 
@@ -31,7 +32,10 @@ const UserManagement = () => {
         .from('users')
         .select('*', { count: 'exact', head: true });
 
-      if (countError) throw countError;
+      if (countError) {
+        console.error('Error getting users count:', countError);
+        throw countError;
+      }
 
       // Then get paginated data
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -43,16 +47,18 @@ const UserManagement = () => {
         .range(from, to)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+      }
 
+      console.log('Fetched users:', users);
       return {
         users: users || [],
         totalCount: count || 0,
         totalPages: Math.ceil((count || 0) / ITEMS_PER_PAGE)
       };
-    },
-    staleTime: 0,
-    gcTime: 0
+    }
   });
 
   const handleExportExcel = () => {
@@ -76,6 +82,7 @@ const UserManagement = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
+        <AdminHeader />
         <div className="text-center text-red-500">
           Si è verificato un errore nel caricamento degli utenti.
         </div>
@@ -85,6 +92,7 @@ const UserManagement = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <AdminHeader />
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Gestione Utenti</h1>
         <Button onClick={handleExportExcel} className="gap-2">
