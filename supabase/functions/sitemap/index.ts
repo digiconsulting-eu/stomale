@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Static pages
+    // Static pages with proper XML formatting
     const staticPages = [
       { path: '', priority: '1.0', changefreq: 'weekly' },
       { path: 'recensioni', priority: '0.8', changefreq: 'weekly' },
@@ -39,25 +39,30 @@ Deno.serve(async (req) => {
       { path: 'privacy-policy', priority: '0.5', changefreq: 'monthly' },
       { path: 'cookie-policy', priority: '0.5', changefreq: 'monthly' },
       { path: 'terms', priority: '0.5', changefreq: 'monthly' }
-    ]
+    ];
 
     console.log(`[${startTime}] Adding ${staticPages.length} static pages to sitemap`);
 
-    // Start building XML
+    // Start building XML with proper formatting
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${staticPages.map(page => `
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+    // Add static pages with consistent formatting
+    staticPages.forEach(page => {
+      xml += `
   <url>
     <loc>https://stomale.info/${page.path}</loc>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`).join('')}`;
+  </url>`;
+    });
 
     // Fetch all conditions
     console.log(`[${startTime}] Fetching conditions from database...`);
     const { data: conditions, error: conditionsError } = await supabaseClient
       .from('PATOLOGIE')
       .select('Patologia')
+      .order('Patologia');
     
     if (conditionsError) {
       console.error(`[${startTime}] Error fetching conditions:`, conditionsError);
@@ -66,18 +71,24 @@ ${staticPages.map(page => `
 
     console.log(`[${startTime}] Found ${conditions?.length || 0} conditions`);
 
-    // Add condition pages to XML
+    // Add condition pages with consistent formatting
     if (conditions) {
-      for (const condition of conditions) {
-        const conditionUrl = `https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`;
-        console.log(`[${startTime}] Adding condition URL: ${conditionUrl}`);
+      conditions.forEach(condition => {
+        const conditionSlug = condition.Patologia.toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .trim();
+        
         xml += `
   <url>
-    <loc>${conditionUrl}</loc>
+    <loc>https://stomale.info/patologia/${encodeURIComponent(conditionSlug)}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`;
-      }
+      });
     }
 
     // Fetch approved reviews
@@ -91,8 +102,7 @@ ${staticPages.map(page => `
           Patologia
         )
       `)
-      .eq('status', 'approved')
-      .limit(1000);
+      .eq('status', 'approved');
     
     if (reviewsError) {
       console.error(`[${startTime}] Error fetching reviews:`, reviewsError);
@@ -101,11 +111,19 @@ ${staticPages.map(page => `
 
     console.log(`[${startTime}] Found ${reviews?.length || 0} approved reviews`);
 
-    // Add review pages to XML
+    // Add review pages with consistent formatting
     if (reviews) {
-      for (const review of reviews) {
+      reviews.forEach(review => {
         if (review.PATOLOGIE?.Patologia) {
-          const slug = review.title
+          const conditionSlug = review.PATOLOGIE.Patologia.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+          
+          const reviewSlug = review.title
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
@@ -114,16 +132,14 @@ ${staticPages.map(page => `
             .replace(/-+/g, '-')
             .trim();
           
-          const reviewUrl = `https://stomale.info/patologia/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}/esperienza/${review.id}-${slug}`;
-          console.log(`[${startTime}] Adding review URL: ${reviewUrl}`);
           xml += `
   <url>
-    <loc>${reviewUrl}</loc>
+    <loc>https://stomale.info/patologia/${encodeURIComponent(conditionSlug)}/esperienza/${review.id}-${reviewSlug}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`;
         }
-      }
+      });
     }
 
     // Close XML
@@ -132,7 +148,7 @@ ${staticPages.map(page => `
     const endTime = new Date().toISOString();
     console.log(`[${endTime}] Sitemap generation completed successfully`);
     
-    // Return the sitemap with CORS headers and no caching
+    // Return the sitemap with proper headers
     return new Response(xml, {
       headers: {
         ...corsHeaders,
@@ -145,7 +161,6 @@ ${staticPages.map(page => `
   } catch (error) {
     const errorTime = new Date().toISOString();
     console.error(`[${errorTime}] Error generating sitemap:`, error);
-    console.error(`[${errorTime}] Error stack:`, error.stack);
     return new Response(`Error generating sitemap: ${error.message}`, { 
       status: 500,
       headers: corsHeaders
