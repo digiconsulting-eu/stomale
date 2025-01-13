@@ -57,57 +57,6 @@
     <priority>0.8</priority>
   </url>
 
-  <url>
-    <loc>https://stomale.info/patologia/ansia/esperienza/1-la-mia-esperienza-con-ansia-e-attacchi-di-panico</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/2-convivere-con-la-depressione-maggiore</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/acne/esperienza/3-il-mio-percorso-con-acne-severa</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/4-gestire-il-diabete-tipo-2</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ansia/esperienza/5-ansia-sociale-e-terapia</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/6-depressione-e-isolamento-sociale</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/acne/esperienza/7-trattamenti-naturali-per-acne</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/8-vita-quotidiana-con-diabete</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ansia/esperienza/9-superare-attacchi-di-panico</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/10-depressione-post-partum</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
   <!-- Patologie con la A -->
   <url>
     <loc>https://stomale.info/patologia/acalasia</loc>
