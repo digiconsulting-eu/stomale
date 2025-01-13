@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ReviewsImport } from "./import/ReviewsImport";
-import { DescriptionsImport } from "./import/DescriptionsImport";
+import { ReviewsImport } from "./ReviewsImport";
+import { DescriptionsImport } from "./DescriptionsImport";
 
 const ImportTab = () => {
   return (
