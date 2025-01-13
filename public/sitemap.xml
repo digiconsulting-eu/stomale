@@ -322,4 +322,65 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+  <!-- Reviews -->
+  <url>
+    <loc>https://stomale.info/patologia/stenosi-lombare/esperienza/1000-mal-di-schiena</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/fibrotecoma-ovarico/esperienza/999-forte-dolore-all-ovaio-dopo-l-operazione</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/entesite/esperienza/955-la-difficolta-di-vivere-con-il-dolore-articolare</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/ascesso-gengivale/esperienza/253-indispensabile-il-dentista</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/emosiderosi/esperienza/910-il-ferro-in-eccesso-che-distrugge-il-corpo</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/acne/esperienza/116-da-adolescente-l-acne-mi-ha-rovinato-l-autostima</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/ascesso-gengivale/esperienza/251-dolore-insopportabile-ma-ho-trovato-sollievo</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/citomegalovirus/esperienza/530-virus-comune-ma-insidioso</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/chetoacidosi-alcolica/esperienza/479-situazione-grave-ma-superabile</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/cancro-della-vescica/esperienza/396-un-percorso-difficile</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/balanopostite/esperienza/303-diagnosi-complessa-cure-lente</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/carcinoma-della-cervice-uterina/esperienza/419-diagnosi-precoce-e-trattamento</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>
