@@ -63,16 +63,16 @@ const generateSitemap = async (supabase: any) => {
   </url>`).join('')}
   ${conditions?.map(condition => `
   <url>
-    <loc>https://stomale.info/patologia/${condition.Patologia.toLowerCase()}</loc>
+    <loc>https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`).join('')}
-  ${reviews?.map(review => `
+  ${reviews?.map(review => review.PATOLOGIE?.Patologia ? `
   <url>
-    <loc>https://stomale.info/recensione/${review.id}/${review.PATOLOGIE?.Patologia.toLowerCase()}</loc>
+    <loc>https://stomale.info/recensione/${review.id}/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>`).join('')}
+  </url>` : '').join('')}
 </urlset>`
 
   return xml.trim()
