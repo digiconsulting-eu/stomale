@@ -24,25 +24,25 @@ Deno.serve(async (req) => {
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Fetch all approved reviews with their condition names
+    console.log('Fetching all reviews from database...');
+
+    // Fetch all reviews with their condition names
     const { data: reviews, error: reviewsError } = await supabaseClient
       .from('reviews')
       .select(`
         id,
         title,
-        status,
         PATOLOGIE (
           Patologia
         )
-      `)
-      .eq('status', 'approved');
+      `);
 
     if (reviewsError) {
       console.error('Error fetching reviews:', reviewsError);
       throw reviewsError;
     }
 
-    console.log(`Found ${reviews?.length || 0} approved reviews`);
+    console.log(`Found ${reviews?.length || 0} total reviews`);
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
