@@ -17,6 +17,7 @@ const ReviewManagement = () => {
         .select(`
           *,
           PATOLOGIE (
+            id,
             Patologia
           )
         `)
