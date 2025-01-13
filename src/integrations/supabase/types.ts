@@ -194,6 +194,7 @@ export type Database = {
           has_medication: boolean | null
           healing_possibility: number | null
           id: number
+          import_timestamp: string | null
           medication_effectiveness: number | null
           social_discomfort: number | null
           status: string | null
@@ -212,6 +213,7 @@ export type Database = {
           has_medication?: boolean | null
           healing_possibility?: number | null
           id?: number
+          import_timestamp?: string | null
           medication_effectiveness?: number | null
           social_discomfort?: number | null
           status?: string | null
@@ -230,6 +232,7 @@ export type Database = {
           has_medication?: boolean | null
           healing_possibility?: number | null
           id?: number
+          import_timestamp?: string | null
           medication_effectiveness?: number | null
           social_discomfort?: number | null
           status?: string | null
