@@ -3,7 +3,7 @@ import { ReviewsGrid } from "./ReviewsGrid";
 import { ReviewsPagination } from "./ReviewsPagination";
 import { ReviewsDisclaimer } from "./ReviewsDisclaimer";
 import { ReviewsHeader } from "./ReviewsHeader";
-import { DatabaseReview } from "@/types/review";
+import { DatabaseReview, Review } from "@/types/review";
 
 interface ReviewsContentProps {
   reviews: DatabaseReview[];
@@ -22,6 +22,23 @@ export const ReviewsContent = ({
 }: ReviewsContentProps) => {
   console.log('Reviews in ReviewsContent:', reviews);
 
+  // Transform DatabaseReview[] to Review[]
+  const transformedReviews: Review[] = reviews.map(review => ({
+    id: review.id,
+    title: review.title,
+    condition: review.PATOLOGIE?.Patologia.toLowerCase() || '',
+    experience: review.experience,
+    diagnosis_difficulty: review.diagnosis_difficulty,
+    symptoms_severity: review.symptoms_severity,
+    has_medication: review.has_medication,
+    medication_effectiveness: review.medication_effectiveness,
+    healing_possibility: review.healing_possibility,
+    social_discomfort: review.social_discomfort,
+    username: review.username || 'Anonimo',
+    created_at: review.created_at,
+    PATOLOGIE: review.PATOLOGIE
+  }));
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-8">
@@ -35,7 +52,7 @@ export const ReviewsContent = ({
           </div>
         ) : (
           <ReviewsGrid 
-            reviews={reviews} 
+            reviews={transformedReviews}
             isLoading={isLoading} 
           />
         )}

@@ -123,9 +123,19 @@ export default function ConditionDetail() {
   };
 
   const reviews: Review[] = reviewsData?.map(review => ({
-    ...review,
+    id: review.id,
+    title: review.title,
     condition: condition || '',
-    username: review.username || 'Anonimo'
+    experience: review.experience,
+    diagnosis_difficulty: review.diagnosis_difficulty,
+    symptoms_severity: review.symptoms_severity,
+    has_medication: review.has_medication,
+    medication_effectiveness: review.medication_effectiveness,
+    healing_possibility: review.healing_possibility,
+    social_discomfort: review.social_discomfort,
+    username: review.username || 'Anonimo',
+    created_at: review.created_at,
+    PATOLOGIE: review.PATOLOGIE
   })) || [];
 
   const stats = calculateStats(reviews);
