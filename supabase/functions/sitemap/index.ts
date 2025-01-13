@@ -118,6 +118,7 @@ Deno.serve(async (req) => {
             .trim();
           
           const reviewUrl = `https://stomale.info/recensione/${review.id}-${slug}`;
+          console.log(`[${startTime}] Adding review URL: ${reviewUrl}`);
           xml += `
   <url>
     <loc>${reviewUrl}</loc>
@@ -133,6 +134,7 @@ Deno.serve(async (req) => {
 
     const endTime = new Date().toISOString();
     console.log(`[${endTime}] Sitemap generation completed successfully`);
+    console.log(`[${endTime}] Final XML length: ${xml.length} characters`);
     
     // Return the sitemap with proper headers
     return new Response(xml, {
