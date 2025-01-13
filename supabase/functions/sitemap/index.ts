@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Static pages with proper changefreq values
+    // Static pages
     const staticPages = [
       { path: '', priority: '1.0', changefreq: 'weekly' },
       { path: 'recensioni', priority: '0.8', changefreq: 'weekly' },
@@ -43,19 +43,15 @@ Deno.serve(async (req) => {
 
     console.log(`[${startTime}] Adding ${staticPages.length} static pages to sitemap`);
 
-    // Start building XML with proper XML declaration and namespace
+    // Start building XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
-
-    // Add static pages with proper XML formatting
-    staticPages.forEach(page => {
-      xml += `
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${staticPages.map(page => `
   <url>
     <loc>https://stomale.info/${page.path}</loc>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`;
-    });
+  </url>`).join('')}`;
 
     // Fetch all conditions
     console.log(`[${startTime}] Fetching conditions from database...`);
@@ -70,17 +66,18 @@ Deno.serve(async (req) => {
 
     console.log(`[${startTime}] Found ${conditions?.length || 0} conditions`);
 
-    // Add condition pages with proper XML formatting
+    // Add condition pages to XML
     if (conditions) {
-      conditions.forEach(condition => {
+      for (const condition of conditions) {
         const conditionUrl = `https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`;
+        console.log(`[${startTime}] Adding condition URL: ${conditionUrl}`);
         xml += `
   <url>
     <loc>${conditionUrl}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`;
-      });
+      }
     }
 
     // Fetch approved reviews
@@ -104,9 +101,9 @@ Deno.serve(async (req) => {
 
     console.log(`[${startTime}] Found ${reviews?.length || 0} approved reviews`);
 
-    // Add review pages with proper XML formatting
+    // Add review pages to XML
     if (reviews) {
-      reviews.forEach(review => {
+      for (const review of reviews) {
         if (review.PATOLOGIE?.Patologia) {
           const slug = review.title
             .toLowerCase()
@@ -117,7 +114,7 @@ Deno.serve(async (req) => {
             .replace(/-+/g, '-')
             .trim();
           
-          const reviewUrl = `https://stomale.info/recensione/${review.id}-${slug}`;
+          const reviewUrl = `https://stomale.info/patologia/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}/esperienza/${review.id}-${slug}`;
           console.log(`[${startTime}] Adding review URL: ${reviewUrl}`);
           xml += `
   <url>
@@ -126,17 +123,16 @@ Deno.serve(async (req) => {
     <priority>0.6</priority>
   </url>`;
         }
-      });
+      }
     }
 
-    // Close XML properly
+    // Close XML
     xml += '\n</urlset>';
 
     const endTime = new Date().toISOString();
     console.log(`[${endTime}] Sitemap generation completed successfully`);
-    console.log(`[${endTime}] Final XML length: ${xml.length} characters`);
     
-    // Return the sitemap with proper headers
+    // Return the sitemap with CORS headers and no caching
     return new Response(xml, {
       headers: {
         ...corsHeaders,
