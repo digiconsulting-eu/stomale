@@ -20,8 +20,14 @@ export const SitemapRedirect = () => {
           return;
         }
 
-        console.log('Sitemap content received:', data);
-        setSitemapContent(data);
+        // Format XML for display
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data, 'text/xml');
+        const serializer = new XMLSerializer();
+        const formattedXml = serializer.serializeToString(xmlDoc);
+
+        console.log('Sitemap XML received and formatted');
+        setSitemapContent(formattedXml);
       } catch (err: any) {
         console.error('Error in sitemap fetch:', err);
         setError('Error loading sitemap: ' + err.message);
@@ -36,7 +42,7 @@ export const SitemapRedirect = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p className="text-gray-600">Caricamento sitemap in corso...</p>
+        <p className="text-gray-600">Generazione sitemap in corso...</p>
       </div>
     );
   }
@@ -51,8 +57,8 @@ export const SitemapRedirect = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Sitemap</h1>
-      <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">
+      <h1 className="text-2xl font-bold mb-4">Sitemap XML</h1>
+      <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono text-sm">
         {sitemapContent}
       </pre>
     </div>
