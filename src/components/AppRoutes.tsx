@@ -74,7 +74,7 @@ export const AppRoutes = () => {
       <Route path="/cerca-patologia" element={<SearchCondition />} />
       <Route path="/cerca-sintomi" element={<SearchSymptoms />} />
       <Route path="/patologia/:condition" element={<ConditionDetail />} />
-      <Route path="/recensione/:id" element={<ReviewDetail />} />
+      <Route path="/patologia/:condition/esperienza/:slug" element={<ReviewDetail />} />
       <Route path="/recensioni" element={<Reviews />} />
       <Route path="/nuova-recensione" element={<NewReview />} />
     </Routes>

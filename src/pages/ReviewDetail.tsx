@@ -7,8 +7,9 @@ import { useReviewQuery } from "@/hooks/useReviewQuery";
 import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
 
 const ReviewDetail = () => {
-  const { slug, condition } = useParams();
-  const { data: review, isLoading, error } = useReviewQuery(slug, condition);
+  const { condition, slug } = useParams();
+  const reviewId = slug?.split('-')[0];
+  const { data: review, isLoading, error } = useReviewQuery(reviewId, condition);
 
   useEffect(() => {
     if (review?.title) {
