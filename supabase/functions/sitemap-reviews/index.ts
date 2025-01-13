@@ -34,11 +34,14 @@ Deno.serve(async (req) => {
           Patologia
         )
       `)
-      .eq('status', 'approved');
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false });
 
     if (reviewsError) {
       throw reviewsError;
     }
+
+    console.log(`Found ${reviews?.length || 0} approved reviews`);
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
@@ -81,6 +84,9 @@ Deno.serve(async (req) => {
         url_count: reviews?.length || 0
       })
       .eq('filename', 'sitemap-reviews.xml');
+
+    const endTime = new Date().toISOString();
+    console.log(`[${endTime}] Completed reviews sitemap generation with ${reviews?.length || 0} URLs`);
 
     return new Response(xml, {
       headers: {
