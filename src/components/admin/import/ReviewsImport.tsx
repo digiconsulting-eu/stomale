@@ -5,12 +5,11 @@ import * as XLSX from 'xlsx';
 import { Loader2, Trash2 } from "lucide-react";
 import { ImportInstructions } from "./ImportInstructions";
 import { validateRow } from "./ImportValidator";
-import { ConfirmDialog } from "../../ConfirmDialog";
 import { supabase } from "@/integrations/supabase/client";
 
 export const ReviewsImport = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [lastImportTimestamp, setLastImportTimestamp] = useState<string | null>(null);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -33,6 +32,7 @@ export const ReviewsImport = () => {
       console.log(`Processing ${jsonData.length} rows...`);
       const validReviews = [];
       const errors = [];
+      const timestamp = new Date().toISOString();
 
       for (const [index, row] of jsonData.entries()) {
         try {
@@ -44,19 +44,8 @@ export const ReviewsImport = () => {
             const { error: insertError } = await supabase
               .from('reviews')
               .insert({
-                condition_id: validatedRow.condition_id,
-                title: validatedRow.title,
-                symptoms: validatedRow.symptoms,
-                experience: validatedRow.experience,
-                diagnosis_difficulty: validatedRow.diagnosis_difficulty,
-                symptoms_severity: validatedRow.symptoms_severity,
-                has_medication: validatedRow.has_medication,
-                medication_effectiveness: validatedRow.medication_effectiveness,
-                healing_possibility: validatedRow.healing_possibility,
-                social_discomfort: validatedRow.social_discomfort,
-                created_at: validatedRow.created_at,
-                status: validatedRow.status,
-                user_id: validatedRow.user_id
+                ...validatedRow,
+                import_timestamp: timestamp
               });
 
             if (insertError) {
@@ -79,6 +68,7 @@ export const ReviewsImport = () => {
       }
 
       if (validReviews.length > 0) {
+        setLastImportTimestamp(timestamp);
         toast.success(
           `${validReviews.length} recensioni importate con successo${
             errors.length > 0 ? `. ${errors.length} recensioni ignorate per errori.` : '.'
@@ -89,38 +79,43 @@ export const ReviewsImport = () => {
       }
     } catch (error) {
       console.error('Errore durante l\'importazione:', error);
-      toast.error("Si è verificato un errore durante l'importazione del file.");
+      toast.error("Si è verificato un errore durante l'importazione del file");
     } finally {
       setIsLoading(false);
       event.target.value = '';
     }
   };
 
-  const handleClearImportedReviews = async () => {
+  const handleUndoLastImport = async () => {
+    if (!lastImportTimestamp) {
+      toast.error("Nessuna importazione recente da annullare");
+      return;
+    }
+
     try {
-      console.log('Attempting to clear imported reviews...');
       const { error } = await supabase
         .from('reviews')
         .delete()
-        .eq('status', 'approved');
+        .eq('import_timestamp', lastImportTimestamp);
 
       if (error) {
-        console.error('Error clearing reviews:', error);
-        throw error;
+        console.error('Error undoing import:', error);
+        toast.error("Errore durante l'annullamento dell'importazione");
+        return;
       }
 
-      console.log('Successfully cleared imported reviews');
-      toast.success("Tutte le recensioni importate sono state eliminate con successo");
+      toast.success("Ultima importazione annullata con successo");
+      setLastImportTimestamp(null);
     } catch (error) {
-      console.error('Error during deletion:', error);
-      toast.error("Si è verificato un errore durante l'eliminazione delle recensioni");
+      console.error('Error:', error);
+      toast.error("Si è verificato un errore durante l'annullamento dell'importazione");
     }
-    setShowDeleteDialog(false);
   };
 
   return (
     <div className="space-y-6">
       <ImportInstructions />
+      
       <div className="flex items-center gap-4">
         <Button
           variant="outline"
@@ -139,23 +134,17 @@ export const ReviewsImport = () => {
           />
         </Button>
 
-        <Button
-          variant="destructive"
-          onClick={() => setShowDeleteDialog(true)}
-          className="gap-2"
-        >
-          <Trash2 className="h-4 w-4" />
-          Elimina recensioni importate
-        </Button>
+        {lastImportTimestamp && (
+          <Button
+            variant="destructive"
+            onClick={handleUndoLastImport}
+            className="gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            Annulla ultima importazione
+          </Button>
+        )}
       </div>
-
-      <ConfirmDialog
-        isOpen={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
-        onConfirm={handleClearImportedReviews}
-        title="Elimina recensioni importate"
-        description="Sei sicuro di voler eliminare tutte le recensioni importate? Questa azione non può essere annullata."
-      />
     </div>
   );
 };
