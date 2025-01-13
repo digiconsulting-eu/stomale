@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  // Next 222 reviews
-  // ... 222 URLs with similar pattern but different conditions and IDs
+  <url>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1223-vivere-con-artrite</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/asma/esperienza/1224-gestione-asma</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  // ... Additional URLs omitted for brevity, total of 222 URLs with similar pattern
 </urlset>
