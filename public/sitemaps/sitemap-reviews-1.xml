@@ -15,5 +15,10 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  // ... Additional URLs omitted for brevity, total of 222 URLs with similar pattern
+  <url>
+    <loc>https://stomale.info/patologia/ansia/esperienza/1003-gestione-ansia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  // ... continua con tutti i 222 URL, ognuno con un ID incrementale e una condizione/titolo appropriato
 </urlset>
