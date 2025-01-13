@@ -23,9 +23,9 @@ Deno.serve(async (req) => {
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
-    console.log('Fetching reviews from database...')
+    console.log('Fetching approved reviews from database...')
 
-    // Fetch all reviews with their condition names
+    // Fetch all approved reviews with their condition names
     const { data: reviews, error: reviewsError } = await supabaseClient
       .from('reviews')
       .select(`
@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
           Patologia
         )
       `)
+      .eq('status', 'approved')
       .order('created_at', { ascending: false })
 
     if (reviewsError) {
@@ -42,7 +43,7 @@ Deno.serve(async (req) => {
       throw reviewsError
     }
 
-    console.log(`Found ${reviews?.length || 0} reviews`)
+    console.log(`Found ${reviews?.length || 0} approved reviews`)
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
@@ -79,6 +80,8 @@ Deno.serve(async (req) => {
 
     if (updateError) {
       console.error('Error updating sitemap_files:', updateError)
+    } else {
+      console.log('Updated sitemap_files table with new count:', reviews?.length || 0)
     }
 
     // Upload to storage
@@ -95,7 +98,7 @@ Deno.serve(async (req) => {
       throw uploadError
     }
 
-    console.log('Sitemap uploaded successfully')
+    console.log('Sitemap uploaded successfully to storage')
 
     // Get the public URL
     const { data: { publicUrl } } = supabaseClient
@@ -103,8 +106,10 @@ Deno.serve(async (req) => {
       .from('sitemaps')
       .getPublicUrl('sitemap-reviews.xml')
 
+    console.log('Sitemap public URL:', publicUrl)
+
     return new Response(
-      JSON.stringify({ success: true, url: publicUrl }),
+      JSON.stringify({ success: true, url: publicUrl, reviewCount: reviews?.length || 0 }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
