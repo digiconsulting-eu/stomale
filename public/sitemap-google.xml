@@ -37,7 +37,7 @@
     <priority>0.5</priority>
   </url>
 
-  <!-- Patologie dalla A alla Z -->
+  <!-- Patologie -->
   <url>
     <loc>https://stomale.info/patologia/acalasia</loc>
     <changefreq>weekly</changefreq>
