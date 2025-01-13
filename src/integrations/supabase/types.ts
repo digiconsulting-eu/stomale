@@ -281,6 +281,27 @@ export type Database = {
         }
         Relationships: []
       }
+      sitemap_files: {
+        Row: {
+          filename: string
+          id: number
+          last_modified: string | null
+          url_count: number | null
+        }
+        Insert: {
+          filename: string
+          id?: never
+          last_modified?: string | null
+          url_count?: number | null
+        }
+        Update: {
+          filename?: string
+          id?: never
+          last_modified?: string | null
+          url_count?: number | null
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           birth_year: string | null
