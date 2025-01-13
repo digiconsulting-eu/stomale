@@ -6,6 +6,8 @@ const corsHeaders = {
   'Content-Type': 'application/xml; charset=utf-8'
 }
 
+console.log('Sitemap function loaded and ready');
+
 Deno.serve(async (req) => {
   const startTime = new Date().toISOString();
   console.log(`[${startTime}] Starting sitemap generation...`);
@@ -17,12 +19,16 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Initialize Supabase client with anon key instead of service role
+    // Initialize Supabase client
     console.log(`[${startTime}] Initializing Supabase client...`);
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '' // Using anon key instead of service role key
-    )
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Missing Supabase configuration');
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
     // Static pages
     const staticPages = [
@@ -45,13 +51,13 @@ ${staticPages.map(page => `
     <loc>https://stomale.info/${page.path}</loc>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`).join('')}`
+  </url>`).join('')}`;
 
     // Fetch all conditions
     console.log(`[${startTime}] Fetching conditions from database...`);
     const { data: conditions, error: conditionsError } = await supabaseClient
       .from('PATOLOGIE')
-      .select('id, Patologia')
+      .select('Patologia')
     
     if (conditionsError) {
       console.error(`[${startTime}] Error fetching conditions:`, conditionsError);
@@ -96,9 +102,6 @@ ${staticPages.map(page => `
     console.log(`[${startTime}] Found ${reviews?.length || 0} approved reviews`);
 
     // Add review pages to XML
-    let addedReviews = 0;
-    let skippedReviews = 0;
-
     if (reviews) {
       for (const review of reviews) {
         if (review.PATOLOGIE?.Patologia) {
@@ -110,6 +113,7 @@ ${staticPages.map(page => `
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-')
             .trim();
+          
           const reviewUrl = `https://stomale.info/patologia/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}/esperienza/${review.id}-${slug}`;
           console.log(`[${startTime}] Adding review URL: ${reviewUrl}`);
           xml += `
@@ -118,10 +122,6 @@ ${staticPages.map(page => `
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`;
-          addedReviews++;
-        } else {
-          console.log(`[${startTime}] Skipping review ${review.id} - missing Patologia`);
-          skippedReviews++;
         }
       }
     }
@@ -129,20 +129,22 @@ ${staticPages.map(page => `
     // Close XML
     xml += '\n</urlset>';
 
-    console.log(`[${startTime}] Sitemap generation completed:`);
-    console.log(`- Added ${addedReviews} review URLs`);
-    console.log(`- Skipped ${skippedReviews} reviews`);
-    console.log(`- Total URLs: ${staticPages.length + (conditions?.length || 0) + addedReviews}`);
+    const endTime = new Date().toISOString();
+    console.log(`[${endTime}] Sitemap generation completed successfully`);
     
+    // Return the sitemap with CORS headers and no caching
     return new Response(xml, {
       headers: {
         ...corsHeaders,
-        'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       }
     });
+
   } catch (error) {
     const errorTime = new Date().toISOString();
-    console.error(`[${errorTime}] Fatal error in sitemap generation:`, error);
+    console.error(`[${errorTime}] Error generating sitemap:`, error);
     console.error(`[${errorTime}] Error stack:`, error.stack);
     return new Response(`Error generating sitemap: ${error.message}`, { 
       status: 500,
