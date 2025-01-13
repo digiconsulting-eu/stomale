@@ -36,7 +36,6 @@ const generateSitemap = async (supabase: any) => {
     .from('reviews')
     .select(`
       id,
-      condition_id,
       PATOLOGIE (
         Patologia
       )
