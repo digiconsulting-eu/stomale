@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  // First 222 reviews
+  <url>
+    <loc>https://stomale.info/patologia/stenosi-lombare/esperienza/1000-mal-di-schiena</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  // ... Additional 221 URLs with similar pattern but different conditions and IDs
+</urlset>
