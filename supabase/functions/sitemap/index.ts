@@ -14,7 +14,7 @@ const handleCors = (req: Request) => {
 }
 
 const generateSitemap = async (supabase: any) => {
-  console.log('Generating sitemap...')
+  console.log('Starting sitemap generation...')
 
   // Fetch all conditions
   const { data: conditions, error: conditionsError } = await supabase
@@ -26,7 +26,10 @@ const generateSitemap = async (supabase: any) => {
     throw conditionsError
   }
 
-  console.log('Fetched conditions:', conditions?.length)
+  console.log(`Fetched ${conditions?.length || 0} conditions`)
+  conditions?.forEach(condition => {
+    console.log('Adding condition URL:', `https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`)
+  })
 
   // Fetch all approved reviews with their associated conditions
   const { data: reviews, error: reviewsError } = await supabase
@@ -45,14 +48,14 @@ const generateSitemap = async (supabase: any) => {
     throw reviewsError
   }
 
-  console.log('Fetched approved reviews:', reviews?.length)
+  console.log(`Fetched ${reviews?.length || 0} approved reviews`)
   
   // Log review URLs being generated
   reviews?.forEach(review => {
     if (review.PATOLOGIE?.Patologia) {
       console.log('Adding review URL:', `https://stomale.info/recensione/${review.id}/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}`)
     } else {
-      console.log('Skipping review due to missing condition:', review.id)
+      console.warn('Skipping review due to missing condition:', review.id)
     }
   })
 
@@ -66,6 +69,8 @@ const generateSitemap = async (supabase: any) => {
     { path: 'cookie-policy', priority: '0.5', changefreq: 'monthly' },
     { path: 'terms', priority: '0.5', changefreq: 'monthly' }
   ]
+
+  console.log('Generating XML sitemap...')
 
   // Build XML
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -90,6 +95,7 @@ const generateSitemap = async (supabase: any) => {
   </url>`).join('')}
 </urlset>`
 
+  console.log('Sitemap generation completed')
   return xml.trim()
 }
 
@@ -99,6 +105,8 @@ Deno.serve(async (req) => {
   if (corsResponse) return corsResponse
 
   try {
+    console.log('Received sitemap request')
+    
     // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -106,6 +114,7 @@ Deno.serve(async (req) => {
     )
 
     const xml = await generateSitemap(supabaseClient)
+    console.log('Sitemap successfully generated and ready to be served')
     
     return new Response(xml, {
       headers: {
