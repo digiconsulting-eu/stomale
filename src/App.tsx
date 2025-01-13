@@ -36,15 +36,7 @@ const App = () => {
       try {
         console.log("Initializing app...");
         
-        // Initialize Supabase auth listener first
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-          console.log("Auth state changed:", event, session?.user?.email);
-          if (event === 'SIGNED_IN') {
-            queryClient.invalidateQueries();
-          }
-        });
-
-        // Then get the current session
+        // Get the current session first
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -57,6 +49,14 @@ const App = () => {
         }
 
         console.log("Session check completed", session);
+
+        // Then initialize auth state listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          console.log("Auth state changed:", event, session?.user?.email);
+          if (event === 'SIGNED_IN' && isMounted) {
+            queryClient.invalidateQueries();
+          }
+        });
 
         if (isMounted) {
           setIsLoading(false);
@@ -80,17 +80,17 @@ const App = () => {
 
     // Set a backup timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
-      if (isMounted) {
+      if (isMounted && isLoading) {
         console.log("Initialization timeout reached");
         setIsLoading(false);
       }
-    }, 5000); // Increased timeout to 5 seconds
+    }, 3000); // Reduced timeout to 3 seconds
 
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, []);
+  }, [isLoading]); // Added isLoading to dependencies
 
   if (isLoading) {
     return (
