@@ -24,20 +24,21 @@ Deno.serve(async (req) => {
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Fetch all approved reviews
+    // Fetch all approved reviews with their condition names
     const { data: reviews, error: reviewsError } = await supabaseClient
       .from('reviews')
       .select(`
         id,
         title,
+        status,
         PATOLOGIE (
           Patologia
         )
       `)
-      .eq('status', 'approved')
-      .order('created_at', { ascending: false });
+      .eq('status', 'approved');
 
     if (reviewsError) {
+      console.error('Error fetching reviews:', reviewsError);
       throw reviewsError;
     }
 
@@ -76,14 +77,18 @@ Deno.serve(async (req) => {
 
     xml += '\n</urlset>';
 
-    // Update the last_modified timestamp for this sitemap
-    await supabaseClient
+    // Update the last_modified timestamp and url_count for this sitemap
+    const { error: updateError } = await supabaseClient
       .from('sitemap_files')
       .update({ 
         last_modified: new Date().toISOString(),
         url_count: reviews?.length || 0
       })
       .eq('filename', 'sitemap-reviews.xml');
+
+    if (updateError) {
+      console.error('Error updating sitemap_files:', updateError);
+    }
 
     const endTime = new Date().toISOString();
     console.log(`[${endTime}] Completed reviews sitemap generation with ${reviews?.length || 0} URLs`);
