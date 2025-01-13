@@ -21,6 +21,7 @@ serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
+    // Fetch all conditions
     const { data: conditions, error: conditionsError } = await supabaseClient
       .from('PATOLOGIE')
       .select('Patologia')
@@ -31,6 +32,9 @@ serve(async (req) => {
       throw conditionsError
     }
 
+    console.log('Fetched conditions count:', conditions?.length)
+
+    // Fetch all approved reviews
     const { data: reviews, error: reviewsError } = await supabaseClient
       .from('reviews')
       .select('id, PATOLOGIE(Patologia)')
@@ -40,6 +44,8 @@ serve(async (req) => {
       console.error('Error fetching reviews:', reviewsError)
       throw reviewsError
     }
+
+    console.log('Fetched approved reviews count:', reviews?.length)
 
     const today = new Date().toISOString().split('T')[0]
     const baseUrl = 'https://stomale.info'
