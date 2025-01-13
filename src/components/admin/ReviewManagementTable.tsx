@@ -12,69 +12,27 @@ import { useQuery } from "@tanstack/react-query";
 import { ReviewActions } from "./ReviewActions";
 import { ReviewsPagination } from "../reviews/ReviewsPagination";
 import { useState } from "react";
+import { DatabaseReview } from "@/types/review";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ITEMS_PER_PAGE = 50;
 
-export const ReviewManagementTable = () => {
+interface ReviewManagementTableProps {
+  reviews: DatabaseReview[];
+  isLoading: boolean;
+}
+
+export const ReviewManagementTable = ({ reviews, isLoading }: ReviewManagementTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, error, isLoading } = useQuery({
-    queryKey: ['admin-reviews', currentPage],
-    queryFn: async () => {
-      console.log('Fetching reviews for admin page:', currentPage);
-      try {
-        // First get total count
-        const { count, error: countError } = await supabase
-          .from('reviews')
-          .select('*', { count: 'exact', head: true });
-
-        if (countError) throw countError;
-
-        // Then get paginated data
-        const from = (currentPage - 1) * ITEMS_PER_PAGE;
-        const to = from + ITEMS_PER_PAGE - 1;
-
-        const { data: reviews, error } = await supabase
-          .from('reviews')
-          .select(`
-            id,
-            title,
-            symptoms,
-            experience,
-            status,
-            created_at,
-            username,
-            PATOLOGIE (
-              Patologia
-            )
-          `)
-          .range(from, to)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        return {
-          reviews: reviews || [],
-          totalCount: count || 0,
-          totalPages: Math.ceil((count || 0) / ITEMS_PER_PAGE)
-        };
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-        throw error;
-      }
-    },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true
-  });
-
-  if (error) {
-    return <div>Error loading reviews</div>;
-  }
-
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-4">
+        {[...Array(5)].map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full" />
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -91,7 +49,7 @@ export const ReviewManagementTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.reviews.map((review) => (
+            {reviews.map((review) => (
               <TableRow key={review.id}>
                 <TableCell>{review.title}</TableCell>
                 <TableCell>{review.PATOLOGIE?.Patologia}</TableCell>
@@ -112,10 +70,10 @@ export const ReviewManagementTable = () => {
         </Table>
       </div>
 
-      {data?.totalPages > 1 && (
+      {reviews.length > ITEMS_PER_PAGE && (
         <ReviewsPagination
           currentPage={currentPage}
-          totalPages={data.totalPages}
+          totalPages={Math.ceil(reviews.length / ITEMS_PER_PAGE)}
           setCurrentPage={setCurrentPage}
         />
       )}
