@@ -12,6 +12,7 @@ import UserDashboard from "@/pages/UserDashboard";
 import Admin from "@/pages/Admin";
 import ReviewManagement from "@/pages/ReviewManagement";
 import UserManagement from "@/pages/UserManagement";
+import ImportTab from "@/components/admin/ImportTab";
 import InsertCondition from "@/pages/InsertCondition";
 import SearchCondition from "@/pages/SearchCondition";
 import SearchSymptoms from "@/pages/SearchSymptoms";
@@ -66,6 +67,15 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <UserManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/import"
+        element={
+          <ProtectedRoute>
+            <ImportTab />
           </ProtectedRoute>
         }
       />
