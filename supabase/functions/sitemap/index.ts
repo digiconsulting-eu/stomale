@@ -26,10 +26,12 @@ const generateSitemap = async (supabase: any) => {
     throw conditionsError
   }
 
+  console.log('Fetched conditions:', conditions?.length)
+
   // Fetch all approved reviews
   const { data: reviews, error: reviewsError } = await supabase
     .from('reviews')
-    .select('id, title')
+    .select('id, condition_id, PATOLOGIE(Patologia)')
     .eq('status', 'approved')
   
   if (reviewsError) {
@@ -37,15 +39,17 @@ const generateSitemap = async (supabase: any) => {
     throw reviewsError
   }
 
+  console.log('Fetched approved reviews:', reviews?.length)
+
   // Static pages
   const staticPages = [
-    '',
-    'recensioni',
-    'cerca-patologia',
-    'cerca-sintomi',
-    'privacy-policy',
-    'cookie-policy',
-    'terms'
+    { path: '', priority: '1.0', changefreq: 'weekly' },
+    { path: 'recensioni', priority: '0.8', changefreq: 'weekly' },
+    { path: 'cerca-patologia', priority: '0.8', changefreq: 'weekly' },
+    { path: 'cerca-sintomi', priority: '0.8', changefreq: 'weekly' },
+    { path: 'privacy-policy', priority: '0.5', changefreq: 'monthly' },
+    { path: 'cookie-policy', priority: '0.5', changefreq: 'monthly' },
+    { path: 'terms', priority: '0.5', changefreq: 'monthly' }
   ]
 
   // Build XML
@@ -53,19 +57,19 @@ const generateSitemap = async (supabase: any) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${staticPages.map(page => `
   <url>
-    <loc>https://stomale.info/${page}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>${page === '' ? '1.0' : '0.8'}</priority>
+    <loc>https://stomale.info/${page.path}</loc>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
   </url>`).join('')}
-  ${conditions.map(condition => `
+  ${conditions?.map(condition => `
   <url>
     <loc>https://stomale.info/patologia/${condition.Patologia.toLowerCase()}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`).join('')}
-  ${reviews.map(review => `
+  ${reviews?.map(review => `
   <url>
-    <loc>https://stomale.info/recensione/${review.id}</loc>
+    <loc>https://stomale.info/recensione/${review.id}/${review.PATOLOGIE?.Patologia.toLowerCase()}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`).join('')}
