@@ -1,30 +1,29 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { slugify } from 'https://deno.land/x/slugify@0.3.0/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'application/xml; charset=utf-8'
 }
 
 Deno.serve(async (req) => {
-  const startTime = new Date().toISOString();
-  console.log(`[${startTime}] Starting reviews sitemap generation...`);
-
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    console.log('Starting sitemap generation...')
+    
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Missing Supabase configuration');
+      throw new Error('Required environment variables are not set')
     }
 
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
 
-    console.log('Fetching all reviews from database...');
+    console.log('Fetching reviews from database...')
 
     // Fetch all reviews with their condition names
     const { data: reviews, error: reviewsError } = await supabaseClient
@@ -35,76 +34,91 @@ Deno.serve(async (req) => {
         PATOLOGIE (
           Patologia
         )
-      `);
+      `)
+      .order('created_at', { ascending: false })
 
     if (reviewsError) {
-      console.error('Error fetching reviews:', reviewsError);
-      throw reviewsError;
+      console.error('Error fetching reviews:', reviewsError)
+      throw reviewsError
     }
 
-    console.log(`Found ${reviews?.length || 0} total reviews`);
+    console.log(`Found ${reviews?.length || 0} reviews`)
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
 
+    // Generate URLs for each review
     reviews?.forEach(review => {
       if (review.PATOLOGIE?.Patologia) {
-        const conditionSlug = review.PATOLOGIE.Patologia.toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-')
-          .trim();
-
-        const reviewSlug = review.title
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-')
-          .trim();
-
+        const condition = review.PATOLOGIE.Patologia.toLowerCase()
+        const titleSlug = slugify(review.title)
+        const url = `https://stomale.info/patologia/${condition}/esperienza/${review.id}-${titleSlug}`
+        
         xml += `
   <url>
-    <loc>https://stomale.info/patologia/${encodeURIComponent(conditionSlug)}/esperienza/${review.id}-${reviewSlug}</loc>
+    <loc>${url}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>`;
+  </url>`
       }
-    });
+    })
 
-    xml += '\n</urlset>';
+    xml += `
+</urlset>`
 
-    // Update the last_modified timestamp and url_count for this sitemap
+    console.log('Generated XML sitemap')
+
+    // Update sitemap_files table with new count
     const { error: updateError } = await supabaseClient
       .from('sitemap_files')
-      .update({ 
+      .upsert({
+        filename: 'sitemap-reviews.xml',
         last_modified: new Date().toISOString(),
         url_count: reviews?.length || 0
       })
-      .eq('filename', 'sitemap-reviews.xml');
 
     if (updateError) {
-      console.error('Error updating sitemap_files:', updateError);
+      console.error('Error updating sitemap_files:', updateError)
     }
 
-    const endTime = new Date().toISOString();
-    console.log(`[${endTime}] Completed reviews sitemap generation with ${reviews?.length || 0} URLs`);
+    // Upload to storage
+    const { error: uploadError } = await supabaseClient
+      .storage
+      .from('sitemaps')
+      .upload('sitemap-reviews.xml', xml, {
+        contentType: 'application/xml',
+        upsert: true
+      })
 
-    return new Response(xml, {
-      headers: {
-        ...corsHeaders,
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+    if (uploadError) {
+      console.error('Error uploading sitemap:', uploadError)
+      throw uploadError
+    }
+
+    console.log('Sitemap uploaded successfully')
+
+    // Get the public URL
+    const { data: { publicUrl } } = supabaseClient
+      .storage
+      .from('sitemaps')
+      .getPublicUrl('sitemap-reviews.xml')
+
+    return new Response(
+      JSON.stringify({ success: true, url: publicUrl }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
       }
-    });
+    )
 
   } catch (error) {
-    console.error(`Error generating reviews sitemap:`, error);
-    return new Response(`Error generating reviews sitemap: ${error.message}`, {
-      status: 500,
-      headers: corsHeaders
-    });
+    console.error('Error:', error)
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
+    )
   }
 })
