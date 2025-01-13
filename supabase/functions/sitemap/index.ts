@@ -28,10 +28,16 @@ const generateSitemap = async (supabase: any) => {
 
   console.log('Fetched conditions:', conditions?.length)
 
-  // Fetch all approved reviews
+  // Fetch all approved reviews with their associated conditions
   const { data: reviews, error: reviewsError } = await supabase
     .from('reviews')
-    .select('id, condition_id, PATOLOGIE(Patologia)')
+    .select(`
+      id,
+      condition_id,
+      PATOLOGIE (
+        Patologia
+      )
+    `)
     .eq('status', 'approved')
   
   if (reviewsError) {
@@ -67,12 +73,12 @@ const generateSitemap = async (supabase: any) => {
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`).join('')}
-  ${reviews?.map(review => review.PATOLOGIE?.Patologia ? `
+  ${reviews?.filter(review => review.PATOLOGIE?.Patologia).map(review => `
   <url>
     <loc>https://stomale.info/recensione/${review.id}/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>` : '').join('')}
+  </url>`).join('')}
 </urlset>`
 
   return xml.trim()
