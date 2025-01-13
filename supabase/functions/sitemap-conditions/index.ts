@@ -9,7 +9,8 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   const startTime = new Date().toISOString();
   const url = new URL(req.url);
-  const letter = url.searchParams.get('letter') || 'a';
+  const pathParts = url.pathname.split('/');
+  const letter = pathParts[pathParts.length - 1].split('-').pop()?.split('.')[0] || 'a';
   
   console.log(`[${startTime}] Starting conditions sitemap generation for letter ${letter}...`);
 
@@ -27,49 +28,21 @@ Deno.serve(async (req) => {
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Fetch all conditions or filter by letter if specified
-    const query = supabaseClient
+    // Fetch conditions that start with the specified letter
+    const { data: conditions, error: conditionsError } = await supabaseClient
       .from('PATOLOGIE')
       .select('Patologia')
+      .ilike('Patologia', `${letter}%`)
       .order('Patologia');
-
-    // Only apply letter filter if a specific letter is requested
-    if (letter !== 'all') {
-      query.ilike('Patologia', `${letter}%`);
-    }
-
-    const { data: conditions, error: conditionsError } = await query;
 
     if (conditionsError) {
       throw conditionsError;
     }
 
-    console.log(`[${startTime}] Found ${conditions?.length || 0} conditions${letter !== 'all' ? ` for letter ${letter}` : ''}`);
+    console.log(`[${startTime}] Found ${conditions?.length || 0} conditions for letter ${letter}`);
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
-
-    // Add static pages first
-    const staticPages = [
-      { path: '', priority: '1.0', changefreq: 'weekly' },
-      { path: 'recensioni', priority: '0.8', changefreq: 'weekly' },
-      { path: 'cerca-patologia', priority: '0.8', changefreq: 'weekly' },
-      { path: 'cerca-sintomi', priority: '0.8', changefreq: 'weekly' },
-      { path: 'privacy-policy', priority: '0.5', changefreq: 'monthly' },
-      { path: 'cookie-policy', priority: '0.5', changefreq: 'monthly' },
-      { path: 'terms', priority: '0.5', changefreq: 'monthly' }
-    ];
-
-    if (letter === 'all') {
-      staticPages.forEach(page => {
-        xml += `
-  <url>
-    <loc>https://stomale.info/${page.path}</loc>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>`;
-      });
-    }
 
     // Add all conditions
     conditions?.forEach(condition => {
@@ -98,13 +71,13 @@ Deno.serve(async (req) => {
         last_modified: new Date().toISOString(),
         url_count: conditions?.length || 0
       })
-      .eq('filename', letter === 'all' ? 'sitemap.xml' : `sitemap-conditions-${letter}.xml`);
+      .eq('filename', `sitemap-conditions-${letter}.xml`);
 
     if (updateError) {
       console.error(`[${startTime}] Error updating sitemap file record:`, updateError);
     }
 
-    console.log(`[${startTime}] Successfully generated sitemap${letter !== 'all' ? ` for letter ${letter}` : ''}`);
+    console.log(`[${startTime}] Successfully generated sitemap for letter ${letter}`);
 
     return new Response(xml, {
       headers: {
