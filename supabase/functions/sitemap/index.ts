@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
             .replace(/-+/g, '-')
             .trim();
           
-          const reviewUrl = `https://stomale.info/patologia/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}/esperienza/${review.id}-${slug}`;
+          const reviewUrl = `https://stomale.info/recensione/${review.id}-${slug}`;
           xml += `
   <url>
     <loc>${reviewUrl}</loc>
