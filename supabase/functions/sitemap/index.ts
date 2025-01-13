@@ -6,48 +6,20 @@ const corsHeaders = {
   'Content-Type': 'application/xml; charset=utf-8'
 }
 
-// Handle CORS preflight requests
-const handleCors = (req: Request) => {
+Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
-}
-
-const generateSitemap = async (supabase: any) => {
-  console.log('Starting sitemap generation...')
 
   try {
-    // Fetch all conditions
-    const { data: conditions, error: conditionsError } = await supabase
-      .from('PATOLOGIE')
-      .select('id, Patologia')
+    console.log('Starting sitemap generation...')
     
-    if (conditionsError) {
-      console.error('Error fetching conditions:', conditionsError)
-      throw conditionsError
-    }
-
-    console.log(`Fetched ${conditions?.length || 0} conditions`)
-
-    // Fetch all approved reviews with their associated conditions
-    const { data: reviews, error: reviewsError } = await supabase
-      .from('reviews')
-      .select(`
-        id,
-        condition_id,
-        PATOLOGIE (
-          id,
-          Patologia
-        )
-      `)
-      .eq('status', 'approved')
-    
-    if (reviewsError) {
-      console.error('Error fetching reviews:', reviewsError)
-      throw reviewsError
-    }
-
-    console.log(`Fetched ${reviews?.length || 0} approved reviews`)
+    // Initialize Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
 
     // Static pages
     const staticPages = [
@@ -60,59 +32,83 @@ const generateSitemap = async (supabase: any) => {
       { path: 'terms', priority: '0.5', changefreq: 'monthly' }
     ]
 
-    // Build XML
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    // Start building XML with static pages
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  ${staticPages.map(page => `
+${staticPages.map(page => `
   <url>
     <loc>https://stomale.info/${page.path}</loc>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`).join('')}
-  ${conditions?.map(condition => {
-    console.log('Adding condition URL:', `https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`)
-    return `
+  </url>`).join('')}`
+
+    // Fetch all conditions
+    console.log('Fetching conditions...')
+    const { data: conditions, error: conditionsError } = await supabaseClient
+      .from('PATOLOGIE')
+      .select('id, Patologia')
+    
+    if (conditionsError) {
+      console.error('Error fetching conditions:', conditionsError)
+      throw conditionsError
+    }
+
+    console.log(`Found ${conditions?.length || 0} conditions`)
+
+    // Add condition pages to XML
+    if (conditions) {
+      for (const condition of conditions) {
+        const conditionUrl = `https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`
+        console.log('Adding condition URL:', conditionUrl)
+        xml += `
   <url>
-    <loc>https://stomale.info/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}</loc>
+    <loc>${conditionUrl}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`
-  }).join('')}
-  ${reviews?.filter(review => review.PATOLOGIE?.Patologia).map(review => {
-    const url = `https://stomale.info/recensione/${review.id}/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}`
-    console.log('Adding review URL:', url)
-    return `
+      }
+    }
+
+    // Fetch approved reviews in batches
+    console.log('Fetching approved reviews...')
+    const { data: reviews, error: reviewsError } = await supabaseClient
+      .from('reviews')
+      .select(`
+        id,
+        PATOLOGIE (
+          Patologia
+        )
+      `)
+      .eq('status', 'approved')
+      .limit(1000)
+    
+    if (reviewsError) {
+      console.error('Error fetching reviews:', reviewsError)
+      throw reviewsError
+    }
+
+    console.log(`Found ${reviews?.length || 0} approved reviews`)
+
+    // Add review pages to XML
+    if (reviews) {
+      for (const review of reviews) {
+        if (review.PATOLOGIE?.Patologia) {
+          const reviewUrl = `https://stomale.info/recensione/${review.id}/${encodeURIComponent(review.PATOLOGIE.Patologia.toLowerCase())}`
+          console.log('Adding review URL:', reviewUrl)
+          xml += `
   <url>
-    <loc>${url}</loc>
+    <loc>${reviewUrl}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`
-  }).join('')}
-</urlset>`
+        }
+      }
+    }
+
+    // Close XML
+    xml += '\n</urlset>'
 
     console.log('Sitemap generation completed successfully')
-    return xml.trim()
-  } catch (error) {
-    console.error('Error generating sitemap:', error)
-    throw error
-  }
-}
-
-Deno.serve(async (req) => {
-  // Handle CORS
-  const corsResponse = handleCors(req)
-  if (corsResponse) return corsResponse
-
-  try {
-    console.log('Received sitemap request')
-    
-    // Initialize Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
-    const xml = await generateSitemap(supabaseClient)
     
     return new Response(xml, {
       headers: {
@@ -122,7 +118,7 @@ Deno.serve(async (req) => {
     })
   } catch (error) {
     console.error('Fatal error in sitemap generation:', error)
-    return new Response('Error generating sitemap', { 
+    return new Response(`Error generating sitemap: ${error.message}`, { 
       status: 500,
       headers: corsHeaders
     })
