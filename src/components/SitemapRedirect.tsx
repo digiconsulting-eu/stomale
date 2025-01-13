@@ -1,66 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 
 export const SitemapRedirect = () => {
-  const [sitemapContent, setSitemapContent] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
-    const fetchSitemap = async () => {
+    const fetchAndRedirectSitemap = async () => {
       try {
-        setIsLoading(true);
         const { data, error } = await supabase.functions.invoke('sitemap', {
           method: 'GET'
         });
 
         if (error) {
           console.error('Error fetching sitemap:', error);
-          setError('Error loading sitemap: ' + error.message);
           return;
         }
 
-        // Format XML for display
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data, 'text/xml');
-        const serializer = new XMLSerializer();
-        const formattedXml = serializer.serializeToString(xmlDoc);
-
-        console.log('Sitemap XML received and formatted');
-        setSitemapContent(formattedXml);
-      } catch (err: any) {
+        // Create a Blob with the XML content
+        const blob = new Blob([data], { type: 'application/xml' });
+        const url = window.URL.createObjectURL(blob);
+        
+        // Create a link and trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('type', 'application/xml');
+        
+        // Trigger the download
+        document.body.appendChild(link);
+        link.click();
+        
+        // Cleanup
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
         console.error('Error in sitemap fetch:', err);
-        setError('Error loading sitemap: ' + err.message);
-      } finally {
-        setIsLoading(false);
       }
     };
 
-    fetchSitemap();
+    fetchAndRedirectSitemap();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <p className="text-gray-600">Generazione sitemap in corso...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-red-500">{error}</div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Sitemap XML</h1>
-      <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono text-sm">
-        {sitemapContent}
-      </pre>
-    </div>
-  );
+  // Return null since we don't want to render anything
+  return null;
 };
