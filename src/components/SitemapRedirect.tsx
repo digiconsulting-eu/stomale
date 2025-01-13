@@ -14,21 +14,18 @@ export const SitemapRedirect = () => {
           return;
         }
 
-        // Set the XML content type
-        document.contentType = 'application/xml';
-        
-        // Clear any existing content
-        document.documentElement.innerHTML = '';
-        
-        // Create and append the XML processing instruction
-        const xmlPI = document.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"');
-        document.insertBefore(xmlPI, document.documentElement);
-        
-        // Parse and append the sitemap XML
+        // Create a new XML document
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(data, 'application/xml');
-        document.documentElement.remove(); // Remove the existing HTML root
-        document.appendChild(xmlDoc.documentElement);
+        
+        // Serialize the XML document
+        const serializer = new XMLSerializer();
+        const xmlString = serializer.serializeToString(xmlDoc);
+        
+        // Create a new document to replace the current one
+        document.open('text/xml');
+        document.write(xmlString);
+        document.close();
         
       } catch (err) {
         console.error('Error in sitemap fetch:', err);
