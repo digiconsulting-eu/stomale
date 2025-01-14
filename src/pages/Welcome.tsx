@@ -24,14 +24,14 @@ export default function Welcome() {
         <div className="grid gap-6 md:grid-cols-2">
           <Button 
             onClick={() => navigate('/cerca-patologia')}
-            className="h-32 text-xl"
+            className="h-32 text-xl text-white"
           >
             Cerca Patologia
           </Button>
 
           <Button 
             onClick={() => navigate('/nuova-recensione')}
-            className="h-32 text-xl"
+            className="h-32 text-xl text-white"
           >
             Racconta la tua Esperienza
           </Button>
