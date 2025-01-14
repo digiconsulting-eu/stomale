@@ -14,48 +14,37 @@ export default function Index() {
     setPageTitle("Stomale.info | Recensioni su malattie, sintomi e patologie");
   }, []);
 
-  const { data: latestReviews = [], isLoading, isError } = useQuery({
+  const { data: latestReviews, isLoading, isError } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
       console.log('Starting reviews fetch...');
-      try {
-        const { data, error } = await supabase
-          .from('reviews')
-          .select(`
+      
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          title,
+          experience,
+          username,
+          created_at,
+          condition_id,
+          PATOLOGIE (
             id,
-            title,
-            experience,
-            username,
-            created_at,
-            PATOLOGIE (
-              id,
-              Patologia
-            )
-          `)
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false })
-          .limit(12);
+            Patologia
+          )
+        `)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(12);
 
-        if (error) {
-          console.error('Error fetching reviews:', error);
-          throw error;
-        }
-
-        console.log('Fetched reviews:', data);
-        
-        if (!data) {
-          console.log('No reviews data returned');
-          return [];
-        }
-
-        return data;
-      } catch (error) {
-        console.error('Error in query execution:', error);
+      if (error) {
+        console.error('Error fetching reviews:', error);
         throw error;
       }
-    },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    gcTime: 1000 * 60 * 5 // Keep unused data for 5 minutes
+
+      console.log('Fetched reviews:', data);
+      return data || [];
+    }
   });
 
   if (isError) {
@@ -100,7 +89,7 @@ export default function Index() {
               <Skeleton key={i} className="h-[300px]" />
             ))}
           </div>
-        ) : latestReviews.length > 0 ? (
+        ) : latestReviews && latestReviews.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {latestReviews.map((review) => (
               <ReviewCard

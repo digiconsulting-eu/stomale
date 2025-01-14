@@ -15,8 +15,6 @@ export const SearchBar = () => {
   const { data: conditions = [] } = useQuery({
     queryKey: ['conditions'],
     queryFn: async () => {
-      console.log('Fetching conditions for SearchBar...');
-      
       try {
         const { data, error } = await supabase
           .from('PATOLOGIE')
@@ -30,29 +28,23 @@ export const SearchBar = () => {
 
         console.log('Fetched conditions:', data);
         return data?.map(item => item.Patologia) || [];
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error in conditions query:', error);
         toast.error("Errore durante il caricamento delle patologie");
         throw error;
       }
-    },
-    staleTime: 1000 * 60 * 5,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
+    }
   });
 
   const handleSearch = (term: string = searchTerm) => {
     if (term) {
-      console.log('Handling search for term:', term);
       const exactMatch = conditions.find(
         condition => condition.toLowerCase() === term.toLowerCase()
       );
       
       if (exactMatch) {
-        console.log('Found exact match:', exactMatch);
         navigate(`/patologia/${exactMatch.toLowerCase()}`);
       } else {
-        console.log('No exact match, navigating to search page');
         navigate(`/cerca-patologia?q=${encodeURIComponent(term)}`);
       }
       
