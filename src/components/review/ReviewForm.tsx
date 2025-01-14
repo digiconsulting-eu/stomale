@@ -88,7 +88,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       console.log('Found condition ID:', patologiaData.id);
 
       // Insert review
-      const { data: reviewData, error: reviewError } = await supabase
+      const { error: reviewError } = await supabase
         .from('reviews')
         .insert([
           {
@@ -105,22 +105,16 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
             social_discomfort: data.socialDiscomfort,
             status: 'pending'
           }
-        ])
-        .select()
-        .single();
+        ]);
 
       if (reviewError) {
         console.error('Error inserting review:', reviewError);
         throw reviewError;
       }
 
-      console.log('Review inserted successfully:', reviewData);
-
-      toast.success(
-        "La tua esperienza è stata inviata con successo! Sarà pubblicata dopo la revisione.",
-        { duration: 5000 }
-      );
-      navigate("/dashboard");
+      console.log('Review submitted successfully');
+      navigate("/grazie");
+      
     } catch (error) {
       console.error('Error submitting review:', error);
       toast.error("Si è verificato un errore durante l'invio della recensione. Riprova più tardi.");

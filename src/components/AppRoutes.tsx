@@ -21,6 +21,7 @@ import NewReview from "@/pages/NewReview";
 import ReviewDetail from "@/pages/ReviewDetail";
 import Reviews from "@/pages/Reviews";
 import Welcome from "@/pages/Welcome";
+import ThankYou from "@/pages/ThankYou";
 
 export const AppRoutes = () => {
   return (
@@ -89,6 +90,7 @@ export const AppRoutes = () => {
       <Route path="/patologia/:condition/esperienza/:slug" element={<ReviewDetail />} />
       <Route path="/recensioni" element={<Reviews />} />
       <Route path="/nuova-recensione" element={<NewReview />} />
+      <Route path="/grazie" element={<ThankYou />} />
     </Routes>
   );
 };
