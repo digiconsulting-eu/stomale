@@ -1,75 +1,49 @@
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { capitalizeFirstLetter } from "@/utils/textUtils";
 
 interface ReviewCardProps {
   id: number;
   title: string;
   condition: string;
-  date: string;
-  username?: string;
   preview: string;
+  date: string;
+  username: string;
 }
 
-export const ReviewCard = ({ 
-  id, 
-  title, 
+export const ReviewCard = ({
+  id,
+  title,
   condition,
+  preview,
+  date,
   username,
-  preview 
 }: ReviewCardProps) => {
-  if (!condition || !title) {
-    console.error('ReviewCard missing required props:', { condition, title });
-    return null;
-  }
-
-  const formattedCondition = condition.toLowerCase();
-  const formattedTitle = title.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 flex flex-col h-[300px] border-2 border-primary">
-      {/* Title */}
-      <Link 
-        to={`/patologia/${formattedCondition}/esperienza/${id}-${formattedTitle}`}
-        className="hover:text-primary transition-colors"
-      >
-        <h3 className="text-lg font-semibold mb-2 line-clamp-2">{title}</h3>
-      </Link>
-
-      {/* Username */}
-      <p className="text-sm text-gray-600 mb-2">
-        {username || 'Anonimo'}
-      </p>
-
-      {/* Condition Badge */}
-      <Link 
-        to={`/patologia/${formattedCondition}`}
-        className="inline-block mb-2"
-      >
-        <Badge 
-          variant="outline" 
-          className="text-primary hover:text-primary/80 bg-primary/10 border-primary/20 hover:bg-primary/20 cursor-pointer transition-colors"
+    <Card className="p-4 h-[300px] flex flex-col justify-between border-2 border-primary">
+      <div>
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-lg font-semibold text-primary hover:underline">
+            <Link to={`/recensione/${id}`}>{title}</Link>
+          </h3>
+          <span className="text-sm text-gray-500">{date}</span>
+        </div>
+        <Link 
+          to={`/patologia/${condition.toLowerCase()}`}
+          className="text-sm text-gray-600 hover:underline mb-2 block"
         >
-          {capitalizeFirstLetter(condition)}
-        </Badge>
-      </Link>
-
-      {/* Preview Text */}
-      <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-        {preview}
-      </p>
-
-      {/* Read More Button */}
-      <Link 
-        to={`/patologia/${formattedCondition}/esperienza/${id}-${formattedTitle}`}
-        className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors mt-auto text-sm"
-      >
-        Leggi l'esperienza completa
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Link>
-    </div>
+          {condition}
+        </Link>
+        <p className="text-gray-600 line-clamp-2 mb-1">{preview}</p>
+        <p className="text-sm text-gray-500">Recensione di {username}</p>
+      </div>
+      <Button asChild variant="ghost" className="w-full justify-between mt-2">
+        <Link to={`/recensione/${id}`}>
+          Leggi recensione completa
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Link>
+      </Button>
+    </Card>
   );
 };
