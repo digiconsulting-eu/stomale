@@ -27,7 +27,7 @@ interface ConditionReviewsProps {
 }
 
 export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionReviewsProps) => {
-  console.log('Condition reviews:', { reviews, condition });
+  console.log('ConditionReviews rendering with:', { reviews, condition, isLoading });
 
   if (isLoading) {
     return (
@@ -39,6 +39,7 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
   }
 
   if (!reviews || reviews.length === 0) {
+    console.log('No reviews found for condition:', condition);
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">Non ci sono ancora recensioni per questa patologia.</p>
@@ -48,17 +49,20 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
 
   return (
     <div className="space-y-4">
-      {reviews.map((review) => (
-        <ReviewCard 
-          key={review.id}
-          id={review.id}
-          title={review.title}
-          condition={condition}
-          date={new Date(review.created_at).toLocaleDateString()}
-          preview={review.experience.slice(0, 200) + '...'}
-          username={review.username}
-        />
-      ))}
+      {reviews.map((review) => {
+        console.log('Rendering review:', review);
+        return (
+          <ReviewCard 
+            key={review.id}
+            id={review.id}
+            title={review.title}
+            condition={condition}
+            date={new Date(review.created_at).toLocaleDateString()}
+            preview={review.experience.slice(0, 200) + '...'}
+            username={review.username}
+          />
+        );
+      })}
     </div>
   );
 };

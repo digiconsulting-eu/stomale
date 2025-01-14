@@ -18,16 +18,6 @@ export const SearchBar = () => {
       console.log('Fetching conditions for SearchBar...');
       
       try {
-        // Check rate limit before making the request
-        const rateLimitResponse = await supabase.functions.invoke('rate-limit');
-        const rateLimitData = await rateLimitResponse.data;
-        
-        if (rateLimitResponse.error) {
-          throw new Error(rateLimitResponse.error.message);
-        }
-
-        console.log('Rate limit remaining:', rateLimitData.remaining);
-
         const { data, error } = await supabase
           .from('PATOLOGIE')
           .select('Patologia')
@@ -38,14 +28,11 @@ export const SearchBar = () => {
           throw error;
         }
 
+        console.log('Fetched conditions:', data);
         return data?.map(item => item.Patologia) || [];
       } catch (error: any) {
-        if (error.status === 429) {
-          toast.error("Troppe richieste. Riprova tra qualche secondo.");
-        } else {
-          console.error('Error:', error);
-          toast.error("Errore durante il caricamento delle patologie");
-        }
+        console.error('Error in conditions query:', error);
+        toast.error("Errore durante il caricamento delle patologie");
         throw error;
       }
     },
@@ -56,13 +43,16 @@ export const SearchBar = () => {
 
   const handleSearch = (term: string = searchTerm) => {
     if (term) {
+      console.log('Handling search for term:', term);
       const exactMatch = conditions.find(
         condition => condition.toLowerCase() === term.toLowerCase()
       );
       
       if (exactMatch) {
+        console.log('Found exact match:', exactMatch);
         navigate(`/patologia/${exactMatch.toLowerCase()}`);
       } else {
+        console.log('No exact match, navigating to search page');
         navigate(`/cerca-patologia?q=${encodeURIComponent(term)}`);
       }
       
