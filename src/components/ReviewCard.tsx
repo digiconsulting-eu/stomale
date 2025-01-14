@@ -30,7 +30,7 @@ export const ReviewCard = ({
     .replace(/(^-|-$)/g, '');
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 flex flex-col h-[350px] border-2 border-primary">
+    <div className="bg-white rounded-lg shadow-md p-4 flex flex-col h-[300px] border-2 border-primary">
       {/* Title */}
       <Link 
         to={`/patologia/${formattedCondition}/esperienza/${id}-${formattedTitle}`}
@@ -58,7 +58,7 @@ export const ReviewCard = ({
       </Link>
 
       {/* Preview Text */}
-      <p className="text-gray-600 text-sm line-clamp-2 mb-3 flex-grow">
+      <p className="text-gray-600 text-sm line-clamp-2 mb-2">
         {preview}
       </p>
 
