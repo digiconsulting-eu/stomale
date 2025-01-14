@@ -14,64 +14,49 @@ export default function Index() {
     setPageTitle("Stomale.info | Recensioni su malattie, sintomi e patologie");
   }, []);
 
-const { data: latestReviews = [], isLoading, isError } = useQuery({
-  queryKey: ['latestReviews'],
-  queryFn: async () => {
-    console.log('Starting reviews fetch...');
-    try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          title,
-          experience,
-          diagnosis_difficulty,
-          symptoms_severity,
-          has_medication,
-          medication_effectiveness,
-          healing_possibility,
-          social_discomfort,
-          username,
-          created_at,
-          PATOLOGIE (
+  const { data: latestReviews = [], isLoading, isError } = useQuery({
+    queryKey: ['latestReviews'],
+    queryFn: async () => {
+      console.log('Starting reviews fetch...');
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select(`
             id,
-            Patologia
-          )
-        `)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(12);
+            title,
+            experience,
+            username,
+            created_at,
+            PATOLOGIE (
+              id,
+              Patologia
+            )
+          `)
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false })
+          .limit(12);
 
-      if (error) {
-        console.error('Error fetching reviews:', error);
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          throw error;
+        }
+
+        console.log('Fetched reviews:', data);
+        
+        if (!data) {
+          console.log('No reviews data returned');
+          return [];
+        }
+
+        return data;
+      } catch (error) {
+        console.error('Error in query execution:', error);
         throw error;
       }
-
-      console.log('Fetched reviews with usernames:', data);
-      
-      if (!data) {
-        console.log('No reviews data returned');
-        return [];
-      }
-
-      // Transform the data to ensure username is properly handled
-      const transformedReviews = data.map(review => ({
-        ...review,
-        username: review.username || 'Anonimo'
-      }));
-
-      console.log('Transformed reviews:', transformedReviews);
-      return transformedReviews;
-    } catch (error) {
-      console.error('Error in query execution:', error);
-      throw error;
-    }
-  },
-  staleTime: 0,
-  gcTime: 0,
-  refetchOnMount: true,
-  refetchOnWindowFocus: true
-});
+    },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 5 // Keep unused data for 5 minutes
+  });
 
   if (isError) {
     console.error('Error loading reviews');
@@ -125,7 +110,7 @@ const { data: latestReviews = [], isLoading, isError } = useQuery({
                 condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
                 date={new Date(review.created_at).toLocaleDateString()}
                 preview={review.experience.slice(0, 200) + '...'}
-                username={review.username}
+                username={review.username || 'Anonimo'}
               />
             ))}
           </div>

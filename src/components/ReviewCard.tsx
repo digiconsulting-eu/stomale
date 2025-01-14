@@ -19,17 +19,15 @@ export const ReviewCard = ({
   username,
   preview 
 }: ReviewCardProps) => {
-  const formattedCondition = condition?.toLowerCase() || '';
-  const formattedTitle = title?.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-
-  console.log('ReviewCard rendering with:', { id, title, condition, username, formattedCondition, formattedTitle });
-
   if (!condition || !title) {
     console.error('ReviewCard missing required props:', { condition, title });
     return null;
   }
+
+  const formattedCondition = condition.toLowerCase();
+  const formattedTitle = title.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 flex flex-col h-full">
