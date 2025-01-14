@@ -21,7 +21,7 @@ export const ReviewCard = ({
   username,
 }: ReviewCardProps) => {
   return (
-    <Card className="bg-[#F5F7FA] rounded-3xl border border-[#E4E7EB] shadow-sm">
+    <Card className="bg-white rounded-3xl border border-[#D3E4FD] shadow-sm">
       <div className="p-6">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary">
@@ -29,7 +29,7 @@ export const ReviewCard = ({
           </h3>
           <span className="text-sm text-gray-500">{date}</span>
         </div>
-        <p className="text-sm text-gray-500 mb-2">Recensione di {username}</p>
+        <p className="text-sm text-gray-500 mb-2">{username}</p>
         <Link 
           to={`/patologia/${condition.toLowerCase()}`}
           className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
