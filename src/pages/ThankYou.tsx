@@ -22,13 +22,13 @@ export default function ThankYou() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
           <Link to="/cerca-patologia">
-            <Button className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto text-white">
               Cerca una Patologia
             </Button>
           </Link>
           
           <Link to="/nuova-recensione">
-            <Button className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto text-white">
               Racconta un'altra Esperienza
             </Button>
           </Link>
