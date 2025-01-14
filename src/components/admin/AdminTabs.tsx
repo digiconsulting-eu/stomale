@@ -17,7 +17,7 @@ interface AdminTabsProps {
   handleAddAdmin: () => void;
   handleReviewAction: (id: number, action: "approve" | "reject") => void;
   handleCommentAction: (id: number, action: "approve" | "reject") => void;
-  markNotificationAsRead: (id: string) => void;
+  markNotificationAsRead: (id: number) => void;
 }
 
 export const AdminTabs = ({

@@ -122,7 +122,7 @@ const Admin = () => {
     setNewAdminEmail("");
   };
 
-  const markNotificationAsRead = async (id: string) => {
+  const markNotificationAsRead = async (id: number) => {
     const { error } = await supabase
       .from('condition_updates')
       .update({ read: true })
