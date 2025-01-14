@@ -19,9 +19,9 @@ export default function Register() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event);
       if (event === 'SIGNED_IN') {
-        console.log("User signed in, redirecting to home...");
+        console.log("User signed in, redirecting to welcome page...");
         toast.success("Registrazione completata con successo");
-        navigate('/', { replace: true });
+        navigate('/welcome', { replace: true });
       }
     });
 

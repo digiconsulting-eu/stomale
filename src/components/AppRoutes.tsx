@@ -20,11 +20,13 @@ import ConditionDetail from "@/pages/ConditionDetail";
 import NewReview from "@/pages/NewReview";
 import ReviewDetail from "@/pages/ReviewDetail";
 import Reviews from "@/pages/Reviews";
+import Welcome from "@/pages/Welcome";
 
 export const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
+      <Route path="/welcome" element={<Welcome />} />
       
       <Route path="/login" element={<Login />} />
       <Route path="/registrati" element={<Register />} />
