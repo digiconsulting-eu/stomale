@@ -25,7 +25,7 @@ export const ReviewCard = ({
       <div className="p-6">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary">
-            <Link to={`/recensione/${id}`}>{title}</Link>
+            <Link to={`/patologia/${condition.toLowerCase()}/esperienza/${id}-${title.toLowerCase().replace(/\s+/g, '-')}`}>{title}</Link>
           </h3>
         </div>
         <p className="text-sm text-gray-500 mb-2">{username}</p>
@@ -40,7 +40,7 @@ export const ReviewCard = ({
           asChild 
           className="w-full bg-primary text-white hover:bg-primary-hover justify-center rounded-xl py-6"
         >
-          <Link to={`/recensione/${id}`}>
+          <Link to={`/patologia/${condition.toLowerCase()}/esperienza/${id}-${title.toLowerCase().replace(/\s+/g, '-')}`}>
             Leggi l'esperienza completa
             <ArrowRight className="h-4 w-4 ml-2" />
           </Link>
