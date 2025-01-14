@@ -1,5 +1,4 @@
 import { Disclaimer } from "@/components/Disclaimer";
-import { CommentSection } from "@/components/CommentSection";
 import { ReviewStats } from "@/components/ReviewStats";
 import { ReviewHeader } from "./ReviewHeader";
 import { ReviewBody } from "./ReviewBody";
@@ -116,10 +115,6 @@ export const ReviewContent = ({
               healingPossibility={healingPossibility}
               socialDiscomfort={socialDiscomfort}
             />
-          </div>
-
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <CommentSection reviewId={reviewId} />
           </div>
 
           <ReviewActions condition={condition} />
