@@ -21,7 +21,7 @@ export const ReviewCard = ({
   username,
 }: ReviewCardProps) => {
   return (
-    <Card className="p-4 h-[300px] flex flex-col justify-between border-2 border-primary">
+    <Card className="p-6 flex flex-col justify-between border-2 border-primary">
       <div>
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold text-primary hover:underline">
@@ -35,10 +35,10 @@ export const ReviewCard = ({
         >
           {condition}
         </Link>
-        <p className="text-gray-600 line-clamp-2 mb-1">{preview}</p>
+        <p className="text-gray-600 line-clamp-2 mb-4">{preview}</p>
         <p className="text-sm text-gray-500">Recensione di {username}</p>
       </div>
-      <Button asChild variant="ghost" className="w-full justify-between mt-2">
+      <Button asChild variant="ghost" className="w-full justify-between mt-4">
         <Link to={`/recensione/${id}`}>
           Leggi recensione completa
           <ArrowRight className="h-4 w-4 ml-2" />
