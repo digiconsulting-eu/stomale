@@ -21,13 +21,12 @@ export const ReviewCard = ({
   username,
 }: ReviewCardProps) => {
   return (
-    <Card className="bg-white rounded-3xl border border-[#D3E4FD] shadow-sm">
+    <Card className="bg-white rounded-3xl border border-[#1EAEDB] shadow-sm">
       <div className="p-6">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary">
             <Link to={`/recensione/${id}`}>{title}</Link>
           </h3>
-          <span className="text-sm text-gray-500">{date}</span>
         </div>
         <p className="text-sm text-gray-500 mb-2">{username}</p>
         <Link 
