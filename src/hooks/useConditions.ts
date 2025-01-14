@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface UseConditionsProps {
   page?: number;
@@ -40,6 +41,7 @@ export const useConditions = ({
 
       if (error) {
         console.error('Error fetching conditions:', error);
+        toast.error("Errore nel caricamento delle patologie. Riprova tra qualche secondo.");
         throw error;
       }
 
@@ -50,7 +52,15 @@ export const useConditions = ({
       };
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: 2, // Reduce number of retries
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Cap retry delay at 10 seconds
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Cap retry delay at 30 seconds
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: true, // Refetch when reconnecting
+    meta: {
+      onError: (error: Error) => {
+        console.error('Query error:', error);
+        toast.error("Errore nel caricamento delle patologie. Riprova tra qualche secondo.");
+      }
+    }
   });
 };

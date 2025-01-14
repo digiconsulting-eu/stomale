@@ -24,6 +24,7 @@ const Reviews = () => {
 
         if (countError) {
           console.error('Error getting count:', countError);
+          toast.error("Errore nel caricamento delle recensioni. Riprova tra qualche secondo.");
           throw countError;
         }
 
@@ -61,6 +62,7 @@ const Reviews = () => {
 
         if (reviewsError) {
           console.error('Error fetching reviews:', reviewsError);
+          toast.error("Errore nel caricamento delle recensioni. Riprova tra qualche secondo.");
           throw reviewsError;
         }
 
@@ -90,17 +92,15 @@ const Reviews = () => {
         };
       } catch (error) {
         console.error('Error in reviews query:', error);
+        toast.error("Errore nel caricamento delle recensioni. Riprova tra qualche secondo.");
         throw error;
       }
     },
-    meta: {
-      onError: (error: Error) => {
-        console.error('Query error:', error);
-        toast.error("Errore nel caricamento delle recensioni");
-      }
-    },
-    refetchOnMount: true,
-    refetchOnWindowFocus: true
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Cap retry delay at 30 seconds
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true
   });
 
   useEffect(() => {
@@ -112,7 +112,7 @@ const Reviews = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center text-red-500">
-          Si è verificato un errore nel caricamento delle recensioni.
+          Si è verificato un errore nel caricamento delle recensioni. Riprova tra qualche secondo.
         </div>
       </div>
     );
