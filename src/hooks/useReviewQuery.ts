@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 const extractReviewId = (slug: string) => {
   const parts = slug.split('-');
-  // Convert the ID part to a number
   return parseInt(parts[0], 10);
 };
 
@@ -37,7 +36,6 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
           )
         `)
         .eq('status', 'approved')
-        .eq('PATOLOGIE.Patologia', decodeURIComponent(condition || '').toUpperCase())
         .eq('id', reviewId)
         .maybeSingle();
 
@@ -48,6 +46,12 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
       
       if (!data) {
         console.log('No review found with these parameters');
+        return null;
+      }
+
+      // Verify that the condition matches
+      if (data.PATOLOGIE?.Patologia.toLowerCase() !== decodeURIComponent(condition).toLowerCase()) {
+        console.log('Condition mismatch');
         return null;
       }
 

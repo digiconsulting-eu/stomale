@@ -27,7 +27,7 @@ interface ConditionReviewsProps {
 }
 
 export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionReviewsProps) => {
-  console.log('Condition reviews with usernames:', reviews);
+  console.log('Condition reviews:', { reviews, condition });
 
   if (isLoading) {
     return (
@@ -38,9 +38,17 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
     );
   }
 
+  if (!reviews || reviews.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">Non ci sono ancora recensioni per questa patologia.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {reviews?.map((review) => (
+      {reviews.map((review) => (
         <ReviewCard 
           key={review.id}
           id={review.id}
