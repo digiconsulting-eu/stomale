@@ -33,7 +33,7 @@ export const ReviewHeader = ({
             variant="outline" 
             className="text-[#0EA5E9] hover:text-[#0EA5E9]/80 bg-[#0EA5E9]/10 border-[#0EA5E9]/20 hover:bg-[#0EA5E9]/20 cursor-pointer transition-colors"
           >
-            {capitalizeFirstLetter(condition)}
+            {condition.toUpperCase()}
           </Badge>
         </Link>
       </div>

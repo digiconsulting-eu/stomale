@@ -33,7 +33,7 @@ export const ReviewCard = ({
           to={`/patologia/${condition.toLowerCase()}`}
           className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
         >
-          {condition}
+          {condition.toUpperCase()}
         </Link>
         <p className="text-gray-600 line-clamp-2 mb-4">{preview}</p>
         <Button 
