@@ -38,7 +38,7 @@ export const ReviewCard = ({
         <p className="text-gray-600 line-clamp-2 mb-1">{preview}</p>
         <p className="text-sm text-gray-500">Recensione di {username}</p>
       </div>
-      <Button asChild variant="ghost" className="w-full justify-between mt-2">
+      <Button asChild variant="ghost" className="w-full justify-between mt-1">
         <Link to={`/recensione/${id}`}>
           Leggi recensione completa
           <ArrowRight className="h-4 w-4 ml-2" />
