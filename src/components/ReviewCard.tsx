@@ -30,13 +30,13 @@ export const ReviewCard = ({
     .replace(/(^-|-$)/g, '');
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 flex flex-col h-full">
+    <div className="bg-white rounded-lg shadow-md p-6 flex flex-col h-[350px]">
       {/* Title */}
       <Link 
         to={`/patologia/${formattedCondition}/esperienza/${id}-${formattedTitle}`}
         className="hover:text-primary transition-colors"
       >
-        <h3 className="text-xl font-semibold mb-3">{title}</h3>
+        <h3 className="text-lg font-semibold mb-2 line-clamp-2">{title}</h3>
       </Link>
 
       {/* Username */}
@@ -47,7 +47,7 @@ export const ReviewCard = ({
       {/* Condition Badge */}
       <Link 
         to={`/patologia/${formattedCondition}`}
-        className="inline-block mb-4"
+        className="inline-block mb-3"
       >
         <Badge 
           variant="outline" 
@@ -58,14 +58,14 @@ export const ReviewCard = ({
       </Link>
 
       {/* Preview Text */}
-      <p className="text-gray-600 line-clamp-2 mb-6 flex-grow">
+      <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-grow">
         {preview}
       </p>
 
       {/* Read More Button */}
       <Link 
         to={`/patologia/${formattedCondition}/esperienza/${id}-${formattedTitle}`}
-        className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors mt-auto"
+        className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors mt-auto text-sm"
       >
         Leggi l'esperienza completa
         <ArrowRight className="ml-2 h-4 w-4" />
