@@ -21,29 +21,32 @@ export const ReviewCard = ({
   username,
 }: ReviewCardProps) => {
   return (
-    <Card className="p-6 flex flex-col justify-between border-2 border-primary">
-      <div>
+    <Card className="bg-[#F5F7FA] rounded-3xl border border-[#E4E7EB] shadow-sm">
+      <div className="p-6">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold text-primary hover:underline">
+          <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary">
             <Link to={`/recensione/${id}`}>{title}</Link>
           </h3>
           <span className="text-sm text-gray-500">{date}</span>
         </div>
+        <p className="text-sm text-gray-500 mb-2">Recensione di {username}</p>
         <Link 
           to={`/patologia/${condition.toLowerCase()}`}
-          className="text-sm text-gray-600 hover:underline mb-2 block"
+          className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
         >
           {condition}
         </Link>
         <p className="text-gray-600 line-clamp-2 mb-4">{preview}</p>
-        <p className="text-sm text-gray-500">Recensione di {username}</p>
+        <Button 
+          asChild 
+          className="w-full bg-primary text-white hover:bg-primary-hover justify-center rounded-xl py-6"
+        >
+          <Link to={`/recensione/${id}`}>
+            Leggi l'esperienza completa
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Link>
+        </Button>
       </div>
-      <Button asChild variant="ghost" className="w-full justify-between mt-4">
-        <Link to={`/recensione/${id}`}>
-          Leggi recensione completa
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Link>
-      </Button>
     </Card>
   );
 };
