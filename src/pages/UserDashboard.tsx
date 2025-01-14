@@ -7,11 +7,13 @@ import { NotificationsTab } from "@/components/dashboard/NotificationsTab";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { FavoritesTab } from "@/components/dashboard/FavoritesTab";
 import { Badge } from "@/components/ui/badge";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { DatabaseReview } from "@/types/review";
 
 const UserDashboard = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(
     location.state?.activeTab || "reviews"
   );
@@ -95,7 +97,15 @@ const UserDashboard = () => {
           {isLoading ? (
             <p className="text-gray-500">Caricamento recensioni...</p>
           ) : reviews?.length === 0 ? (
-            <p className="text-gray-500">Non hai ancora scritto recensioni.</p>
+            <div className="text-center space-y-4">
+              <p className="text-gray-500">Non hai ancora scritto recensioni.</p>
+              <Button 
+                onClick={() => navigate('/nuova-recensione')}
+                className="text-xl py-6 px-8 text-white"
+              >
+                Racconta la tua Esperienza
+              </Button>
+            </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {reviews?.map((review) => (

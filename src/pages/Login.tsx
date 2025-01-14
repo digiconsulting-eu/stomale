@@ -62,9 +62,9 @@ export default function Login() {
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
 
-      // Add a small delay before navigation to ensure state is properly set
+      // Redirect to dashboard instead of home
       setTimeout(() => {
-        navigate(isAdmin ? '/admin' : '/dashboard');
+        navigate('/dashboard');
       }, 100);
       
     } catch (error: any) {
