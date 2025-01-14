@@ -9,7 +9,6 @@ import { FavoritesTab } from "@/components/dashboard/FavoritesTab";
 import { Badge } from "@/components/ui/badge";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { DatabaseReview } from "@/types/review";
 
 const UserDashboard = () => {
   const location = useLocation();
@@ -18,18 +17,29 @@ const UserDashboard = () => {
     location.state?.activeTab || "reviews"
   );
 
-  const { data: reviews, isLoading } = useQuery({
-    queryKey: ['user-reviews'],
+  // Add auth check
+  const { data: session, isLoading: isSessionLoading } = useQuery({
+    queryKey: ['auth-session'],
     queryFn: async () => {
-      console.log('Starting to fetch user reviews...');
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) return [];
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      return session;
+    },
+  });
 
+  // Fetch reviews only if we have a session
+  const { data: reviews, isLoading: isReviewsLoading } = useQuery({
+    queryKey: ['user-reviews', session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user) return [];
+
+      console.log('Starting to fetch user reviews...');
+      
       // First get the user's username
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('username')
-        .eq('id', session.session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (userError) {
@@ -71,15 +81,30 @@ const UserDashboard = () => {
         throw error;
       }
       return data || [];
-    }
+    },
+    enabled: !!session?.user, // Only run query if we have a session
   });
 
-  // Update active tab when location state changes
+  // Redirect to login if no session
   useEffect(() => {
-    if (location.state?.activeTab) {
-      setActiveTab(location.state.activeTab);
+    if (!isSessionLoading && !session) {
+      navigate('/login');
     }
-  }, [location.state]);
+  }, [session, isSessionLoading, navigate]);
+
+  // Show loading state while checking auth
+  if (isSessionLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  // If we're not loading and have no session, don't render anything (redirect will happen)
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -94,7 +119,7 @@ const UserDashboard = () => {
         </TabsList>
 
         <TabsContent value="reviews" className="space-y-6">
-          {isLoading ? (
+          {isReviewsLoading ? (
             <p className="text-gray-500">Caricamento recensioni...</p>
           ) : reviews?.length === 0 ? (
             <div className="text-center space-y-4">
