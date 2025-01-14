@@ -13,6 +13,17 @@ import { Button } from "@/components/ui/button";
 const MODAL_TIMEOUT = 90000; // 90 seconds in milliseconds
 const LAST_MODAL_INTERACTION_KEY = 'lastAuthModalInteraction';
 
+// Pages where the modal should not appear
+const EXCLUDED_PATHS = [
+  '/login',
+  '/registrati',
+  '/cookie-policy',
+  '/privacy-policy',
+  '/terms',
+  '/aggiorna-password',
+  '/recupera-password'
+];
+
 export const AuthModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
@@ -22,29 +33,28 @@ export const AuthModal = () => {
     const checkAuthStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session) {
-        console.log("User not logged in, checking last modal interaction...");
-        const lastInteraction = localStorage.getItem(LAST_MODAL_INTERACTION_KEY);
-        const currentTime = Date.now();
-        
-        if (!lastInteraction || currentTime - parseInt(lastInteraction) > MODAL_TIMEOUT) {
-          const timer = setTimeout(() => {
-            // Don't show modal on login or register pages
-            if (!['/login', '/registrati'].includes(location.pathname)) {
-              console.log("90 seconds elapsed, showing auth modal");
-              setIsOpen(true);
-            }
-          }, MODAL_TIMEOUT);
-          
-          return () => {
-            console.log("Clearing auth modal timer");
-            clearTimeout(timer);
-          };
-        } else {
-          console.log("Modal interaction too recent, waiting...");
-        }
-      } else {
+      // Don't show modal if user is logged in or on excluded paths
+      if (session || EXCLUDED_PATHS.includes(location.pathname)) {
         setIsOpen(false);
+        return;
+      }
+
+      console.log("User not logged in, checking last modal interaction...");
+      const lastInteraction = localStorage.getItem(LAST_MODAL_INTERACTION_KEY);
+      const currentTime = Date.now();
+      
+      if (!lastInteraction || currentTime - parseInt(lastInteraction) > MODAL_TIMEOUT) {
+        const timer = setTimeout(() => {
+          console.log("90 seconds elapsed, showing auth modal");
+          setIsOpen(true);
+        }, MODAL_TIMEOUT);
+        
+        return () => {
+          console.log("Clearing auth modal timer");
+          clearTimeout(timer);
+        };
+      } else {
+        console.log("Modal interaction too recent, waiting...");
       }
     };
 
