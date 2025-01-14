@@ -20,13 +20,18 @@ export const AuthModal = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
+        console.log("User not logged in, setting timer for auth modal...");
         const timer = setTimeout(() => {
           // Don't show modal on login or register pages
           if (!['/login', '/registrati'].includes(location.pathname)) {
+            console.log("90 seconds elapsed, showing auth modal");
             setIsOpen(true);
           }
-        }, 90000); // 90 seconds
-        return () => clearTimeout(timer);
+        }, 90000); // 90 seconds = 90000 milliseconds
+        return () => {
+          console.log("Clearing auth modal timer");
+          clearTimeout(timer);
+        };
       } else {
         setIsOpen(false);
       }
