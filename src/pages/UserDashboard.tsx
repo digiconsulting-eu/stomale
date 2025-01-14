@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReviewCard } from "@/components/ReviewCard";
@@ -9,25 +9,33 @@ import { FavoritesTab } from "@/components/dashboard/FavoritesTab";
 import { Badge } from "@/components/ui/badge";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const UserDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(
     location.state?.activeTab || "reviews"
   );
 
-  // Add auth check
+  // Add auth check with better error handling
   const { data: session, isLoading: isSessionLoading } = useQuery({
     queryKey: ['auth-session'],
     queryFn: async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) throw error;
+      if (error) {
+        console.error('Session error:', error);
+        toast.error("Errore nel caricamento della sessione");
+        throw error;
+      }
       return session;
     },
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Fetch reviews only if we have a session
+  // Fetch reviews with proper error handling
   const { data: reviews, isLoading: isReviewsLoading } = useQuery({
     queryKey: ['user-reviews', session?.user?.id],
     queryFn: async () => {
@@ -40,10 +48,11 @@ const UserDashboard = () => {
         .from('users')
         .select('username')
         .eq('id', session.user.id)
-        .single();
+        .maybeSingle();
 
       if (userError) {
         console.error('Error fetching user data:', userError);
+        toast.error("Errore nel caricamento dei dati utente");
         throw userError;
       }
 
@@ -78,24 +87,26 @@ const UserDashboard = () => {
 
       if (error) {
         console.error('Error fetching reviews:', error);
+        toast.error("Errore nel caricamento delle recensioni");
         throw error;
       }
       return data || [];
     },
-    enabled: !!session?.user, // Only run query if we have a session
+    enabled: !!session?.user,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Redirect to login if no session
   useEffect(() => {
     if (!isSessionLoading && !session) {
-      navigate('/login');
+      navigate('/login', { state: { returnTo: '/dashboard' } });
     }
   }, [session, isSessionLoading, navigate]);
 
   // Show loading state while checking auth
   if (isSessionLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
       </div>
     );
