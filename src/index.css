@@ -6,16 +6,16 @@
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-secondary to-white text-text font-sans antialiased min-h-screen;
+    @apply bg-white text-text font-sans antialiased min-h-screen;
   }
 }
 
 .card {
-  @apply bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 transition-all hover:shadow-xl border border-gray-100;
+  @apply bg-white backdrop-blur-sm rounded-xl shadow-lg p-6 transition-all hover:shadow-xl border border-gray-100;
 }
 
 .input {
-  @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white/80 backdrop-blur-sm;
+  @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white;
 }
 
 .button-primary {
