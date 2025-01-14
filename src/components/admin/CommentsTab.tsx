@@ -9,25 +9,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface CommentData {
-  id: number;
+interface Comment {
+  id: string;
   content: string;
-  created_at: string;
+  author: string;
+  reviewTitle: string;
   status: string;
-  users: {
-    username: string;
-  };
-  reviews: {
-    title: string;
-  };
+  date: string;
 }
 
 interface CommentsTabProps {
-  commentsData: CommentData[];
-  handleCommentAction: (id: number, action: "approve" | "reject") => void;
+  comments: Comment[];
+  handleCommentAction: (id: string, action: "approve" | "reject") => void;
 }
 
-export const CommentsTab = ({ commentsData, handleCommentAction }: CommentsTabProps) => {
+export const CommentsTab = ({ comments, handleCommentAction }: CommentsTabProps) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -42,12 +38,12 @@ export const CommentsTab = ({ commentsData, handleCommentAction }: CommentsTabPr
           </TableRow>
         </TableHeader>
         <TableBody>
-          {commentsData.map((comment) => (
+          {comments.map((comment) => (
             <TableRow key={comment.id}>
               <TableCell className="max-w-xs truncate">{comment.content}</TableCell>
-              <TableCell>{comment.users?.username}</TableCell>
-              <TableCell>{comment.reviews?.title}</TableCell>
-              <TableCell>{new Date(comment.created_at).toLocaleDateString('it-IT')}</TableCell>
+              <TableCell>{comment.author}</TableCell>
+              <TableCell>{comment.reviewTitle}</TableCell>
+              <TableCell>{comment.date}</TableCell>
               <TableCell>
                 <Badge variant={comment.status === "approved" ? "default" : "secondary"}>
                   {comment.status === "approved" ? "Approvato" : "In attesa"}

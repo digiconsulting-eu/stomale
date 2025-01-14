@@ -187,7 +187,6 @@ export type Database = {
       }
       reviews: {
         Row: {
-          comment_count: number | null
           condition_id: number | null
           created_at: string | null
           diagnosis_difficulty: number | null
@@ -207,7 +206,6 @@ export type Database = {
           username: string | null
         }
         Insert: {
-          comment_count?: number | null
           condition_id?: number | null
           created_at?: string | null
           diagnosis_difficulty?: number | null
@@ -227,7 +225,6 @@ export type Database = {
           username?: string | null
         }
         Update: {
-          comment_count?: number | null
           condition_id?: number | null
           created_at?: string | null
           diagnosis_difficulty?: number | null

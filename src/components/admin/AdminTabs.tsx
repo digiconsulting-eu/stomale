@@ -10,20 +10,20 @@ import ImportTab from "./ImportTab";
 interface AdminTabsProps {
   notifications: any[];
   reviews: any[];
-  commentsData: any[];
+  comments: any[];
   admins: any[];
   newAdminEmail: string;
   setNewAdminEmail: (email: string) => void;
   handleAddAdmin: () => void;
   handleReviewAction: (id: number, action: "approve" | "reject") => void;
-  handleCommentAction: (id: number, action: "approve" | "reject") => void;
-  markNotificationAsRead: (id: number) => void;
+  handleCommentAction: (id: string, action: "approve" | "reject") => void;
+  markNotificationAsRead: (id: string) => void;
 }
 
 export const AdminTabs = ({
   notifications,
   reviews,
-  commentsData,
+  comments,
   admins,
   newAdminEmail,
   setNewAdminEmail,
@@ -77,7 +77,7 @@ export const AdminTabs = ({
 
         <TabsContent value="comments" className="m-0">
           <CommentsTab 
-            commentsData={commentsData}
+            comments={comments}
             handleCommentAction={handleCommentAction}
           />
         </TabsContent>
