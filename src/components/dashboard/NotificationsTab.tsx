@@ -21,6 +21,23 @@ export const NotificationsTab = () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) return [];
 
+      // First get the user's username
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('username')
+        .eq('id', session.session.user.id)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+        throw userError;
+      }
+
+      if (!userData?.username) {
+        console.log('No username found for user');
+        return [];
+      }
+
       // Get user's followed conditions
       const { data: followedConditions } = await supabase
         .from('condition_follows')
@@ -31,7 +48,7 @@ export const NotificationsTab = () => {
       const { data: userReviews } = await supabase
         .from('reviews')
         .select('id, condition_id')
-        .eq('username', session.session.user.username);
+        .eq('username', userData.username);
 
       if (!followedConditions && !userReviews) return [];
 
