@@ -23,18 +23,12 @@ export const FollowButton = ({ conditionId }: FollowButtonProps) => {
         return;
       }
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('condition_follows')
         .select('id')
         .eq('condition_id', conditionId)
         .eq('user_id', session.session.user.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error checking follow status:', error);
-        setIsLoading(false);
-        return;
-      }
+        .maybeSingle();
 
       setIsFollowing(!!data);
       setIsLoading(false);
