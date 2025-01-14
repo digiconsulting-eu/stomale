@@ -47,6 +47,16 @@ export const ReviewContent = ({
     queryKey: ['condition-reviews', condition],
     queryFn: async () => {
       console.log('Fetching other reviews for condition:', condition);
+      const { data: patologiaData } = await supabase
+        .from('PATOLOGIE')
+        .select('id')
+        .eq('Patologia', condition.toUpperCase())
+        .single();
+
+      if (!patologiaData) {
+        throw new Error('Condition not found');
+      }
+
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -54,12 +64,9 @@ export const ReviewContent = ({
           title,
           experience,
           username,
-          created_at,
-          PATOLOGIE (
-            id,
-            Patologia
-          )
+          created_at
         `)
+        .eq('condition_id', patologiaData.id)
         .eq('status', 'approved')
         .neq('id', parseInt(reviewId))
         .limit(5);
@@ -79,15 +86,15 @@ export const ReviewContent = ({
       {/* Back link */}
       <Link 
         to={`/patologia/${condition.toLowerCase()}`}
-        className="inline-flex items-center text-primary hover:text-primary/80 mb-6"
+        className="inline-flex items-center text-primary hover:text-primary/80 mb-6 text-sm"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Leggi tutte le recensioni su {condition.toUpperCase()}
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Main content */}
-        <div className="col-span-1 lg:col-span-8">
+        <div className="col-span-1 lg:col-span-8 space-y-8">
           <ReviewHeader 
             title={title}
             condition={condition}
@@ -100,13 +107,7 @@ export const ReviewContent = ({
             experience={experience}
           />
 
-          <div className="mb-8">
-            <CommentSection reviewId={reviewId} />
-          </div>
-
-          <ReviewActions condition={condition} />
-
-          <div className="mb-8">
+          <div className="bg-white rounded-lg p-6 shadow-sm">
             <ReviewStats
               diagnosisDifficulty={diagnosisDifficulty}
               symptomSeverity={symptomSeverity}
@@ -117,12 +118,20 @@ export const ReviewContent = ({
             />
           </div>
 
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <CommentSection reviewId={reviewId} />
+          </div>
+
+          <ReviewActions condition={condition} />
+
           <Disclaimer condition={capitalizeFirstLetter(condition)} />
         </div>
         
         {/* Right column with other reviews */}
-        <div className="col-span-1 lg:col-span-4 space-y-6">
-          <h3 className="text-xl font-semibold mb-4">Altre esperienze su {condition.toUpperCase()}</h3>
+        <div className="col-span-1 lg:col-span-4 space-y-4">
+          <h3 className="text-xl font-semibold">
+            Altre esperienze su {condition.toUpperCase()}
+          </h3>
           {otherReviews?.map((review) => (
             <ReviewCard
               key={review.id}
