@@ -19,13 +19,13 @@ export const AdminHeader = () => {
           </Button>
         )}
         <Button asChild className="gap-2">
-          <Link to="/admin/recensioni">
+          <Link to="/admin/reviews">
             <ClipboardList className="h-4 w-4" />
             Gestione Recensioni
           </Link>
         </Button>
         <Button asChild className="gap-2">
-          <Link to="/admin/utenti">
+          <Link to="/admin/users">
             <Users className="h-4 w-4" />
             Gestione Utenti
           </Link>
