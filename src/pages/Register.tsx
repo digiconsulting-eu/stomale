@@ -14,7 +14,21 @@ export default function Register() {
 
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Registrati"));
-  }, []);
+
+    // Set up auth state listener for registration completion
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event);
+      if (event === 'SIGNED_IN') {
+        console.log("User signed in, redirecting to home...");
+        toast.success("Registrazione completata con successo");
+        navigate('/', { replace: true });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const handleSubmit = async (data: {
     email: string;
@@ -49,14 +63,11 @@ export default function Register() {
       }
 
       console.log("User registered successfully:", authData.user.email);
-
+      
+      // Note: The redirect will be handled by the auth state listener above
       toast.success("Registrazione completata con successo", {
         description: "Ti abbiamo inviato una email di conferma. Controlla la tua casella di posta.",
       });
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
 
     } catch (error: any) {
       console.error('Error during registration process:', error);
