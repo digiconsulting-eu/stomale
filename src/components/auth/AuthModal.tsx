@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+const MODAL_TIMEOUT = 90000; // 90 seconds in milliseconds
+const LAST_MODAL_INTERACTION_KEY = 'lastAuthModalInteraction';
+
 export const AuthModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
@@ -20,18 +23,26 @@ export const AuthModal = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        console.log("User not logged in, setting timer for auth modal...");
-        const timer = setTimeout(() => {
-          // Don't show modal on login or register pages
-          if (!['/login', '/registrati'].includes(location.pathname)) {
-            console.log("90 seconds elapsed, showing auth modal");
-            setIsOpen(true);
-          }
-        }, 90000); // 90 seconds = 90000 milliseconds
-        return () => {
-          console.log("Clearing auth modal timer");
-          clearTimeout(timer);
-        };
+        console.log("User not logged in, checking last modal interaction...");
+        const lastInteraction = localStorage.getItem(LAST_MODAL_INTERACTION_KEY);
+        const currentTime = Date.now();
+        
+        if (!lastInteraction || currentTime - parseInt(lastInteraction) > MODAL_TIMEOUT) {
+          const timer = setTimeout(() => {
+            // Don't show modal on login or register pages
+            if (!['/login', '/registrati'].includes(location.pathname)) {
+              console.log("90 seconds elapsed, showing auth modal");
+              setIsOpen(true);
+            }
+          }, MODAL_TIMEOUT);
+          
+          return () => {
+            console.log("Clearing auth modal timer");
+            clearTimeout(timer);
+          };
+        } else {
+          console.log("Modal interaction too recent, waiting...");
+        }
       } else {
         setIsOpen(false);
       }
@@ -52,13 +63,18 @@ export const AuthModal = () => {
     };
   }, [location.pathname]);
 
-  const handleLogin = () => {
+  const handleModalInteraction = () => {
+    localStorage.setItem(LAST_MODAL_INTERACTION_KEY, Date.now().toString());
     setIsOpen(false);
+  };
+
+  const handleLogin = () => {
+    handleModalInteraction();
     navigate('/login');
   };
 
   const handleRegister = () => {
-    setIsOpen(false);
+    handleModalInteraction();
     navigate('/registrati');
   };
 
