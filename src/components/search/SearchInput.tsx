@@ -12,7 +12,7 @@ export const SearchInput = ({ value, onChange }: SearchInputProps) => {
         placeholder="Cerca una patologia..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full max-w-5xl mx-auto h-14 text-lg px-6"
+        className="w-full max-w-5xl mx-auto h-14 text-lg px-6 border-[#1EAEDB] focus:border-[#1EAEDB] focus:ring-[#1EAEDB]"
       />
     </div>
   );
