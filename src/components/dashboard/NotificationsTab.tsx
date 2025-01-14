@@ -21,6 +21,25 @@ export const NotificationsTab = () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) return [];
 
+      // Get user's followed conditions
+      const { data: followedConditions } = await supabase
+        .from('condition_follows')
+        .select('condition_id')
+        .eq('user_id', session.session.user.id);
+
+      // Get user's reviews to know which conditions they've reviewed
+      const { data: userReviews } = await supabase
+        .from('reviews')
+        .select('id, condition_id')
+        .eq('username', session.session.user.username);
+
+      if (!followedConditions && !userReviews) return [];
+
+      const followedConditionIds = followedConditions?.map(f => f.condition_id) || [];
+      const reviewedConditionIds = userReviews?.map(r => r.condition_id) || [];
+      const userReviewIds = userReviews?.map(r => r.id) || [];
+
+      // Get updates for followed conditions or comments on user's reviews
       const { data, error } = await supabase
         .from('condition_updates')
         .select(`
@@ -31,9 +50,14 @@ export const NotificationsTab = () => {
             Patologia
           )
         `)
+        .or(`condition_id.in.(${[...followedConditionIds, ...reviewedConditionIds].join(',')}),review_id.in.(${userReviewIds.join(',')})`)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching updates:', error);
+        throw error;
+      }
+
       return data as Update[];
     }
   });
@@ -57,12 +81,11 @@ export const NotificationsTab = () => {
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
             <h3 className="font-semibold">
-              Aggiornamento per {update.condition.Patologia}
+              {update.update_type === 'new_review' 
+                ? 'Nuova recensione per'
+                : 'Nuovo commento su'} {update.condition.Patologia}
             </h3>
           </div>
-          <p className="text-gray-600 mt-1">
-            {update.update_type}
-          </p>
           <p className="text-sm text-gray-500 mt-2">
             {new Date(update.created_at).toLocaleDateString('it-IT')}
           </p>
