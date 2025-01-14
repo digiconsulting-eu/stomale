@@ -101,7 +101,7 @@ export const SearchBar = () => {
           onClick={() => handleSearch()}
           className="px-6"
         >
-          <Search className="h-4 w-4" />
+          <Search className="h-4 w-4 text-white" />
         </Button>
       </div>
     </div>
