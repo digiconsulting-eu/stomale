@@ -29,15 +29,16 @@ export const ConditionHeader = ({ condition, conditionId }: ConditionHeaderProps
         .from('condition_follows')
         .select('id')
         .eq('condition_id', conditionId)
-        .eq('user_id', session.session.user.id);
+        .eq('user_id', session.session.user.id)
+        .single();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error checking follow status:', error);
         setIsLoading(false);
         return;
       }
 
-      setIsFollowing(data && data.length > 0);
+      setIsFollowing(!!data);
       setIsLoading(false);
     } catch (error) {
       console.error('Error checking follow status:', error);
@@ -52,6 +53,8 @@ export const ConditionHeader = ({ condition, conditionId }: ConditionHeaderProps
         toast.error("Devi effettuare l'accesso per seguire una patologia");
         return;
       }
+
+      setIsLoading(true);
 
       if (isFollowing) {
         // Unfollow
@@ -82,6 +85,8 @@ export const ConditionHeader = ({ condition, conditionId }: ConditionHeaderProps
     } catch (error) {
       console.error('Error toggling follow:', error);
       toast.error("Si è verificato un errore");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -96,7 +101,7 @@ export const ConditionHeader = ({ condition, conditionId }: ConditionHeaderProps
         disabled={isLoading}
         className="min-w-[100px]"
       >
-        {isFollowing ? "Seguito" : "Segui"}
+        {isLoading ? "..." : isFollowing ? "Seguito" : "Segui"}
       </Button>
     </div>
   );
