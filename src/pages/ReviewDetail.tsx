@@ -12,9 +12,10 @@ const ReviewDetail = () => {
   const { data: review, isLoading, error } = useReviewQuery(reviewId, condition);
 
   useEffect(() => {
-    if (review?.title) {
-      setPageTitle(`${review.title} | Recensione`);
-      setMetaDescription(getReviewMetaDescription(review.PATOLOGIE?.Patologia, review.title));
+    if (review?.title && review?.PATOLOGIE?.Patologia) {
+      // Set page title in format: PATOLOGIA | TITOLO RECENSIONE
+      setPageTitle(`${review.PATOLOGIE.Patologia.toUpperCase()} | ${review.title}`);
+      setMetaDescription(getReviewMetaDescription(review.PATOLOGIE.Patologia, review.title));
     }
   }, [review?.title, review?.PATOLOGIE?.Patologia]);
 
