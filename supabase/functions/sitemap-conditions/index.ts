@@ -1,4 +1,6 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+import { serve } from "https://deno.fresh.dev/std@v9.6.1/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -6,47 +8,35 @@ const corsHeaders = {
   'Content-Type': 'application/xml; charset=utf-8'
 }
 
-Deno.serve(async (req) => {
-  const startTime = new Date().toISOString();
-  const url = new URL(req.url);
-  const pathParts = url.pathname.split('/');
-  const letter = pathParts[pathParts.length - 1].split('-').pop()?.split('.')[0] || 'a';
-  
-  console.log(`[${startTime}] Starting conditions sitemap generation for letter ${letter}...`);
-
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseKey) {
       throw new Error('Missing Supabase configuration');
     }
 
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch conditions that start with the specified letter
-    const { data: conditions, error: conditionsError } = await supabaseClient
+    const { data: conditions, error } = await supabase
       .from('PATOLOGIE')
-      .select('Patologia')
-      .ilike('Patologia', `${letter}%`)
+      .select('*')
       .order('Patologia');
 
-    if (conditionsError) {
-      throw conditionsError;
+    if (error) {
+      throw error;
     }
-
-    console.log(`[${startTime}] Found ${conditions?.length || 0} conditions for letter ${letter}`);
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
-    // Add all conditions
     conditions?.forEach(condition => {
-      const conditionSlug = condition.Patologia.toLowerCase()
+      const slug = condition.Patologia.toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9\s-]/g, '')
@@ -56,7 +46,7 @@ Deno.serve(async (req) => {
 
       xml += `
   <url>
-    <loc>https://stomale.info/patologia/${encodeURIComponent(conditionSlug)}</loc>
+    <loc>https://stomale.info/patologia/${encodeURIComponent(slug)}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`;
@@ -64,33 +54,18 @@ Deno.serve(async (req) => {
 
     xml += '\n</urlset>';
 
-    // Update the last_modified timestamp for this sitemap
-    const { error: updateError } = await supabaseClient
-      .from('sitemap_files')
-      .update({ 
-        last_modified: new Date().toISOString(),
-        url_count: conditions?.length || 0
-      })
-      .eq('filename', `sitemap-conditions-${letter}.xml`);
-
-    if (updateError) {
-      console.error(`[${startTime}] Error updating sitemap file record:`, updateError);
-    }
-
-    console.log(`[${startTime}] Successfully generated sitemap for letter ${letter}`);
-
     return new Response(xml, {
       headers: {
         ...corsHeaders,
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+        'Cache-Control': 'public, max-age=3600'
       }
     });
 
   } catch (error) {
-    console.error(`[${startTime}] Error generating conditions sitemap:`, error);
+    console.error('Error generating conditions sitemap:', error);
     return new Response(`Error generating conditions sitemap: ${error.message}`, {
       status: 500,
       headers: corsHeaders
     });
   }
-})
+});
