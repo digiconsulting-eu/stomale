@@ -18,11 +18,11 @@ serve(async (req) => {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>https://stomale.info/api/sitemap</loc>
+    <loc>https://stomale.info/sitemap.xml</loc>
     <lastmod>${today}</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/api/sitemap-conditions</loc>
+    <loc>https://stomale.info/sitemap-conditions.xml</loc>
     <lastmod>${today}</lastmod>
   </sitemap>
 </sitemapindex>`;
