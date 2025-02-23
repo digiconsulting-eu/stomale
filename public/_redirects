@@ -1,11 +1,9 @@
 
 /* /index.html 200
-/sitemap.xml /.netlify/functions/sitemap 200
-/sitemaps/* /.netlify/functions/sitemap-conditions 200
+/sitemap-index.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index 200
+/sitemap.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap 200
+/sitemap-conditions.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions 200
 /sitemaps/sitemap-reviews-1.xml /.netlify/functions/sitemap-reviews-1 200
 /sitemaps/sitemap-reviews-2.xml /.netlify/functions/sitemap-reviews-2 200
 /sitemaps/sitemap-reviews-3.xml /.netlify/functions/sitemap-reviews-3 200
 /sitemaps/sitemap-reviews-4.xml /.netlify/functions/sitemap-reviews-4 200
-/sitemap-index.xml /api/sitemap-index 200
-/sitemap.xml /api/sitemap 200
-/sitemap-conditions.xml /api/sitemap-conditions 200
