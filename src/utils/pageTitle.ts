@@ -21,3 +21,7 @@ export const getSearchMetaDescription = () => {
 export const getReviewMetaDescription = (condition: string, title: string) => {
   return `Leggi l'esperienza "${title}" sulla patologia ${condition}. Scopri sintomi, diagnosi e trattamenti raccontati da chi ha vissuto questa condizione su StoMale.info`;
 };
+
+export const getConditionMetaDescription = (condition: string) => {
+  return `Scopri esperienze, sintomi e trattamenti per ${condition} su StoMale.info. Leggi recensioni e testimonianze di chi convive con questa patologia.`;
+};
