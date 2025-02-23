@@ -24,12 +24,15 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     if (!supabaseUrl || !supabaseKey) {
+      console.error(`[${startTime}] Missing Supabase configuration`);
       throw new Error('Missing Supabase configuration');
     }
 
+    console.log(`[${startTime}] Creating Supabase client...`);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Fetch approved reviews
+    console.log(`[${startTime}] Fetching approved reviews...`);
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
       .select(`
@@ -47,7 +50,10 @@ serve(async (req) => {
       throw reviewsError;
     }
 
+    console.log(`[${startTime}] Found ${reviews?.length || 0} approved reviews`);
+
     // Generate XML
+    console.log(`[${startTime}] Generating XML...`);
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
@@ -112,7 +118,8 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error(`Error generating sitemap:`, error);
+    const errorTime = new Date().toISOString();
+    console.error(`[${errorTime}] Error generating sitemap:`, error);
     return new Response(`Error generating sitemap: ${error.message}`, { 
       status: 500,
       headers: corsHeaders
