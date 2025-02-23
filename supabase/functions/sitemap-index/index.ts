@@ -7,12 +7,21 @@ const corsHeaders = {
   'Content-Type': 'application/xml; charset=utf-8'
 };
 
+console.log('Sitemap Index function loaded and ready');
+
 serve(async (req) => {
+  const startTime = new Date().toISOString();
+  console.log(`[${startTime}] Received request for sitemap index`);
+  console.log(`[${startTime}] Request method: ${req.method}`);
+  console.log(`[${startTime}] Request URL: ${req.url}`);
+
   if (req.method === 'OPTIONS') {
+    console.log(`[${startTime}] Handling CORS preflight request`);
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log(`[${startTime}] Generating sitemap index XML...`);
     const today = new Date().toISOString().split('T')[0];
     
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -27,6 +36,9 @@ serve(async (req) => {
   </sitemap>
 </sitemapindex>`;
 
+    console.log(`[${startTime}] Successfully generated sitemap index`);
+    console.log(`[${startTime}] Response headers:`, corsHeaders);
+
     return new Response(xml, {
       headers: {
         ...corsHeaders,
@@ -35,7 +47,8 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error generating sitemap index:', error);
+    const errorTime = new Date().toISOString();
+    console.error(`[${errorTime}] Error generating sitemap index:`, error);
     return new Response(`Error generating sitemap index: ${error.message}`, {
       status: 500,
       headers: corsHeaders
