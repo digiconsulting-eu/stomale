@@ -9,12 +9,26 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Log della richiesta per debug
+  console.log("Request headers:", Object.fromEntries(req.headers.entries()));
+
+  // Gestione CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
         ...corsHeaders,
         'Access-Control-Allow-Methods': 'GET, OPTIONS'
       }
+    });
+  }
+
+  // Verifica dell'header di autorizzazione
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader) {
+    console.error("Missing authorization header");
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: corsHeaders
     });
   }
 
@@ -55,11 +69,24 @@ serve(async (req) => {
     <lastmod>${today}</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-reviews.xml</loc>
+    <loc>https://stomale.info/sitemaps/sitemap-reviews-1.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-reviews-2.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-reviews-3.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-reviews-4.xml</loc>
     <lastmod>${today}</lastmod>
   </sitemap>
 </sitemapindex>`;
 
+    console.log("Generating sitemap index successfully");
     return new Response(xml, {
       headers: {
         ...corsHeaders,
