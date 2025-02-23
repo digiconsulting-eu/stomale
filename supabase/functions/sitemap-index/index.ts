@@ -8,17 +8,9 @@ const corsHeaders = {
   'X-Content-Type-Options': 'nosniff'
 };
 
-console.log('Sitemap Index function loaded and ready');
-
 serve(async (req) => {
-  const startTime = new Date().toISOString();
-  console.log(`[${startTime}] Received request for sitemap index`);
-  console.log(`[${startTime}] Request method: ${req.method}`);
-  console.log(`[${startTime}] Request URL: ${req.url}`);
-
   if (req.method === 'OPTIONS') {
-    console.log(`[${startTime}] Handling CORS preflight request`);
-    return new Response(null, { 
+    return new Response(null, {
       headers: {
         ...corsHeaders,
         'Access-Control-Allow-Methods': 'GET, OPTIONS'
@@ -27,10 +19,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log(`[${startTime}] Generating sitemap index XML...`);
     const today = new Date().toISOString().split('T')[0];
-    
-    // Usiamo il contenuto del file sitemap.xml esistente
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
@@ -66,25 +55,10 @@ serve(async (req) => {
     <lastmod>${today}</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-reviews-1.xml</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-reviews-2.xml</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-reviews-3.xml</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-reviews-4.xml</loc>
+    <loc>https://stomale.info/sitemaps/sitemap-reviews.xml</loc>
     <lastmod>${today}</lastmod>
   </sitemap>
 </sitemapindex>`;
-
-    console.log(`[${startTime}] Successfully generated sitemap index`);
-    console.log(`[${startTime}] Response headers:`, corsHeaders);
 
     return new Response(xml, {
       headers: {
@@ -94,8 +68,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    const errorTime = new Date().toISOString();
-    console.error(`[${errorTime}] Error generating sitemap index:`, error);
+    console.error('Error generating sitemap index:', error);
     return new Response(`Error generating sitemap index: ${error.message}`, {
       status: 500,
       headers: corsHeaders
