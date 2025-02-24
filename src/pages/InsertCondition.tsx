@@ -29,7 +29,7 @@ export default function InsertCondition() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { data: session } = useAuthSession();
+  const { data: session, isLoading: isSessionLoading } = useAuthSession();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,6 +47,11 @@ export default function InsertCondition() {
 
     const checkAdminAccess = async () => {
       try {
+        // Wait for session loading to complete
+        if (isSessionLoading) {
+          return;
+        }
+
         if (!session) {
           console.log("No session found, redirecting to login");
           toast.error("Devi effettuare l'accesso per inserire una patologia");
@@ -64,7 +69,9 @@ export default function InsertCondition() {
 
         if (adminError) {
           console.error("Admin check error:", adminError);
-          throw adminError;
+          toast.error("Si è verificato un errore durante il controllo dei permessi: " + adminError.message);
+          navigate("/");
+          return;
         }
 
         console.log("Admin status:", isAdmin);
@@ -76,14 +83,14 @@ export default function InsertCondition() {
           return;
         }
 
+        if (isMounted) {
+          setIsLoading(false);
+        }
+
       } catch (error) {
         console.error("Error checking admin status:", error);
         toast.error("Si è verificato un errore durante il controllo dei permessi");
         navigate("/");
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
       }
     };
 
@@ -92,7 +99,7 @@ export default function InsertCondition() {
     return () => {
       isMounted = false;
     };
-  }, [navigate, session]);
+  }, [navigate, session, isSessionLoading]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!session) {
@@ -132,7 +139,8 @@ export default function InsertCondition() {
     }
   };
 
-  if (isLoading) {
+  // Show loading state while checking session and admin status
+  if (isLoading || isSessionLoading) {
     return (
       <div className="container mx-auto px-4 py-8 flex justify-center items-center">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
