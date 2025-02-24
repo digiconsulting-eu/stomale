@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/useAuthSession";
 import {
   Dialog,
   DialogContent,
@@ -27,69 +28,43 @@ const EXCLUDED_PATHS = [
 
 export const AuthModal = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { data: session, isLoading } = useAuthSession();
 
   useEffect(() => {
-    let isMounted = true;
+    let timer: NodeJS.Timeout | undefined;
 
-    const checkAuthStatus = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        // Don't show modal if user is logged in or on excluded paths
-        if (session || EXCLUDED_PATHS.includes(location.pathname)) {
-          setIsOpen(false);
-          if (session) {
-            setIsAuthenticated(true);
+    const checkModalDisplay = () => {
+      // Don't show modal if user is logged in or on excluded paths
+      if (session || EXCLUDED_PATHS.includes(location.pathname)) {
+        setIsOpen(false);
+        return;
+      }
+
+      const lastInteraction = localStorage.getItem(LAST_MODAL_INTERACTION_KEY);
+      const currentTime = Date.now();
+      
+      if (!lastInteraction || currentTime - parseInt(lastInteraction) > MODAL_TIMEOUT) {
+        timer = setTimeout(() => {
+          if (!session) {
+            console.log("90 seconds elapsed, showing auth modal");
+            setIsOpen(true);
           }
-          return;
-        }
-
-        console.log("User not logged in, checking last modal interaction...");
-        const lastInteraction = localStorage.getItem(LAST_MODAL_INTERACTION_KEY);
-        const currentTime = Date.now();
-        
-        if (!lastInteraction || currentTime - parseInt(lastInteraction) > MODAL_TIMEOUT) {
-          const timer = setTimeout(() => {
-            if (!isAuthenticated) {
-              console.log("90 seconds elapsed, showing auth modal");
-              setIsOpen(true);
-            }
-          }, MODAL_TIMEOUT);
-          
-          return () => {
-            console.log("Clearing auth modal timer");
-            clearTimeout(timer);
-          };
-        } else {
-          console.log("Modal interaction too recent, waiting...");
-        }
-      } catch (error) {
-        console.error("Error checking auth status:", error);
+        }, MODAL_TIMEOUT);
       }
     };
 
-    checkAuthStatus();
-
-    // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed in modal:", event);
-      if (session) {
-        setIsAuthenticated(true);
-        setIsOpen(false);
-      } else {
-        setIsAuthenticated(false);
-      }
-    });
+    if (!isLoading) {
+      checkModalDisplay();
+    }
 
     return () => {
-      if (subscription) {
-        subscription.unsubscribe();
+      if (timer) {
+        clearTimeout(timer);
       }
     };
-  }, [location.pathname, isAuthenticated]);
+  }, [session, location.pathname, isLoading]);
 
   const handleModalInteraction = () => {
     localStorage.setItem(LAST_MODAL_INTERACTION_KEY, Date.now().toString());
@@ -106,8 +81,8 @@ export const AuthModal = () => {
     navigate('/registrati');
   };
 
-  // Don't render anything if user is authenticated
-  if (isAuthenticated) {
+  // Don't render anything if user is authenticated or loading
+  if (session || isLoading) {
     return null;
   }
 
