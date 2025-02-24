@@ -17,6 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 const formSchema = z.object({
   patologia: z.string().min(2, {
@@ -28,6 +29,7 @@ export default function InsertCondition() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { data: session } = useAuthSession();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,16 +45,8 @@ export default function InsertCondition() {
   useEffect(() => {
     let isMounted = true;
 
-    const checkAuth = async () => {
+    const checkAdminAccess = async () => {
       try {
-        console.log("Checking auth status...");
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Session error:", sessionError);
-          throw sessionError;
-        }
-
         if (!session) {
           console.log("No session found, redirecting to login");
           toast.error("Devi effettuare l'accesso per inserire una patologia");
@@ -60,15 +54,17 @@ export default function InsertCondition() {
           return;
         }
 
-        console.log("Session found, checking admin status for user:", session.user.id);
+        console.log("Checking admin status for user:", session.user.id);
+        
+        // Check if user is admin
+        const { data: isAdmin, error: adminError } = await supabase
+          .rpc('is_admin', { 
+            user_id: session.user.id 
+          });
 
-        // Check if user is admin using user_id parameter
-        const { data: isAdmin, error: isAdminError } = await supabase
-          .rpc('is_admin', { user_id: session.user.id });
-
-        if (isAdminError) {
-          console.error("Admin check error:", isAdminError);
-          throw isAdminError;
+        if (adminError) {
+          console.error("Admin check error:", adminError);
+          throw adminError;
         }
 
         console.log("Admin status:", isAdmin);
@@ -80,9 +76,8 @@ export default function InsertCondition() {
           return;
         }
 
-        console.log("Auth check completed successfully");
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error("Error checking admin status:", error);
         toast.error("Si è verificato un errore durante il controllo dei permessi");
         navigate("/");
       } finally {
@@ -92,14 +87,19 @@ export default function InsertCondition() {
       }
     };
 
-    checkAuth();
+    checkAdminAccess();
 
     return () => {
       isMounted = false;
     };
-  }, [navigate]);
+  }, [navigate, session]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!session) {
+      toast.error("Devi effettuare l'accesso per inserire una patologia");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       console.log("Submitting condition:", values);
