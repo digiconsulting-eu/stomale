@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -59,16 +60,20 @@ export default function InsertCondition() {
           return;
         }
 
-        // Check if user is admin using the is_admin function
-        const { data: isAdminData, error: isAdminError } = await supabase
-          .rpc('is_admin', { user_id: session.user.id });
+        console.log("Session found, checking admin status...");
+
+        // Check if user is admin
+        const { data: isAdmin, error: isAdminError } = await supabase
+          .rpc('is_admin');
 
         if (isAdminError) {
           console.error("Admin check error:", isAdminError);
           throw isAdminError;
         }
 
-        if (!isAdminData) {
+        console.log("Admin status:", isAdmin);
+
+        if (!isAdmin) {
           console.log("User is not admin, redirecting to home");
           toast.error("Non hai i permessi per accedere a questa pagina");
           navigate("/");
