@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,35 +27,47 @@ const EXCLUDED_PATHS = [
 
 export const AuthModal = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Don't show modal if user is logged in or on excluded paths
-      if (session || EXCLUDED_PATHS.includes(location.pathname)) {
-        setIsOpen(false);
-        return;
-      }
+    let isMounted = true;
 
-      console.log("User not logged in, checking last modal interaction...");
-      const lastInteraction = localStorage.getItem(LAST_MODAL_INTERACTION_KEY);
-      const currentTime = Date.now();
-      
-      if (!lastInteraction || currentTime - parseInt(lastInteraction) > MODAL_TIMEOUT) {
-        const timer = setTimeout(() => {
-          console.log("90 seconds elapsed, showing auth modal");
-          setIsOpen(true);
-        }, MODAL_TIMEOUT);
+    const checkAuthStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
         
-        return () => {
-          console.log("Clearing auth modal timer");
-          clearTimeout(timer);
-        };
-      } else {
-        console.log("Modal interaction too recent, waiting...");
+        // Don't show modal if user is logged in or on excluded paths
+        if (session || EXCLUDED_PATHS.includes(location.pathname)) {
+          setIsOpen(false);
+          if (session) {
+            setIsAuthenticated(true);
+          }
+          return;
+        }
+
+        console.log("User not logged in, checking last modal interaction...");
+        const lastInteraction = localStorage.getItem(LAST_MODAL_INTERACTION_KEY);
+        const currentTime = Date.now();
+        
+        if (!lastInteraction || currentTime - parseInt(lastInteraction) > MODAL_TIMEOUT) {
+          const timer = setTimeout(() => {
+            if (!isAuthenticated) {
+              console.log("90 seconds elapsed, showing auth modal");
+              setIsOpen(true);
+            }
+          }, MODAL_TIMEOUT);
+          
+          return () => {
+            console.log("Clearing auth modal timer");
+            clearTimeout(timer);
+          };
+        } else {
+          console.log("Modal interaction too recent, waiting...");
+        }
+      } catch (error) {
+        console.error("Error checking auth status:", error);
       }
     };
 
@@ -64,14 +77,19 @@ export const AuthModal = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed in modal:", event);
       if (session) {
+        setIsAuthenticated(true);
         setIsOpen(false);
+      } else {
+        setIsAuthenticated(false);
       }
     });
 
     return () => {
-      subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
-  }, [location.pathname]);
+  }, [location.pathname, isAuthenticated]);
 
   const handleModalInteraction = () => {
     localStorage.setItem(LAST_MODAL_INTERACTION_KEY, Date.now().toString());
@@ -87,6 +105,11 @@ export const AuthModal = () => {
     handleModalInteraction();
     navigate('/registrati');
   };
+
+  // Don't render anything if user is authenticated
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}} modal>
