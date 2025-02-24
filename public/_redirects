@@ -1,6 +1,3 @@
 
 /* /index.html 200
-/sitemap.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap 200!
-/sitemap-index.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index 200!
-/sitemap-conditions.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions 200!
 /sitemaps/* /sitemaps/:splat 200
