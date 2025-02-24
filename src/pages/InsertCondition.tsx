@@ -60,11 +60,11 @@ export default function InsertCondition() {
           return;
         }
 
-        console.log("Session found, checking admin status...");
+        console.log("Session found, checking admin status for user:", session.user.id);
 
-        // Check if user is admin
+        // Check if user is admin using user_id parameter
         const { data: isAdmin, error: isAdminError } = await supabase
-          .rpc('is_admin');
+          .rpc('is_admin', { user_id: session.user.id });
 
         if (isAdminError) {
           console.error("Admin check error:", isAdminError);
