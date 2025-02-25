@@ -13,6 +13,7 @@ interface Comment {
   content: string;
   created_at: string;
   status: string;
+  user_id: string;
   users?: {
     username: string;
   };
@@ -40,6 +41,7 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
           content,
           created_at,
           status,
+          user_id,
           users (
             username
           )
