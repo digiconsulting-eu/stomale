@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
@@ -5,7 +6,23 @@
     <lastmod>2024-03-20</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-a.xml</loc>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-aa-ac.xml</loc>
+    <lastmod>2024-03-20</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-ad-ai.xml</loc>
+    <lastmod>2024-03-20</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-al.xml</loc>
+    <lastmod>2024-03-20</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-am-an.xml</loc>
+    <lastmod>2024-03-20</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-ao-az.xml</loc>
     <lastmod>2024-03-20</lastmod>
   </sitemap>
   <sitemap>
