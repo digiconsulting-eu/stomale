@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Table,
@@ -16,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 50;
 
@@ -36,10 +38,11 @@ export const ReviewManagementTable = ({ reviews, isLoading }: ReviewManagementTa
     );
   };
 
-  // Aggiungiamo la query per i commenti in attesa
-  const { data: pendingComments } = useQuery({
+  // Aggiorniamo la query per i commenti in attesa
+  const { data: pendingComments, refetch: refetchComments } = useQuery({
     queryKey: ['pending-comments'],
     queryFn: async () => {
+      console.log('Fetching pending comments...');
       const { data, error } = await supabase
         .from('comments')
         .select(`
@@ -59,31 +62,42 @@ export const ReviewManagementTable = ({ reviews, isLoading }: ReviewManagementTa
         throw error;
       }
 
+      console.log('Fetched pending comments:', data);
       return data;
     }
   });
 
   const handleApproveComment = async (commentId: number) => {
-    const { error } = await supabase
-      .from('comments')
-      .update({ status: 'approved' })
-      .eq('id', commentId);
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .update({ status: 'approved' })
+        .eq('id', commentId);
 
-    if (error) {
+      if (error) throw error;
+
+      toast.success('Commento approvato con successo');
+      refetchComments(); // Aggiorniamo la lista dopo l'approvazione
+    } catch (error) {
       console.error('Error approving comment:', error);
-      return;
+      toast.error('Errore durante l\'approvazione del commento');
     }
   };
 
   const handleRejectComment = async (commentId: number) => {
-    const { error } = await supabase
-      .from('comments')
-      .update({ status: 'rejected' })
-      .eq('id', commentId);
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .update({ status: 'rejected' })
+        .eq('id', commentId);
 
-    if (error) {
+      if (error) throw error;
+
+      toast.success('Commento rifiutato');
+      refetchComments(); // Aggiorniamo la lista dopo il rifiuto
+    } catch (error) {
       console.error('Error rejecting comment:', error);
-      return;
+      toast.error('Errore durante il rifiuto del commento');
     }
   };
 
