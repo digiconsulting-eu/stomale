@@ -115,7 +115,6 @@ export const PendingCommentsTable = () => {
   };
 
   if (isError) {
-    console.error('Error in PendingCommentsTable:', queryError);
     return (
       <div className="p-4 text-red-500">
         Errore nel caricamento dei commenti. Per favore, riprova più tardi.
@@ -173,7 +172,7 @@ export const PendingCommentsTable = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Autore</TableHead>
-            <TableHead>Contenuto</TableHead>
+            <TableHead className="w-1/3">Contenuto</TableHead>
             <TableHead>Patologia</TableHead>
             <TableHead>Recensione</TableHead>
             <TableHead>Data</TableHead>
@@ -184,7 +183,9 @@ export const PendingCommentsTable = () => {
           {pendingComments.map((comment) => (
             <TableRow key={comment.id}>
               <TableCell>{comment.users?.username || comment.users?.email || 'Utente anonimo'}</TableCell>
-              <TableCell className="max-w-md truncate">{comment.content}</TableCell>
+              <TableCell className="whitespace-pre-wrap break-words max-w-md">
+                {comment.content}
+              </TableCell>
               <TableCell>
                 {comment.reviews?.PATOLOGIE?.Patologia || 'N/A'}
               </TableCell>
