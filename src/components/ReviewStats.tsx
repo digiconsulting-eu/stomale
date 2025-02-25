@@ -1,4 +1,3 @@
-import { StarRating } from "@/components/StarRating";
 
 interface ReviewStatsProps {
   diagnosisDifficulty: number;
@@ -9,6 +8,13 @@ interface ReviewStatsProps {
   socialDiscomfort: number;
 }
 
+const StatBox = ({ label, value }: { label: string; value: number }) => (
+  <div className="bg-gray-50 p-4 rounded-lg text-center">
+    <div className="text-2xl font-bold text-primary mb-1">{value}/5</div>
+    <div className="text-sm text-gray-600">{label}</div>
+  </div>
+);
+
 export const ReviewStats = ({
   diagnosisDifficulty,
   symptomSeverity,
@@ -18,33 +24,29 @@ export const ReviewStats = ({
   socialDiscomfort
 }: ReviewStatsProps) => {
   return (
-    <section className="grid grid-cols-1 gap-6">
-      <div>
-        <h3 className="font-medium mb-2">Difficoltà di Diagnosi</h3>
-        <StarRating value={diagnosisDifficulty} readOnly onChange={() => {}} />
-      </div>
-
-      <div>
-        <h3 className="font-medium mb-2">Gravità dei Sintomi</h3>
-        <StarRating value={symptomSeverity} readOnly onChange={() => {}} />
-      </div>
-
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <StatBox 
+        label="Difficoltà Diagnosi" 
+        value={diagnosisDifficulty}
+      />
+      <StatBox 
+        label="Gravità Sintomi" 
+        value={symptomSeverity}
+      />
       {hasMedication && (
-        <div>
-          <h3 className="font-medium mb-2">Efficacia Cura Farmacologica</h3>
-          <StarRating value={medicationEffectiveness} readOnly onChange={() => {}} />
-        </div>
+        <StatBox 
+          label="Efficacia Cura" 
+          value={medicationEffectiveness}
+        />
       )}
-
-      <div>
-        <h3 className="font-medium mb-2">Possibilità di Guarigione</h3>
-        <StarRating value={healingPossibility} readOnly onChange={() => {}} />
-      </div>
-
-      <div>
-        <h3 className="font-medium mb-2">Disagio Sociale</h3>
-        <StarRating value={socialDiscomfort} readOnly onChange={() => {}} />
-      </div>
-    </section>
+      <StatBox 
+        label="Possibilità Guarigione" 
+        value={healingPossibility}
+      />
+      <StatBox 
+        label="Disagio Sociale" 
+        value={socialDiscomfort}
+      />
+    </div>
   );
 };
