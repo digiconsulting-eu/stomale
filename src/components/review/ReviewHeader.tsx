@@ -18,14 +18,15 @@ export const ReviewHeader = ({
   username 
 }: ReviewHeaderProps) => {
   return (
-    <div className="mb-8">
-      <h1 className="text-3xl font-bold mb-4">{title}</h1>
-      <div className="flex flex-col gap-2">
+    <div>
+      <h1 className="text-3xl font-bold mb-4 text-gray-900">{title}</h1>
+      <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <User className="h-4 w-4" />
           <span>{username || 'Anonimo'}</span>
+          <span className="mx-2">•</span>
+          <span>{date}</span>
         </div>
-        <p className="text-sm text-gray-600 mb-4">{date}</p>
         <Link 
           to={`/patologia/${condition.toLowerCase()}`}
           className="inline-block"

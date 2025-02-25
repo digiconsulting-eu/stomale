@@ -43,7 +43,6 @@ export const ReviewContent = ({
   reviewId,
   username
 }: ReviewContentProps) => {
-  // Fetch other reviews for the same condition
   const { data: otherReviews } = useQuery({
     queryKey: ['condition-reviews', condition],
     queryFn: async () => {
@@ -83,65 +82,80 @@ export const ReviewContent = ({
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Back link */}
-      <Link 
-        to={`/patologia/${condition.toLowerCase()}`}
-        className="inline-flex items-center text-primary hover:text-primary/80 mb-6 text-sm"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Leggi tutte le recensioni su {condition.toUpperCase()}
-      </Link>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Back link */}
+        <Link 
+          to={`/patologia/${condition.toLowerCase()}`}
+          className="inline-flex items-center text-primary hover:text-primary/80 mb-6 text-sm"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Torna alle recensioni di {condition.toUpperCase()}
+        </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Main content */}
-        <div className="col-span-1 lg:col-span-8 space-y-8">
-          <ReviewHeader 
-            title={title}
-            condition={condition}
-            date={date}
-            username={username}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Main content */}
+          <div className="col-span-1 lg:col-span-8 space-y-6">
+            <div className="bg-white rounded-xl p-8 shadow-sm">
+              <ReviewHeader 
+                title={title}
+                condition={condition}
+                date={date}
+                username={username}
+              />
 
-          <ReviewBody 
-            symptoms={symptoms}
-            experience={experience}
-          />
+              <div className="mt-8">
+                <ReviewBody 
+                  symptoms={symptoms}
+                  experience={experience}
+                />
+              </div>
+            </div>
 
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <ReviewStats
-              diagnosisDifficulty={diagnosisDifficulty}
-              symptomSeverity={symptomSeverity}
-              hasMedication={hasMedication}
-              medicationEffectiveness={medicationEffectiveness}
-              healingPossibility={healingPossibility}
-              socialDiscomfort={socialDiscomfort}
-            />
+            <div className="bg-white rounded-xl p-8 shadow-sm">
+              <h3 className="text-xl font-semibold mb-6">Statistiche della Recensione</h3>
+              <ReviewStats
+                diagnosisDifficulty={diagnosisDifficulty}
+                symptomSeverity={symptomSeverity}
+                hasMedication={hasMedication}
+                medicationEffectiveness={medicationEffectiveness}
+                healingPossibility={healingPossibility}
+                socialDiscomfort={socialDiscomfort}
+              />
+            </div>
+
+            <div className="bg-white rounded-xl p-8 shadow-sm">
+              <CommentSection reviewId={reviewId} />
+            </div>
+
+            <ReviewActions condition={condition} />
+
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-8">
+              <Disclaimer condition={capitalizeFirstLetter(condition)} />
+            </div>
           </div>
-
-          <CommentSection reviewId={reviewId} />
-
-          <ReviewActions condition={condition} />
-
-          <Disclaimer condition={capitalizeFirstLetter(condition)} />
-        </div>
-        
-        {/* Right column with other reviews */}
-        <div className="col-span-1 lg:col-span-4 space-y-4">
-          <h3 className="text-xl font-semibold">
-            Altre esperienze su {condition.toUpperCase()}
-          </h3>
-          {otherReviews?.map((review) => (
-            <ReviewCard
-              key={review.id}
-              id={review.id}
-              title={review.title}
-              condition={condition}
-              date={new Date(review.created_at).toLocaleDateString()}
-              preview={review.experience.slice(0, 150) + '...'}
-              username={review.username}
-            />
-          ))}
+          
+          {/* Right sidebar */}
+          <div className="col-span-1 lg:col-span-4 space-y-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <h3 className="text-xl font-semibold mb-4">
+                Altre esperienze su {condition.toUpperCase()}
+              </h3>
+              <div className="space-y-4">
+                {otherReviews?.map((review) => (
+                  <ReviewCard
+                    key={review.id}
+                    id={review.id}
+                    title={review.title}
+                    condition={condition}
+                    date={new Date(review.created_at).toLocaleDateString()}
+                    preview={review.experience.slice(0, 150) + '...'}
+                    username={review.username}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
