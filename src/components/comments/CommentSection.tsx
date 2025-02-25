@@ -60,7 +60,13 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
         (session?.user.id && comment.user_id === session.user.id)
       ) as Comment[];
     },
-    enabled: true
+    enabled: true,
+    meta: {
+      onError: (error: Error) => {
+        console.error('Query error:', error);
+        toast.error('Errore nel caricamento dei commenti');
+      }
+    }
   });
 
   const handleOpenCommentBox = () => {
@@ -89,12 +95,6 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
     setIsSubmitting(true);
 
     try {
-      console.log('Attempting to submit comment:', {
-        reviewId,
-        userId: session.user.id,
-        content: comment.trim(),
-      });
-
       const { data, error } = await supabase
         .from('comments')
         .insert({
