@@ -1,8 +1,10 @@
+
 import { Disclaimer } from "@/components/Disclaimer";
 import { ReviewStats } from "@/components/ReviewStats";
 import { ReviewHeader } from "./ReviewHeader";
 import { ReviewBody } from "./ReviewBody";
 import { ReviewActions } from "./ReviewActions";
+import { CommentSection } from "@/components/comments/CommentSection";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -116,6 +118,8 @@ export const ReviewContent = ({
               socialDiscomfort={socialDiscomfort}
             />
           </div>
+
+          <CommentSection reviewId={reviewId} />
 
           <ReviewActions condition={condition} />
 
