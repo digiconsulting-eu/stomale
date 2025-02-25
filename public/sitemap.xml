@@ -5,11 +5,11 @@
     <lastmod>2024-03-20</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/api/sitemap-dynamic?type=conditions</loc>
+    <loc>https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-dynamic?type=conditions</loc>
     <lastmod>2024-03-20</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/api/sitemap-dynamic?type=reviews</loc>
+    <loc>https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-dynamic?type=reviews</loc>
     <lastmod>2024-03-20</lastmod>
   </sitemap>
 </sitemapindex>
