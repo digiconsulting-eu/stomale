@@ -15,73 +15,40 @@ interface Comment {
   id: number;
   content: string;
   created_at: string;
+  status: string;
   users?: {
     username: string;
+    email: string;
   };
 }
 
 export const PendingCommentsTable = () => {
-  const { data: pendingComments, refetch: refetchComments, isError, error: queryError } = useQuery({
-    queryKey: ['pending-comments'],
+  const { data: allComments, refetch: refetchComments, isError, error: queryError } = useQuery({
+    queryKey: ['all-comments'],
     queryFn: async () => {
-      console.log('Starting to fetch pending comments...');
+      console.log('Starting to fetch all comments...');
       
-      // First check if there are any comments at all
-      const { data: allComments, error: countError } = await supabase
-        .from('comments')
-        .select('*');
-        
-      if (countError) {
-        console.error('Error checking comments:', countError);
-        throw countError;
-      }
-      
-      console.log('All comments in database:', allComments);
-
-      // Then get pending comments without any filters first
-      const { data: allPendingComments, error: pendingError } = await supabase
-        .from('comments')
-        .select(`
-          *,
-          users (
-            username,
-            email
-          )
-        `);
-
-      if (pendingError) {
-        console.error('Error fetching all comments:', pendingError);
-        throw pendingError;
-      }
-
-      console.log('All comments before status filter:', allPendingComments);
-
-      // Now get only pending comments
+      // Fetch ALL comments to see what's in the database
       const { data, error } = await supabase
         .from('comments')
         .select(`
           id,
           content,
           created_at,
-          review_id,
           status,
           users (
             username,
             email
           )
         `)
-        .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching pending comments:', error);
+        console.error('Error fetching comments:', error);
         throw error;
       }
 
-      console.log('Final pending comments query result:', {
-        commentCount: data?.length || 0,
-        comments: data
-      });
+      console.log('All comments from database:', data);
       
       return data;
     },
@@ -141,7 +108,7 @@ export const PendingCommentsTable = () => {
   }
 
   // Show loading state
-  if (!pendingComments) {
+  if (!allComments) {
     return (
       <div className="p-4">
         Caricamento commenti in corso...
@@ -149,17 +116,44 @@ export const PendingCommentsTable = () => {
     );
   }
 
-  // Show empty state
+  // Filter pending comments
+  const pendingComments = allComments.filter(comment => comment.status === 'pending');
+
+  // Debug information
+  console.log('All comments:', allComments);
+  console.log('Pending comments:', pendingComments);
+  console.log('Comments by status:', allComments.reduce((acc, comment) => {
+    acc[comment.status] = (acc[comment.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>));
+
+  // Show empty state for pending comments
   if (pendingComments.length === 0) {
-    console.log('No pending comments found');
     return (
-      <div className="p-4 text-gray-500">
-        Non ci sono commenti in attesa di approvazione.
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Stato dei Commenti</h2>
+        <div className="p-4 bg-white rounded-lg shadow">
+          <p className="text-gray-500 mb-4">
+            Non ci sono commenti in attesa di approvazione.
+          </p>
+          <div className="text-sm text-gray-600">
+            <p>Statistiche commenti:</p>
+            <ul className="list-disc pl-5 mt-2">
+              {Object.entries(allComments.reduce((acc, comment) => {
+                acc[comment.status] = (acc[comment.status] || 0) + 1;
+                return acc;
+              }, {} as Record<string, number>)).map(([status, count]) => (
+                <li key={status}>
+                  {status}: {count} commenti
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
     );
   }
 
-  console.log('Rendering pending comments table with:', pendingComments);
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Commenti in Attesa di Approvazione</h2>
