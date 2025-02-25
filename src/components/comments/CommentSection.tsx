@@ -12,6 +12,7 @@ interface Comment {
   id: number;
   content: string;
   created_at: string;
+  status: string;
   users?: {
     username: string;
   };
@@ -44,7 +45,6 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
           )
         `)
         .eq('review_id', parseInt(reviewId))
-        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -53,8 +53,12 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
       }
 
       console.log('Fetched comments:', data);
-      return data as Comment[];
-    }
+      return (data || []).filter(comment => 
+        comment.status === 'approved' || 
+        (session?.user.id && comment.user_id === session.user.id)
+      ) as Comment[];
+    },
+    enabled: true
   });
 
   const handleOpenCommentBox = () => {
@@ -69,6 +73,12 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!session?.user?.id) {
+      toast.error("Devi effettuare l'accesso per commentare");
+      navigate('/login');
+      return;
+    }
+    
     if (!comment.trim()) {
       toast.error('Il commento non può essere vuoto');
       return;
@@ -79,7 +89,7 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
     try {
       console.log('Attempting to submit comment:', {
         reviewId,
-        userId: session?.user.id,
+        userId: session.user.id,
         content: comment.trim(),
       });
 
@@ -88,13 +98,16 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
         .insert({
           review_id: parseInt(reviewId),
           content: comment.trim(),
-          user_id: session?.user.id,
+          user_id: session.user.id,
           status: 'pending'
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error submitting comment:', error);
+        throw error;
+      }
 
       console.log('Comment submitted successfully:', data);
       toast.success('Commento inviato con successo! Verrà pubblicato dopo la revisione.');
