@@ -45,7 +45,7 @@ export default function InsertCondition() {
   useEffect(() => {
     let isMounted = true;
 
-    const checkAdminAccess = async () => {
+    const checkAuth = async () => {
       try {
         // Wait for session loading to complete
         if (isSessionLoading) {
@@ -59,43 +59,19 @@ export default function InsertCondition() {
           return;
         }
 
-        // Log user email for debugging
-        console.log("Current user email:", session.user.email);
-        console.log("Checking admin status for user:", session.user.id);
-        
-        // Check if user is admin
-        const { data: isAdmin, error: adminError } = await supabase.rpc('is_admin', {
-          user_id: session.user.id
-        });
-
-        if (adminError) {
-          console.error("Admin check error:", adminError);
-          toast.error("Si è verificato un errore durante il controllo dei permessi: " + adminError.message);
-          navigate("/");
-          return;
-        }
-
-        console.log("Admin status:", isAdmin);
-
-        if (!isAdmin) {
-          console.log("User is not admin, redirecting to home");
-          toast.error("Non hai i permessi per accedere a questa pagina");
-          navigate("/");
-          return;
-        }
-
+        // User is authenticated, allow access
         if (isMounted) {
           setIsLoading(false);
         }
 
       } catch (error) {
-        console.error("Error checking admin status:", error);
-        toast.error("Si è verificato un errore durante il controllo dei permessi");
+        console.error("Error checking auth status:", error);
+        toast.error("Si è verificato un errore durante il controllo dell'autenticazione");
         navigate("/");
       }
     };
 
-    checkAdminAccess();
+    checkAuth();
 
     return () => {
       isMounted = false;
@@ -140,7 +116,7 @@ export default function InsertCondition() {
     }
   };
 
-  // Show loading state while checking session and admin status
+  // Show loading state while checking session
   if (isLoading || isSessionLoading) {
     return (
       <div className="container mx-auto px-4 py-8 flex justify-center items-center">
