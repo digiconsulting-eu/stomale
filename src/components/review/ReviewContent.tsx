@@ -105,6 +105,18 @@ export const ReviewContent = ({
               />
 
               <div className="mt-8">
+                <h3 className="text-xl font-semibold mb-6">Statistiche della Recensione</h3>
+                <ReviewStats
+                  diagnosisDifficulty={diagnosisDifficulty}
+                  symptomSeverity={symptomSeverity}
+                  hasMedication={hasMedication}
+                  medicationEffectiveness={medicationEffectiveness}
+                  healingPossibility={healingPossibility}
+                  socialDiscomfort={socialDiscomfort}
+                />
+              </div>
+
+              <div className="mt-8">
                 <ReviewBody 
                   symptoms={symptoms}
                   experience={experience}
@@ -113,19 +125,7 @@ export const ReviewContent = ({
             </div>
 
             <div className="bg-white rounded-xl p-8 shadow-sm">
-              <h3 className="text-xl font-semibold mb-6">Statistiche della Recensione</h3>
-              <ReviewStats
-                diagnosisDifficulty={diagnosisDifficulty}
-                symptomSeverity={symptomSeverity}
-                hasMedication={hasMedication}
-                medicationEffectiveness={medicationEffectiveness}
-                healingPossibility={healingPossibility}
-                socialDiscomfort={socialDiscomfort}
-              />
-            </div>
-
-            <div className="bg-white rounded-xl p-8 shadow-sm">
-              <CommentSection reviewId={reviewId} />
+              <CommentSection reviewId={reviewId} showBottomButton={true} />
             </div>
 
             <ReviewActions condition={condition} />

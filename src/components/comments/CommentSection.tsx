@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,9 +20,10 @@ interface Comment {
 
 interface CommentSectionProps {
   reviewId: string;
+  showBottomButton?: boolean;
 }
 
-export const CommentSection = ({ reviewId }: CommentSectionProps) => {
+export const CommentSection = ({ reviewId, showBottomButton = false }: CommentSectionProps) => {
   const [isCommentBoxOpen, setIsCommentBoxOpen] = useState(false);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -180,6 +180,18 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
               <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
             </div>
           ))}
+
+          {/* Bottom comment button */}
+          {showBottomButton && !isCommentBoxOpen && (
+            <div className="flex justify-end mt-6">
+              <Button 
+                onClick={handleOpenCommentBox}
+                className="bg-primary hover:bg-primary/90"
+              >
+                Aggiungi un commento
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
