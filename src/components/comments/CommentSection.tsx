@@ -31,12 +31,14 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
   const { data: commentsData, refetch } = useQuery({
     queryKey: ['comments', reviewId],
     queryFn: async () => {
+      console.log('Fetching comments for review:', reviewId);
       const { data, error } = await supabase
         .from('comments')
         .select(`
           id,
           content,
           created_at,
+          status,
           users (
             username
           )
@@ -50,6 +52,7 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
         throw error;
       }
 
+      console.log('Fetched comments:', data);
       return data as Comment[];
     }
   });
@@ -74,17 +77,26 @@ export const CommentSection = ({ reviewId }: CommentSectionProps) => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      console.log('Attempting to submit comment:', {
+        reviewId,
+        userId: session?.user.id,
+        content: comment.trim(),
+      });
+
+      const { data, error } = await supabase
         .from('comments')
         .insert({
           review_id: parseInt(reviewId),
           content: comment.trim(),
           user_id: session?.user.id,
           status: 'pending'
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
+      console.log('Comment submitted successfully:', data);
       toast.success('Commento inviato con successo! Verrà pubblicato dopo la revisione.');
       setComment('');
       setIsCommentBoxOpen(false);
