@@ -10,6 +10,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 interface Comment {
   id: number;
@@ -20,6 +21,14 @@ interface Comment {
     username: string;
     email: string;
   };
+  reviews?: {
+    id: number;
+    title: string;
+    condition_id: number;
+    PATOLOGIE?: {
+      Patologia: string;
+    };
+  };
 }
 
 export const PendingCommentsTable = () => {
@@ -28,7 +37,6 @@ export const PendingCommentsTable = () => {
     queryFn: async () => {
       console.log('Starting to fetch all comments...');
       
-      // Fetch ALL comments to see what's in the database
       const { data, error } = await supabase
         .from('comments')
         .select(`
@@ -39,6 +47,14 @@ export const PendingCommentsTable = () => {
           users (
             username,
             email
+          ),
+          reviews (
+            id,
+            title,
+            condition_id,
+            PATOLOGIE (
+              Patologia
+            )
           )
         `)
         .order('created_at', { ascending: false });
@@ -107,7 +123,6 @@ export const PendingCommentsTable = () => {
     );
   }
 
-  // Show loading state
   if (!allComments) {
     return (
       <div className="p-4">
@@ -116,10 +131,8 @@ export const PendingCommentsTable = () => {
     );
   }
 
-  // Filter pending comments
   const pendingComments = allComments.filter(comment => comment.status === 'pending');
 
-  // Debug information
   console.log('All comments:', allComments);
   console.log('Pending comments:', pendingComments);
   console.log('Comments by status:', allComments.reduce((acc, comment) => {
@@ -127,7 +140,6 @@ export const PendingCommentsTable = () => {
     return acc;
   }, {} as Record<string, number>));
 
-  // Show empty state for pending comments
   if (pendingComments.length === 0) {
     return (
       <div>
@@ -162,6 +174,8 @@ export const PendingCommentsTable = () => {
           <TableRow>
             <TableHead>Autore</TableHead>
             <TableHead>Contenuto</TableHead>
+            <TableHead>Patologia</TableHead>
+            <TableHead>Recensione</TableHead>
             <TableHead>Data</TableHead>
             <TableHead>Azioni</TableHead>
           </TableRow>
@@ -171,6 +185,19 @@ export const PendingCommentsTable = () => {
             <TableRow key={comment.id}>
               <TableCell>{comment.users?.username || comment.users?.email || 'Utente anonimo'}</TableCell>
               <TableCell className="max-w-md truncate">{comment.content}</TableCell>
+              <TableCell>
+                {comment.reviews?.PATOLOGIE?.Patologia || 'N/A'}
+              </TableCell>
+              <TableCell>
+                {comment.reviews ? (
+                  <Link 
+                    to={`/reviews/${comment.reviews.id}`}
+                    className="text-blue-600 hover:underline truncate block max-w-[200px]"
+                  >
+                    {comment.reviews.title || `Recensione #${comment.reviews.id}`}
+                  </Link>
+                ) : 'N/A'}
+              </TableCell>
               <TableCell>
                 {new Date(comment.created_at).toLocaleDateString('it-IT')}
               </TableCell>
