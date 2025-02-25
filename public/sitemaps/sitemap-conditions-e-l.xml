@@ -1,3 +1,4 @@
+<lov-code>
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -385,7 +386,7 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+    <url>
     <loc>https://stomale.info/patologia/herpes-genitale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -440,7 +441,7 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/indigestione</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -490,7 +491,7 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/indigestione-di-sostanze-caustiche</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -515,22 +516,22 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/insulinemia</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/insulinoma</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/intertrigine</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/intolleranza-all-istamina</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -545,32 +546,32 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/intolleranza-al-nichel</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/intolleranze-alimentari</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/intossicazione-da-monossido-di-carbonio</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/iperemesi-gravidica</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/ipermetropia</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/iperparatiroidismo</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -580,12 +581,12 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/ipertensione-polmonare</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/ipertermia-maligna</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -595,7 +596,7 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/ipertrofia-dei-turbinati</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -605,22 +606,22 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/ipertrofia-ventricolare</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/ipocondria</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/ipogonadismo-maschile</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/ipoparatiroidismo</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -630,17 +631,17 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/iridociclite</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/ischemia-cerebrale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/istoplasmosi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -650,12 +651,12 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/ittiosi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/labbro-leporino</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -670,7 +671,7 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/lebbra</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -680,12 +681,12 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/leishmaniosi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/leptospirosi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -695,17 +696,17 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/lichen-planus</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/lichen-simplex</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/linfogranuloma-venereo</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -715,39 +716,25 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/linfoma-di-hodgkin</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/linfoma-non-hodgkin</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/lipoma</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
+   <url>
     <loc>https://stomale.info/patologia/liposarcoma</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/listeriosi</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/lupus-erimatoso-sistemico</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/lussazione</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-</urlset>
+   <url>
+    <
