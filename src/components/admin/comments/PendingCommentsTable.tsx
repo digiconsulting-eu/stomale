@@ -27,18 +27,36 @@ export const PendingCommentsTable = () => {
       console.log('Starting to fetch pending comments...');
       
       // First check if there are any comments at all
-      const { count, error: countError } = await supabase
+      const { data: allComments, error: countError } = await supabase
         .from('comments')
-        .select('*', { count: 'exact', head: true });
+        .select('*');
         
       if (countError) {
-        console.error('Error checking comments count:', countError);
+        console.error('Error checking comments:', countError);
         throw countError;
       }
       
-      console.log('Total comments in database:', count);
+      console.log('All comments in database:', allComments);
 
-      // Then get pending comments
+      // Then get pending comments without any filters first
+      const { data: allPendingComments, error: pendingError } = await supabase
+        .from('comments')
+        .select(`
+          *,
+          users (
+            username,
+            email
+          )
+        `);
+
+      if (pendingError) {
+        console.error('Error fetching all comments:', pendingError);
+        throw pendingError;
+      }
+
+      console.log('All comments before status filter:', allPendingComments);
+
+      // Now get only pending comments
       const { data, error } = await supabase
         .from('comments')
         .select(`
@@ -48,7 +66,8 @@ export const PendingCommentsTable = () => {
           review_id,
           status,
           users (
-            username
+            username,
+            email
           )
         `)
         .eq('status', 'pending')
@@ -59,7 +78,7 @@ export const PendingCommentsTable = () => {
         throw error;
       }
 
-      console.log('Pending comments query result:', {
+      console.log('Final pending comments query result:', {
         commentCount: data?.length || 0,
         comments: data
       });
@@ -121,9 +140,23 @@ export const PendingCommentsTable = () => {
     );
   }
 
-  if (!pendingComments?.length) {
+  // Show loading state
+  if (!pendingComments) {
+    return (
+      <div className="p-4">
+        Caricamento commenti in corso...
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (pendingComments.length === 0) {
     console.log('No pending comments found');
-    return null;
+    return (
+      <div className="p-4 text-gray-500">
+        Non ci sono commenti in attesa di approvazione.
+      </div>
+    );
   }
 
   console.log('Rendering pending comments table with:', pendingComments);
@@ -142,7 +175,7 @@ export const PendingCommentsTable = () => {
         <TableBody>
           {pendingComments.map((comment) => (
             <TableRow key={comment.id}>
-              <TableCell>{comment.users?.username}</TableCell>
+              <TableCell>{comment.users?.username || comment.users?.email || 'Utente anonimo'}</TableCell>
               <TableCell className="max-w-md truncate">{comment.content}</TableCell>
               <TableCell>
                 {new Date(comment.created_at).toLocaleDateString('it-IT')}
