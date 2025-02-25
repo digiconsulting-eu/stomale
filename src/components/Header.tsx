@@ -16,7 +16,6 @@ export const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Close menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
@@ -66,15 +65,30 @@ export const Header = () => {
       } else {
         setIsAdmin(false);
       }
+
+      // Handle logout completion
+      if (event === 'SIGNED_OUT') {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+        setIsMenuOpen(false);
+        navigate('/', { replace: true });
+        toast.success("Logout effettuato con successo");
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   const handleLogout = async () => {
     try {
+      // First clear local state
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+      setIsMenuOpen(false);
+      
+      // Then attempt signOut
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error during logout:', error);
@@ -82,19 +96,18 @@ export const Header = () => {
         return;
       }
       
-      // Clear all auth-related state
-      setIsLoggedIn(false);
-      setIsAdmin(false);
-      setIsMenuOpen(false);
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('isAdmin');
+      // Clear any remaining local storage
+      localStorage.clear();
       
-      // Navigate to home page
+      // Force navigation regardless of signOut success
       navigate('/', { replace: true });
       toast.success("Logout effettuato con successo");
     } catch (error) {
-      console.error('Error during logout:', error);
+      console.error('Unexpected error during logout:', error);
       toast.error("Errore durante il logout");
+      
+      // Force navigation even on error
+      navigate('/', { replace: true });
     }
   };
 
