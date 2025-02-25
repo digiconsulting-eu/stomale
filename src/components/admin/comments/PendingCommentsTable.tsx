@@ -21,10 +21,24 @@ interface Comment {
 }
 
 export const PendingCommentsTable = () => {
-  const { data: pendingComments, refetch: refetchComments } = useQuery({
+  const { data: pendingComments, refetch: refetchComments, isError, error: queryError } = useQuery({
     queryKey: ['pending-comments'],
     queryFn: async () => {
-      console.log('Fetching pending comments...');
+      console.log('Starting to fetch pending comments...');
+      
+      // First check if there are any comments at all
+      const { count, error: countError } = await supabase
+        .from('comments')
+        .select('*', { count: 'exact', head: true });
+        
+      if (countError) {
+        console.error('Error checking comments count:', countError);
+        throw countError;
+      }
+      
+      console.log('Total comments in database:', count);
+
+      // Then get pending comments
       const { data, error } = await supabase
         .from('comments')
         .select(`
@@ -32,6 +46,7 @@ export const PendingCommentsTable = () => {
           content,
           created_at,
           review_id,
+          status,
           users (
             username
           )
@@ -44,13 +59,24 @@ export const PendingCommentsTable = () => {
         throw error;
       }
 
-      console.log('Fetched pending comments:', data);
+      console.log('Pending comments query result:', {
+        commentCount: data?.length || 0,
+        comments: data
+      });
+      
       return data;
+    },
+    meta: {
+      onError: (error: Error) => {
+        console.error('Query error in PendingCommentsTable:', error);
+        toast.error('Errore nel caricamento dei commenti');
+      }
     }
   });
 
   const handleApproveComment = async (commentId: number) => {
     try {
+      console.log('Approving comment:', commentId);
       const { error } = await supabase
         .from('comments')
         .update({ status: 'approved' })
@@ -58,6 +84,7 @@ export const PendingCommentsTable = () => {
 
       if (error) throw error;
 
+      console.log('Comment approved successfully');
       toast.success('Commento approvato con successo');
       refetchComments();
     } catch (error) {
@@ -68,6 +95,7 @@ export const PendingCommentsTable = () => {
 
   const handleRejectComment = async (commentId: number) => {
     try {
+      console.log('Rejecting comment:', commentId);
       const { error } = await supabase
         .from('comments')
         .update({ status: 'rejected' })
@@ -75,6 +103,7 @@ export const PendingCommentsTable = () => {
 
       if (error) throw error;
 
+      console.log('Comment rejected successfully');
       toast.success('Commento rifiutato');
       refetchComments();
     } catch (error) {
@@ -83,10 +112,21 @@ export const PendingCommentsTable = () => {
     }
   };
 
+  if (isError) {
+    console.error('Error in PendingCommentsTable:', queryError);
+    return (
+      <div className="p-4 text-red-500">
+        Errore nel caricamento dei commenti. Per favore, riprova più tardi.
+      </div>
+    );
+  }
+
   if (!pendingComments?.length) {
+    console.log('No pending comments found');
     return null;
   }
 
+  console.log('Rendering pending comments table with:', pendingComments);
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Commenti in Attesa di Approvazione</h2>
