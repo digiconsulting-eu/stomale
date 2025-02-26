@@ -1,6 +1,6 @@
 /* /index.html 200
 /sitemap.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap 200! Content-Type=application/xml
 /sitemap-index.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index 200! Content-Type=application/xml
-/sitemap-conditions/:letter https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=:letter 200! Content-Type=application/xml Authorization="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudWhkb3ljd3BqZmpodGhmcWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwOTAxOTcsImV4cCI6MjA0ODY2NjE5N30.oE_g8iFcu9UdsHeZhFLYpArJWa7hNFWnsR5x1E8ZGA0"
+/sitemap-conditions/:letter https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=:letter 200! Content-Type=application/xml
 /sitemap-reviews/:page https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews?page=:page 200! Content-Type=application/xml
 /sitemaps/* /sitemaps/:splat 200

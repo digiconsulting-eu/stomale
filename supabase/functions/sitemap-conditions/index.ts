@@ -6,7 +6,7 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-  console.log('Request received:', req.url); // Log the incoming request URL
+  console.log('Request received:', req.url);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -15,9 +15,9 @@ Deno.serve(async (req) => {
 
   try {
     const letter = new URL(req.url).searchParams.get('letter')?.toLowerCase() || 'a'
-    console.log('Processing letter:', letter); // Log the letter being processed
+    console.log('Processing letter:', letter);
     
-    // For testing, return a simple static XML
+    // Test XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
   </url>
 </urlset>`
 
-    console.log('Generated XML length:', xml.length); // Log the size of generated XML
+    console.log('Returning XML response');
 
     return new Response(xml, {
       headers: {
