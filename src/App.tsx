@@ -22,7 +22,7 @@ function App() {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    const defaultTitle = getDefaultPageTitle();
+    const defaultTitle = getDefaultPageTitle("Home");
     setPageTitle(defaultTitle);
     
     supabase.auth.getSession().then(({ data: { session } }) => {
