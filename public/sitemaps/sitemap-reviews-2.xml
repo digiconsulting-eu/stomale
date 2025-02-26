@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Reviews 224-446 will be added here -->
+  <url>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1449-fibromialgia-quotidiana</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1450-gestione-gastrite</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
   <url>
     <loc>https://stomale.info/patologia/allergia-al-nichel/esperienza/1223-la-mia-esperienza</loc>
     <changefreq>monthly</changefreq>

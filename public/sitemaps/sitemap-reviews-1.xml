@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Reviews 1-223 will be added here -->
+  <url>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1776-depressione-forum</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1777-diabete-forum</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1778-endometriosi-forum</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
   <url>
     <loc>https://stomale.info/patologia/allergia-al-nichel-e-snas/esperienza/21-la-mia-storia</loc>
     <changefreq>monthly</changefreq>
