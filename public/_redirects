@@ -2,4 +2,5 @@
 /sitemap.xml /sitemap.xml 200
 /sitemap-index.xml /sitemap-index.xml 200
 /sitemap-conditions/:letter https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=:letter 200! Content-Type=application/xml
+/sitemap-reviews/:page https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews?page=:page 200! Content-Type=application/xml
 /sitemaps/* /sitemaps/:splat 200
