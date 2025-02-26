@@ -34,7 +34,6 @@ function App() {
     })
   }, [])
 
-  // Aggiungi la funzione all'oggetto window per l'accesso dalla console
   if (typeof window !== 'undefined') {
     (window as any).regenerateSitemaps = regenerateSitemaps;
   }
