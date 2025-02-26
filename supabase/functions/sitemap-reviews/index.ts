@@ -23,7 +23,9 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client
+    console.log('Starting sitemap generation with service role...')
+    
+    // Create Supabase client with service role key
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -32,29 +34,54 @@ serve(async (req) => {
     // Get page parameter from URL
     const url = new URL(req.url)
     const page = parseInt(url.searchParams.get('page') || '1')
-    const perPage = 100 // 100 recensioni per file
+    const perPage = 100
 
-    // Calculate offset
-    const offset = (page - 1) * perPage
+    console.log(`Processing page ${page} with ${perPage} items per page`)
 
-    console.log(`Generating sitemap for page ${page} (offset: ${offset}, items per page: ${perPage})`)
-
-    // First get total count of approved reviews
+    // First get total count with detailed logging
     const { count, error: countError } = await supabaseClient
       .from('reviews')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'approved')
 
     if (countError) {
-      console.error('Error getting count:', countError)
+      console.error('Error getting review count:', countError)
       throw countError
     }
 
-    console.log(`Total approved reviews: ${count}`)
-    const totalPages = Math.ceil((count || 0) / perPage)
+    console.log(`Found ${count} total approved reviews`)
+
+    if (!count || count === 0) {
+      console.log('No approved reviews found')
+      return new Response(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`, {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/xml',
+        },
+      })
+    }
+
+    const totalPages = Math.ceil(count / perPage)
     console.log(`Total pages needed: ${totalPages}`)
 
-    // Fetch reviews for the current page
+    if (page > totalPages) {
+      console.log(`Requested page ${page} exceeds total pages ${totalPages}`)
+      return new Response(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`, {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/xml',
+        },
+      })
+    }
+
+    // Calculate offset
+    const offset = (page - 1) * perPage
+    console.log(`Using offset: ${offset}`)
+
+    // Fetch reviews with detailed logging
+    console.log('Fetching reviews from database...')
     const { data: reviews, error: reviewsError } = await supabaseClient
       .from('reviews')
       .select(`
@@ -63,6 +90,7 @@ serve(async (req) => {
         condition_id,
         created_at,
         PATOLOGIE (
+          id,
           Patologia
         )
       `)
@@ -75,8 +103,8 @@ serve(async (req) => {
       throw reviewsError
     }
 
-    if (!reviews?.length) {
-      console.log('No reviews found for this page')
+    if (!reviews || reviews.length === 0) {
+      console.log('No reviews found for the current page')
       return new Response(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`, {
         headers: {
@@ -86,31 +114,35 @@ serve(async (req) => {
       })
     }
 
-    console.log(`Processing ${reviews.length} reviews for page ${page}`)
+    console.log(`Processing ${reviews.length} reviews`)
 
-    // Generate URLs
+    // Generate URLs with detailed logging
     const urls = reviews.map((review: Review) => {
       if (!review.PATOLOGIE?.Patologia) {
-        console.warn(`Warning: Review ${review.id} has no associated condition`)
+        console.warn(`Review ${review.id} has no associated condition (condition_id: ${review.condition_id})`)
         return null
       }
 
+      console.log(`Processing review ${review.id} with condition "${review.PATOLOGIE.Patologia}"`)
+
       const conditionSlug = review.PATOLOGIE.Patologia.toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+        .replace(/[\u0300-\u036f]/g, '')
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
         
       const titleSlug = review.title.toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+        .replace(/[\u0300-\u036f]/g, '')
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
 
-      return `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`
+      const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`
+      console.log(`Generated URL: ${url}`)
+      return url
     }).filter(url => url !== null)
 
-    console.log(`Generated ${urls.length} valid URLs`)
+    console.log(`Generated ${urls.length} valid URLs out of ${reviews.length} reviews`)
 
     // Generate sitemap XML
     const urlset = urls.map(url => `
@@ -125,7 +157,7 @@ serve(async (req) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlset}
 </urlset>`
 
-    console.log(`Successfully generated sitemap for page ${page}`)
+    console.log('Sitemap generation completed successfully')
 
     return new Response(xml.trim(), {
       headers: {
@@ -135,7 +167,7 @@ serve(async (req) => {
     })
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Fatal error in sitemap generation:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: {
         ...corsHeaders,
