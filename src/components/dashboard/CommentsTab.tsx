@@ -79,9 +79,8 @@ export const CommentsTab = () => {
     setCommentToDelete(null);
   };
 
-  const formatPathname = (text: string) => {
-    const decodedText = decodeURIComponent(text);
-    return decodedText.toLowerCase().replace(/\s+/g, '-');
+  const formatUrlPath = (text: string) => {
+    return text.trim().toLowerCase().replace(/\s+/g, '-');
   };
 
   if (isLoading) {
@@ -146,11 +145,13 @@ export const CommentsTab = () => {
                 </div>
               </div>
               <p className="text-gray-700">{comment.content}</p>
-              <Button asChild variant="link" className="p-0 h-auto">
-                <Link to={`/patologia/${formatPathname(comment.reviews?.condition?.Patologia || '')}/esperienza/${comment.review_id}-${formatPathname(comment.reviews?.title || '')}`}>
-                  Vai alla recensione
-                </Link>
-              </Button>
+              {comment.reviews?.condition?.Patologia && comment.reviews?.title && (
+                <Button asChild variant="link" className="p-0 h-auto">
+                  <Link to={`/patologia/${formatUrlPath(comment.reviews.condition.Patologia)}/esperienza/${comment.review_id}-${formatUrlPath(comment.reviews.title)}`}>
+                    Vai alla recensione
+                  </Link>
+                </Button>
+              )}
             </div>
           </Card>
         ))}
