@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +29,8 @@ const Reviews = () => {
           throw countError;
         }
 
-        console.log('Total approved reviews count:', totalCount);
+        // Aggiungiamo questo log per vedere il numero totale
+        console.log('Numero totale di recensioni approvate:', totalCount);
 
         // Calculate the range for pagination
         const from = (currentPage - 1) * REVIEWS_PER_PAGE;
