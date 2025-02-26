@@ -48,7 +48,19 @@ const Reviews = () => {
         const { data: reviewsData, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
-            *,
+            id,
+            title,
+            experience,
+            diagnosis_difficulty,
+            symptoms_severity,
+            has_medication,
+            medication_effectiveness,
+            healing_possibility,
+            social_discomfort,
+            username,
+            created_at,
+            symptoms,
+            condition_id,
             PATOLOGIE (
               id,
               Patologia

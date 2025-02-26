@@ -1,6 +1,5 @@
-
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0"
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,85 +8,84 @@ const corsHeaders = {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Starting sitemap index generation...')
-    
-    // Create Supabase client
-    const supabaseClient = createClient(
+    const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    );
 
-    // Get total count of approved reviews
-    const { count: reviewCount, error: countError } = await supabaseClient
-      .from('reviews')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved')
+    const { data: files, error } = await supabase
+      .from('sitemap_files')
+      .select('*')
+      .order('filename');
 
-    if (countError) throw countError
+    if (error) throw error;
 
-    console.log(`Total approved reviews: ${reviewCount}`)
+    const today = new Date().toISOString().split('T')[0];
 
-    // Calculate number of sitemap files needed (100 URLs per file)
-    const reviewsPerFile = 100
-    const totalReviewSitemaps = Math.ceil((reviewCount || 0) / reviewsPerFile)
-
-    console.log(`Will generate ${totalReviewSitemaps} review sitemap files`)
-
-    // Create sitemap entries
-    const today = new Date().toISOString().split('T')[0]
-    
-    // Static sitemap
-    let sitemaps = `
+    const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>
     <lastmod>${today}</lastmod>
-  </sitemap>`
-
-    // Conditions sitemaps
-    const letters = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z']
-    for (const letter of letters) {
-      sitemaps += `
+  </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-${letter}.xml</loc>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-a.xml</loc>
     <lastmod>${today}</lastmod>
-  </sitemap>`
-    }
-
-    // Reviews sitemaps
-    for (let i = 1; i <= totalReviewSitemaps; i++) {
-      const sitemapUrl = `https://stomale.info/sitemaps/sitemap-reviews-${i}.xml`
-      console.log(`Adding review sitemap: ${sitemapUrl}`)
-      
-      sitemaps += `
+  </sitemap>
   <sitemap>
-    <loc>${sitemapUrl}</loc>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-b.xml</loc>
     <lastmod>${today}</lastmod>
-  </sitemap>`
-    }
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-c.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-d.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-e-l.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-m-r.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-s-z.xml</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+${files.map(file => `  <sitemap>
+    <loc>https://stomale.info/sitemaps/${file.filename}</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>`).join('\n')}
+</sitemapindex>`;
 
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemaps}
-</sitemapindex>`
-
-    return new Response(xml, {
+    return new Response(JSON.stringify({
+      sitemapIndex,
+      filesCount: files.length
+    }), {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'application/xml',
-      },
-    })
+        'Content-Type': 'application/json'
+      }
+    });
 
   } catch (error) {
-    console.error('Error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Error generating sitemap index:', error);
+    return new Response(JSON.stringify({
+      error: error.message
+    }), {
+      status: 500,
       headers: {
         ...corsHeaders,
-        'Content-Type': 'application/json',
-      },
-      status: 500,
-    })
+        'Content-Type': 'application/json'
+      }
+    });
   }
-})
+});
