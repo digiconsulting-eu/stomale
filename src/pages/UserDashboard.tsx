@@ -15,7 +15,7 @@ const UserDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(
-    location.state?.activeTab || "reviews"
+    location.state?.activeTab || "notifications"  // Cambiato il tab di default in notifications
   );
 
   const { data: session, isLoading: isSessionLoading } = useAuthSession();
@@ -41,12 +41,16 @@ const UserDashboard = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
+          <TabsTrigger value="notifications">Notifiche</TabsTrigger>
           <TabsTrigger value="reviews">Le mie recensioni</TabsTrigger>
           <TabsTrigger value="comments">I miei commenti</TabsTrigger>
           <TabsTrigger value="favorites">Patologie seguite</TabsTrigger>
-          <TabsTrigger value="notifications">Notifiche</TabsTrigger>
           <TabsTrigger value="profile">Profilo</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="notifications">
+          <NotificationsTab />
+        </TabsContent>
 
         <TabsContent value="reviews">
           <ReviewsList reviews={reviews} isLoading={isReviewsLoading} />
@@ -58,10 +62,6 @@ const UserDashboard = () => {
 
         <TabsContent value="favorites">
           <FavoritesTab />
-        </TabsContent>
-
-        <TabsContent value="notifications">
-          <NotificationsTab />
         </TabsContent>
 
         <TabsContent value="profile">
