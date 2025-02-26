@@ -34,7 +34,7 @@ serve(async (req) => {
     // Get page parameter from URL
     const url = new URL(req.url)
     const page = parseInt(url.searchParams.get('page') || '1')
-    const perPage = 20 // Ridotto a 20 per gestire meglio la paginazione
+    const perPage = 100 // Aumentato a 100 recensioni per file
 
     // Calculate offset
     const offset = (page - 1) * perPage

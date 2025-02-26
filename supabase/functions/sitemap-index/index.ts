@@ -31,8 +31,8 @@ serve(async (req) => {
 
     console.log(`Total approved reviews: ${reviewCount}`)
 
-    // Calculate number of sitemap files needed (20 URLs per file)
-    const reviewsPerFile = 20
+    // Calculate number of sitemap files needed (100 URLs per file)
+    const reviewsPerFile = 100
     const totalReviewSitemaps = Math.ceil((reviewCount || 0) / reviewsPerFile)
 
     console.log(`Will generate ${totalReviewSitemaps} review sitemap files`)
