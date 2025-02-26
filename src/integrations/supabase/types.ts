@@ -140,6 +140,54 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: number
+          is_read: boolean | null
+          related_comment_id: number | null
+          related_review_id: number | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: never
+          is_read?: boolean | null
+          related_comment_id?: number | null
+          related_review_id?: number | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: never
+          is_read?: boolean | null
+          related_comment_id?: number | null
+          related_review_id?: number | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_related_comment_id_fkey"
+            columns: ["related_comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_related_review_id_fkey"
+            columns: ["related_review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       PATOLOGIE: {
         Row: {
           created_at: string | null

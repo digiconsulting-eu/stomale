@@ -1,89 +1,75 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bell } from "lucide-react";
+import { Bell, Check, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-interface Update {
+interface Notification {
   id: number;
-  condition: {
-    Patologia: string;
-  };
-  update_type: string;
+  type: string;
+  content: string;
+  related_review_id: number;
+  related_comment_id: number;
+  is_read: boolean;
   created_at: string;
 }
 
 export const NotificationsTab = () => {
-  const { data: updates } = useQuery({
-    queryKey: ['condition-updates'],
+  const { data: notifications, refetch } = useQuery({
+    queryKey: ['notifications'],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) return [];
 
-      // First get the user's username
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('username')
-        .eq('id', session.session.user.id)
-        .single();
-
-      if (userError) {
-        console.error('Error fetching user data:', userError);
-        throw userError;
-      }
-
-      if (!userData?.username) {
-        console.log('No username found for user');
-        return [];
-      }
-
-      // Get user's followed conditions
-      const { data: followedConditions } = await supabase
-        .from('condition_follows')
-        .select('condition_id')
-        .eq('user_id', session.session.user.id);
-
-      // Get user's reviews to know which conditions they've reviewed
-      const { data: userReviews } = await supabase
-        .from('reviews')
-        .select('id, condition_id')
-        .eq('username', userData.username);
-
-      if (!followedConditions && !userReviews) return [];
-
-      const followedConditionIds = followedConditions?.map(f => f.condition_id) || [];
-      const reviewedConditionIds = userReviews?.map(r => r.condition_id) || [];
-      const userReviewIds = userReviews?.map(r => r.id) || [];
-
-      // Get updates for followed conditions or comments on user's reviews
       const { data, error } = await supabase
-        .from('condition_updates')
-        .select(`
-          id,
-          update_type,
-          created_at,
-          condition:PATOLOGIE (
-            Patologia
-          )
-        `)
-        .or(`condition_id.in.(${[...followedConditionIds, ...reviewedConditionIds].join(',')}),review_id.in.(${userReviewIds.join(',')})`)
+        .from('notifications')
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching updates:', error);
+        console.error('Error fetching notifications:', error);
         throw error;
       }
 
-      return data as Update[];
+      return data as Notification[];
     }
   });
 
-  if (!updates?.length) {
+  const markAsRead = async (notificationId: number) => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('id', notificationId);
+
+    if (error) {
+      console.error('Error marking notification as read:', error);
+      toast.error("Errore durante l'aggiornamento della notifica");
+      return;
+    }
+
+    refetch();
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'comment_approved':
+        return <Check className="h-5 w-5 text-green-500" />;
+      case 'new_comment_on_review':
+      case 'new_comment_on_thread':
+        return <MessageCircle className="h-5 w-5 text-blue-500" />;
+      default:
+        return <Bell className="h-5 w-5" />;
+    }
+  };
+
+  if (!notifications?.length) {
     return (
       <Card className="p-8 text-center">
         <Bell className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-        <p className="text-gray-500">Non ci sono aggiornamenti al momento</p>
+        <p className="text-gray-500">Non ci sono notifiche al momento</p>
         <Button asChild variant="link" className="mt-2">
           <Link to="/cerca-patologia">Cerca una patologia da seguire</Link>
         </Button>
@@ -93,19 +79,53 @@ export const NotificationsTab = () => {
 
   return (
     <div className="space-y-4">
-      {updates.map((update) => (
-        <Card key={update.id} className="p-4">
-          <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            <h3 className="font-semibold">
-              {update.update_type === 'new_review' 
-                ? 'Nuova recensione per'
-                : 'Nuovo commento su'} {update.condition.Patologia}
-            </h3>
+      {notifications.map((notification) => (
+        <Card 
+          key={notification.id} 
+          className={`p-4 transition-colors ${!notification.is_read ? 'bg-blue-50' : ''}`}
+        >
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 mt-1">
+              {getNotificationIcon(notification.type)}
+            </div>
+            <div className="flex-1">
+              <p className="text-gray-800">
+                {notification.content}
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                {new Date(notification.created_at).toLocaleDateString('it-IT', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
+            {!notification.is_read && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => markAsRead(notification.id)}
+                className="flex-shrink-0"
+              >
+                Segna come letto
+              </Button>
+            )}
           </div>
-          <p className="text-sm text-gray-500 mt-2">
-            {new Date(update.created_at).toLocaleDateString('it-IT')}
-          </p>
+          {notification.related_review_id && (
+            <div className="mt-3">
+              <Button 
+                variant="link" 
+                asChild 
+                className="p-0 h-auto font-normal text-primary"
+              >
+                <Link to={`/recensione/${notification.related_review_id}`}>
+                  Vai alla recensione
+                </Link>
+              </Button>
+            </div>
+          )}
         </Card>
       ))}
     </div>
