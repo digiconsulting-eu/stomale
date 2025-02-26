@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-import { serve } from "https://deno.fresh.run/std@v1/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -94,51 +94,10 @@ ${chunk.map(review => {
 
     console.log(`Generated ${sitemapChunks.length} sitemap files`);
 
-    // Genera il sitemap index
-    const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-a.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-b.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-c.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-d.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-e-l.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-m-r.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-s-z.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-${sitemapChunks.map(chunk => `  <sitemap>
-    <loc>https://stomale.info/sitemaps/${chunk.filename}</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>`).join('\n')}
-</sitemapindex>`;
-
     return new Response(JSON.stringify({
       message: 'Sitemaps generated successfully',
       sitemaps: sitemapChunks,
-      sitemapIndex
+      url_count: reviews.length
     }), {
       headers: {
         ...corsHeaders,
