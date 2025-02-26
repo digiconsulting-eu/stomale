@@ -23,6 +23,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting sitemap generation...')
+    
     // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -32,10 +34,20 @@ serve(async (req) => {
     // Get page parameter from URL
     const url = new URL(req.url)
     const page = parseInt(url.searchParams.get('page') || '1')
-    const perPage = 200 // Number of URLs per sitemap file
+    const perPage = 20 // Ridotto a 20 per gestire meglio la paginazione
 
     // Calculate offset
     const offset = (page - 1) * perPage
+
+    console.log(`Generating sitemap for page ${page} with offset ${offset}`)
+
+    // First get total count
+    const { count } = await supabaseClient
+      .from('reviews')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'approved')
+
+    console.log(`Total approved reviews: ${count}`)
 
     // Fetch reviews for the current page
     const { data: reviews, error } = await supabaseClient
@@ -50,10 +62,14 @@ serve(async (req) => {
         )
       `)
       .eq('status', 'approved')
-      .order('created_at', { ascending: false })
       .range(offset, offset + perPage - 1)
 
-    if (error) throw error
+    if (error) {
+      console.error('Error fetching reviews:', error)
+      throw error
+    }
+
+    console.log(`Retrieved ${reviews?.length} reviews for this page`)
 
     // Generate sitemap XML
     const urlset = reviews?.map((review: Review) => {
@@ -65,9 +81,12 @@ serve(async (req) => {
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
 
+      const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`
+      console.log(`Generated URL: ${url}`)
+
       return `
   <url>
-    <loc>https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}</loc>
+    <loc>${url}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
     <lastmod>${new Date(review.created_at).toISOString().split('T')[0]}</lastmod>

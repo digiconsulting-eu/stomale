@@ -13,6 +13,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting sitemap index generation...')
+    
     // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -27,9 +29,13 @@ serve(async (req) => {
 
     if (countError) throw countError
 
-    // Calculate number of sitemap files needed (200 URLs per file)
-    const reviewsPerFile = 200
+    console.log(`Total approved reviews: ${reviewCount}`)
+
+    // Calculate number of sitemap files needed (20 URLs per file)
+    const reviewsPerFile = 20
     const totalReviewSitemaps = Math.ceil((reviewCount || 0) / reviewsPerFile)
+
+    console.log(`Will generate ${totalReviewSitemaps} review sitemap files`)
 
     // Create sitemap entries
     const today = new Date().toISOString().split('T')[0]
@@ -53,9 +59,12 @@ serve(async (req) => {
 
     // Reviews sitemaps
     for (let i = 1; i <= totalReviewSitemaps; i++) {
+      const sitemapUrl = `https://stomale.info/sitemaps/sitemap-reviews-${i}.xml`
+      console.log(`Adding review sitemap: ${sitemapUrl}`)
+      
       sitemaps += `
   <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-reviews-${i}.xml</loc>
+    <loc>${sitemapUrl}</loc>
     <lastmod>${today}</lastmod>
   </sitemap>`
     }
