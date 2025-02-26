@@ -16,6 +16,8 @@ const Home = () => {
           id,
           title,
           experience,
+          condition_id,
+          symptoms,
           diagnosis_difficulty,
           symptoms_severity,
           has_medication,
