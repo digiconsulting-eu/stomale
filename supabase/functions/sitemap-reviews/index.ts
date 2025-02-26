@@ -43,14 +43,22 @@ serve(async (req) => {
     console.log(`Using offset: ${offset}`)
     console.log(`Items per page: ${perPage}`)
 
-    // First get total count of approved reviews
-    const { count } = await supabaseClient
+    // First get total count of approved reviews with detailed error logging
+    const { data: countResult, error: countError } = await supabaseClient
       .from('reviews')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })
       .eq('status', 'approved')
 
-    const totalPages = Math.ceil((count || 0) / perPage)
-    console.log(`Total approved reviews: ${count}`)
+    if (countError) {
+      console.error('Error getting count:', countError)
+      throw countError
+    }
+
+    const count = countResult?.length || 0
+    const totalPages = Math.ceil(count / perPage)
+    
+    console.log(`Total approved reviews found: ${count}`)
+    console.log(`Using count method: ${count} reviews`)
     console.log(`Total pages needed: ${totalPages}`)
 
     if (page > totalPages) {
@@ -64,8 +72,10 @@ serve(async (req) => {
       })
     }
 
-    // Fetch reviews for the current page
-    const { data: reviews, error } = await supabaseClient
+    // Fetch reviews for the current page with detailed logging
+    console.log(`Fetching reviews for page ${page} with offset ${offset}`)
+    
+    const { data: reviews, error: reviewsError } = await supabaseClient
       .from('reviews')
       .select(`
         id,
@@ -80,9 +90,9 @@ serve(async (req) => {
       .order('id', { ascending: true })
       .range(offset, offset + perPage - 1)
 
-    if (error) {
-      console.error('Error fetching reviews:', error)
-      throw error
+    if (reviewsError) {
+      console.error('Error fetching reviews:', reviewsError)
+      throw reviewsError
     }
 
     if (!reviews?.length) {
@@ -99,10 +109,16 @@ serve(async (req) => {
     console.log(`Found ${reviews.length} reviews for page ${page}`)
     console.log(`First review ID: ${reviews[0].id}`)
     console.log(`Last review ID: ${reviews[reviews.length - 1].id}`)
+    console.log('Review IDs:', reviews.map(r => r.id).join(', '))
 
     // Generate and log URLs
     const urls = reviews.map((review: Review) => {
-      const conditionSlug = review.PATOLOGIE?.Patologia.toLowerCase()
+      if (!review.PATOLOGIE?.Patologia) {
+        console.warn(`Warning: Review ${review.id} has no associated condition`)
+        return null
+      }
+
+      const conditionSlug = review.PATOLOGIE.Patologia.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
         
@@ -114,7 +130,7 @@ serve(async (req) => {
       
       console.log(`Generated URL for review ${review.id}: ${url}`)
       return url
-    })
+    }).filter(url => url !== null) // Remove any null URLs
 
     // Generate sitemap XML
     const urlset = urls.map(url => `
