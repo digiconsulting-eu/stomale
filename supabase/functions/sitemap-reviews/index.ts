@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -6,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const CHUNK_SIZE = 250; // Numero di URL per ogni file sitemap
+const CHUNK_SIZE = 200; // Aumentato a 200 URL per sitemap
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -20,7 +21,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    console.log('Fetching all reviews from database...');
+    console.log('Fetching all approved reviews from database...');
     
     // Recupera tutte le recensioni approvate
     const { data: reviews, error } = await supabase
@@ -39,7 +40,7 @@ serve(async (req) => {
       throw new Error('No reviews found');
     }
 
-    console.log(`Found ${reviews.length} reviews`);
+    console.log(`Found ${reviews.length} approved reviews`);
 
     // Funzione per generare URL SEO-friendly
     const toSEOFriendlyURL = (text: string): string => {
@@ -92,12 +93,13 @@ ${chunk.map(review => {
       });
     }
 
-    console.log(`Generated ${sitemapChunks.length} sitemap files`);
+    console.log(`Generated ${sitemapChunks.length} sitemap files with ${CHUNK_SIZE} URLs per file`);
 
     return new Response(JSON.stringify({
       message: 'Sitemaps generated successfully',
       sitemaps: sitemapChunks,
-      url_count: reviews.length
+      total_reviews: reviews.length,
+      chunks_created: sitemapChunks.length
     }), {
       headers: {
         ...corsHeaders,
