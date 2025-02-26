@@ -29,8 +29,16 @@ const Reviews = () => {
           throw countError;
         }
 
-        // Aggiungiamo questo log per vedere il numero totale
+        // Log total count of approved reviews
         console.log('Numero totale di recensioni approvate:', totalCount);
+
+        if (totalCount === 0) {
+          return {
+            reviews: [],
+            totalCount: 0,
+            totalPages: 0
+          };
+        }
 
         // Calculate the range for pagination
         const from = (currentPage - 1) * REVIEWS_PER_PAGE;
@@ -70,7 +78,7 @@ const Reviews = () => {
 
         console.log('Raw reviews data:', reviewsData);
         
-        if (!reviewsData) {
+        if (!reviewsData || reviewsData.length === 0) {
           console.log('No reviews data returned');
           return {
             reviews: [],
@@ -115,6 +123,18 @@ const Reviews = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center text-red-500">
           Si è verificato un errore nel caricamento delle recensioni. Riprova tra qualche secondo.
+        </div>
+      </div>
+    );
+  }
+
+  // Add a specific case for when there are no reviews
+  if (!isLoading && (!data?.reviews || data.reviews.length === 0)) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center text-gray-600">
+          <p className="text-lg mb-4">Non ci sono ancora recensioni disponibili.</p>
+          <p>Sii il primo a condividere la tua esperienza!</p>
         </div>
       </div>
     );
