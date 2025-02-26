@@ -3,5 +3,5 @@
 /sitemap.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap 200! Content-Type=application/xml
 /sitemap-index.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index 200! Content-Type=application/xml
 /sitemap-conditions/:letter https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=:letter 200! Content-Type=application/xml
-/sitemap-reviews https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews 200! Content-Type=application/xml
+/sitemap-reviews https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews/:splat 200! Content-Type=application/xml
 /sitemaps/* /sitemaps/:splat 200
