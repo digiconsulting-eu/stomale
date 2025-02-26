@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +7,7 @@ import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { FavoritesTab } from "@/components/dashboard/FavoritesTab";
 import { DashboardLoader } from "@/components/dashboard/DashboardLoader";
 import { ReviewsList } from "@/components/dashboard/ReviewsList";
+import { CommentsTab } from "@/components/dashboard/CommentsTab";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { useUserReviews } from "@/hooks/useUserReviews";
 
@@ -40,6 +42,7 @@ const UserDashboard = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="reviews">Le mie recensioni</TabsTrigger>
+          <TabsTrigger value="comments">I miei commenti</TabsTrigger>
           <TabsTrigger value="favorites">Patologie seguite</TabsTrigger>
           <TabsTrigger value="notifications">Notifiche</TabsTrigger>
           <TabsTrigger value="profile">Profilo</TabsTrigger>
@@ -47,6 +50,10 @@ const UserDashboard = () => {
 
         <TabsContent value="reviews">
           <ReviewsList reviews={reviews} isLoading={isReviewsLoading} />
+        </TabsContent>
+
+        <TabsContent value="comments">
+          <CommentsTab />
         </TabsContent>
 
         <TabsContent value="favorites">
