@@ -5,42 +5,30 @@ const corsHeaders = {
   'Content-Type': 'application/xml; charset=utf-8'
 }
 
+// Simple test handler for sitemap generation
 Deno.serve(async (req) => {
-  console.log('Request received:', req.url);
-  
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, {
+      headers: {
+        ...corsHeaders,
+        'Allow': 'GET, OPTIONS',
+      }
+    })
   }
 
-  try {
-    const letter = new URL(req.url).searchParams.get('letter')?.toLowerCase() || 'a'
-    console.log('Processing letter:', letter);
-    
-    // Test XML
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+  // Basic test response
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://stomale.info/patologia/test-${letter}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://stomale.info/test</loc>
+    <lastmod>2024-03-21</lastmod>
   </url>
 </urlset>`
 
-    console.log('Returning XML response');
-
-    return new Response(xml, {
-      headers: {
-        ...corsHeaders,
-        'Cache-Control': 'public, max-age=3600'
-      }
-    })
-
-  } catch (error) {
-    console.error('Error in sitemap-conditions:', error)
-    return new Response('Error generating sitemap', { 
-      status: 500,
-      headers: corsHeaders
-    })
-  }
+  return new Response(xml, {
+    headers: {
+      ...corsHeaders,
+      'Cache-Control': 'public, max-age=3600',
+    }
+  })
 })

@@ -2,3 +2,4 @@
 project_id = "hnuhdoycwpjfjhthfqbt"
 [functions.sitemap-conditions]
 verify_jwt = false
+import_map = {path = "./import_map.json"}
