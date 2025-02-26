@@ -28,9 +28,9 @@ serve(async (req) => {
 
     console.log(`Generating sitemap for page ${page}, offset: ${offset}`);
 
-    const { data: reviews, error, count } = await supabase
+    const { data: reviews, error } = await supabase
       .from('reviews')
-      .select('id, title, condition:PATOLOGIE(Patologia)', { count: 'exact' })
+      .select('id, title, PATOLOGIE!inner(Patologia)')
       .eq('status', 'approved')
       .order('created_at', { ascending: false })
       .range(offset, offset + ITEMS_PER_PAGE - 1);
@@ -45,7 +45,10 @@ serve(async (req) => {
     if (!reviews?.length) {
       console.log('No reviews found for this page');
       return new Response('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', {
-        headers: corsHeaders
+        headers: {
+          ...corsHeaders,
+          'Cache-Control': 'public, max-age=0, s-maxage=3600'
+        }
       });
     }
 
@@ -64,7 +67,7 @@ serve(async (req) => {
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${reviews.map(review => {
-  const conditionSlug = toSEOFriendlyURL(review.condition?.Patologia || '');
+  const conditionSlug = toSEOFriendlyURL(review.PATOLOGIE.Patologia);
   const titleSlug = toSEOFriendlyURL(review.title);
   return `  <url>
     <loc>https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}</loc>
@@ -77,7 +80,10 @@ ${reviews.map(review => {
     console.log('Generated sitemap XML');
 
     return new Response(sitemap, {
-      headers: corsHeaders
+      headers: {
+        ...corsHeaders,
+        'Cache-Control': 'public, max-age=0, s-maxage=3600'
+      }
     });
 
   } catch (error) {
