@@ -39,7 +39,7 @@ serve(async (req) => {
     // Calculate offset
     const offset = (page - 1) * perPage
 
-    console.log(`Generating sitemap for page ${page} with offset ${offset}`)
+    console.log(`Page ${page}, Offset: ${offset}, Items per page: ${perPage}`)
 
     // First get total count of approved reviews
     const { count } = await supabaseClient
@@ -48,6 +48,7 @@ serve(async (req) => {
       .eq('status', 'approved')
 
     console.log(`Total approved reviews: ${count}`)
+    console.log(`Total pages needed: ${Math.ceil((count || 0) / perPage)}`)
 
     // Fetch reviews for the current page, ordered by ID
     const { data: reviews, error } = await supabaseClient
@@ -62,7 +63,7 @@ serve(async (req) => {
         )
       `)
       .eq('status', 'approved')
-      .order('id', { ascending: true }) // Ordina per ID in modo crescente
+      .order('id', { ascending: true })
       .range(offset, offset + perPage - 1)
 
     if (error) {
@@ -81,9 +82,10 @@ serve(async (req) => {
       })
     }
 
-    console.log(`Retrieved ${reviews.length} reviews for this page`)
-    console.log('First review ID:', reviews[0].id)
-    console.log('Last review ID:', reviews[reviews.length - 1].id)
+    console.log(`Page ${page} contains ${reviews.length} reviews`)
+    console.log(`Page ${page} - First review ID: ${reviews[0].id}`)
+    console.log(`Page ${page} - Last review ID: ${reviews[reviews.length - 1].id}`)
+    console.log('Review IDs in this page:', reviews.map(r => r.id).join(', '))
 
     // Generate sitemap XML
     const urlset = reviews.map((review: Review) => {
@@ -96,7 +98,6 @@ serve(async (req) => {
         .replace(/[^\w-]+/g, '')
 
       const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`
-      console.log(`Generated URL for review ${review.id}:`, url)
 
       return `
   <url>
