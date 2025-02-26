@@ -17,6 +17,9 @@ interface Comment {
   review_id: number;
   reviews: {
     title: string;
+    condition: {
+      Patologia: string;
+    };
   } | null;
 }
 
@@ -39,7 +42,10 @@ export const CommentsTab = () => {
           status,
           review_id,
           reviews (
-            title
+            title,
+            condition:condition_id (
+              Patologia
+            )
           )
         `)
         .eq('user_id', session.session.user.id)
@@ -136,7 +142,7 @@ export const CommentsTab = () => {
               </div>
               <p className="text-gray-700">{comment.content}</p>
               <Button asChild variant="link" className="p-0 h-auto">
-                <Link to={`/recensione/${comment.review_id}`}>
+                <Link to={`/patologia/${comment.reviews?.condition?.Patologia.toLowerCase()}/esperienza/${comment.review_id}-${comment.reviews?.title.toLowerCase().replace(/\s+/g, '-')}`}>
                   Vai alla recensione
                 </Link>
               </Button>
