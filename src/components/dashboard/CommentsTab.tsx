@@ -80,7 +80,8 @@ export const CommentsTab = () => {
   };
 
   const formatPathname = (text: string) => {
-    return text.toLowerCase().replace(/\s+/g, '-');
+    const decodedText = decodeURIComponent(text);
+    return decodedText.toLowerCase().replace(/\s+/g, '-');
   };
 
   if (isLoading) {
