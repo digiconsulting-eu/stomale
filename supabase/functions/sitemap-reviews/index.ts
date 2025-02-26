@@ -44,9 +44,9 @@ serve(async (req) => {
     console.log(`Items per page: ${perPage}`)
 
     // First get total count of approved reviews with detailed error logging
-    const { data: countResult, error: countError } = await supabaseClient
+    const { count, error: countError } = await supabaseClient
       .from('reviews')
-      .select('id', { count: 'exact' })
+      .select('*', { count: 'exact', head: true })
       .eq('status', 'approved')
 
     if (countError) {
@@ -54,11 +54,9 @@ serve(async (req) => {
       throw countError
     }
 
-    const count = countResult?.length || 0
-    const totalPages = Math.ceil(count / perPage)
+    const totalPages = Math.ceil((count || 0) / perPage)
     
     console.log(`Total approved reviews found: ${count}`)
-    console.log(`Using count method: ${count} reviews`)
     console.log(`Total pages needed: ${totalPages}`)
 
     if (page > totalPages) {
