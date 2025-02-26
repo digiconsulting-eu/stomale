@@ -79,6 +79,10 @@ export const CommentsTab = () => {
     setCommentToDelete(null);
   };
 
+  const formatPathname = (text: string) => {
+    return text.toLowerCase().replace(/\s+/g, '-');
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -142,7 +146,7 @@ export const CommentsTab = () => {
               </div>
               <p className="text-gray-700">{comment.content}</p>
               <Button asChild variant="link" className="p-0 h-auto">
-                <Link to={`/patologia/${comment.reviews?.condition?.Patologia.toLowerCase()}/esperienza/${comment.review_id}-${comment.reviews?.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                <Link to={`/patologia/${formatPathname(comment.reviews?.condition?.Patologia || '')}/esperienza/${comment.review_id}-${formatPathname(comment.reviews?.title || '')}`}>
                   Vai alla recensione
                 </Link>
               </Button>
