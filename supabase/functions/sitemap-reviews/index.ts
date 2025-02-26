@@ -59,8 +59,10 @@ serve(async (req) => {
     console.log(`Total approved reviews found: ${count}`)
     console.log(`Total pages needed: ${totalPages}`)
 
-    if (page > totalPages) {
-      console.log(`Page ${page} requested but only ${totalPages} pages exist`)
+    // If there are no reviews or the requested page is beyond the total pages,
+    // return an empty sitemap
+    if (count === 0 || page > totalPages) {
+      console.log(`No reviews found or page ${page} is beyond total pages ${totalPages}`)
       return new Response(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`, {
         headers: {
@@ -71,7 +73,7 @@ serve(async (req) => {
     }
 
     // Fetch reviews for the current page with detailed logging
-    console.log(`Fetching reviews for page ${page} with offset ${offset}`)
+    console.log(`Fetching reviews for page ${page}`)
     
     const { data: reviews, error: reviewsError } = await supabaseClient
       .from('reviews')
@@ -85,7 +87,7 @@ serve(async (req) => {
         )
       `)
       .eq('status', 'approved')
-      .order('id', { ascending: true })
+      .order('created_at', { ascending: false })
       .range(offset, offset + perPage - 1)
 
     if (reviewsError) {
@@ -105,11 +107,8 @@ serve(async (req) => {
     }
 
     console.log(`Found ${reviews.length} reviews for page ${page}`)
-    console.log(`First review ID: ${reviews[0].id}`)
-    console.log(`Last review ID: ${reviews[reviews.length - 1].id}`)
-    console.log('Review IDs:', reviews.map(r => r.id).join(', '))
 
-    // Generate and log URLs
+    // Generate URLs
     const urls = reviews.map((review: Review) => {
       if (!review.PATOLOGIE?.Patologia) {
         console.warn(`Warning: Review ${review.id} has no associated condition`)
@@ -124,11 +123,8 @@ serve(async (req) => {
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
 
-      const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`
-      
-      console.log(`Generated URL for review ${review.id}: ${url}`)
-      return url
-    }).filter(url => url !== null) // Remove any null URLs
+      return `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`
+    }).filter(url => url !== null)
 
     // Generate sitemap XML
     const urlset = urls.map(url => `
