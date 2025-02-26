@@ -34,14 +34,14 @@ serve(async (req) => {
     // Get page parameter from URL
     const url = new URL(req.url)
     const page = parseInt(url.searchParams.get('page') || '1')
-    const perPage = 100 // Aumentato a 100 recensioni per file
+    const perPage = 100 // 100 recensioni per file
 
     // Calculate offset
     const offset = (page - 1) * perPage
 
     console.log(`Generating sitemap for page ${page} with offset ${offset}`)
 
-    // First get total count
+    // First get total count of approved reviews
     const { count } = await supabaseClient
       .from('reviews')
       .select('*', { count: 'exact', head: true })
@@ -49,7 +49,7 @@ serve(async (req) => {
 
     console.log(`Total approved reviews: ${count}`)
 
-    // Fetch reviews for the current page
+    // Fetch reviews for the current page, ordered by ID
     const { data: reviews, error } = await supabaseClient
       .from('reviews')
       .select(`
@@ -62,6 +62,7 @@ serve(async (req) => {
         )
       `)
       .eq('status', 'approved')
+      .order('id', { ascending: true }) // Ordina per ID in modo crescente
       .range(offset, offset + perPage - 1)
 
     if (error) {
@@ -69,10 +70,23 @@ serve(async (req) => {
       throw error
     }
 
-    console.log(`Retrieved ${reviews?.length} reviews for this page`)
+    if (!reviews?.length) {
+      console.log('No reviews found for this page')
+      return new Response(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`, {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/xml',
+        },
+      })
+    }
+
+    console.log(`Retrieved ${reviews.length} reviews for this page`)
+    console.log('First review ID:', reviews[0].id)
+    console.log('Last review ID:', reviews[reviews.length - 1].id)
 
     // Generate sitemap XML
-    const urlset = reviews?.map((review: Review) => {
+    const urlset = reviews.map((review: Review) => {
       const conditionSlug = review.PATOLOGIE?.Patologia.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
@@ -82,7 +96,7 @@ serve(async (req) => {
         .replace(/[^\w-]+/g, '')
 
       const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`
-      console.log(`Generated URL: ${url}`)
+      console.log(`Generated URL for review ${review.id}:`, url)
 
       return `
   <url>
