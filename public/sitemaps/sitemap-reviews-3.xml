@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Reviews 447-669 -->
   <url>
     <loc>https://stomale.info/patologia/asma/esperienza/447-asma-rimedi</loc>
     <changefreq>monthly</changefreq>
@@ -12,58 +11,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/449-depressione-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/lichen-planus/esperienza/140-esperienza-lichen-planus</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/allergia-al-nichel/esperienza/1223-la-mia-esperienza</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1224-combattere-il-dolore</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1341-frequentare-un-gruppo-di-supporto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1445-superare-emicrania</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1446-combattere-depressione</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1447-vita-diabete</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1448-dolore-endometriosi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <!-- ... continua con le altre recensioni fino alla 669 -->
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/668-fibromialgia-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/669-gastrite-dieta</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/669-depressione-terapia</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
