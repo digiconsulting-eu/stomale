@@ -5,6 +5,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Content-Type': 'application/xml; charset=utf-8'
 }
 
 serve(async (req) => {
@@ -25,13 +26,13 @@ serve(async (req) => {
     // Calcola l'offset per la paginazione
     const offset = (page - 1) * ITEMS_PER_PAGE;
 
-    console.log(`Generating sitemap for page ${page}`);
+    console.log(`Generating sitemap for page ${page}, offset: ${offset}`);
 
     const { data: reviews, error, count } = await supabase
       .from('reviews')
       .select('id, title, condition:PATOLOGIE(Patologia)', { count: 'exact' })
       .eq('status', 'approved')
-      .order('id')
+      .order('created_at', { ascending: false })
       .range(offset, offset + ITEMS_PER_PAGE - 1);
 
     if (error) {
@@ -39,17 +40,14 @@ serve(async (req) => {
       throw error;
     }
 
+    console.log(`Found ${reviews?.length || 0} reviews`);
+
     if (!reviews?.length) {
       console.log('No reviews found for this page');
       return new Response('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/xml'
-        }
+        headers: corsHeaders
       });
     }
-
-    console.log(`Found ${reviews.length} reviews for page ${page}`);
 
     // Funzione per generare URL SEO-friendly
     const toSEOFriendlyURL = (text: string): string => {
@@ -76,23 +74,10 @@ ${reviews.map(review => {
 }).join('\n')}
 </urlset>`;
 
-    // Aggiorna o inserisci il record nella tabella sitemap_files
-    const fileName = `sitemap-reviews-${page}.xml`;
-    await supabase
-      .from('sitemap_files')
-      .upsert({
-        filename: fileName,
-        url_count: reviews.length,
-        last_modified: new Date().toISOString()
-      }, {
-        onConflict: 'filename'
-      });
+    console.log('Generated sitemap XML');
 
     return new Response(sitemap, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/xml'
-      }
+      headers: corsHeaders
     });
 
   } catch (error) {
