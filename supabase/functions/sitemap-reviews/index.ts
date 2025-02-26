@@ -1,123 +1,99 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from '@supabase/supabase-js'
+import { Database } from '../database.types'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const CHUNK_SIZE = 200; // Aumentato a 200 URL per sitemap
+interface Review {
+  id: number
+  title: string
+  condition_id: number
+  PATOLOGIE?: {
+    Patologia: string
+  }
+  created_at: string
+}
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabase = createClient(
+    // Create Supabase client
+    const supabaseClient = createClient<Database>(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    )
 
-    console.log('Fetching all approved reviews from database...');
-    
-    // Recupera tutte le recensioni approvate
-    const { data: reviews, error } = await supabase
+    // Get page parameter from URL
+    const url = new URL(req.url)
+    const page = parseInt(url.searchParams.get('page') || '1')
+    const perPage = 200 // Number of URLs per sitemap file
+
+    // Calculate offset
+    const offset = (page - 1) * perPage
+
+    // Fetch reviews for the current page
+    const { data: reviews, error } = await supabaseClient
       .from('reviews')
-      .select('id, title, condition:PATOLOGIE(Patologia)')
+      .select(`
+        id,
+        title,
+        condition_id,
+        created_at,
+        PATOLOGIE (
+          Patologia
+        )
+      `)
       .eq('status', 'approved')
-      .order('id');
+      .order('created_at', { ascending: false })
+      .range(offset, offset + perPage - 1)
 
-    if (error) {
-      console.error('Error fetching reviews:', error);
-      throw error;
-    }
+    if (error) throw error
 
-    if (!reviews?.length) {
-      console.log('No reviews found');
-      throw new Error('No reviews found');
-    }
+    // Generate sitemap XML
+    const urlset = reviews?.map((review: Review) => {
+      const conditionSlug = review.PATOLOGIE?.Patologia.toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
+        
+      const titleSlug = review.title.toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
 
-    console.log(`Found ${reviews.length} approved reviews`);
-
-    // Funzione per generare URL SEO-friendly
-    const toSEOFriendlyURL = (text: string): string => {
-      return text
-        .toLowerCase()
-        .replace(/ /g, '-')
-        .replace(/[^a-z0-9-]/g, '')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '');
-    };
-
-    // Genera i contenuti dei sitemap
-    const sitemapChunks = [];
-    for (let i = 0; i < reviews.length; i += CHUNK_SIZE) {
-      const chunk = reviews.slice(i, i + CHUNK_SIZE);
-      const sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${chunk.map(review => {
-  const conditionSlug = toSEOFriendlyURL(review.condition?.Patologia || '');
-  const titleSlug = toSEOFriendlyURL(review.title);
-  return `  <url>
+      return `
+  <url>
     <loc>https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>`;
-}).join('\n')}
-</urlset>`;
-      
-      // Salva il contenuto nel database
-      const fileName = `sitemap-reviews-${Math.floor(i / CHUNK_SIZE) + 1}.xml`;
-      const { error: saveError } = await supabase
-        .from('sitemap_files')
-        .upsert({
-          filename: fileName,
-          url_count: chunk.length,
-          last_modified: new Date().toISOString()
-        }, {
-          onConflict: 'filename'
-        });
+    <lastmod>${new Date(review.created_at).toISOString().split('T')[0]}</lastmod>
+  </url>`
+    }).join('')
 
-      if (saveError) {
-        console.error(`Error saving sitemap file ${fileName}:`, saveError);
-        throw saveError;
-      }
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlset}
+</urlset>`
 
-      sitemapChunks.push({
-        filename: fileName,
-        content: sitemapContent,
-        url_count: chunk.length
-      });
-    }
-
-    console.log(`Generated ${sitemapChunks.length} sitemap files with ${CHUNK_SIZE} URLs per file`);
-
-    return new Response(JSON.stringify({
-      message: 'Sitemaps generated successfully',
-      sitemaps: sitemapChunks,
-      total_reviews: reviews.length,
-      chunks_created: sitemapChunks.length
-    }), {
+    return new Response(xml, {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'application/json'
-      }
-    });
+        'Content-Type': 'application/xml',
+      },
+    })
 
   } catch (error) {
-    console.error('Error generating sitemaps:', error);
-    return new Response(JSON.stringify({
-      error: 'Error generating sitemaps',
-      details: error.message
-    }), {
-      status: 500,
+    console.error('Error:', error)
+    return new Response(JSON.stringify({ error: error.message }), {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'application/json'
-      }
-    });
+        'Content-Type': 'application/json',
+      },
+      status: 500,
+    })
   }
-});
+})
