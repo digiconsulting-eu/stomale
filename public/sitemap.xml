@@ -34,40 +34,7 @@
     <lastmod>2024-03-20</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemap-reviews?page=1</loc>
+    <loc>https://stomale.info/sitemaps/sitemap-reviews.xml</loc>
     <lastmod>2024-03-20</lastmod>
   </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews?page=2</loc>
-    <lastmod>2024-03-20</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews?page=3</loc>
-    <lastmod>2024-03-20</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews?page=4</loc>
-    <lastmod>2024-03-20</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews?page=5</loc>
-    <lastmod>2024-03-20</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews?page=6</loc>
-    <lastmod>2024-03-20</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews?page=7</loc>
-    <lastmod>2024-03-20</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews?page=8</loc>
-    <lastmod>2024-03-20</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews?page=9</loc>
-    <lastmod>2024-03-20</lastmod>
-  </sitemap>
-</sitemapindex>
-
+</urlset>
