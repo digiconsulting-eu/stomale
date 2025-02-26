@@ -9,8 +9,7 @@ import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/ut
 
 const ReviewDetail = () => {
   const { condition, slug } = useParams();
-  // Decodifichiamo la condizione dall'URL e sostituiamo gli spazi con trattini
-  const decodedCondition = condition ? decodeURIComponent(condition).replace(/-/g, ' ') : '';
+  const decodedCondition = condition ? condition.replace(/-/g, ' ') : '';
   const reviewId = slug?.split('-')[0];
 
   const { data: review, isLoading, error } = useReviewQuery(reviewId, decodedCondition);

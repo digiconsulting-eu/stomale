@@ -11,7 +11,7 @@ interface ReviewCardProps {
   preview: string;
   date: string;
   username: string;
-  onDelete?: () => void;  // Aggiungiamo la prop onDelete come opzionale
+  onDelete?: () => void;
 }
 
 export const ReviewCard = ({
@@ -23,12 +23,18 @@ export const ReviewCard = ({
   username,
   onDelete,
 }: ReviewCardProps) => {
+  const formatUrlPath = (text: string) => {
+    return text.trim().toLowerCase().replace(/\s+/g, '-');
+  };
+
+  const reviewPath = `/patologia/${formatUrlPath(condition)}/esperienza/${id}-${formatUrlPath(title)}`;
+
   return (
     <Card className="bg-white rounded-3xl border border-[#1EAEDB] shadow-sm">
       <div className="p-6">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary">
-            <Link to={`/patologia/${condition.toLowerCase()}/esperienza/${id}-${title.toLowerCase().replace(/\s+/g, '-')}`}>{title}</Link>
+            <Link to={reviewPath}>{title}</Link>
           </h3>
           {onDelete && (
             <Button
@@ -43,7 +49,7 @@ export const ReviewCard = ({
         </div>
         <p className="text-sm text-gray-500 mb-2">{username}</p>
         <Link 
-          to={`/patologia/${condition.toLowerCase()}`}
+          to={`/patologia/${formatUrlPath(condition)}`}
           className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
         >
           {condition.toUpperCase()}
@@ -53,7 +59,7 @@ export const ReviewCard = ({
           asChild 
           className="w-full bg-primary text-white hover:bg-primary-hover justify-center rounded-xl py-6"
         >
-          <Link to={`/patologia/${condition.toLowerCase()}/esperienza/${id}-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+          <Link to={reviewPath}>
             Leggi l'esperienza completa
             <ArrowRight className="h-4 w-4 ml-2" />
           </Link>
