@@ -116,17 +116,17 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <!-- ... continua con le altre recensioni fino alla 223 -->
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/221-gestire-dolore-fibromialgia</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/24-artrite-reumatoide</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/222-terapia-endometriosi</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/25-asma-allergico</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+  <!-- Continua con le recensioni dalla 26 alla 222 -->
   <url>
     <loc>https://stomale.info/patologia/cefalea/esperienza/223-cefalea-tensiva</loc>
     <changefreq>monthly</changefreq>
