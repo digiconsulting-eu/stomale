@@ -1,1115 +1,593 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1223-vivere-con-artrite</loc>
+    <loc>https://stomale.info/patologia/allergia-al-nichel/esperienza/1223-la-mia-esperienza</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1224-gestione-asma</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1224-combattere-il-dolore</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1225-mal-di-testa-cronico</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1226-superare-depressione</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1227-gestione-diabete</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1228-vivere-con-endometriosi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1229-dolore-cronico</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1230-problemi-digestivi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1231-pressione-alta</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1232-disturbi-sonno</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1233-dolori-articolari</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1234-difficolta-respiratorie</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1235-emicrania-cronica</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1236-lotta-depressione</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1237-controllo-glicemia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1238-sintomi-endometriosi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1239-gestione-dolore</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1240-bruciore-stomaco</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1241-controllo-pressione</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1242-problemi-sonno</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1243-terapia-artrite</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1244-asma-allergico</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1245-cefalea-tensiva</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1246-depressione-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1247-diabete-tipo2</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1248-endometriosi-diagnosi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1249-fibromialgia-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1250-gastrite-acuta</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1251-ipertensione-dieta</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1252-insonnia-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1253-artrite-esercizi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1254-asma-sport</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1255-cefalea-cronica</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1256-depressione-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1257-diabete-dieta</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1258-endometriosi-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1259-fibromialgia-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1260-gastrite-cronica</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1261-ipertensione-sport</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1262-insonnia-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1263-artrite-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1264-asma-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1265-cefalea-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1266-depressione-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1267-diabete-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1268-endometriosi-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1269-fibromialgia-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1270-gastrite-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1271-ipertensione-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1272-insonnia-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1273-artrite-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1274-asma-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1275-cefalea-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1276-depressione-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1277-diabete-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1278-endometriosi-rimedi</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1225-alleviare-i-sintomi</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1279-fibromialgia-aiuto</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1226-gestire-la-pressione</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1280-gastrite-terapia</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1227-migliorare-il-sonno</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1281-ipertensione-rimedi</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1228-vivere-con-l-artrite</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1282-insonnia-aiuto</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1229-gestire-l-asma</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1283-artrite-terapia</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1230-alleviare-la-cefalea</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1284-asma-cura</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1231-affrontare-la-depressione</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1285-cefalea-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1286-depressione-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1287-diabete-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1288-endometriosi-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1289-fibromialgia-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1290-gastrite-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1291-ipertensione-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1292-insonnia-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1293-artrite-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1294-asma-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1295-cefalea-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1296-depressione-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1297-diabete-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1298-endometriosi-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1299-fibromialgia-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1300-gastrite-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1301-ipertensione-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1302-insonnia-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1303-artrite-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1304-asma-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1305-cefalea-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1306-depressione-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1307-diabete-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1308-endometriosi-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1309-fibromialgia-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1310-gastrite-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1311-ipertensione-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1312-insonnia-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1313-artrite-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1314-asma-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1315-cefalea-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1316-depressione-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1317-diabete-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1318-endometriosi-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1319-fibromialgia-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1320-gastrite-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1321-ipertensione-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1322-insonnia-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1323-artrite-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1324-asma-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1325-cefalea-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1326-depressione-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1327-diabete-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1328-endometriosi-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1329-fibromialgia-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1330-gastrite-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1331-ipertensione-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1332-insonnia-rimedi</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1333-artrite-aiuto</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1334-asma-cura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1335-cefalea-aiuto</loc>
+   <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1232-convivere-con-il-diabete</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1336-depressione-cura</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1233-gestire-l-endometriosi</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1337-diabete-aiuto</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1234-vivere-con-la-fibromialgia</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1338-endometriosi-terapia</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1235-alleviare-i-sintomi-della-gastrite</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1339-fibromialgia-rimedi</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1236-gestire-la-pressione-alta</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1340-gastrite-aiuto</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1237-migliorare-la-qualita-del-sonno</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1341-ipertensione-aiuto</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1238-convivere-con-l-artrite</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1342-insonnia-terapia</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1239-gestire-l-asma-quotidianamente</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1343-artrite-rimedi</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1240-alleviare-il-mal-di-testa</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1344-asma-aiuto</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1241-superare-la-depressione</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1345-cefalea-rimedi</loc>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1242-controllare-il-diabete</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1346-depressione-aiuto</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1243-affrontare-l-endometriosi</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1347-diabete-rimedi</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1244-gestire-il-dolore-della-fibromialgia</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1348-endometriosi-cura</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1245-calmare-la-gastrite</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1349-fibromialgia-terapia</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1246-abbassare-la-pressione-alta</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1350-gastrite-rimedi</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1247-combattere-l-insonnia</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1351-ipertensione-rimedi</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1248-ridurre-il-dolore-artritico</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1352-insonnia-cura</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1249-prevenire-gli-attacchi-d-asma</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1353-artrite-terapia</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1250-prevenire-il-mal-di-testa</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1354-asma-rimedi</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1251-trovare-la-felicita</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1355-cefalea-terapia</loc>
+   <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1252-mantenere-stabile-la-glicemia</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1356-depressione-rimedi</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1253-gestire-il-dolore-pelvico</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1357-diabete-terapia</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1254-alleviare-il-dolore-cronico</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endomet
-
-riosi/esperienza/1358-endometriosi-aiuto</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1255-proteggere-lo-stomaco</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1359-fibromialgia-cura</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1256-proteggere-il-cuore</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1360-gastrite-terapia</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1257-favorire-il-rilassamento</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1361-ipertensione-terapia</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1258-migliorare-la-mobilita-articolare</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1362-insonnia-aiuto</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1259-controllare-l-infiammazione-polmonare</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1363-artrite-cura</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1260-ridurre-la-frequenza-del-mal-di-testa</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1364-asma-terapia</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1261-ritrovare-l-energia</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1365-cefalea-cura</loc>
+   <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1262-prevenire-le-complicanze-del-diabete</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1366-depressione-terapia</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1263-migliorare-la-fertilita</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1367-diabete-cura</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1264-migliorare-la-qualita-della-vita</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1368-endometriosi-rimedi</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1265-prevenire-l-ulcera</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1369-fibromialgia-aiuto</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1266-prevenire-l-ictus</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1370-gastrite-cura</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1267-migliorare-la-concentrazione</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1371-ipertensione-cura</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1268-proteggere-le-articolazioni</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1372-insonnia-rimedi</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1269-migliorare-la-capacita-polmonare</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1373-artrite-aiuto</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1270-alleviare-la-tensione</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1374-asma-cura</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1271-aumentare-l-autostima</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1375-cefalea-aiuto</loc>
+   <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1272-gestire-lo-stress</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1376-depressione-cura</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1273-trovare-supporto</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1377-diabete-aiuto</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1274-imparare-a-convivere</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1378-endometriosi-terapia</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1275-cambiare-l-alimentazione</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1379-fibromialgia-rimedi</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1276-fare-esercizio-fisico</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1380-gastrite-aiuto</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1277-creare-una-routine</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1381-ipertensione-aiuto</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1278-utilizzare-rimedi-naturali</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1382-insonnia-terapia</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1279-evitare-gli-allergeni</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1383-artrite-rimedi</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1280-bere-molta-acqua</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1384-asma-aiuto</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1281-chiedere-aiuto</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1385-cefalea-rimedi</loc>
+   <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1282-monitorare-la-glicemia</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1386-depressione-aiuto</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1283-gestire-il-ciclo</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1387-diabete-rimedi</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1284-fare-stretching</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1388-endometriosi-cura</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1285-evitare-cibi-piccanti</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1389-fibromialgia-terapia</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1286-limitare-il-sale</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1390-gastrite-rimedi</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1287-evitare-la-caffeina</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1391-ipertensione-rimedi</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1288-mantenere-il-peso-forma</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1392-insonnia-cura</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1289-usare-l-inalatore</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1393-artrite-terapia</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1290-dormire-a-sufficienza</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1394-asma-rimedi</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1291-parlare-con-un-terapeuta</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1395-cefalea-terapia</loc>
+   <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1292-seguire-una-dieta-equilibrata</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1396-depressione-rimedi</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1293-assumere-antidolorifici</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1397-diabete-terapia</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1294-fare-massaggi</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1398-endometriosi-aiuto</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1295-assumere-antiacidi</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1399-fibromialgia-cura</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1296-assumere-farmaci</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1400-gastrite-terapia</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1297-assumere-sonniferi</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1401-ipertensione-terapia</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1298-assumere-antinfiammatori</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1402-insonnia-aiuto</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1299-assumere-broncodilatatori</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1403-artrite-cura</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1300-assumere-analgesici</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1404-asma-terapia</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1301-assumere-antidepressivi</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1405-cefalea-cura</loc>
+   <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1302-fare-attivita-fisica</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1406-depressione-terapia</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1303-seguire-una-terapia-ormonale</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1407-diabete-cura</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1304-provare-l-agopuntura</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1408-endometriosi-rimedi</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1305-bere-tisane</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1409-fibromialgia-aiuto</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1306-meditare</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1410-gastrite-cura</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1307-leggere-un-libro</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1411-ipertensione-cura</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1308-fare-esercizi-di-stretching</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1412-insonnia-rimedi</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1309-controllare-l-umidita-in-casa</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1413-artrite-aiuto</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1310-fare-un-bagno-caldo</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1414-asma-cura</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1311-uscire-con-gli-amici</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1415-cefalea-aiuto</loc>
+   <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1312-controllare-il-peso</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1416-depressione-cura</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1313-utilizzare-la-borsa-dell-acqua-calda</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1417-diabete-aiuto</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1314-fare-yoga</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1418-endometriosi-terapia</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1315-mangiare-poco-e-spesso</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1419-fibromialgia-rimedi</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1316-smettere-di-fumare</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1420-gastrite-aiuto</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1317-ascoltare-musica-rilassante</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1421-ipertensione-aiuto</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1318-utilizzare-tutori</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1422-insonnia-terapia</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1319-vaccinarsi-contro-l-influenza</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1423-artrite-rimedi</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1320-massaggiare-le-tempie</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1424-asma-aiuto</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1321-fare-volontariato</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1425-cefalea-rimedi</loc>
+   <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1322-controllare-la-pressione</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1426-depressione-aiuto</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1323-evitare-cibi-infiammatori</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1427-diabete-rimedi</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1324-fare-pilates</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1428-endometriosi-cura</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1325-evitare-alcolici</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1429-fibromialgia-terapia</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1326-ridurre-lo-stress</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1430-gastrite-rimedi</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1327-fare-un-pisolino</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1431-ipertensione-rimedi</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1328-utilizzare-plantari</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1432-insonnia-cura</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1329-pulire-la-casa-regolarmente</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1433-artrite-terapia</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1330-fare-esercizi-di-respirazione</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1434-asma-rimedi</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1331-tenere-un-diario</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url>
-    <loc>https://stomale.info/patologia/cefalea/esperienza/1435-cefalea-terapia</loc>
+   <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1332-controllare-i-piedi</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1436-depressione-rimedi</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1333-fare-stretching-dolce</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete/esperienza/1437-diabete-terapia</loc>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1334-fare-tai-chi</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/endometriosi/esperienza/1438-endometriosi-aiuto</loc>
+    <loc>https://stomale.info/patologia/gastrite/esperienza/1335-dormire-con-la-testa-sollevata</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1439-fibromialgia-cura</loc>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/1336-bere-succo-di-barbabietola</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1440-gastrite-terapia</loc>
+    <loc>https://stomale.info/patologia/insonnia/esperienza/1337-bere-latte-caldo</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ipertensione/esperienza/1441-ipertensione-terapia</loc>
+    <loc>https://stomale.info/patologia/artrite/esperienza/1338-utilizzare-ausili</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/insonnia/esperienza/1442-insonnia-aiuto</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1339-evitare-profumi-forti</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/artrite/esperienza/1443-artrite-cura</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1340-applicare-ghiaccio</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/asma/esperienza/1444-asma-terapia</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-</urlset>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1341-frequentare-
