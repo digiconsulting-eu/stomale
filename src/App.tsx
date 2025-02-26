@@ -1,65 +1,144 @@
-import { useState, useEffect } from 'react';
-import { Outlet } from "react-router-dom";
-import { Auth } from '@supabase/auth-ui-react'
-import { ThemeSupa } from '@supabase/auth-ui-shared'
-import { supabase } from './integrations/supabase/client';
-import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
-import Home from './pages/Home';
-import Conditions from './pages/Conditions';
-import Condition from './pages/Condition';
-import Reviews from './pages/Reviews';
-import Review from './pages/Review';
-import NewReview from './pages/NewReview';
-import Profile from './pages/Profile';
-import Admin from './pages/Admin';
-import { Toaster } from "sonner"
-import { setPageTitle, getDefaultPageTitle } from './utils/pageTitle';
-import { regenerateSitemaps } from "@/utils/sitemapUtils";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router-dom";
+import { Header } from "./components/Header";
+import Footer from "./components/Footer";
+import { CookieConsent } from "./components/CookieConsent";
+import { AppRoutes } from "./components/AppRoutes";
+import { AuthStateHandler } from "./components/auth/AuthStateHandler";
+import { ScrollToTop } from "./components/ScrollToTop";
+import { AuthModal } from "./components/auth/AuthModal";
+import { useState, useEffect } from "react";
+import { supabase } from "./integrations/supabase/client";
+import { toast } from "sonner";
 
-function App() {
-  const [session, setSession] = useState(null)
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 0,
+      refetchOnWindowFocus: false,
+      staleTime: 30000,
+      gcTime: 5 * 60 * 1000,
+    },
+  },
+});
+
+const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    setPageTitle(getDefaultPageTitle());
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-    })
+    let isMounted = true;
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
-  }, [])
+    const initializeApp = async () => {
+      try {
+        console.log("Initializing app...");
+        
+        // Get the current session first
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session check failed:", sessionError);
+          if (isMounted) {
+            setIsError(true);
+            toast.error("Errore durante l'inizializzazione dell'applicazione");
+          }
+          return;
+        }
 
-  // Aggiungi la funzione all'oggetto window per l'accesso dalla console
-  if (typeof window !== 'undefined') {
-    (window as any).regenerateSitemaps = regenerateSitemaps;
+        console.log("Session check completed", session);
+
+        // Then initialize auth state listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          console.log("Auth state changed:", event, session?.user?.email);
+          if (event === 'SIGNED_IN' && isMounted) {
+            queryClient.invalidateQueries();
+          }
+        });
+
+        if (isMounted) {
+          setIsLoading(false);
+        }
+
+        return () => {
+          subscription.unsubscribe();
+        };
+
+      } catch (error) {
+        console.error("Critical initialization error:", error);
+        if (isMounted) {
+          setIsError(true);
+          toast.error("Errore critico durante l'inizializzazione");
+        }
+      }
+    };
+
+    // Start initialization
+    initializeApp();
+
+    // Set a backup timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (isMounted && isLoading) {
+        console.log("Initialization timeout reached");
+        setIsLoading(false);
+      }
+    }, 3000); // Reduced timeout to 3 seconds
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [isLoading]); // Added isLoading to dependencies
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-secondary to-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mb-4"></div>
+        <p className="text-gray-600">Caricamento in corso...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-secondary to-white">
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
+          <h1 className="text-xl font-semibold text-red-600 mb-4">Errore di caricamento</h1>
+          <p className="text-gray-600 mb-6">Si è verificato un errore durante il caricamento dell'applicazione.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Riprova
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/conditions" element={<Conditions />} />
-          <Route path="/patologia/:condition" element={<Condition />} />
-          <Route path="/reviews" element={<Reviews />} />
-          <Route path="/patologia/:condition/esperienza/:id" element={<Review />} />
-          <Route path="/nuova-esperienza" element={session ? (<NewReview session={session} />) : (<Navigate to="/profile" replace={true} />)} />
-          <Route path="/profile" element={
-            <div className="container" style={{ padding: '50px 0 100px 0' }}>
-              {!session ? (
-                <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} session={session} redirectTo={"/profile"} />
-              ) : (
-                <Profile session={session} />
-              )}
-            </div>
-          } />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
-      </BrowserRouter>
-      <Toaster richColors />
-    </>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <AuthStateHandler />
+          <AuthModal />
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="flex-1">
+              <AppRoutes />
+            </main>
+            <Footer />
+            <CookieConsent />
+          </div>
+          <Toaster />
+          <Sonner />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
-}
+};
 
 export default App;
