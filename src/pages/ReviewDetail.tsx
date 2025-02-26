@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { ReviewContent } from "@/components/review/ReviewContent";
@@ -8,12 +9,14 @@ import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/ut
 
 const ReviewDetail = () => {
   const { condition, slug } = useParams();
+  // Decodifichiamo la condizione dall'URL e sostituiamo gli spazi con trattini
+  const decodedCondition = condition ? decodeURIComponent(condition).replace(/-/g, ' ') : '';
   const reviewId = slug?.split('-')[0];
-  const { data: review, isLoading, error } = useReviewQuery(reviewId, condition);
+
+  const { data: review, isLoading, error } = useReviewQuery(reviewId, decodedCondition);
 
   useEffect(() => {
     if (review?.title && review?.PATOLOGIE?.Patologia) {
-      // Set page title in format: PATOLOGIA | TITOLO RECENSIONE
       setPageTitle(`${review.PATOLOGIE.Patologia.toUpperCase()} | ${review.title}`);
       setMetaDescription(getReviewMetaDescription(review.PATOLOGIE.Patologia, review.title));
     }
