@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Trash2 } from "lucide-react";
 
 interface ReviewCardProps {
   id: number;
@@ -11,6 +11,7 @@ interface ReviewCardProps {
   preview: string;
   date: string;
   username: string;
+  onDelete?: () => void;  // Aggiungiamo la prop onDelete come opzionale
 }
 
 export const ReviewCard = ({
@@ -20,6 +21,7 @@ export const ReviewCard = ({
   preview,
   date,
   username,
+  onDelete,
 }: ReviewCardProps) => {
   return (
     <Card className="bg-white rounded-3xl border border-[#1EAEDB] shadow-sm">
@@ -28,6 +30,16 @@ export const ReviewCard = ({
           <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary">
             <Link to={`/patologia/${condition.toLowerCase()}/esperienza/${id}-${title.toLowerCase().replace(/\s+/g, '-')}`}>{title}</Link>
           </h3>
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={onDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <p className="text-sm text-gray-500 mb-2">{username}</p>
         <Link 
