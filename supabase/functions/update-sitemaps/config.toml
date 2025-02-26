@@ -1,4 +1,0 @@
-
-project_id = "hnuhdoycwpjfjhthfqbt"
-[functions.update-sitemaps]
-verify_jwt = false
