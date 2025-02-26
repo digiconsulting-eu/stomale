@@ -1,28 +1,89 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Reviews 224-446 will be added here -->
+  <!-- Reviews 224-446 -->
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1449-fibromialgia-quotidiana</loc>
+    <loc>https://stomale.info/patologia/asma/esperienza/1474-asma-cura</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/gastrite/esperienza/1450-gestione-gastrite</loc>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/1475-cefalea-cura</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/allergia-al-nichel/esperienza/1223-la-mia-esperienza</loc>
+    <loc>https://stomale.info/patologia/depressione/esperienza/1476-depressione-aiuto</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/fibromialgia/esperienza/1224-combattere-il-dolore</loc>
+    <loc>https://stomale.info/patologia/diabete/esperienza/1477-diabete-cura</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/depressione/esperienza/1341-frequentare-un-gruppo-di-supporto</loc>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/1478-endometriosi-aiuto</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/artrite/esperienza/12-vivere-con-dolore-cronico</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/ansia/esperienza/13-superare-attacchi-panico</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/depressione/esperienza/14-ritrovare-la-speranza</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/acne/esperienza/15-trattamenti-naturali</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/16-gestire-il-dolore-cronico</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/17-la-mia-battaglia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/asma/esperienza/18-respirare-meglio</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/cefalea/esperienza/19-vincere-emicrania</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/diabete/esperienza/20-controllo-glicemia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/allergia-al-nichel-e-snas/esperienza/21-la-mia-storia</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/fibromialgia/esperienza/22-vivere-con-dolore-cronico</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/endometriosi/esperienza/23-la-mia-battaglia</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

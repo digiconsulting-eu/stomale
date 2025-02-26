@@ -1,84 +1,60 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'application/xml',
+interface ReviewURL {
+  id: number
+  condition_slug: string
+  title_slug: string
 }
 
-const REVIEWS_PER_SITEMAP = 1000;
-
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
-
+serve(async (req) => {
   try {
-    const url = new URL(req.url)
-    const page = parseInt(url.searchParams.get('page') || '1')
-
-    // Initialize the Supabase client
-    const supabaseAdmin = createClient(
+    const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    // Fetch reviews for the current page
-    const { data: reviews } = await supabaseAdmin
+    const page = new URL(req.url).searchParams.get('page') || '1'
+    const pageSize = 223
+    const offset = (parseInt(page) - 1) * pageSize
+
+    const { data: reviews, error } = await supabase
       .from('reviews')
       .select(`
         id,
         title,
-        created_at,
         PATOLOGIE (
           Patologia
         )
       `)
       .eq('status', 'approved')
+      .range(offset, offset + pageSize - 1)
       .order('created_at', { ascending: false })
-      .range((page - 1) * REVIEWS_PER_SITEMAP, page * REVIEWS_PER_SITEMAP - 1)
 
-    // Generate XML content
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    if (error) throw error
 
-    // Add URLs for each review
-    reviews?.forEach((review) => {
-      if (review.PATOLOGIE?.Patologia) {
-        const conditionSlug = review.PATOLOGIE.Patologia.toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, '')
-        
-        const titleSlug = review.title.toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, '')
-        
-        const lastmod = new Date(review.created_at).toISOString().split('T')[0]
-        
-        xml += '  <url>\n'
-        xml += `    <loc>https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}</loc>\n`
-        xml += `    <lastmod>${lastmod}</lastmod>\n`
-        xml += '    <changefreq>monthly</changefreq>\n'
-        xml += '    <priority>0.6</priority>\n'
-        xml += '  </url>\n'
-      }
-    })
-
-    xml += '</urlset>'
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${reviews.map(review => {
+  const condition_slug = review.PATOLOGIE?.Patologia.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || ''
+  const title_slug = review.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  return `  <url>
+    <loc>https://stomale.info/patologia/${condition_slug}/esperienza/${review.id}-${title_slug}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`
+}).join('\n')}
+</urlset>`
 
     return new Response(xml, {
       headers: {
-        ...corsHeaders,
-        'Cache-Control': 'public, max-age=3600'
-      }
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=86400'
+      },
     })
-
   } catch (error) {
-    console.error('Error generating reviews sitemap:', error)
-    return new Response(`Error generating reviews sitemap: ${error.message}`, {
-      status: 500,
-      headers: corsHeaders
-    })
+    console.error('Error generating sitemap:', error)
+    return new Response('Error generating sitemap', { status: 500 })
   }
 })
