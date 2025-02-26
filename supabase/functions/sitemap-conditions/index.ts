@@ -1,5 +1,5 @@
 
-// Basic headers
+// Basic headers with content-type
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey',
@@ -10,9 +10,13 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   console.log('Request received:', req.url);
 
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: corsHeaders
+    return new Response('ok', {
+      headers: {
+        ...corsHeaders,
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      }
     });
   }
 
