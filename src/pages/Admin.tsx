@@ -1,16 +1,10 @@
-
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { FileUp } from "lucide-react";
-import { regenerateSitemaps } from "@/utils/sitemapUtils";
 
 const Admin = () => {
   const navigate = useNavigate();
-
-  const handleRegenerateSitemaps = async () => {
-    await regenerateSitemaps();
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -57,20 +51,6 @@ const Admin = () => {
           >
             <FileUp className="h-4 w-4" />
             Vai a Importazione
-          </Button>
-        </div>
-
-        {/* Sitemap Management Card */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold mb-4">Gestione Sitemap</h2>
-          <p className="text-gray-600 mb-6">
-            Rigenera i sitemap XML per l'indicizzazione delle recensioni.
-          </p>
-          <Button 
-            onClick={handleRegenerateSitemaps}
-            className="w-full"
-          >
-            Rigenera Sitemap
           </Button>
         </div>
       </div>

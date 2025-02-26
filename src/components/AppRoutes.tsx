@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import Index from "@/pages/Index";
@@ -23,12 +22,8 @@ import ReviewDetail from "@/pages/ReviewDetail";
 import Reviews from "@/pages/Reviews";
 import Welcome from "@/pages/Welcome";
 import ThankYou from "@/pages/ThankYou";
-import { useAuthSession } from "@/hooks/useAuthSession";
-import { Navigate } from "react-router-dom";
 
 export const AppRoutes = () => {
-  const { data: session } = useAuthSession();
-
   return (
     <Routes>
       <Route path="/" element={<Index />} />
@@ -94,9 +89,7 @@ export const AppRoutes = () => {
       <Route path="/patologia/:condition" element={<ConditionDetail />} />
       <Route path="/patologia/:condition/esperienza/:slug" element={<ReviewDetail />} />
       <Route path="/recensioni" element={<Reviews />} />
-      <Route path="/nuova-recensione" element={
-        session ? <NewReview session={session} /> : <Navigate to="/login" replace={true} />
-      } />
+      <Route path="/nuova-recensione" element={<NewReview />} />
       <Route path="/grazie" element={<ThankYou />} />
     </Routes>
   );
