@@ -6,6 +6,8 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
+  console.log('Request received:', req.url); // Log the incoming request URL
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -13,6 +15,7 @@ Deno.serve(async (req) => {
 
   try {
     const letter = new URL(req.url).searchParams.get('letter')?.toLowerCase() || 'a'
+    console.log('Processing letter:', letter); // Log the letter being processed
     
     // For testing, return a simple static XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -23,6 +26,8 @@ Deno.serve(async (req) => {
     <priority>0.8</priority>
   </url>
 </urlset>`
+
+    console.log('Generated XML length:', xml.length); // Log the size of generated XML
 
     return new Response(xml, {
       headers: {
