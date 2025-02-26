@@ -25,32 +25,12 @@ serve(async (req) => {
   try {
     console.log('Starting sitemap generation...')
     
-    // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get page parameter from URL
-    const url = new URL(req.url)
-    const page = parseInt(url.searchParams.get('page') || '1')
-    const perPage = 100 // 100 recensioni per file
-
-    // Calculate offset
-    const offset = (page - 1) * perPage
-
-    console.log(`Page ${page}, Offset: ${offset}, Items per page: ${perPage}`)
-
-    // First get total count of approved reviews
-    const { count } = await supabaseClient
-      .from('reviews')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved')
-
-    console.log(`Total approved reviews: ${count}`)
-    console.log(`Total pages needed: ${Math.ceil((count || 0) / perPage)}`)
-
-    // Fetch reviews for the current page, ordered by ID
+    // Get all approved reviews
     const { data: reviews, error } = await supabaseClient
       .from('reviews')
       .select(`
@@ -64,7 +44,6 @@ serve(async (req) => {
       `)
       .eq('status', 'approved')
       .order('id', { ascending: true })
-      .range(offset, offset + perPage - 1)
 
     if (error) {
       console.error('Error fetching reviews:', error)
@@ -72,7 +51,7 @@ serve(async (req) => {
     }
 
     if (!reviews?.length) {
-      console.log('No reviews found for this page')
+      console.log('No reviews found')
       return new Response(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`, {
         headers: {
@@ -82,17 +61,14 @@ serve(async (req) => {
       })
     }
 
-    console.log(`Page ${page} contains ${reviews.length} reviews`)
-    console.log(`Page ${page} - First review ID: ${reviews[0].id}`)
-    console.log(`Page ${page} - Last review ID: ${reviews[reviews.length - 1].id}`)
-    console.log('Review IDs in this page:', reviews.map(r => r.id).join(', '))
+    console.log(`Found ${reviews.length} total reviews`)
 
-    // Generate sitemap XML
-    const urlset = reviews.map((review: Review) => {
+    // Generate URLs for all reviews
+    const urls = reviews.map((review: Review) => {
       const conditionSlug = review.PATOLOGIE?.Patologia.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
-        
+      
       const titleSlug = review.title.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
@@ -109,7 +85,7 @@ serve(async (req) => {
     }).join('')
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlset}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}
 </urlset>`
 
     return new Response(xml, {
