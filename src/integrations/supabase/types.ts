@@ -233,6 +233,41 @@ export type Database = {
         }
         Relationships: []
       }
+      review_urls: {
+        Row: {
+          condition: string | null
+          created_at: string | null
+          id: number
+          review_id: number | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          condition?: string | null
+          created_at?: string | null
+          id?: number
+          review_id?: number | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          condition?: string | null
+          created_at?: string | null
+          id?: number
+          review_id?: number | null
+          title?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_urls_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           condition_id: number | null
@@ -396,6 +431,10 @@ export type Database = {
           user_id: string
         }
         Returns: boolean
+      }
+      populate_review_urls: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       unaccent: {
         Args: {
