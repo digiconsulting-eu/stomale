@@ -5,6 +5,7 @@
 /sitemap-reviews-2.xml /sitemap-reviews-2.xml 200! Content-Type=application/xml
 /sitemap-reviews-3.xml /sitemap-reviews-3.xml 200! Content-Type=application/xml
 /sitemap-reviews-4.xml /sitemap-reviews-4.xml 200! Content-Type=application/xml
+/sitemap-reviews-5.xml /sitemap-reviews-5.xml 200! Content-Type=application/xml
 /sitemap-conditions/:letter https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=:letter 200! Content-Type=application/xml
 /sitemap-reviews/:page https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews?page=:page 200! Content-Type=application/xml
 /sitemaps/* /sitemaps/:splat 200! Content-Type=application/xml
