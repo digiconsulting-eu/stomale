@@ -1,139 +1,90 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.5.0'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// Definizione delle intestazioni CORS
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'application/xml; charset=utf-8'
-}
+  'Content-Type': 'application/xml',
+};
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
+  // Gestione delle richieste OPTIONS per CORS
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const today = new Date().toISOString().split('T')[0]
+    // Inizializza il client Supabase
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
-    // Creazione del sitemap index
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    console.log('Generazione sitemap index');
+    
+    // Recupera il conteggio totale delle recensioni
+    const { count, error: countError } = await supabaseClient
+      .from('review_urls')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) {
+      console.error('Errore nel conteggio delle recensioni:', countError);
+      throw countError;
+    }
+    
+    // Calcola il numero di pagine necessarie
+    const urlsPerPage = 100;
+    const totalPages = Math.ceil((count || 0) / urlsPerPage);
+    
+    console.log(`Trovate ${count} recensioni, necessarie ${totalPages} pagine`);
+    
+    // Data corrente per lastmod
+    const currentDate = new Date().toISOString().split('T')[0];
+    
+    // Costruisci l'XML della sitemap index
+    let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>
-    <lastmod>${today}</lastmod>
+    <lastmod>${currentDate}</lastmod>
   </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/a</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/b</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/c</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/d</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/e</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/f</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/g</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/h</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/i</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/l</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/m</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/n</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/o</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/p</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/r</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/s</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/t</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/u</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/v</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-conditions/z</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews/1</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews/2</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews/3</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews/4</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews/5</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-</sitemapindex>`
+`;
 
-    return new Response(xml, {
-      headers: corsHeaders,
-      status: 200
-    })
+    // Aggiungi le sitemap delle condizioni
+    const letters = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z'];
+    letters.forEach(letter => {
+      xmlContent += `  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-${letter}.xml</loc>
+    <lastmod>${currentDate}</lastmod>
+  </sitemap>
+`;
+    });
+
+    // Aggiungi le sitemap delle recensioni
+    for (let page = 1; page <= totalPages; page++) {
+      xmlContent += `  <sitemap>
+    <loc>https://stomale.info/sitemap-reviews-${page}.xml</loc>
+    <lastmod>${currentDate}</lastmod>
+  </sitemap>
+`;
+    }
+
+    xmlContent += `</sitemapindex>`;
+    
+    // Restituisci l'XML
+    return new Response(xmlContent, { 
+      headers: { 
+        ...corsHeaders,
+        'Cache-Control': 'public, max-age=86400' // Cache per 24 ore
+      } 
+    });
+    
   } catch (error) {
-    console.error('Errore durante la generazione del sitemap index:', error.message)
+    console.error('Errore durante la generazione della sitemap index:', error);
     return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500
-    })
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
-})
+});

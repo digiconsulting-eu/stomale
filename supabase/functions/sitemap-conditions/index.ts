@@ -1,77 +1,96 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.5.0'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// Definizione delle intestazioni CORS
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Content-Type': 'application/xml; charset=utf-8'
-}
-
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-
-const generateSitemapXML = (conditions: any[]) => {
-  const urlEntries = conditions.map(condition => {
-    const slugPatologia = condition.Patologia
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '')  // Rimuovi caratteri speciali
-      .replace(/\s+/g, '-')      // Sostituisci spazi con trattini
-      .trim()
-
-    return `  <url>
-    <loc>https://stomale.info/patologia/${slugPatologia}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`
-  }).join('\n')
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urlEntries}
-</urlset>`
-}
+  'Content-Type': 'application/xml',
+};
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
+  // Gestione delle richieste OPTIONS per CORS
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Ottieni la lettera per filtrare le condizioni
-    const url = new URL(req.url)
-    const letter = url.searchParams.get('letter') || 'a'
+    // Estrai il parametro lettera dalla query string
+    const url = new URL(req.url);
+    const letter = url.searchParams.get('letter') || 'a';
+    
+    // Inizializza il client Supabase
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
-    // Crea il client Supabase con service role key per accesso completo
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-
-    // Query per ottenere le patologie che iniziano con la lettera specificata
-    const { data: conditions, error } = await supabase
+    console.log(`Generazione sitemap per condizioni con lettera ${letter}`);
+    
+    let query = supabaseClient
       .from('PATOLOGIE')
-      .select('id, Patologia')
-      .ilike('Patologia', `${letter}%`)
-      .order('Patologia', { ascending: true })
-
+      .select('Patologia');
+    
+    // Gestione dei range di lettere (e-l, m-r, s-z)
+    if (letter === 'e-l') {
+      query = query.gte('Patologia', 'E').lte('Patologia', 'Lz');
+    } else if (letter === 'm-r') {
+      query = query.gte('Patologia', 'M').lte('Patologia', 'Rz');
+    } else if (letter === 's-z') {
+      query = query.gte('Patologia', 'S').lte('Patologia', 'Zz');
+    } else {
+      // Lettera singola
+      query = query.ilike('Patologia', `${letter}%`);
+    }
+    
+    const { data: conditions, error } = await query.order('Patologia');
+    
     if (error) {
-      console.error('Errore durante il recupero delle patologie:', error)
-      return new Response(JSON.stringify({ error: error.message }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
-      })
+      console.error('Errore nella query Supabase:', error);
+      throw error;
     }
 
-    const xml = generateSitemapXML(conditions)
+    console.log(`Trovate ${conditions.length} condizioni per la lettera ${letter}`);
+    
+    // Data corrente per lastmod
+    const currentDate = new Date().toISOString().split('T')[0];
+    
+    // Costruisci l'XML della sitemap
+    let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+`;
 
-    return new Response(xml, {
-      headers: corsHeaders,
-      status: 200
-    })
+    // Aggiungi ogni condizione alla sitemap
+    conditions.forEach(condition => {
+      const slug = condition.Patologia.toLowerCase().replace(/\s+/g, '-');
+      const fullUrl = `https://stomale.info/patologia/${slug}`;
+      
+      xmlContent += `  <url>
+    <loc>${fullUrl}</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`;
+    });
+
+    xmlContent += `</urlset>`;
+    
+    console.log(`Sitemap generata con successo con ${conditions.length} condizioni`);
+    
+    // Restituisci l'XML
+    return new Response(xmlContent, { 
+      headers: { 
+        ...corsHeaders,
+        'Cache-Control': 'public, max-age=86400' // Cache per 24 ore
+      } 
+    });
+    
   } catch (error) {
-    console.error('Errore durante la generazione della sitemap:', error.message)
+    console.error('Errore durante la generazione della sitemap:', error);
     return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500
-    })
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
-})
+});
