@@ -14,11 +14,10 @@ serve(async (req) => {
   }
   
   try {
-    // Create a Supabase client with the Auth context of the logged in user
+    // Create a Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
     // Get the start and end ID from the URL parameters
@@ -34,9 +33,7 @@ serve(async (req) => {
       .select(`
         id, 
         title, 
-        condition_id,
         PATOLOGIE (
-          id,
           Patologia
         )
       `)
@@ -107,7 +104,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: String(error) }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500
