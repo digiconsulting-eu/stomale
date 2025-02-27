@@ -1,1 +1,30 @@
+
 project_id = "hnuhdoycwpjfjhthfqbt"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://localhost"
+
+[[transformers]]
+extensions = ["js", "ts", "jsx", "tsx"]
+command = "npx"
+args = ["esbuild", "--format=esm", "--loader:.js=jsx", "--loader:.ts=tsx", "--sourcemap", "${FILE_PATH}", "--outfile=${OUTPUT_FILE_PATH}"]
+
+[functions]
+[functions.sitemap-reviews]
+verify_jwt = false
+[functions.sitemap-conditions]
+verify_jwt = false
+[functions.sitemap-index]
+verify_jwt = false
+[functions.sitemap-static]
+verify_jwt = false

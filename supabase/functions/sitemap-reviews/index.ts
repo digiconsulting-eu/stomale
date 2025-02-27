@@ -1,6 +1,5 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.5.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,95 +7,86 @@ const corsHeaders = {
   'Content-Type': 'application/xml; charset=utf-8'
 }
 
-serve(async (req) => {
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+
+const generateSitemapXML = (reviews: any[]) => {
+  const urlEntries = reviews.map(review => {
+    // Genera un titolo URL-friendly
+    const slugTitle = review.title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')  // Rimuovi caratteri speciali
+      .replace(/\s+/g, '-')      // Sostituisci spazi con trattini
+      .trim()
+
+    return `  <url>
+    <loc>https://stomale.info/patologia/${review.patologia.toLowerCase().replace(/\s+/g, '-')}/esperienza/${review.id}-${slugTitle}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`
+  }).join('\n')
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlEntries}
+</urlset>`
+}
+
+Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const url = new URL(req.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const ITEMS_PER_PAGE = 200;
+    // Ottieni il parametro page dall'URL
+    const url = new URL(req.url)
+    const page = url.searchParams.get('page') || '1'
+    const pageNumber = parseInt(page, 10)
+    const pageSize = 100  // Numero di recensioni per pagina
+    const offset = (pageNumber - 1) * pageSize
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Crea il client Supabase con service role key per accesso completo
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-    // Calcola l'offset per la paginazione
-    const offset = (page - 1) * ITEMS_PER_PAGE;
-
-    console.log(`Generating sitemap for page ${page}, offset: ${offset}`);
-
+    // Prima query per ottenere i dati di recensioni con join alla tabella patologie
     const { data: reviews, error } = await supabase
       .from('reviews')
-      .select('id, title, PATOLOGIE!inner(Patologia)')
+      .select(`
+        id, 
+        title, 
+        patologia: PATOLOGIE!condition_id (Patologia)
+      `)
       .eq('status', 'approved')
-      .order('created_at', { ascending: false })
-      .range(offset, offset + ITEMS_PER_PAGE - 1);
+      .range(offset, offset + pageSize - 1)
+      .order('id', { ascending: true })
 
     if (error) {
-      console.error('Error fetching reviews:', error);
-      throw error;
+      console.error('Errore durante il recupero delle recensioni:', error)
+      return new Response(JSON.stringify({ error: error.message }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      })
     }
 
-    console.log(`Found ${reviews?.length || 0} reviews`);
+    const formattedReviews = reviews.map(review => ({
+      id: review.id,
+      title: review.title,
+      patologia: review.patologia?.Patologia || 'patologia-non-specificata'
+    }))
 
-    if (!reviews?.length) {
-      console.log('No reviews found for this page');
-      return new Response('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', {
-        headers: {
-          ...corsHeaders,
-          'Cache-Control': 'public, max-age=0, s-maxage=3600'
-        }
-      });
-    }
+    const xml = generateSitemapXML(formattedReviews)
 
-    // Funzione per generare URL SEO-friendly
-    const toSEOFriendlyURL = (text: string): string => {
-      if (!text) return '';
-      return text
-        .toLowerCase()
-        .replace(/ /g, '-')
-        .replace(/[^a-z0-9-]/g, '')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '');
-    };
-
-    // Genera il contenuto XML della sitemap
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${reviews.map(review => {
-  const conditionSlug = toSEOFriendlyURL(review.PATOLOGIE.Patologia);
-  const titleSlug = toSEOFriendlyURL(review.title);
-  return `  <url>
-    <loc>https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>`;
-}).join('\n')}
-</urlset>`;
-
-    console.log('Generated sitemap XML');
-
-    return new Response(sitemap, {
-      headers: {
-        ...corsHeaders,
-        'Cache-Control': 'public, max-age=0, s-maxage=3600'
-      }
-    });
-
+    return new Response(xml, {
+      headers: corsHeaders,
+      status: 200
+    })
   } catch (error) {
-    console.error('Error generating sitemap:', error);
-    return new Response(JSON.stringify({
-      error: 'Error generating sitemap',
-      details: error.message
-    }), {
-      status: 500,
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json'
-      }
-    });
+    console.error('Errore durante la generazione della sitemap:', error.message)
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500
+    })
   }
-});
+})
