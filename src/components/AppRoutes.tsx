@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import Index from "@/pages/Index";
