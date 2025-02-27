@@ -9,6 +9,7 @@ export async function generateReviewsSitemap(startId: number, endId: number) {
         id, 
         title, 
         PATOLOGIE (
+          id,
           Patologia
         )
       `)
@@ -36,7 +37,7 @@ export async function generateReviewsSitemap(startId: number, endId: number) {
 
     reviews.forEach((review) => {
       if (review.PATOLOGIE && review.PATOLOGIE.Patologia) {
-        const condition = review.PATOLOGIE.Patologia.toLowerCase();
+        const condition = review.PATOLOGIE.Patologia.toLowerCase().replace(/\s+/g, '-');
         const slugTitle = slugify(review.title);
         const url = `https://stomale.info/patologia/${condition}/esperienza/${review.id}-${slugTitle}`;
         
