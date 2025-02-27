@@ -32,10 +32,16 @@ Deno.serve(async (req) => {
 
     console.log(`Generazione sitemap per recensioni (pagina ${page})`);
     
-    // Recupera gli URL dal database
-    const { data: urls, error } = await supabaseClient
-      .from('review_urls')
-      .select('url, created_at')
+    // Recupera le recensioni direttamente dalla tabella reviews invece di review_urls
+    const { data: reviews, error } = await supabaseClient
+      .from('reviews')
+      .select(`
+        id,
+        title,
+        created_at,
+        PATOLOGIE(Patologia)
+      `)
+      .eq('status', 'approved')
       .range(offset, offset + urlsPerPage - 1)
       .order('id', { ascending: true });
     
@@ -44,7 +50,7 @@ Deno.serve(async (req) => {
       throw error;
     }
 
-    console.log(`Trovati ${urls.length} URL per la pagina ${page}`);
+    console.log(`Trovate ${reviews.length} recensioni per la pagina ${page}`);
     
     // Data corrente per lastmod (formato ISO)
     const currentDate = new Date().toISOString().split('T')[0];
@@ -54,17 +60,24 @@ Deno.serve(async (req) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
 
-    // Aggiungi ogni URL alla sitemap
-    urls.forEach(item => {
-      const fullUrl = `https://stomale.info${item.url}`;
+    // Funzione di formattazione URL uguale a quella in ReviewCard.tsx
+    const formatUrlPath = (text: string) => {
+      return text.trim().toLowerCase().replace(/\s+/g, '-');
+    };
+
+    // Aggiungi ogni recensione alla sitemap
+    reviews.forEach(review => {
+      const condition = review.PATOLOGIE?.Patologia || '';
+      const reviewPath = `/patologia/${formatUrlPath(condition)}/esperienza/${review.id}-${formatUrlPath(review.title)}`;
+      const fullUrl = `https://stomale.info${reviewPath}`;
+      
       // Usa la data di creazione se disponibile, altrimenti usa la data corrente
-      const lastmod = item.created_at 
-        ? new Date(item.created_at).toISOString().split('T')[0]
+      const lastmod = review.created_at 
+        ? new Date(review.created_at).toISOString().split('T')[0]
         : currentDate;
       
       xmlContent += `  <url>
     <loc>${fullUrl}</loc>
-    <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -78,13 +91,13 @@ Deno.serve(async (req) => {
       .from('sitemap_files')
       .upsert({ 
         filename: `sitemap-reviews-${page}.xml`,
-        url_count: urls.length,
+        url_count: reviews.length,
         last_modified: new Date().toISOString()
       }, {
         onConflict: 'filename'
       });
     
-    console.log(`Sitemap generata con successo con ${urls.length} URL`);
+    console.log(`Sitemap generata con successo con ${reviews.length} URL`);
     
     // Restituisci l'XML
     return new Response(xmlContent, { 
