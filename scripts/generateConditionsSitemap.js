@@ -28,6 +28,11 @@ const URLS_PER_SITEMAP = 50;
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
 const SITEMAPS_DIR = path.join(PUBLIC_DIR, 'sitemaps');
 
+// Formatta il nome della patologia per l'URL
+function formatPathName(name) {
+  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
 // Funzione principale
 async function generateConditionsSitemaps() {
   try {
@@ -140,7 +145,8 @@ function generateSitemapXml(conditions) {
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
   
   conditions.forEach(condition => {
-    const conditionUrl = `/patologia/${condition.Patologia.toLowerCase().replace(/ /g, '-')}`;
+    // Utilizziamo formatPathName per generare l'URL corretto
+    const conditionUrl = `/patologia/${formatPathName(condition.Patologia)}`;
     
     xml += '  <url>\n';
     xml += `    <loc>${BASE_URL}${conditionUrl}</loc>\n`;
