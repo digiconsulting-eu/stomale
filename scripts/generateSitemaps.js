@@ -40,7 +40,7 @@ const generateReviewsSitemaps = async () => {
       throw error;
     }
     
-    if (!reviewUrls.length) {
+    if (!reviewUrls || !reviewUrls.length) {
       console.log('Nessun URL di recensione trovato');
       return;
     }
@@ -100,6 +100,7 @@ const generateReviewsSitemaps = async () => {
     console.log('Generazione sitemaps completata con successo');
   } catch (error) {
     console.error('Errore durante la generazione dei sitemaps:', error.message);
+    process.exit(1);
   }
 };
 
