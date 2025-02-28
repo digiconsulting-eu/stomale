@@ -1,7 +1,12 @@
 
-const fs = require('fs');
-const path = require('path');
-const { createClient } = require('@supabase/supabase-js');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createClient } from '@supabase/supabase-js';
+
+// Configurazione dirname per ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configurazione Supabase
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -18,7 +23,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Dominio base
 const BASE_URL = 'https://stomale.info';
 // Numero di URL per file sitemap
-const URLS_PER_SITEMAP = 1000;
+const URLS_PER_SITEMAP = 5; // Ridotto a 5 per test
 // Directory per i file sitemap
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
 
@@ -37,7 +42,7 @@ async function generateSitemaps() {
     console.log('Recupero URL delle recensioni da Supabase...');
     const { data: reviewUrls, error } = await supabase
       .from('review_urls')
-      .select('url, review_id')
+      .select('url, review_id, title, condition')
       .order('id');
     
     if (error) {
@@ -71,7 +76,7 @@ async function generateSitemaps() {
       console.log(`Creato file sitemap-reviews-${fileNumber}.xml con ${urls.length} URL`);
     }
     
-    // Genera il file sitemap.xml principale
+    // Genera il file sitemap index
     generateSitemapIndex(sitemapGroups.length);
     
     console.log('Generazione sitemap completata con successo!');
@@ -86,8 +91,6 @@ async function generateSitemaps() {
 
 // Genera il contenuto XML di un singolo file sitemap
 function generateSitemapXml(urls) {
-  const today = new Date().toISOString().split('T')[0];
-  
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
   
@@ -95,14 +98,13 @@ function generateSitemapXml(urls) {
     if (url && url.url) {
       xml += '  <url>\n';
       xml += `    <loc>${BASE_URL}${url.url}</loc>\n`;
-      xml += `    <lastmod>${today}</lastmod>\n`;
       xml += '    <changefreq>monthly</changefreq>\n';
       xml += '    <priority>0.6</priority>\n';
       xml += '  </url>\n';
     }
   });
   
-  xml += '</urlset>';
+  xml += '</urlset>\n';
   return xml;
 }
 
@@ -129,7 +131,7 @@ function generateSitemapIndex(numSitemaps) {
     ];
     
     // Aggiungi ogni sitemap esistente
-    staticSitemaps.forEach(filename => {
+    for (const filename of staticSitemaps) {
       const sitemapPath = path.join(sitemapsDir, filename);
       if (fs.existsSync(sitemapPath)) {
         xml += '  <sitemap>\n';
@@ -137,7 +139,7 @@ function generateSitemapIndex(numSitemaps) {
         xml += `    <lastmod>${today}</lastmod>\n`;
         xml += '  </sitemap>\n';
       }
-    });
+    }
   }
   
   // Aggiungi le sitemap delle recensioni appena generate
@@ -148,32 +150,36 @@ function generateSitemapIndex(numSitemaps) {
     xml += '  </sitemap>\n';
   }
   
-  xml += '</sitemapindex>';
+  xml += '</sitemapindex>\n';
   
   // Salva il file sitemap.xml
-  const indexPath = path.join(PUBLIC_DIR, 'sitemap.xml');
+  const indexPath = path.join(PUBLIC_DIR, 'sitemap-index.xml');
   fs.writeFileSync(indexPath, xml);
-  console.log('Creato file sitemap.xml principale');
+  console.log('Creato file sitemap-index.xml principale');
 }
 
 // Genera una sitemap vuota in caso di errore
 async function generateEmptySitemap() {
+  const today = new Date().toISOString().split('T')[0];
+  
   // Crea una sitemap vuota
   const emptySitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-</urlset>`;
+</urlset>
+`;
   
   const emptyIndexSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>${BASE_URL}/sitemap-reviews-1.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${today}</lastmod>
   </sitemap>
-</sitemapindex>`;
+</sitemapindex>
+`;
   
   // Salva i file
   fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap-reviews-1.xml'), emptySitemap);
-  fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap.xml'), emptyIndexSitemap);
+  fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap-index.xml'), emptyIndexSitemap);
   
   console.log('Generate sitemap vuote di fallback');
 }
