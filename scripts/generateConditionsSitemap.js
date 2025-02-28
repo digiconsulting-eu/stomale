@@ -1,149 +1,63 @@
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { createClient } from '@supabase/supabase-js';
+const fs = require('fs');
+const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
 
-// Configurazione dirname per ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Configurazione Supabase
+// Configuration
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const encodeSpaces = process.env.ENCODE_SPACES === 'true';
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Errore: variabili di ambiente SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY mancanti');
+  console.error('Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.');
   process.exit(1);
 }
 
-console.log('Inizializzazione client Supabase...');
 const supabase = createClient(supabaseUrl, supabaseKey);
+const URLS_PER_FILE = 50;
+const sitemapsDir = path.join(process.cwd(), 'public', 'sitemaps');
+const sitemapIndexPath = path.join(process.cwd(), 'public', 'sitemap-index.xml');
 
-// Dominio base
-const BASE_URL = 'https://stomale.info';
-// Numero di URL per file sitemap
-const URLS_PER_SITEMAP = 50;
-// Directory per i file sitemap
-const PUBLIC_DIR = path.join(process.cwd(), 'public');
-const SITEMAPS_DIR = path.join(PUBLIC_DIR, 'sitemaps');
+// Ensure the sitemaps directory exists
+if (!fs.existsSync(sitemapsDir)) {
+  fs.mkdirSync(sitemapsDir, { recursive: true });
+}
 
-// Funzione principale
-async function generateConditionsSitemaps() {
-  try {
-    console.log('Inizio generazione sitemap delle patologie...');
-    
-    // Verifica che le directory esistano
-    if (!fs.existsSync(PUBLIC_DIR)) {
-      console.log('Creazione directory public...');
-      fs.mkdirSync(PUBLIC_DIR, { recursive: true });
-    }
-    
-    if (!fs.existsSync(SITEMAPS_DIR)) {
-      console.log('Creazione directory sitemaps...');
-      fs.mkdirSync(SITEMAPS_DIR, { recursive: true });
-    }
-    
-    // Recupera tutte le patologie dal database
-    console.log('Recupero patologie da Supabase...');
-    const { data: conditions, error } = await supabase
-      .from('PATOLOGIE')
-      .select('id, Patologia')
-      .order('Patologia');
-    
-    if (error) {
-      throw new Error(`Errore nel recupero delle patologie: ${error.message}`);
-    }
-    
-    if (!conditions || conditions.length === 0) {
-      console.log('Nessuna patologia trovata. Creazione di sitemap vuota...');
-      generateEmptySitemap();
-      return;
-    }
-    
-    console.log(`Trovate ${conditions.length} patologie.`);
-    
-    // Raggruppa patologie per lettera iniziale
-    const conditionsByLetter = {};
-    
-    conditions.forEach(condition => {
-      const firstLetter = condition.Patologia.charAt(0).toUpperCase();
-      
-      if (!conditionsByLetter[firstLetter]) {
-        conditionsByLetter[firstLetter] = [];
-      }
-      
-      conditionsByLetter[firstLetter].push(condition);
-    });
-    
-    const letterGroups = {
-      'A': 'a',
-      'B': 'b',
-      'C': 'c',
-      'D': 'd',
-      'E-L': 'e-l',
-      'M-R': 'm-r',
-      'S-Z': 's-z'
-    };
-    
-    // Genera i file sitemap per ogni gruppo di lettere
-    for (const [groupName, groupSlug] of Object.entries(letterGroups)) {
-      console.log(`Generazione sitemap per patologie ${groupName}...`);
-      const groupConditions = [];
-      
-      if (groupName === 'A') {
-        if (conditionsByLetter['A']) groupConditions.push(...conditionsByLetter['A']);
-      } else if (groupName === 'B') {
-        if (conditionsByLetter['B']) groupConditions.push(...conditionsByLetter['B']);
-      } else if (groupName === 'C') {
-        if (conditionsByLetter['C']) groupConditions.push(...conditionsByLetter['C']);
-      } else if (groupName === 'D') {
-        if (conditionsByLetter['D']) groupConditions.push(...conditionsByLetter['D']);
-      } else if (groupName === 'E-L') {
-        for (let i = 'E'.charCodeAt(0); i <= 'L'.charCodeAt(0); i++) {
-          const letter = String.fromCharCode(i);
-          if (conditionsByLetter[letter]) groupConditions.push(...conditionsByLetter[letter]);
-        }
-      } else if (groupName === 'M-R') {
-        for (let i = 'M'.charCodeAt(0); i <= 'R'.charCodeAt(0); i++) {
-          const letter = String.fromCharCode(i);
-          if (conditionsByLetter[letter]) groupConditions.push(...conditionsByLetter[letter]);
-        }
-      } else if (groupName === 'S-Z') {
-        for (let i = 'S'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
-          const letter = String.fromCharCode(i);
-          if (conditionsByLetter[letter]) groupConditions.push(...conditionsByLetter[letter]);
-        }
-      }
-      
-      if (groupConditions.length > 0) {
-        const sitemapContent = generateSitemapXml(groupConditions);
-        const filePath = path.join(SITEMAPS_DIR, `sitemap-conditions-${groupSlug}.xml`);
-        fs.writeFileSync(filePath, sitemapContent);
-        console.log(`Creato file sitemap-conditions-${groupSlug}.xml con ${groupConditions.length} URL`);
-      }
-    }
-    
-    // Aggiorna il file sitemap-index.xml per includere le nuove sitemap
-    updateSitemapIndex();
-    
-    console.log('Generazione sitemap delle patologie completata con successo!');
-  } catch (error) {
-    console.error('Errore durante la generazione delle sitemap delle patologie:', error);
-    generateEmptySitemap();
+// Function to format a condition name for the URL
+function formatConditionForUrl(conditionName) {
+  if (encodeSpaces) {
+    // Use encodeURIComponent for proper URL encoding of spaces and special characters
+    return encodeURIComponent(conditionName.toLowerCase());
+  } else {
+    // The old way (replace spaces with hyphens)
+    return conditionName.toLowerCase().replace(/\s+/g, '-');
   }
 }
 
-// Genera il contenuto XML di un singolo file sitemap
+// Function to clean up old condition sitemap files
+function cleanupOldConditionSitemaps() {
+  try {
+    const files = fs.readdirSync(sitemapsDir);
+    files.forEach(file => {
+      if (file.startsWith('sitemap-conditions-') && file.endsWith('.xml')) {
+        fs.unlinkSync(path.join(sitemapsDir, file));
+        console.log(`Deleted old sitemap file: ${file}`);
+      }
+    });
+  } catch (error) {
+    console.error('Error cleaning up old sitemap files:', error);
+  }
+}
+
+// Function to generate sitemap XML for a group of conditions
 function generateSitemapXml(conditions) {
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
   
   conditions.forEach(condition => {
-    const conditionUrl = `/patologia/${condition.Patologia.toLowerCase().replace(/ /g, '-')}`;
-    
+    const formattedName = formatConditionForUrl(condition.Patologia);
     xml += '  <url>\n';
-    xml += `    <loc>${BASE_URL}${conditionUrl}</loc>\n`;
+    xml += `    <loc>https://stomale.info/patologia/${formattedName}</loc>\n`;
     xml += '    <changefreq>weekly</changefreq>\n';
     xml += '    <priority>0.8</priority>\n';
     xml += '  </url>\n';
@@ -153,121 +67,198 @@ function generateSitemapXml(conditions) {
   return xml;
 }
 
-// Genera una sitemap vuota in caso di errore
-function generateEmptySitemap() {
-  const emptySitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-</urlset>
-`;
-  
-  const filePath = path.join(SITEMAPS_DIR, 'sitemap-conditions-empty.xml');
-  fs.writeFileSync(filePath, emptySitemap);
-  
-  console.log('Generata sitemap vuota di fallback');
-}
+// Function to update sitemap index
+function updateSitemapIndex(sitemapFiles) {
+  try {
+    // Read existing sitemap index
+    let sitemapIndexContent = '';
+    if (fs.existsSync(sitemapIndexPath)) {
+      sitemapIndexContent = fs.readFileSync(sitemapIndexPath, 'utf8');
+    }
 
-// Aggiorna il file sitemap-index.xml per includere le nuove sitemap
-function updateSitemapIndex() {
-  const indexPath = path.join(PUBLIC_DIR, 'sitemap-index.xml');
-  const today = new Date().toISOString().split('T')[0];
-  
-  // Se il file sitemap-index.xml non esiste, creane uno nuovo
-  if (!fs.existsSync(indexPath)) {
-    console.log('File sitemap-index.xml non trovato. Creazione di un nuovo file...');
-    
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-    
-    // Aggiungi le sitemap delle patologie
-    xml += '  <sitemap>\n';
-    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-conditions-a.xml</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += '  </sitemap>\n';
-    xml += '  <sitemap>\n';
-    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-conditions-b.xml</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += '  </sitemap>\n';
-    xml += '  <sitemap>\n';
-    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-conditions-c.xml</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += '  </sitemap>\n';
-    xml += '  <sitemap>\n';
-    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-conditions-d.xml</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += '  </sitemap>\n';
-    xml += '  <sitemap>\n';
-    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-conditions-e-l.xml</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += '  </sitemap>\n';
-    xml += '  <sitemap>\n';
-    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-conditions-m-r.xml</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += '  </sitemap>\n';
-    xml += '  <sitemap>\n';
-    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-conditions-s-z.xml</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += '  </sitemap>\n';
-    
-    // Leggi la directory per trovare i file sitemap-reviews-*.xml
-    const files = fs.readdirSync(PUBLIC_DIR);
-    const reviewSitemaps = files.filter(file => file.startsWith('sitemap-reviews-') && file.endsWith('.xml'));
-    
-    reviewSitemaps.forEach(file => {
+    // Create new sitemap index or update existing
+    if (!sitemapIndexContent || sitemapIndexContent === '') {
+      // Create new sitemap index
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+      
+      // Add static sitemap
       xml += '  <sitemap>\n';
-      xml += `    <loc>${BASE_URL}/${file}</loc>\n`;
-      xml += `    <lastmod>${today}</lastmod>\n`;
+      xml += '    <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>\n';
+      xml += `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n`;
       xml += '  </sitemap>\n';
-    });
-    
-    xml += '</sitemapindex>\n';
-    
-    fs.writeFileSync(indexPath, xml);
-    console.log('Creato nuovo file sitemap-index.xml');
-  } else {
-    // Se il file sitemap-index.xml esiste già, aggiungi le nuove sitemap se non ci sono già
-    console.log('Aggiornamento file sitemap-index.xml esistente...');
-    
-    let indexContent = fs.readFileSync(indexPath, 'utf8');
-    let updated = false;
-    
-    const conditionSitemaps = [
-      '/sitemaps/sitemap-conditions-a.xml',
-      '/sitemaps/sitemap-conditions-b.xml',
-      '/sitemaps/sitemap-conditions-c.xml',
-      '/sitemaps/sitemap-conditions-d.xml',
-      '/sitemaps/sitemap-conditions-e-l.xml',
-      '/sitemaps/sitemap-conditions-m-r.xml',
-      '/sitemaps/sitemap-conditions-s-z.xml'
-    ];
-    
-    // Verifica che ogni sitemap delle patologie sia presente nel file sitemap-index.xml
-    for (const sitemapPath of conditionSitemaps) {
-      if (!indexContent.includes(sitemapPath)) {
-        const insertPosition = indexContent.indexOf('</sitemapindex>');
-        
-        if (insertPosition !== -1) {
-          const sitemapEntry = `  <sitemap>\n    <loc>${BASE_URL}${sitemapPath}</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
-          indexContent = indexContent.slice(0, insertPosition) + sitemapEntry + indexContent.slice(insertPosition);
-          updated = true;
-        }
-      }
-    }
-    
-    if (updated) {
-      fs.writeFileSync(indexPath, indexContent);
-      console.log('File sitemap-index.xml aggiornato con le sitemap delle patologie');
+      
+      // Add condition sitemaps
+      sitemapFiles.forEach(file => {
+        xml += '  <sitemap>\n';
+        xml += `    <loc>https://stomale.info/sitemaps/${file}</loc>\n`;
+        xml += `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n`;
+        xml += '  </sitemap>\n';
+      });
+      
+      // Add review sitemaps (assume they exist)
+      const reviewFiles = fs.readdirSync(sitemapsDir)
+        .filter(file => file.startsWith('sitemap-reviews-') && file.endsWith('.xml'));
+      
+      reviewFiles.forEach(file => {
+        xml += '  <sitemap>\n';
+        xml += `    <loc>https://stomale.info/sitemaps/${file}</loc>\n`;
+        xml += `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n`;
+        xml += '  </sitemap>\n';
+      });
+      
+      xml += '</sitemapindex>\n';
+      fs.writeFileSync(sitemapIndexPath, xml);
     } else {
-      console.log('Tutte le sitemap delle patologie sono già presenti nel file sitemap-index.xml');
+      // Update existing sitemap index
+      let updatedContent = sitemapIndexContent;
+      
+      // Remove existing condition sitemap entries
+      sitemapFiles.forEach(file => {
+        const sitemapRegex = new RegExp(`<sitemap>[\\s\\S]*?<loc>https://stomale.info/sitemaps/${file}</loc>[\\s\\S]*?</sitemap>`, 'g');
+        updatedContent = updatedContent.replace(sitemapRegex, '');
+      });
+      
+      // Add new condition sitemap entries before the closing tag
+      let newEntries = '';
+      sitemapFiles.forEach(file => {
+        newEntries += '  <sitemap>\n';
+        newEntries += `    <loc>https://stomale.info/sitemaps/${file}</loc>\n`;
+        newEntries += `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n`;
+        newEntries += '  </sitemap>\n';
+      });
+      
+      updatedContent = updatedContent.replace('</sitemapindex>', newEntries + '</sitemapindex>');
+      fs.writeFileSync(sitemapIndexPath, updatedContent);
     }
+    
+    console.log('Updated sitemap index file');
+  } catch (error) {
+    console.error('Error updating sitemap index:', error);
   }
 }
 
-// Esegui la funzione principale
-generateConditionsSitemaps()
-  .then(() => {
-    console.log('Processo di generazione sitemap delle patologie completato');
-  })
-  .catch(error => {
-    console.error('Errore critico non gestito:', error);
+// Main function to generate condition sitemaps
+async function generateConditionSitemaps() {
+  try {
+    console.log('Fetching conditions from Supabase...');
+    const { data: conditions, error } = await supabase
+      .from('PATOLOGIE')
+      .select('id, Patologia')
+      .order('Patologia');
+    
+    if (error) {
+      throw error;
+    }
+    
+    if (!conditions || conditions.length === 0) {
+      console.log('No conditions found');
+      return;
+    }
+    
+    console.log(`Retrieved ${conditions.length} conditions`);
+    
+    // Clean up old sitemap files
+    cleanupOldConditionSitemaps();
+    
+    // Group conditions by first letter
+    const groupedConditions = {};
+    conditions.forEach(condition => {
+      const firstLetter = condition.Patologia.charAt(0).toUpperCase();
+      
+      if (!groupedConditions[firstLetter]) {
+        groupedConditions[firstLetter] = [];
+      }
+      
+      groupedConditions[firstLetter].push(condition);
+    });
+    
+    // Generate sitemap files based on the groups
+    const sitemapFiles = [];
+    
+    // Handle A, B, C, D letters individually
+    ['A', 'B', 'C', 'D'].forEach(letter => {
+      if (groupedConditions[letter] && groupedConditions[letter].length > 0) {
+        const fileName = `sitemap-conditions-${letter.toLowerCase()}.xml`;
+        const filePath = path.join(sitemapsDir, fileName);
+        
+        const xml = generateSitemapXml(groupedConditions[letter]);
+        fs.writeFileSync(filePath, xml);
+        
+        sitemapFiles.push(fileName);
+        console.log(`Generated ${fileName} with ${groupedConditions[letter].length} conditions`);
+      }
+    });
+    
+    // Group E-L
+    const eLConditions = [];
+    for (let letter = 'E'.charCodeAt(0); letter <= 'L'.charCodeAt(0); letter++) {
+      const letterStr = String.fromCharCode(letter);
+      if (groupedConditions[letterStr]) {
+        eLConditions.push(...groupedConditions[letterStr]);
+      }
+    }
+    
+    if (eLConditions.length > 0) {
+      const fileName = 'sitemap-conditions-e-l.xml';
+      const filePath = path.join(sitemapsDir, fileName);
+      
+      const xml = generateSitemapXml(eLConditions);
+      fs.writeFileSync(filePath, xml);
+      
+      sitemapFiles.push(fileName);
+      console.log(`Generated ${fileName} with ${eLConditions.length} conditions`);
+    }
+    
+    // Group M-R
+    const mRConditions = [];
+    for (let letter = 'M'.charCodeAt(0); letter <= 'R'.charCodeAt(0); letter++) {
+      const letterStr = String.fromCharCode(letter);
+      if (groupedConditions[letterStr]) {
+        mRConditions.push(...groupedConditions[letterStr]);
+      }
+    }
+    
+    if (mRConditions.length > 0) {
+      const fileName = 'sitemap-conditions-m-r.xml';
+      const filePath = path.join(sitemapsDir, fileName);
+      
+      const xml = generateSitemapXml(mRConditions);
+      fs.writeFileSync(filePath, xml);
+      
+      sitemapFiles.push(fileName);
+      console.log(`Generated ${fileName} with ${mRConditions.length} conditions`);
+    }
+    
+    // Group S-Z
+    const sZConditions = [];
+    for (let letter = 'S'.charCodeAt(0); letter <= 'Z'.charCodeAt(0); letter++) {
+      const letterStr = String.fromCharCode(letter);
+      if (groupedConditions[letterStr]) {
+        sZConditions.push(...groupedConditions[letterStr]);
+      }
+    }
+    
+    if (sZConditions.length > 0) {
+      const fileName = 'sitemap-conditions-s-z.xml';
+      const filePath = path.join(sitemapsDir, fileName);
+      
+      const xml = generateSitemapXml(sZConditions);
+      fs.writeFileSync(filePath, xml);
+      
+      sitemapFiles.push(fileName);
+      console.log(`Generated ${fileName} with ${sZConditions.length} conditions`);
+    }
+    
+    // Update sitemap index
+    updateSitemapIndex(sitemapFiles);
+    
+    console.log('All condition sitemaps generated successfully');
+  } catch (error) {
+    console.error('Error generating condition sitemaps:', error);
     process.exit(1);
-  });
+  }
+}
+
+// Execute the main function
+generateConditionSitemaps();
