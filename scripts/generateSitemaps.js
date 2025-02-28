@@ -1,7 +1,12 @@
 
-const fs = require('fs');
-const path = require('path');
-const { createClient } = require('@supabase/supabase-js');
+import fs from 'fs';
+import path from 'path';
+import { createClient } from '@supabase/supabase-js';
+import { fileURLToPath } from 'url';
+
+// Get the directory name using ES modules approach
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Carica le variabili d'ambiente
 const supabaseUrl = process.env.SUPABASE_URL;
