@@ -28,7 +28,7 @@ export const ReviewHeader = ({
           <span>{date}</span>
         </div>
         <Link 
-          to={`/patologia/${condition.toLowerCase()}`}
+          to={`/patologia/${encodeURIComponent(condition.toLowerCase())}`}
           className="inline-block"
         >
           <Badge 
