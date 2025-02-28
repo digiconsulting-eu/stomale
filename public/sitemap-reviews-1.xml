@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://stomale.info/patologia/allergie/esperienza/1-la-mia-esperienza-con-allergia-ai-pollini</loc>
+    <loc>https://stomale.info/patologia/stenosi-lombare/esperienza/1000-mal-di-schiena</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/enfisema/esperienza/947-il-lento-decadimento-delle-funzioni-polmonari</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/enterite/esperienza/950-dolore-e-disagio-addominale-per-una-malattia-fasti</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/enterite/esperienza/953-la-difficile-guarigione-da-un'infiammazione-intest</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/entesite/esperienza/956-dolore-persistente-alle-articolazioni</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
