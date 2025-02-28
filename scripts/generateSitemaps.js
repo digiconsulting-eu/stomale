@@ -6,6 +6,13 @@ const { createClient } = require('@supabase/supabase-js');
 // Configurazione Supabase
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Errore: variabili di ambiente SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY mancanti');
+  process.exit(1);
+}
+
+console.log('Configurazione Supabase completata');
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Dominio base
@@ -16,7 +23,16 @@ async function generateSitemaps() {
   try {
     console.log('Inizia generazione sitemap...');
     
+    // Verifica che la directory public esista, altrimenti creala
+    const publicDir = path.join(process.cwd(), 'public');
+    if (!fs.existsSync(publicDir)) {
+      console.log('Directory public non trovata, creazione...');
+      fs.mkdirSync(publicDir, { recursive: true });
+      console.log('Creata directory public');
+    }
+    
     // Ottieni tutti gli URL delle recensioni dal database
+    console.log('Recupero URL recensioni da Supabase...');
     const { data: reviewUrls, error } = await supabase
       .from('review_urls')
       .select('*')
@@ -26,9 +42,24 @@ async function generateSitemaps() {
       throw new Error(`Errore nel recupero degli URL: ${error.message}`);
     }
     
+    if (!reviewUrls || reviewUrls.length === 0) {
+      console.log('Nessun URL di recensione trovato nel database');
+      // Crea comunque un sitemap vuoto
+      const emptyGroup = [];
+      const sitemapContent = generateSitemapXml(emptyGroup);
+      const filePath = path.join(publicDir, 'sitemap-reviews-1.xml');
+      fs.writeFileSync(filePath, sitemapContent);
+      console.log('Generato sitemap vuoto: sitemap-reviews-1.xml');
+      
+      // Aggiorna il sitemap index
+      updateSitemapIndex(1);
+      
+      return;
+    }
+    
     console.log(`Trovati ${reviewUrls.length} URL di recensioni`);
     
-    // Dividi gli URL in gruppi di 5 per sitemap
+    // Dividi gli URL in gruppi per sitemap
     const urlGroups = [];
     const ITEMS_PER_FILE = 5;
     
@@ -38,24 +69,17 @@ async function generateSitemaps() {
     
     console.log(`Creazione di ${urlGroups.length} file sitemap`);
     
-    // Assicurati che la directory public esista
-    const publicDir = path.join(process.cwd(), 'public');
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir, { recursive: true });
-      console.log('Creata directory public');
-    }
-    
     // Genera i file delle sitemap
     urlGroups.forEach((group, index) => {
       const fileNum = index + 1;
       const sitemapContent = generateSitemapXml(group);
       
-      const filePath = path.join(process.cwd(), `public/sitemap-reviews-${fileNum}.xml`);
+      const filePath = path.join(publicDir, `sitemap-reviews-${fileNum}.xml`);
       fs.writeFileSync(filePath, sitemapContent);
       console.log(`Generato: sitemap-reviews-${fileNum}.xml`);
     });
     
-    // Aggiorna il sitemap index se necessario
+    // Aggiorna il sitemap index
     updateSitemapIndex(urlGroups.length);
     
     console.log('Generazione sitemap completata con successo!');
@@ -85,20 +109,24 @@ function generateSitemapXml(urlsData) {
 // Aggiorna il file sitemap.xml principale per includere tutti i file delle sitemap
 function updateSitemapIndex(totalSitemaps) {
   const today = new Date().toISOString().split('T')[0];
+  const publicDir = path.join(process.cwd(), 'public');
   
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
   
   // Verifica se la directory sitemaps esiste
-  const sitemapsDir = path.join(process.cwd(), 'public/sitemaps');
+  const sitemapsDir = path.join(publicDir, 'sitemaps');
   const sitemapsDirExists = fs.existsSync(sitemapsDir);
   
   // Aggiungi le sitemap statiche se esistono
   if (sitemapsDirExists) {
-    xml += '  <sitemap>\n';
-    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-static.xml</loc>\n`;
-    xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += '  </sitemap>\n';
+    const staticSitemapPath = path.join(sitemapsDir, 'sitemap-static.xml');
+    if (fs.existsSync(staticSitemapPath)) {
+      xml += '  <sitemap>\n';
+      xml += `    <loc>${BASE_URL}/sitemaps/sitemap-static.xml</loc>\n`;
+      xml += `    <lastmod>${today}</lastmod>\n`;
+      xml += '  </sitemap>\n';
+    }
     
     // Aggiungi tutte le sitemap delle condizioni
     const conditionLetters = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z'];
@@ -124,10 +152,13 @@ function updateSitemapIndex(totalSitemaps) {
   xml += '</sitemapindex>';
   
   // Salva il file sitemap.xml
-  const filePath = path.join(process.cwd(), 'public/sitemap.xml');
+  const filePath = path.join(publicDir, 'sitemap.xml');
   fs.writeFileSync(filePath, xml);
   console.log('Aggiornato il file sitemap.xml principale');
 }
 
 // Esegui la funzione principale
-generateSitemaps();
+generateSitemaps().catch(error => {
+  console.error('Errore non gestito:', error);
+  process.exit(1);
+});
