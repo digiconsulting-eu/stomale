@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -22,6 +23,51 @@
   </url>
   <url>
     <loc>https://stomale.info/patologia/fimosi/esperienza/1019-il-trattamento-non-chirurgico-della-fimosi</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/asma/esperienza/262--respirare-diventa-impossibile-</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/asma/esperienza/263--un-incubo-durante-la-primavera-</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/asma/esperienza/264--convivere-con-l'asma-è-possibile-</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/aspergillosi/esperienza/265--un-percorso-complicato-ma-gestibile-</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/astigmatismo/esperienza/266--vale-davvero-la-pena-operarsi?-</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/astigmatismo/esperienza/267--un-problema-piccolo-ma-che-limita-</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/astigmatismo/esperienza/268--un-mondo-finalmente-chiaro-</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/astigmatismo/esperienza/269--occhiali-sempre-ma-gestibile-</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/atresia-esofagea/esperienza/270--un-inizio-difficile-ma-con-una-speranza-</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
