@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -36,7 +35,7 @@ export const ConditionsGrid = ({ conditions, isLoading }: ConditionsGridProps) =
       {conditions.map(condition => (
         <Link 
           key={condition.id}
-          to={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
+          to={`/patologia/${condition.Patologia.toLowerCase()}`}
           className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white group"
         >
           <h2 className="text-xl font-semibold text-[#0EA5E9] group-hover:text-[#0EA5E9]/80 transition-colors">

@@ -44,7 +44,6 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          ENCODE_SPACES: "true"  # Add this environment variable to properly encode spaces
       
       - name: List generated files
         run: |

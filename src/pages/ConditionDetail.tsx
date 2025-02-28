@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -61,26 +60,22 @@ export default function ConditionDetail() {
   const { condition } = useParams();
   const navigate = useNavigate();
   const isAdmin = localStorage.getItem("isAdmin") === "true";
-  
-  // Decode the condition param for database queries
-  const decodedCondition = condition ? decodeURIComponent(condition) : '';
 
   useEffect(() => {
     if (condition) {
-      const decodedName = decodeURIComponent(condition);
-      const title = `${decodedName.toUpperCase()} | Recensioni ed Esperienze`;
+      const title = `${condition.toUpperCase()} | Recensioni ed Esperienze`;
       setPageTitle(title);
-      setMetaDescription(getConditionMetaDescription(decodedName));
+      setMetaDescription(getConditionMetaDescription(condition));
     }
   }, [condition]);
 
   const { data: patologiaData } = useQuery({
-    queryKey: ["patologia", decodedCondition],
+    queryKey: ["patologia", condition],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('id, Patologia')
-        .eq('Patologia', decodedCondition.toUpperCase())
+        .eq('Patologia', condition?.toUpperCase())
         .single();
       
       if (error) throw error;
@@ -124,13 +119,13 @@ export default function ConditionDetail() {
   };
 
   const handleNewReview = () => {
-    navigate(`/nuova-recensione?patologia=${encodeURIComponent(decodedCondition)}`);
+    navigate(`/nuova-recensione?patologia=${condition}`);
   };
 
   const reviews: Review[] = reviewsData?.map(review => ({
     id: review.id,
     title: review.title,
-    condition: decodedCondition || '',
+    condition: condition || '',
     experience: review.experience,
     diagnosis_difficulty: review.diagnosis_difficulty,
     symptoms_severity: review.symptoms_severity,
@@ -148,7 +143,7 @@ export default function ConditionDetail() {
   return (
     <div className="container py-8">
       <ConditionHeader 
-        condition={decodedCondition || ''} 
+        condition={condition || ''} 
         conditionId={patologiaData?.id || 0}
       />
 
@@ -159,14 +154,14 @@ export default function ConditionDetail() {
 
         <div className="md:col-span-8">
           <ConditionActions
-            condition={decodedCondition || ''}
+            condition={condition || ''}
             onNavigate={handleNavigate}
             onNewReview={handleNewReview}
           />
 
           <div id="overview" className="mt-8">
             <ConditionOverview 
-              condition={decodedCondition || ''} 
+              condition={condition || ''} 
               isAdmin={isAdmin}
             />
           </div>
@@ -178,14 +173,14 @@ export default function ConditionDetail() {
             <ConditionReviews
               reviews={reviews}
               isLoading={isLoading}
-              condition={decodedCondition || ''}
+              condition={condition || ''}
             />
           </div>
         </div>
       </div>
 
       <div className="mt-8">
-        <Disclaimer condition={capitalizeFirstLetter(decodedCondition || '')} />
+        <Disclaimer condition={capitalizeFirstLetter(condition || '')} />
       </div>
     </div>
   );

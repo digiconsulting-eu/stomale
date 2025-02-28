@@ -19,18 +19,24 @@ Deno.serve(async (req) => {
     const page = parseInt(pageParam, 10)
     
     // Validate page parameter
-    if (isNaN(page) || page < 1 || page > 200) {
+    if (isNaN(page) || page < 1 || page > 10) {
       return new Response('Invalid page parameter', { status: 400, headers: corsHeaders })
     }
     
     console.log(`Generating sitemap for reviews, page ${page}`)
+    
+    // Calculate pagination limits - 100 reviews per page
+    const limit = 100
+    const offset = (page - 1) * limit
+    
+    console.log(`Using offset ${offset} and limit ${limit}`)
     
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     
-    // Check if we have any records in the table
+    // First check if we have any records in the table
     const { count, error: countError } = await supabase
       .from('review_urls')
       .select('*', { count: 'exact', head: true })
@@ -56,13 +62,7 @@ Deno.serve(async (req) => {
       return new Response(xml, { headers: corsHeaders });
     }
     
-    // Calculate pagination limits - 100 reviews per page
-    const limit = 5
-    const offset = (page - 1) * limit
-    
-    console.log(`Using offset ${offset} and limit ${limit}`)
-    
-    // Fetch the URLs for this page
+    // If we have URLs, fetch them
     const { data: reviewUrls, error } = await supabase
       .from('review_urls')
       .select('url')
@@ -106,6 +106,24 @@ Deno.serve(async (req) => {
     }
     
     xml += `</urlset>`
+    
+    // Update the sitemap_files table to track this file
+    const filename = `sitemap-reviews-${page}.xml`
+    const { error: updateError } = await supabase
+      .from('sitemap_files')
+      .upsert(
+        { 
+          filename, 
+          url_count: reviewUrls.length,
+          last_modified: new Date().toISOString() 
+        },
+        { onConflict: 'filename' }
+      )
+    
+    if (updateError) {
+      console.error('Error updating sitemap_files:', updateError)
+      // Continue anyway - this is not critical
+    }
     
     return new Response(xml, { headers: corsHeaders })
     

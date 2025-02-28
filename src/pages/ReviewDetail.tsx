@@ -9,7 +9,7 @@ import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/ut
 
 const ReviewDetail = () => {
   const { condition, slug } = useParams();
-  const decodedCondition = condition ? decodeURIComponent(condition) : '';
+  const decodedCondition = condition ? condition.replace(/-/g, ' ') : '';
   const reviewId = slug?.split('-')[0];
 
   const { data: review, isLoading, error } = useReviewQuery(reviewId, decodedCondition);
