@@ -34,12 +34,10 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     
-    // Fetch reviews from the review_urls table which already has the correct associations
-    // between review IDs, titles, and conditions
+    // Fetch exact URLs from the review_urls table
     const { data: reviewUrls, error } = await supabase
       .from('review_urls')
-      .select('*')
-      .order('review_id', { ascending: true })
+      .select('url')
       .range(offset, offset + limit - 1)
     
     if (error) {
@@ -57,14 +55,16 @@ Deno.serve(async (req) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `
     
-    // Add entry for each review
+    // Add entry for each review using the exact URL from the database
     for (const reviewUrl of reviewUrls) {
-      xml += `  <url>
+      if (reviewUrl.url) {
+        xml += `  <url>
     <loc>https://stomale.info${reviewUrl.url}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 `
+      }
     }
     
     xml += `</urlset>`
