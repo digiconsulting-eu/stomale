@@ -1,34 +1,70 @@
 
+// Script per recuperare e salvare le sitemap delle recensioni
 const fs = require('fs');
 const path = require('path');
-const fetch = require('node-fetch');
+const https = require('https');
 
+// Configurazione
+const PROJECT_ID = 'hnuhdoycwpjfjhthfqbt';
+const BASE_URL = `https://${PROJECT_ID}.supabase.co/functions/v1/sitemap-reviews`;
+const OUTPUT_DIR = path.resolve(__dirname, '../public');
+
+// Funzione per effettuare una richiesta HTTP GET
+function fetchData(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      if (res.statusCode !== 200) {
+        reject(new Error(`HTTP Error: ${res.statusCode}`));
+        return;
+      }
+
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => { resolve(data); });
+    }).on('error', reject);
+  });
+}
+
+// Funzione per salvare una sitemap
+function saveSitemap(fileName, content) {
+  const filePath = path.join(OUTPUT_DIR, fileName);
+  fs.writeFileSync(filePath, content);
+  console.log(`Sitemap saved to ${filePath}`);
+}
+
+// Funzione principale
 async function main() {
   try {
-    console.log('Fetching sitemap from Supabase Edge Function...');
+    console.log('Fetching sitemaps for reviews...');
     
-    // Base URL for the Supabase function
-    const functionUrl = 'https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/generate-reviews-sitemap';
+    // Recupera le prime 5 sitemap
+    const maxPages = 5;
     
-    // Set parameters for reviews with ID from 103 to 203
-    const url = `${functionUrl}?startId=103&endId=203`;
-    
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    for (let page = 1; page <= maxPages; page++) {
+      console.log(`Fetching sitemap for page ${page}...`);
+      
+      try {
+        const url = `${BASE_URL}?page=${page}`;
+        const xmlContent = await fetchData(url);
+        const fileName = `sitemap-reviews-${page}.xml`;
+        
+        saveSitemap(fileName, xmlContent);
+      } catch (error) {
+        console.error(`Error fetching sitemap for page ${page}:`, error);
+        // If there's an error, create an empty sitemap file
+        const emptyXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+</urlset>`;
+        saveSitemap(`sitemap-reviews-${page}.xml`, emptyXml);
+      }
     }
     
-    const xmlContent = await response.text();
-    
-    // Save the XML content to sitemap-reviews-1.xml
-    const outputPath = path.resolve(__dirname, '../public/sitemap-reviews-1.xml');
-    fs.writeFileSync(outputPath, xmlContent);
-    
-    console.log(`Successfully saved sitemap to ${outputPath}`);
+    console.log('All sitemaps generated successfully!');
   } catch (error) {
-    console.error('Error fetching sitemap:', error);
+    console.error('Failed to generate sitemaps:', error);
+    process.exit(1);
   }
 }
 
+// Esegui lo script
 main();
