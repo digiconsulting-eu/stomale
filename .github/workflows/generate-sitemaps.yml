@@ -3,8 +3,8 @@ name: Generate Sitemaps
 
 on:
   schedule:
-    - cron: '0 0 * * 0'
-  workflow_dispatch:
+    - cron: '0 0 * * 0'  # Esegui ogni domenica a mezzanotte
+  workflow_dispatch:  # Permette di eseguire manualmente il workflow
 
 jobs:
   generate-sitemaps:
@@ -27,7 +27,7 @@ jobs:
       - name: Install Supabase
         run: npm install @supabase/supabase-js
       
-      - name: Debug secrets
+      - name: Verify secrets
         run: |
           if [ -z "${{ secrets.SUPABASE_URL }}" ]; then
             echo "SUPABASE_URL is not set"
@@ -37,31 +37,18 @@ jobs:
             echo "SUPABASE_SERVICE_ROLE_KEY is not set"
             exit 1
           fi
-          echo "Both secrets are available"
+          echo "Secrets are configured correctly"
       
-      - name: Create basic sitemap
+      - name: Generate sitemaps
+        run: node scripts/generateSitemaps.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      
+      - name: List generated files
         run: |
-          mkdir -p public
-          cat > public/sitemap-reviews-1.xml << 'EOL'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-            <url>
-              <loc>https://stomale.info/patologia/allergie/esperienza/1-la-mia-esperienza-con-allergia-ai-pollini</loc>
-              <changefreq>monthly</changefreq>
-              <priority>0.6</priority>
-            </url>
-          </urlset>
-          EOL
-          
-          cat > public/sitemap.xml << 'EOL'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-            <sitemap>
-              <loc>https://stomale.info/sitemap-reviews-1.xml</loc>
-              <lastmod>2024-04-01</lastmod>
-            </sitemap>
-          </sitemapindex>
-          EOL
+          echo "Generated sitemap files:"
+          ls -la public/sitemap*.xml
       
       - name: Commit changes
         run: |
