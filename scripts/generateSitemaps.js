@@ -1,90 +1,117 @@
 
-// Script per generare le sitemap delle recensioni
 const fs = require('fs');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 
 // Configurazione Supabase
-const supabaseUrl = "https://hnuhdoycwpjfjhthfqbt.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudWhkb3ljd3BqZmpodGhmcWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwOTAxOTcsImV4cCI6MjA0ODY2NjE5N30.oE_g8iFcu9UdsHeZhFLYpArJWa7hNFWnsR5x1E8ZGA0";
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Funzione per generare una singola sitemap
-async function generateSitemap(fileIndex, startRange, endRange) {
+// Dominio base
+const BASE_URL = 'https://stomale.info';
+
+// Funzione principale
+async function generateSitemaps() {
   try {
-    console.log(`Generazione sitemap-reviews-${fileIndex}.xml (range ${startRange}-${endRange})...`);
+    console.log('Inizia generazione sitemap...');
     
+    // Ottieni tutti gli URL delle recensioni dal database
     const { data: reviewUrls, error } = await supabase
       .from('review_urls')
-      .select('url')
-      .range(startRange, endRange)
-      .order('id', { ascending: true });
-      
+      .select('*')
+      .order('id');
+    
     if (error) {
       throw new Error(`Errore nel recupero degli URL: ${error.message}`);
     }
     
-    if (!reviewUrls || reviewUrls.length === 0) {
-      console.warn(`Nessun URL trovato per l'intervallo ${startRange}-${endRange}`);
-      // Genera comunque un file vuoto
-      const emptyXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-</urlset>`;
-      return emptyXml;
+    console.log(`Trovati ${reviewUrls.length} URL di recensioni`);
+    
+    // Dividi gli URL in gruppi di 5 per sitemap
+    const urlGroups = [];
+    const ITEMS_PER_FILE = 5;
+    
+    for (let i = 0; i < reviewUrls.length; i += ITEMS_PER_FILE) {
+      urlGroups.push(reviewUrls.slice(i, i + ITEMS_PER_FILE));
     }
     
-    // Genera il contenuto XML
-    let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-`;
-
-    reviewUrls.forEach(reviewUrl => {
-      if (reviewUrl.url) {
-        const fullUrl = `https://stomale.info${reviewUrl.url}`;
-        xmlContent += `  <url>
-    <loc>${fullUrl}</loc>
-    <lastmod>2024-03-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-`;
-      }
-    });
-
-    xmlContent += `</urlset>`;
-    return xmlContent;
-  } catch (error) {
-    console.error(`Errore nella generazione della sitemap ${fileIndex}:`, error);
-    throw error;
-  }
-}
-
-// Funzione principale
-async function main() {
-  try {
-    // Definiamo i range per ogni file di sitemap (5 file con 5 elementi ciascuno)
-    const ranges = [
-      { file: 1, start: 0, end: 4 },
-      { file: 2, start: 5, end: 9 },
-      { file: 3, start: 10, end: 14 },
-      { file: 4, start: 15, end: 19 },
-      { file: 5, start: 20, end: 24 }
-    ];
+    console.log(`Creazione di ${urlGroups.length} file sitemap`);
     
-    for (const range of ranges) {
-      const xmlContent = await generateSitemap(range.file, range.start, range.end);
-      const outputPath = path.resolve(__dirname, `../public/sitemap-reviews-${range.file}.xml`);
+    // Genera i file delle sitemap
+    urlGroups.forEach((group, index) => {
+      const fileNum = index + 1;
+      const sitemapContent = generateSitemapXml(group);
       
-      fs.writeFileSync(outputPath, xmlContent);
-      console.log(`Sitemap salvata con successo in ${outputPath}`);
-    }
+      const filePath = path.join(process.cwd(), `public/sitemap-reviews-${fileNum}.xml`);
+      fs.writeFileSync(filePath, sitemapContent);
+      console.log(`Generato: sitemap-reviews-${fileNum}.xml`);
+    });
     
-    console.log('Generazione delle sitemap completata con successo!');
+    // Aggiorna il sitemap index se necessario
+    updateSitemapIndex(urlGroups.length);
+    
+    console.log('Generazione sitemap completata con successo!');
   } catch (error) {
     console.error('Errore nella generazione delle sitemap:', error);
     process.exit(1);
   }
 }
 
-// Esegui lo script
-main();
+// Genera il contenuto XML per una singola sitemap
+function generateSitemapXml(urlsData) {
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  
+  for (const urlData of urlsData) {
+    xml += '  <url>\n';
+    xml += `    <loc>${BASE_URL}${urlData.url}</loc>\n`;
+    xml += '    <changefreq>monthly</changefreq>\n';
+    xml += '    <priority>0.6</priority>\n';
+    xml += '  </url>\n';
+  }
+  
+  xml += '</urlset>';
+  return xml;
+}
+
+// Aggiorna il file sitemap.xml principale per includere tutti i file delle sitemap
+function updateSitemapIndex(totalSitemaps) {
+  const today = new Date().toISOString().split('T')[0];
+  
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  
+  // Aggiungi le sitemap statiche
+  xml += '  <sitemap>\n';
+  xml += `    <loc>${BASE_URL}/sitemaps/sitemap-static.xml</loc>\n`;
+  xml += `    <lastmod>${today}</lastmod>\n`;
+  xml += '  </sitemap>\n';
+  
+  // Aggiungi tutte le sitemap delle condizioni
+  const conditionLetters = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z'];
+  for (const letter of conditionLetters) {
+    xml += '  <sitemap>\n';
+    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-conditions-${letter}.xml</loc>\n`;
+    xml += `    <lastmod>${today}</lastmod>\n`;
+    xml += '  </sitemap>\n';
+  }
+  
+  // Aggiungi tutte le sitemap delle recensioni
+  for (let i = 1; i <= totalSitemaps; i++) {
+    xml += '  <sitemap>\n';
+    xml += `    <loc>${BASE_URL}/sitemap-reviews-${i}.xml</loc>\n`;
+    xml += `    <lastmod>${today}</lastmod>\n`;
+    xml += '  </sitemap>\n';
+  }
+  
+  xml += '</sitemapindex>';
+  
+  // Salva il file sitemap.xml
+  const filePath = path.join(process.cwd(), 'public/sitemap.xml');
+  fs.writeFileSync(filePath, xml);
+  console.log('Aggiornato il file sitemap.xml principale');
+}
+
+// Esegui la funzione principale
+generateSitemaps();
