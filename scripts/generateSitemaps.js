@@ -21,7 +21,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Assicurati che la directory sitemaps esista
-const sitemapsDir = path.join(__dirname, '../public');
+const sitemapsDir = path.join(__dirname, '../public/sitemaps');
 if (!fs.existsSync(sitemapsDir)) {
   fs.mkdirSync(sitemapsDir, { recursive: true });
 }
@@ -63,6 +63,7 @@ const generateReviewsSitemaps = async () => {
       const fileName = `sitemap-reviews-${fileIndex}.xml`;
       const filePath = path.join(sitemapsDir, fileName);
       
+      // Importante: Nessuna riga vuota prima della dichiarazione XML
       let content = '<?xml version="1.0" encoding="UTF-8"?>\n';
       content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
       
@@ -80,21 +81,21 @@ const generateReviewsSitemaps = async () => {
       console.log(`Generato ${fileName} con ${chunk.length} URL`);
     });
     
-    // Genera il sitemap index
+    // Genera il sitemap index - anche qui nessuna riga vuota all'inizio
     let indexContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
     indexContent += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     
     for (let i = 1; i <= chunks.length; i++) {
       indexContent += '  <sitemap>\n';
-      indexContent += `    <loc>https://stomale.info/sitemap-reviews-${i}.xml</loc>\n`;
+      indexContent += `    <loc>https://stomale.info/sitemaps/sitemap-reviews-${i}.xml</loc>\n`;
       indexContent += '    <lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod>\n';
       indexContent += '  </sitemap>\n';
     }
     
     indexContent += '</sitemapindex>\n';
     
-    fs.writeFileSync(path.join(sitemapsDir, 'sitemap.xml'), indexContent);
-    console.log('Generato sitemap.xml principale');
+    fs.writeFileSync(path.join(sitemapsDir, 'sitemap-reviews.xml'), indexContent);
+    console.log('Generato sitemap-reviews.xml principale');
     
     console.log('Generazione sitemaps completata con successo');
   } catch (error) {
