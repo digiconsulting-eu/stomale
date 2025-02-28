@@ -1,48 +1,43 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export async function generateReviewsSitemap(startId: number, endId: number) {
+/**
+ * Genera una sitemap XML per le recensioni specificando un intervallo di indici
+ * @param start Indice iniziale per la paginazione
+ * @param limit Numero massimo di elementi da recuperare
+ * @returns Contenuto XML della sitemap o null in caso di errore
+ */
+export async function generateReviewsSitemap(start: number, limit: number) {
   try {
-    const { data: reviews, error } = await supabase
-      .from('reviews')
-      .select(`
-        id, 
-        title, 
-        PATOLOGIE (
-          id,
-          Patologia
-        )
-      `)
-      .gte('id', startId)
-      .lte('id', endId)
-      .eq('status', 'approved')
+    const { data: reviewUrls, error } = await supabase
+      .from('review_urls')
+      .select('url')
+      .range(start, start + limit - 1)
       .order('id', { ascending: true });
 
     if (error) {
-      console.error('Error fetching reviews:', error);
+      console.error('Errore nel recupero degli URL delle recensioni:', error);
       return null;
     }
 
-    if (!reviews || reviews.length === 0) {
-      console.warn('No reviews found in the specified range');
+    if (!reviewUrls || reviewUrls.length === 0) {
+      console.warn('Nessun URL di recensione trovato nell\'intervallo specificato');
       return null;
     }
 
-    console.log(`Found ${reviews.length} reviews`);
+    console.log(`Trovati ${reviewUrls.length} URL di recensioni`);
 
-    // Generate XML content for sitemap
+    // Genera il contenuto XML per la sitemap
     let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
 
-    reviews.forEach((review) => {
-      if (review.PATOLOGIE && review.PATOLOGIE.Patologia) {
-        const condition = review.PATOLOGIE.Patologia.toLowerCase().replace(/\s+/g, '-');
-        const slugTitle = slugify(review.title);
-        const url = `https://stomale.info/patologia/${condition}/esperienza/${review.id}-${slugTitle}`;
-        
+    reviewUrls.forEach((reviewUrl) => {
+      if (reviewUrl.url) {
+        const fullUrl = `https://stomale.info${reviewUrl.url}`;
         xmlContent += `  <url>
-    <loc>${url}</loc>
+    <loc>${fullUrl}</loc>
+    <lastmod>2024-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -53,21 +48,30 @@ export async function generateReviewsSitemap(startId: number, endId: number) {
     xmlContent += `</urlset>`;
     return xmlContent;
   } catch (error) {
-    console.error('Error generating sitemap:', error);
+    console.error('Errore nella generazione della sitemap:', error);
     return null;
   }
 }
 
-// Helper function to create slug from title
-function slugify(text: string) {
-  return text
-    .toString()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '')
-    .replace(/--+/g, '-')
-    .substring(0, 50); // Limit slug length
+/**
+ * Funzione per scrivere il contenuto XML in un file
+ * Questa funzione è utilizzabile solo lato server o in build scripts
+ */
+export async function writeSitemapToFile(filePath: string, content: string) {
+  if (typeof window === 'undefined') {
+    // Questa operazione funziona solo lato server
+    const fs = require('fs');
+    const path = require('path');
+    const fullPath = path.resolve(process.cwd(), filePath);
+    
+    try {
+      fs.writeFileSync(fullPath, content);
+      console.log(`Sitemap salvata con successo in ${fullPath}`);
+      return true;
+    } catch (error) {
+      console.error(`Errore nella scrittura della sitemap in ${fullPath}:`, error);
+      return false;
+    }
+  }
+  return false;
 }
