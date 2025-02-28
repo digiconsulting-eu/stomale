@@ -21,22 +21,21 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     
-    // Count total reviews to determine number of sitemap files
+    // Count total review URLs to determine number of sitemap files
     const { count, error: countError } = await supabase
-      .from('reviews')
+      .from('review_urls')
       .select('id', { count: 'exact', head: true })
-      .eq('status', 'approved')
     
     if (countError) {
-      console.error('Error counting reviews:', countError)
-      return new Response(`Error counting reviews: ${countError.message}`, { 
+      console.error('Error counting review URLs:', countError)
+      return new Response(`Error counting review URLs: ${countError.message}`, { 
         status: 500, 
         headers: corsHeaders 
       })
     }
     
     const totalReviews = count || 0
-    console.log(`Total reviews: ${totalReviews}`)
+    console.log(`Total review URLs: ${totalReviews}`)
     
     // Calculate total pages needed (100 reviews per page)
     const reviewsPerPage = 100
