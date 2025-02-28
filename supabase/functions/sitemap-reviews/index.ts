@@ -52,39 +52,12 @@ Deno.serve(async (req) => {
     console.log(`Total review URLs in database: ${count}`)
     
     if (count === 0) {
-      // If no URLs exist in review_urls, we'll create a fallback XML with static entries
-      // from our public/sitemap-reviews-X.xml files
-      console.log("No URLs found in database, creating fallback sitemap based on page number")
-      
-      // Generate XML sitemap with static content (this is just a temporary fallback)
-      let staticEntries = [];
-      const startNum = (page - 1) * 100 + 1;
-      const endNum = startNum + 99;
-      
-      // This is a fallback implementation using static URLs
-      for (let i = startNum; i <= endNum; i++) {
-        // Generate static URLs based on typical patterns for reviews
-        const conditions = ["fibromialgia", "acalasia", "allergie", "artrite", "asma"];
-        const condition = conditions[i % conditions.length];
-        const title = `esperienza-${i}`;
-        staticEntries.push(`/patologia/${condition}/esperienza/${i}-${title}`);
-      }
+      // If no URLs exist in review_urls, return empty sitemap
+      console.log("No URLs found in database, returning empty sitemap")
       
       let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-`;
-      
-      // Add static entries
-      for (const entry of staticEntries) {
-        xml += `  <url>
-    <loc>https://stomale.info${entry}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-`;
-      }
-      
-      xml += `</urlset>`;
+</urlset>`;
       
       return new Response(xml, { headers: corsHeaders });
     }
@@ -107,10 +80,11 @@ Deno.serve(async (req) => {
     
     if (!reviewUrls || reviewUrls.length === 0) {
       console.log("No reviews found for the specified page range")
-      return new Response(`No reviews found for page ${page}`, { 
-        status: 404, 
-        headers: corsHeaders 
-      })
+      // Return empty sitemap instead of 404
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+</urlset>`;
+      return new Response(xml, { headers: corsHeaders })
     }
     
     // Generate XML sitemap
