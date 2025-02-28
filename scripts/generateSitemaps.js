@@ -38,6 +38,13 @@ async function generateSitemaps() {
     
     console.log(`Creazione di ${urlGroups.length} file sitemap`);
     
+    // Assicurati che la directory public esista
+    const publicDir = path.join(process.cwd(), 'public');
+    if (!fs.existsSync(publicDir)) {
+      fs.mkdirSync(publicDir, { recursive: true });
+      console.log('Creata directory public');
+    }
+    
     // Genera i file delle sitemap
     urlGroups.forEach((group, index) => {
       const fileNum = index + 1;
@@ -82,19 +89,28 @@ function updateSitemapIndex(totalSitemaps) {
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
   
-  // Aggiungi le sitemap statiche
-  xml += '  <sitemap>\n';
-  xml += `    <loc>${BASE_URL}/sitemaps/sitemap-static.xml</loc>\n`;
-  xml += `    <lastmod>${today}</lastmod>\n`;
-  xml += '  </sitemap>\n';
+  // Verifica se la directory sitemaps esiste
+  const sitemapsDir = path.join(process.cwd(), 'public/sitemaps');
+  const sitemapsDirExists = fs.existsSync(sitemapsDir);
   
-  // Aggiungi tutte le sitemap delle condizioni
-  const conditionLetters = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z'];
-  for (const letter of conditionLetters) {
+  // Aggiungi le sitemap statiche se esistono
+  if (sitemapsDirExists) {
     xml += '  <sitemap>\n';
-    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-conditions-${letter}.xml</loc>\n`;
+    xml += `    <loc>${BASE_URL}/sitemaps/sitemap-static.xml</loc>\n`;
     xml += `    <lastmod>${today}</lastmod>\n`;
     xml += '  </sitemap>\n';
+    
+    // Aggiungi tutte le sitemap delle condizioni
+    const conditionLetters = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z'];
+    for (const letter of conditionLetters) {
+      const conditionFilePath = path.join(sitemapsDir, `sitemap-conditions-${letter}.xml`);
+      if (fs.existsSync(conditionFilePath)) {
+        xml += '  <sitemap>\n';
+        xml += `    <loc>${BASE_URL}/sitemaps/sitemap-conditions-${letter}.xml</loc>\n`;
+        xml += `    <lastmod>${today}</lastmod>\n`;
+        xml += '  </sitemap>\n';
+      }
+    }
   }
   
   // Aggiungi tutte le sitemap delle recensioni

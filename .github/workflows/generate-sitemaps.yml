@@ -27,16 +27,23 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        
+      - name: Check for changes
+        id: git-check
+        run: |
+          git status
+          echo "modified=$(if git diff --quiet; then echo "false"; else echo "true"; fi)" >> $GITHUB_OUTPUT
           
       - name: Commit changes
+        if: steps.git-check.outputs.modified == 'true'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add public/sitemap-reviews-*.xml
-          git add public/sitemap.xml
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update sitemaps [skip ci]"
+          git add public/sitemap*.xml
+          git commit -m "Update sitemaps [skip ci]"
           
       - name: Push changes
+        if: steps.git-check.outputs.modified == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
