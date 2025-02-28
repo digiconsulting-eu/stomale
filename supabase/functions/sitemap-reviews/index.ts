@@ -1,117 +1,125 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2'
 
-// Definizione delle intestazioni CORS
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Content-Type': 'application/xml',
-};
+}
 
 Deno.serve(async (req) => {
-  // Gestione delle richieste OPTIONS per CORS
+  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Estrai il parametro page dalla query string
-    const url = new URL(req.url);
-    const pageParam = url.searchParams.get('page');
-    const page = pageParam ? parseInt(pageParam, 10) : 1;
+    const url = new URL(req.url)
+    const pageParam = url.searchParams.get('page') || '1'
+    const page = parseInt(pageParam, 10)
     
-    // Numero di URL per pagina
-    const urlsPerPage = 100;
-    const offset = (page - 1) * urlsPerPage;
+    // Validate page parameter
+    if (isNaN(page) || page < 1 || page > 10) {
+      return new Response('Invalid page parameter', { status: 400, headers: corsHeaders })
+    }
     
-    // Inizializza il client Supabase
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    console.log(`Generazione sitemap per recensioni (pagina ${page})`);
+    console.log(`Generating sitemap for reviews, page ${page}`)
     
-    // Recupera le recensioni direttamente dalla tabella reviews invece di review_urls
-    const { data: reviews, error } = await supabaseClient
+    // Calculate pagination limits - 100 reviews per page
+    const limit = 100
+    const offset = (page - 1) * limit
+    
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    
+    // Fetch reviews for this page with their condition names
+    const { data: reviews, error } = await supabase
       .from('reviews')
       .select(`
-        id,
+        id, 
         title,
-        created_at,
-        PATOLOGIE(Patologia)
+        PATOLOGIE (
+          Patologia
+        )
       `)
       .eq('status', 'approved')
-      .range(offset, offset + urlsPerPage - 1)
-      .order('id', { ascending: true });
+      .order('id', { ascending: true })
+      .range(offset, offset + limit - 1)
     
     if (error) {
-      console.error('Errore nella query Supabase:', error);
-      throw error;
+      console.error('Error fetching reviews:', error)
+      return new Response(`Error fetching reviews: ${error.message}`, { 
+        status: 500, 
+        headers: corsHeaders 
+      })
     }
-
-    console.log(`Trovate ${reviews.length} recensioni per la pagina ${page}`);
     
-    // Data corrente per lastmod (formato ISO)
-    const currentDate = new Date().toISOString().split('T')[0];
+    console.log(`Found ${reviews.length} reviews for page ${page}`)
     
-    // Costruisci l'XML della sitemap
-    let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+    // Generate XML sitemap
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-`;
-
-    // Funzione di formattazione URL uguale a quella in ReviewCard.tsx
-    const formatUrlPath = (text: string) => {
-      return text.trim().toLowerCase().replace(/\s+/g, '-');
-    };
-
-    // Aggiungi ogni recensione alla sitemap
-    reviews.forEach(review => {
-      const condition = review.PATOLOGIE?.Patologia || '';
-      const reviewPath = `/patologia/${formatUrlPath(condition)}/esperienza/${review.id}-${formatUrlPath(review.title)}`;
-      const fullUrl = `https://stomale.info${reviewPath}`;
-      
-      // Usa la data di creazione se disponibile, altrimenti usa la data corrente
-      const lastmod = review.created_at 
-        ? new Date(review.created_at).toISOString().split('T')[0]
-        : currentDate;
-      
-      xmlContent += `  <url>
-    <loc>${fullUrl}</loc>
+`
+    
+    // Add entry for each review
+    for (const review of reviews) {
+      if (review.PATOLOGIE?.Patologia) {
+        const conditionSlug = slugify(review.PATOLOGIE.Patologia)
+        const titleSlug = slugify(review.title)
+        const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`
+        
+        xml += `  <url>
+    <loc>${url}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-`;
-    });
-
-    xmlContent += `</urlset>`;
+`
+      }
+    }
     
-    // Registra l'aggiornamento nel database
-    await supabaseClient
+    xml += `</urlset>`
+    
+    // Update the sitemap_files table to track this file
+    const filename = `sitemap-reviews-${page}.xml`
+    const { error: updateError } = await supabase
       .from('sitemap_files')
-      .upsert({ 
-        filename: `sitemap-reviews-${page}.xml`,
-        url_count: reviews.length,
-        last_modified: new Date().toISOString()
-      }, {
-        onConflict: 'filename'
-      });
+      .upsert(
+        { 
+          filename, 
+          url_count: reviews.length,
+          last_modified: new Date().toISOString() 
+        },
+        { onConflict: 'filename' }
+      )
     
-    console.log(`Sitemap generata con successo con ${reviews.length} URL`);
+    if (updateError) {
+      console.error('Error updating sitemap_files:', updateError)
+      // Continue anyway - this is not critical
+    }
     
-    // Restituisci l'XML
-    return new Response(xmlContent, { 
-      headers: { 
-        ...corsHeaders,
-        'Cache-Control': 'public, max-age=86400' // Cache per 24 ore
-      } 
-    });
+    return new Response(xml, { headers: corsHeaders })
     
   } catch (error) {
-    console.error('Errore durante la generazione della sitemap:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    console.error('Unexpected error generating sitemap:', error)
+    return new Response(`Internal Server Error: ${error.message}`, { 
+      status: 500, 
+      headers: corsHeaders 
+    })
   }
-});
+})
+
+// Helper function to create URL-friendly slugs
+function slugify(text: string): string {
+  return text
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-')
+    .substring(0, 50)
+}

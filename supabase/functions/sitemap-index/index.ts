@@ -1,90 +1,102 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2'
 
-// Definizione delle intestazioni CORS
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Content-Type': 'application/xml',
-};
+}
 
 Deno.serve(async (req) => {
-  // Gestione delle richieste OPTIONS per CORS
+  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Inizializza il client Supabase
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    console.log('Generazione sitemap index');
+    console.log('Generating sitemap index')
     
-    // Recupera il conteggio totale delle recensioni
-    const { count, error: countError } = await supabaseClient
-      .from('review_urls')
-      .select('*', { count: 'exact', head: true });
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    
+    // Count total reviews to determine number of sitemap files
+    const { count, error: countError } = await supabase
+      .from('reviews')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'approved')
     
     if (countError) {
-      console.error('Errore nel conteggio delle recensioni:', countError);
-      throw countError;
+      console.error('Error counting reviews:', countError)
+      return new Response(`Error counting reviews: ${countError.message}`, { 
+        status: 500, 
+        headers: corsHeaders 
+      })
     }
     
-    // Calcola il numero di pagine necessarie
-    const urlsPerPage = 100;
-    const totalPages = Math.ceil((count || 0) / urlsPerPage);
+    const totalReviews = count || 0
+    console.log(`Total reviews: ${totalReviews}`)
     
-    console.log(`Trovate ${count} recensioni, necessarie ${totalPages} pagine`);
+    // Calculate total pages needed (100 reviews per page)
+    const reviewsPerPage = 100
+    const totalReviewPages = Math.ceil(totalReviews / reviewsPerPage)
     
-    // Data corrente per lastmod
-    const currentDate = new Date().toISOString().split('T')[0];
-    
-    // Costruisci l'XML della sitemap index
-    let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+    // Generate XML sitemap index
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>
-    <lastmod>${currentDate}</lastmod>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
   </sitemap>
-`;
-
-    // Aggiungi le sitemap delle condizioni
-    const letters = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z'];
-    letters.forEach(letter => {
-      xmlContent += `  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-${letter}.xml</loc>
-    <lastmod>${currentDate}</lastmod>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-a.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
   </sitemap>
-`;
-    });
-
-    // Aggiungi le sitemap delle recensioni
-    for (let page = 1; page <= totalPages; page++) {
-      xmlContent += `  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-${page}.xml</loc>
-    <lastmod>${currentDate}</lastmod>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-b.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
   </sitemap>
-`;
-    }
-
-    xmlContent += `</sitemapindex>`;
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-c.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-d.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-e-l.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-m-r.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-s-z.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>
+`
     
-    // Restituisci l'XML
-    return new Response(xmlContent, { 
-      headers: { 
-        ...corsHeaders,
-        'Cache-Control': 'public, max-age=86400' // Cache per 24 ore
-      } 
-    });
+    // Add entry for each review sitemap page
+    for (let page = 1; page <= totalReviewPages; page++) {
+      xml += `  <sitemap>
+    <loc>https://stomale.info/sitemap-reviews-${page}.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>
+`
+    }
+    
+    xml += `</sitemapindex>`
+    
+    return new Response(xml, { headers: corsHeaders })
     
   } catch (error) {
-    console.error('Errore durante la generazione della sitemap index:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    console.error('Unexpected error generating sitemap index:', error)
+    return new Response(`Internal Server Error: ${error.message}`, { 
+      status: 500, 
+      headers: corsHeaders 
+    })
   }
-});
+})
