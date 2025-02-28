@@ -16,6 +16,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/calcoli-biliari</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/calcoli-renali</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -26,42 +31,52 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/calcolosi-salivare</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://stomale.info/patologia/calcolosi-renale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/cancro-al-collo-dell-utero</loc>
+    <loc>https://stomale.info/patologia/calcolosi-salivare</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/cancro-al-colon</loc>
+    <loc>https://stomale.info/patologia/cancro-al-collo-dell’utero-(tumore)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/cancro-al-seno</loc>
+    <loc>https://stomale.info/patologia/cancro-al-colon-(tumore)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/cancro-alla-prostata</loc>
+    <loc>https://stomale.info/patologia/cancro-alla-prostata-(tumore)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/cancro-all-endometrio</loc>
+    <loc>https://stomale.info/patologia/cancro-all'endometrio</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/cancro-all’endometrio-(tumore)</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/cancro-al-seno-(tumore)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://stomale.info/patologia/cancro-della-vescica</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/cancro-della-vescica-(tumore)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -76,7 +91,17 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/caratatta</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/carcinoma-baso-cellulare</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/carcinoma-baso-cellulare-(basalioma)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -96,7 +121,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/caratatta</loc>
+    <loc>https://stomale.info/patologia/cataratta</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -176,6 +201,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/cisticercosi</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/cisti-dermoide</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -191,17 +221,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/cisti-ovarica</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/cisticercosi</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://stomale.info/patologia/cistinuria</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/cisti-ovarica</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -236,12 +261,17 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/coagulazione-intravascellulare-disseminata</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/coagulazione-intravascolare-disseminata</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/coggigodinia</loc>
+    <loc>https://stomale.info/patologia/coccigodinia</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -266,7 +296,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/colelitiasi</loc>
+    <loc>https://stomale.info/patologia/colelithiasi-o-calcoli-biliari</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/colelitiasi-o-calcoli-biliari</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -376,7 +411,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/covid-19</loc>
+    <loc>https://stomale.info/patologia/covid-19-(coronavirus)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

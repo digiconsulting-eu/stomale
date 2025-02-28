@@ -6,42 +6,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/daltonismo</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/danno-epatico-da-farmaci</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/deficit-di-alfa-1-antitripsina</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/deficit-di-carnitina</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/deficit-di-gnrh</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/deficit-di-lattasi</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/degenerazione-maculare</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/demenza-frontotemporale</loc>
+    <loc>https://stomale.info/patologia/degenerazione-maculare-senile</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -51,7 +16,22 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/demenza-vascolare</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/dengue</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/depressione</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/depressione-post-partum</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -66,7 +46,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/dermatite-da-contatto</loc>
+    <loc>https://stomale.info/patologia/dermatite-da-pannolino</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/dermatite-periorale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -76,7 +61,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/dermatomiosite</loc>
+    <loc>https://stomale.info/patologia/dermatofibroma</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/dermatofitosi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -86,52 +76,32 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diabete-di-tipo-1</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/diabete-di-tipo-2</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://stomale.info/patologia/diabete-gestazionale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/diarrea</loc>
+    <loc>https://stomale.info/patologia/diabete-insipido</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/difetti-del-setto-interventricolare</loc>
+    <loc>https://stomale.info/patologia/diarrea-del-viaggiatore</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/difetti-del-tubo-neurale</loc>
+    <loc>https://stomale.info/patologia/difetto-interatriale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/disfagia</loc>
+    <loc>https://stomale.info/patologia/difterite</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/disforia-di-genere</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/disfunzione-erettile</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/disidratazione</loc>
+    <loc>https://stomale.info/patologia/disidrosi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -141,22 +111,47 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/dispepsia</loc>
+    <loc>https://stomale.info/patologia/dislipidemie</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/displasia-dell-anca</loc>
+    <loc>https://stomale.info/patologia/disprassia</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/disturbi-del-comportamento-alimentare</loc>
+    <loc>https://stomale.info/patologia/distacco-di-retina</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/disturbi-del-sonno</loc>
+    <loc>https://stomale.info/patologia/distimia</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/distorsione</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/distorsione-della-caviglia</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/distress-respiratorio</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/distrofia-di-duchenne</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/disturbi-della-coagulazione</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -166,12 +161,47 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/disturbo-borderline-di-personalita</loc>
+    <loc>https://stomale.info/patologia/disturbo-ciclotimico</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/disturbo-da-deficit-di-attenzione-e-iperattivita</loc>
+    <loc>https://stomale.info/patologia/disturbo-da-alimentazione-incontrollata</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/disturbo-di-personalita-borderline</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/disturbo-di-personalità-borderline</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/disturbo-evitante-di-personalita</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/disturbo-evitante-di-personalità</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/disturbo-narcisistico-di-personalita</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/disturbo-narcisistico-di-personalità</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/disturbo-narcisistico-di-personalita-(-narcisismo)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -181,32 +211,52 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/disturbo-post-traumatico-da-stress</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/dito-a-scatto</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/diverticoli-esofagei</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/diverticolite</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/dolore-al-ginocchio</loc>
+    <loc>https://stomale.info/patologia/diverticolo-di-meckel</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/dolore-alla-spalla</loc>
+    <loc>https://stomale.info/patologia/diverticolo-di-zenker</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/dolore-cervicale</loc>
+    <loc>https://stomale.info/patologia/diverticolosi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/dolore-lombare</loc>
+    <loc>https://stomale.info/patologia/drepanocitosi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/dolore-pelvico</loc>
+    <loc>https://stomale.info/patologia/drepanoistosi</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/duodenite</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

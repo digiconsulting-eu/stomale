@@ -221,12 +221,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/morbo-di-graves-basedow</loc>
+    <loc>https://stomale.info/patologia/morbo-di-graves---basedow</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/morbo-di-hashimoto-tiroidite</loc>
+    <loc>https://stomale.info/patologia/morbo-di-hashimoto-(tiroidite)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -266,7 +266,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/neurinoma-dell-acustico</loc>
+    <loc>https://stomale.info/patologia/neurinoma-dell'acustico</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -281,7 +281,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/neurofribromatosi</loc>
+    <loc>https://stomale.info/patologia/neurofibromatosi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -301,7 +301,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/nevi-neo-nei</loc>
+    <loc>https://stomale.info/patologia/nevi-(neo---nei)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -316,7 +316,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/obesita</loc>
+    <loc>https://stomale.info/patologia/obesità</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -521,17 +521,17 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/pemfigo-volgare</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://stomale.info/patologia/pemfigoide-bolloso</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://stomale.info/patologia/pemfigoide-gestazionale</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/pemfigo-volgare</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -561,7 +561,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/piede-d-atleta</loc>
+    <loc>https://stomale.info/patologia/piede-d'atleta</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -646,7 +646,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/poliposi-nasale-polipi-naso</loc>
+    <loc>https://stomale.info/patologia/poliposi-nasale-(polipi-naso)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -731,7 +731,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/ragade-anale-ragadi-anali</loc>
+    <loc>https://stomale.info/patologia/ragade-anale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -131,12 +131,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/sindrome-da-deficit-di-attenzione-e-iperattivita-adhd</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/sindrome-da-stanchezza-cronica</loc>
+    <loc>https://stomale.info/patologia/sindrome-da-deficit-di-attenzione-e-iperattività-(adhd)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -146,22 +141,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/sindrome-del-tunnel-carpale</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/sindrome-intestino-irritabile</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/sindrome-dell-occhio-secco</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/sindrome-dell-ovaio-policistico</loc>
+    <loc>https://stomale.info/patologia/sindrome-da-stanchezza-cronica</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -181,7 +161,22 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/sindrome-dell'occhio-secco</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/sindrome-dello-stretto-toracico</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/sindrome-dell'ovaio-policistico</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/sindrome-del-tunnel-carpale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -236,7 +231,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/sindrome-di-meniere</loc>
+    <loc>https://stomale.info/patologia/sindrome-di-menière</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -286,17 +281,22 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/sindrome-feto-alcolica</loc>
+    <loc>https://stomale.info/patologia/sindrome-fetale-alcolica</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/sindrome-fibromialgica-fibromialgia</loc>
+    <loc>https://stomale.info/patologia/sindrome-intestino-irritabile</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://stomale.info/patologia/sindrome-metabolica</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/sindrome-parainfluenzale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -311,11 +311,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/sindrome-parainfluenzale</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://stomale.info/patologia/sinovite</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -326,7 +321,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/sintomi-gangli-o-cisti-sinoviali</loc>
+    <loc>https://stomale.info/patologia/sintomi-gangli-(o-cisti-sinoviali)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -371,12 +366,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/spondilosistesi</loc>
+    <loc>https://stomale.info/patologia/spondilosi-cervicale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/spondilosi-cercivale</loc>
+    <loc>https://stomale.info/patologia/spondilosistesi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -571,107 +566,107 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tubercolosi</loc>
+    <loc>https://stomale.info/patologia/tuberculosis-(tubercolosi)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-ai-testicoli-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-ai-testicoli-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-al-fegato-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-al-fegato-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-al-pancreas-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-alla-prostata-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-al-polmone-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-allo-stomaco-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-al-rene-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-al-pancreas-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-alla-prostata-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-al-polmone-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-allo-stomaco-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-al-rene-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-del-colon-retto-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-cardiaco-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-del-pene-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-del-colon-retto-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-dell-ano-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-della-laringe-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-dell-esofago-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-dell'ano-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-dell-ovaio-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-della-tiroide-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-dell-uretra-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-delle-ghiandole-salivari-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-della-tiroide-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-dell'esofago-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-delle-ghiandole-salivari-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-dell'ovaio-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-di-wilms-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-dell'uretra-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-cardiaco-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-del-midollo-spinale-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-del-midollo-spinale-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-del-pene-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-della-laringe-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-di-wilms-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/tumore-ipofisi-cancro</loc>
+    <loc>https://stomale.info/patologia/tumore-ipofisi-(cancro)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -681,7 +676,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    
     <loc>https://stomale.info/patologia/ulcera-duodenale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -777,12 +771,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/zahn-malattia-di</loc>
+    <loc>https://stomale.info/patologia/zahn-(malattia-di)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/zieve-sindrome-di</loc>
+    <loc>https://stomale.info/patologia/zieve-(sindrome-di)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
