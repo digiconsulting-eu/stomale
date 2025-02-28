@@ -107,24 +107,6 @@ Deno.serve(async (req) => {
     
     xml += `</urlset>`
     
-    // Update the sitemap_files table to track this file
-    const filename = `sitemap-reviews-${page}.xml`
-    const { error: updateError } = await supabase
-      .from('sitemap_files')
-      .upsert(
-        { 
-          filename, 
-          url_count: reviewUrls.length,
-          last_modified: new Date().toISOString() 
-        },
-        { onConflict: 'filename' }
-      )
-    
-    if (updateError) {
-      console.error('Error updating sitemap_files:', updateError)
-      // Continue anyway - this is not critical
-    }
-    
     return new Response(xml, { headers: corsHeaders })
     
   } catch (error) {

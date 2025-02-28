@@ -5,4 +5,5 @@
 /sitemap-reviews-:page.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews?page=:page 200! Content-Type=application/xml
 /sitemap-conditions-:letter.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=:letter 200! Content-Type=application/xml
 /sitemaps/sitemap-static.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-static 200! Content-Type=application/xml
-/sitemaps/* /sitemaps/:splat 200! Content-Type=application/xml
+/sitemaps/sitemap-reviews-:page.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews?page=:page 200! Content-Type=application/xml
+/sitemaps/sitemap-conditions-:letter.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=:letter 200! Content-Type=application/xml
