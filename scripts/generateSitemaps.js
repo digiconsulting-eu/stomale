@@ -23,7 +23,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Dominio base
 const BASE_URL = 'https://stomale.info';
 // Numero di URL per file sitemap
-const URLS_PER_SITEMAP = 100; // Aumentato da 5 a 100 per ridurre il numero di file
+const URLS_PER_SITEMAP = 1000; // Aumentato a 1000 URL per file
 // Directory per i file sitemap
 const PUBLIC_DIR = path.join(process.cwd(), 'public');
 const SITEMAPS_DIR = path.join(PUBLIC_DIR, 'sitemaps');
@@ -91,6 +91,22 @@ async function generateSitemaps() {
       const filePath = path.join(PUBLIC_DIR, file);
       fs.unlinkSync(filePath);
       console.log(`Rimosso vecchio file ${file}`);
+    }
+    
+    // Pulisci anche le vecchie sitemap-reviews nella directory sitemaps che non sono più necessarie
+    if (fs.existsSync(SITEMAPS_DIR)) {
+      const sitemapsFiles = fs.readdirSync(SITEMAPS_DIR);
+      const oldReviewsSitemaps = sitemapsFiles.filter(file => 
+        file.startsWith('sitemap-reviews-') && 
+        file.endsWith('.xml') && 
+        parseInt(file.replace('sitemap-reviews-', '').replace('.xml', '')) > sitemapGroups.length
+      );
+      
+      for (const file of oldReviewsSitemaps) {
+        const filePath = path.join(SITEMAPS_DIR, file);
+        fs.unlinkSync(filePath);
+        console.log(`Rimosso vecchio file sitemaps/${file}`);
+      }
     }
     
     // Genera il file sitemap index
