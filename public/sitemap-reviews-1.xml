@@ -1,3 +1,29 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://stomale.info/patologia/allergie/esperienza/1-la-mia-esperienza-con-allergia-ai-pollini</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/artrite-reumatoide/esperienza/2-combattere-il-dolore-articolare-ogni-giorno</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/asma/esperienza/3-vivere-con-difficoltà-respiratorie</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/celiachia/esperienza/4-adattarsi-a-una-dieta-senza-glutine</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/colite-ulcerosa/esperienza/5-come-gestisco-i-sintomi-intestinali</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>

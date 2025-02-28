@@ -1,3 +1,29 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://stomale.info/patologia/sindrome-colon-irritabile/esperienza/16-vivere-con-problemi-intestinali-imprevedibili</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/sindrome-affaticamento-cronico/esperienza/17-quando-la-stanchezza-non-passa-mai</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/ansia/esperienza/18-la-mia-battaglia-quotidiana-con-i-pensieri</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/depressione/esperienza/19-risalire-dal-buio-giorno-dopo-giorno</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/toc/esperienza/20-lotta-contro-i-rituali-e-le-ossessioni</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>

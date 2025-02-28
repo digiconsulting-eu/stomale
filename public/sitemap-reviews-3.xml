@@ -1,3 +1,29 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://stomale.info/patologia/ipertensione/esperienza/11-monitoraggio-costante-della-pressione</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/ipotiroidismo/esperienza/12-quando-la-tiroide-funziona-meno-del-dovuto</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/malattia-di-crohn/esperienza/13-gestire-linfiammazione-intestinale</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/psoriasi/esperienza/14-combattere-lesioni-cutanee-e-giudizi</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/sclerosi-multipla/esperienza/15-alti-e-bassi-con-una-malattia-autoimmune</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>
