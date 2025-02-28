@@ -31,9 +31,9 @@ export const ConditionsGrid = ({ conditions, isLoading }: ConditionsGridProps) =
     );
   }
 
-  // Helper function to format pathname
+  // Helper function to properly encode the pathname for URL
   const formatPathName = (name: string) => {
-    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    return encodeURIComponent(name.toLowerCase());
   };
 
   return (
