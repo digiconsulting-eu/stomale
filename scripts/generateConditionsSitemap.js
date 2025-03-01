@@ -94,6 +94,14 @@ ${groupConditions.map(condition => {
     }
     
     // Update sitemap index to include condition sitemaps
+    const indexPath = path.join(process.cwd(), 'public', 'sitemap-index.xml');
+    
+    // Create original sitemap index content if it doesn't exist
+    let originalContent = '';
+    if (fs.existsSync(indexPath)) {
+      originalContent = fs.readFileSync(indexPath, 'utf8');
+    }
+    
     const sitemapIndexContent = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${Object.keys(groupedConditions).map(group => `
@@ -102,10 +110,10 @@ ${groupConditions.map(condition => {
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
   </sitemap>`).join('')}
   <!-- Other sitemaps can be added here -->
+${originalContent.includes('<!-- Other sitemaps can be added here -->') ? '' : originalContent.split('<sitemapindex')[1]?.split('</sitemapindex>')[0] || ''}
 </sitemapindex>
 `;
     
-    const indexPath = path.join(process.cwd(), 'public', 'sitemap-index.xml');
     fs.writeFileSync(indexPath, sitemapIndexContent);
     console.log(`Updated sitemap index at ${indexPath}`);
     
