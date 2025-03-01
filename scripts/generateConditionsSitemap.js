@@ -141,6 +141,7 @@ async function generateConditionsSitemaps() {
 
 // Genera il contenuto XML di un singolo file sitemap
 function generateSitemapXml(conditions) {
+  // Ensure no leading whitespace before XML declaration
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
   
@@ -161,10 +162,10 @@ function generateSitemapXml(conditions) {
 
 // Genera una sitemap vuota in caso di errore
 function generateEmptySitemap() {
+  // Ensure no leading whitespace before XML declaration
   const emptySitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-</urlset>
-`;
+</urlset>`;
   
   const filePath = path.join(SITEMAPS_DIR, 'sitemap-conditions-empty.xml');
   fs.writeFileSync(filePath, emptySitemap);
@@ -181,6 +182,7 @@ function updateSitemapIndex() {
   if (!fs.existsSync(indexPath)) {
     console.log('File sitemap-index.xml non trovato. Creazione di un nuovo file...');
     
+    // Ensure no leading whitespace before XML declaration
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     
@@ -234,6 +236,12 @@ function updateSitemapIndex() {
     console.log('Aggiornamento file sitemap-index.xml esistente...');
     
     let indexContent = fs.readFileSync(indexPath, 'utf8');
+    
+    // Ensure the XML declaration is at the very beginning
+    if (indexContent.trim().indexOf('<?xml') !== 0) {
+      indexContent = '<?xml version="1.0" encoding="UTF-8"?>\n' + indexContent.substring(indexContent.indexOf('<sitemapindex'));
+    }
+    
     let updated = false;
     
     const conditionSitemaps = [

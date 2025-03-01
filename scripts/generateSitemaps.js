@@ -1,3 +1,4 @@
+
 const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -63,6 +64,7 @@ const generateSitemaps = async () => {
       const chunk = chunks[i];
       const sitemapIndex = i + 1;
       
+      // Ensure no leading whitespace before XML declaration
       const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${chunk.map(item => `  <url>
@@ -70,14 +72,14 @@ ${chunk.map(item => `  <url>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`).join('\n')}
-</urlset>
-`;
+</urlset>`;
       
       fs.writeFileSync(`public/sitemap-reviews-${sitemapIndex}.xml`, xmlContent);
       console.log(`Generato sitemap-reviews-${sitemapIndex}.xml`);
     }
     
     // Genera il sitemap index
+    // Ensure no leading whitespace before XML declaration
     const sitemapIndexXml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${chunks.map((_, index) => {
@@ -87,8 +89,7 @@ ${chunks.map((_, index) => {
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
   </sitemap>`;
 }).join('\n')}
-</sitemapindex>
-`;
+</sitemapindex>`;
     
     fs.writeFileSync('public/sitemap-index.xml', sitemapIndexXml);
     console.log('Generato sitemap-index.xml');
