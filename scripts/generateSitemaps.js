@@ -37,7 +37,8 @@ const generateSitemaps = async () => {
       if (!review.PATOLOGIE) return null;
       
       const condition = review.PATOLOGIE.Patologia;
-      const cleanedCondition = condition.toLowerCase().trim();
+      // Usa encodeURIComponent per codificare gli spazi come %20
+      const cleanedCondition = encodeURIComponent(condition.toLowerCase().trim());
       
       const title = review.title || '';
       const cleanedTitle = title.toLowerCase()
