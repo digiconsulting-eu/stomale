@@ -1,7 +1,12 @@
 
-const fs = require('fs');
-const path = require('path');
-const { createClient } = require('@supabase/supabase-js');
+import fs from 'fs';
+import path from 'path';
+import { createClient } from '@supabase/supabase-js';
+import { fileURLToPath } from 'url';
+
+// Get the current file's directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Ensure the directory exists
 const ensureDirectoryExists = (directory) => {
@@ -246,7 +251,7 @@ ${groupConditions.map(condition => {
 };
 
 // Execute the function if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   generateConditionsSitemap()
     .then(result => {
       if (!result || !result.success) {
@@ -263,4 +268,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = generateConditionsSitemap;
+export default generateConditionsSitemap;
