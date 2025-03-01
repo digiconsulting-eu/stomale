@@ -1,101 +1,97 @@
+const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
 
-import fs from 'fs';
-import path from 'path';
-import { createClient } from '@supabase/supabase-js';
-import { fileURLToPath } from 'url';
-
-// Get the directory name using ES modules approach
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Carica le variabili d'ambiente
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error("Variabili d'ambiente SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY mancanti");
-  process.exit(1);
-}
-
-// Inizializza il client Supabase
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Assicurati che la directory sitemaps esista
-const sitemapsDir = path.join(__dirname, '../public/sitemaps');
-if (!fs.existsSync(sitemapsDir)) {
-  fs.mkdirSync(sitemapsDir, { recursive: true });
-}
-
-const generateReviewsSitemaps = async () => {
+const generateSitemaps = async () => {
   try {
-    console.log('Inizio generazione sitemaps delle recensioni...');
+    console.log('Inizio generazione sitemap...');
     
-    // Ottieni tutti gli URL delle recensioni
-    const { data: reviewUrls, error } = await supabase
-      .from('review_urls')
-      .select('*')
-      .order('review_id', { ascending: true });
+    // Inizializza il client Supabase
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Le variabili di ambiente SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY devono essere definite');
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    // Fetch delle recensioni
+    const { data: reviews, error } = await supabase
+      .from('RECENSIONI')
+      .select('id, username, condition_id, title, created_at, PATOLOGIE(id, Patologia)')
+      .filter('is_published', 'eq', true)
+      .order('id');
     
     if (error) {
       throw error;
     }
     
-    if (!reviewUrls || !reviewUrls.length) {
+    if (!reviews || !reviews.length) {
       console.log('Nessun URL di recensione trovato');
       return;
     }
     
-    console.log(`Trovati ${reviewUrls.length} URL di recensioni`);
+    // Costruisci gli URL delle recensioni
+    const reviewUrls = reviews.map(review => {
+      if (!review.PATOLOGIE) return null;
+      
+      const condition = review.PATOLOGIE.Patologia;
+      const cleanedCondition = condition.toLowerCase().trim();
+      
+      const title = review.title || '';
+      const cleanedTitle = title.toLowerCase()
+                               .trim()
+                               .replace(/[^\w\s-]/g, '')
+                               .replace(/\s+/g, '-')
+                               .replace(/--+/g, '-');
+      
+      return {
+        id: review.id,
+        url: `https://stomale.info/patologia/${cleanedCondition}/esperienza/${review.id}-${cleanedTitle}`,
+        lastmod: review.created_at
+      };
+    }).filter(Boolean);
     
-    // Dividi gli URL in gruppi di 100
-    const ITEMS_PER_FILE = 100;
+    // Dividi in chunks da 5 URL per sitemap
     const chunks = [];
-    
-    for (let i = 0; i < reviewUrls.length; i += ITEMS_PER_FILE) {
-      chunks.push(reviewUrls.slice(i, i + ITEMS_PER_FILE));
+    for (let i = 0; i < reviewUrls.length; i += 5) {
+      chunks.push(reviewUrls.slice(i, i + 5));
     }
     
-    console.log(`Generazione di ${chunks.length} file sitemap`);
-    
-    // Genera un file sitemap per ogni chunk
-    chunks.forEach((chunk, index) => {
-      const fileIndex = index + 1;
-      const fileName = `sitemap-reviews-${fileIndex}.xml`;
-      const filePath = path.join(sitemapsDir, fileName);
+    // Genera i file XML per ogni chunk
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      const sitemapIndex = i + 1;
       
-      // Importante: Nessuna riga vuota prima della dichiarazione XML
-      let content = '<?xml version="1.0" encoding="UTF-8"?>\n';
-      content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+      const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${chunk.map(item => `  <url>
+    <loc>${item.url}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`).join('\n')}
+</urlset>
+`;
       
-      chunk.forEach((item) => {
-        content += '  <url>\n';
-        content += `    <loc>https://stomale.info${item.url}</loc>\n`;
-        content += '    <changefreq>monthly</changefreq>\n';
-        content += '    <priority>0.6</priority>\n';
-        content += '  </url>\n';
-      });
-      
-      content += '</urlset>\n';
-      
-      fs.writeFileSync(filePath, content);
-      console.log(`Generato ${fileName} con ${chunk.length} URL`);
-    });
-    
-    // Genera il sitemap index - anche qui nessuna riga vuota all'inizio
-    let indexContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    indexContent += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-    
-    for (let i = 1; i <= chunks.length; i++) {
-      indexContent += '  <sitemap>\n';
-      indexContent += `    <loc>https://stomale.info/sitemaps/sitemap-reviews-${i}.xml</loc>\n`;
-      indexContent += '    <lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod>\n';
-      indexContent += '  </sitemap>\n';
+      fs.writeFileSync(`public/sitemap-reviews-${sitemapIndex}.xml`, xmlContent);
+      console.log(`Generato sitemap-reviews-${sitemapIndex}.xml`);
     }
     
-    indexContent += '</sitemapindex>\n';
+    // Genera il sitemap index
+    const sitemapIndexXml = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${chunks.map((_, index) => {
+  const sitemapNumber = index + 1;
+  return `  <sitemap>
+    <loc>https://stomale.info/sitemap-reviews-${sitemapNumber}.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>`;
+}).join('\n')}
+</sitemapindex>
+`;
     
-    fs.writeFileSync(path.join(sitemapsDir, 'sitemap-reviews.xml'), indexContent);
-    console.log('Generato sitemap-reviews.xml principale');
+    fs.writeFileSync('public/sitemap-index.xml', sitemapIndexXml);
+    console.log('Generato sitemap-index.xml');
     
     console.log('Generazione sitemaps completata con successo');
   } catch (error) {
@@ -104,5 +100,8 @@ const generateReviewsSitemaps = async () => {
   }
 };
 
-// Esecuzione della funzione principale
-generateReviewsSitemaps();
+module.exports = generateSitemaps;
+
+if (require.main === module) {
+  generateSitemaps();
+}
