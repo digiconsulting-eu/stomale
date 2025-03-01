@@ -27,11 +27,21 @@ jobs:
       - name: Install Supabase
         run: npm install @supabase/supabase-js
       
-      - name: Create directories
+      - name: Create directories and verify
         run: |
-          mkdir -p public
           mkdir -p public/sitemaps
-          touch public/sitemap-index.xml
+          echo "Directory structure:"
+          ls -la public/
+          echo "Sitemaps directory:"
+          ls -la public/sitemaps/
+          
+          # Create sitemap-index.xml if it doesn't exist
+          if [ ! -f public/sitemap-index.xml ]; then
+            echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"></sitemapindex>" > public/sitemap-index.xml
+            echo "Created new sitemap-index.xml"
+          else
+            echo "sitemap-index.xml already exists"
+          fi
       
       - name: Verify secrets
         run: |
@@ -46,7 +56,10 @@ jobs:
           echo "Secrets are configured correctly"
       
       - name: Generate conditions sitemaps
-        run: node scripts/generateConditionsSitemap.js
+        run: |
+          echo "Starting sitemap generation process..."
+          node scripts/generateConditionsSitemap.js
+          echo "Sitemap generation completed."
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -55,12 +68,20 @@ jobs:
         run: |
           echo "Generated sitemap files:"
           ls -la public/sitemaps/
+          echo "Sitemap index content:"
           cat public/sitemap-index.xml
       
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add public/sitemaps/ public/sitemap-index.xml
-          git diff --staged --quiet || git commit -m "Update condition sitemaps [skip ci]"
-          git push || echo "No changes to push"
+          
+          # Check if there are any changes to commit
+          if git status --porcelain | grep -q "sitemap"; then
+            git add public/sitemaps/ public/sitemap-index.xml
+            git commit -m "Update condition sitemaps [skip ci]"
+            git push
+            echo "Changes committed and pushed successfully."
+          else
+            echo "No sitemap changes to commit."
+          fi
