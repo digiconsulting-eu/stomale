@@ -27,8 +27,11 @@ jobs:
       - name: Install Supabase
         run: npm install @supabase/supabase-js
       
-      - name: Create sitemaps directory
-        run: mkdir -p public/sitemaps
+      - name: Create directories
+        run: |
+          mkdir -p public
+          mkdir -p public/sitemaps
+          touch public/sitemap-index.xml
       
       - name: Verify secrets
         run: |
@@ -52,15 +55,12 @@ jobs:
         run: |
           echo "Generated sitemap files:"
           ls -la public/sitemaps/
+          cat public/sitemap-index.xml
       
-      - name: Commit changes
+      - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add public/sitemaps/ public/sitemap-index.xml
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Update condition sitemaps [skip ci]"
-            git push
-          fi
+          git diff --staged --quiet || git commit -m "Update condition sitemaps [skip ci]"
+          git push || echo "No changes to push"
