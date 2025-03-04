@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     const reviewPages = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178]
     const today = new Date().toISOString().split('T')[0]
     
-    // Start XML with XML declaration at the very beginning
+    // Start XML with XML declaration at the very beginning - NO whitespace
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     
     // Add static sitemap entry
@@ -64,6 +64,12 @@ Deno.serve(async (req) => {
     // Log the first few characters to verify there's no whitespace before XML declaration
     console.log('First 50 characters of generated XML:');
     console.log(xml.substring(0, 50));
+    
+    // Double-check that there's no leading whitespace
+    if (xml.trimStart() !== xml) {
+      console.error('WARNING: Detected leading whitespace in XML output');
+      xml = xml.trimStart();
+    }
     
     return new Response(xml, { headers: corsHeaders })
     
