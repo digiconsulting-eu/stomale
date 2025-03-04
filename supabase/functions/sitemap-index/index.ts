@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     const reviewPages = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178]
     const today = new Date().toISOString().split('T')[0]
     
-    // Start XML with XML declaration at the very beginning - NO whitespace
+    // Build the XML string without any leading whitespace
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     
     // Add static sitemap entry
@@ -61,17 +61,43 @@ Deno.serve(async (req) => {
     // Close the sitemapindex tag
     xml += '</sitemapindex>';
     
-    // Log the first few characters to verify there's no whitespace before XML declaration
-    console.log('First 50 characters of generated XML:');
+    // Log and validate the generated XML
+    console.log('First 50 characters of XML:');
     console.log(xml.substring(0, 50));
     
-    // Double-check that there's no leading whitespace
+    // Strip any potential whitespace at the beginning
     if (xml.trimStart() !== xml) {
-      console.error('WARNING: Detected leading whitespace in XML output');
+      console.error('WARNING: Found leading whitespace in XML, stripping it');
       xml = xml.trimStart();
     }
     
-    return new Response(xml, { headers: corsHeaders })
+    // Ensure the XML starts with the declaration
+    if (!xml.startsWith('<?xml')) {
+      console.error('CRITICAL ERROR: XML does not start with declaration');
+      return new Response('Internal Server Error: Generated invalid XML', { 
+        status: 500, 
+        headers: corsHeaders 
+      });
+    }
+    
+    // Final validation check
+    const xmlLines = xml.split('\n');
+    if (xmlLines.length > 0 && !xmlLines[0].includes('<?xml')) {
+      console.error('CRITICAL ERROR: First line does not contain XML declaration');
+      console.error('First line:', xmlLines[0]);
+      return new Response('Internal Server Error: XML validation failed', { 
+        status: 500, 
+        headers: corsHeaders 
+      });
+    }
+    
+    // Set Content-Type header to ensure browser interprets as XML
+    const responseHeaders = {
+      ...corsHeaders,
+      'Content-Type': 'application/xml; charset=utf-8'
+    };
+    
+    return new Response(xml, { headers: responseHeaders })
     
   } catch (error) {
     console.error('Unexpected error generating sitemap index:', error)
