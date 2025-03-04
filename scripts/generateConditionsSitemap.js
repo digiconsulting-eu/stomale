@@ -140,105 +140,68 @@ ${groupConditions.map(condition => {
     // Update sitemap index to include condition sitemaps
     console.log('Updating sitemap index...');
     
-    // Ensure sitemap-index.xml exists with proper structure
+    // Read existing sitemap index
     const indexPath = path.join(publicDir, 'sitemap-index.xml');
-    
-    let existingContent = '';
-    let existingSitemaps = [];
+    let existingSitemapUrls = [];
     
     try {
-      // Check if sitemap index exists and read it
+      // Check if the file exists before reading
       if (fs.existsSync(indexPath)) {
-        existingContent = fs.readFileSync(indexPath, 'utf8');
-        console.log('Existing sitemap index found, analyzing content');
+        const sitemapIndexContent = fs.readFileSync(indexPath, 'utf8');
         
-        // Extract existing sitemap entries
-        const regex = /<sitemap>\s*<loc>([^<]+)<\/loc>/g;
+        // Extract existing sitemap URLs using regex
+        const urlRegex = /<loc>([^<]+)<\/loc>/g;
         let match;
-        while ((match = regex.exec(existingContent)) !== null) {
-          existingSitemaps.push(match[1]);
+        while ((match = urlRegex.exec(sitemapIndexContent)) !== null) {
+          existingSitemapUrls.push(match[1]);
         }
         
-        console.log(`Found existing sitemap index with ${existingSitemaps.length} entries`);
+        console.log(`Found ${existingSitemapUrls.length} existing sitemaps in the index`);
       } else {
-        console.log('No existing sitemap index found, creating new one');
-        existingContent = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n</sitemapindex>`;
-        fs.writeFileSync(indexPath, existingContent);
-        console.log(`Created new sitemap index at ${indexPath}`);
+        console.log('No existing sitemap index found, will create a new one');
       }
-    } catch (indexError) {
-      console.error('Error processing sitemap index:', indexError);
-      existingContent = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n</sitemapindex>`;
-      try {
-        fs.writeFileSync(indexPath, existingContent);
-        console.log(`Created new sitemap index at ${indexPath} after error`);
-      } catch (writeError) {
-        console.error('Failed to create sitemap index:', writeError);
-        throw new Error('Could not create or update sitemap index');
-      }
+    } catch (readError) {
+      console.error('Error reading existing sitemap index:', readError);
+      // Continue with an empty array if we couldn't read the file
     }
     
-    // Validate existing sitemap index content
-    if (!existingContent.includes('<sitemapindex') || !existingContent.includes('</sitemapindex>')) {
-      console.log('Malformed sitemap index, creating new one');
-      existingContent = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n</sitemapindex>`;
-      try {
-        fs.writeFileSync(indexPath, existingContent);
-        console.log(`Recreated sitemap index at ${indexPath} due to malformed content`);
-      } catch (writeError) {
-        console.error('Failed to recreate sitemap index:', writeError);
-        throw new Error('Could not recreate sitemap index');
-      }
-    }
-    
-    // Create new sitemap entries for condition sitemaps
+    // Build a new sitemap index from scratch to avoid XML declaration issues
     const today = new Date().toISOString().split('T')[0];
+    let newSitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+`;
     
-    // Process each generated sitemap
-    let updatedIndexContent = existingContent;
-    let newEntriesAdded = false;
-    
-    for (const sitemap of generatedSitemaps) {
-      const sitemapUrl = sitemap.url;
-      
-      // Skip if this sitemap is already in the index
-      if (existingSitemaps.includes(sitemapUrl)) {
-        console.log(`Sitemap ${sitemapUrl} already in index, skipping`);
-        continue;
-      }
-      
-      console.log(`Adding new sitemap to index: ${sitemapUrl}`);
-      
-      const newEntry = `  <sitemap>\n    <loc>${sitemapUrl}</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
-      
-      // Find the position to insert the new entry
-      const insertPosition = updatedIndexContent.indexOf('</sitemapindex>');
-      if (insertPosition !== -1) {
-        updatedIndexContent = 
-          updatedIndexContent.substring(0, insertPosition) + 
-          newEntry + 
-          updatedIndexContent.substring(insertPosition);
-        
-        newEntriesAdded = true;
-      } else {
-        console.error('Could not find closing sitemapindex tag in the sitemap index');
-        // Try to append it anyway at the end
-        updatedIndexContent += newEntry + '</sitemapindex>';
-        newEntriesAdded = true;
+    // Add all existing sitemaps that aren't generated conditions sitemaps
+    for (const url of existingSitemapUrls) {
+      if (!url.includes('sitemap-conditions-')) {
+        newSitemapIndex += `  <sitemap>
+    <loc>${url}</loc>
+    <lastmod>${url.includes('sitemap-reviews') ? '2023-10-19T08:00:00+00:00' : today}</lastmod>
+  </sitemap>
+`;
       }
     }
     
-    // Write updated sitemap index if changes were made
-    if (newEntriesAdded) {
-      try {
-        fs.writeFileSync(indexPath, updatedIndexContent);
-        console.log(`Updated sitemap index at ${indexPath}`);
-      } catch (writeError) {
-        console.error('Error writing updated sitemap index:', writeError);
-        throw new Error('Failed to write updated sitemap index');
-      }
-    } else {
-      console.log('No new entries added to sitemap index');
+    // Add all generated condition sitemaps
+    for (const sitemap of generatedSitemaps) {
+      newSitemapIndex += `  <sitemap>
+    <loc>${sitemap.url}</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>
+`;
+    }
+    
+    // Close the sitemapindex tag
+    newSitemapIndex += `</sitemapindex>
+`;
+    
+    // Write the new sitemap index
+    try {
+      fs.writeFileSync(indexPath, newSitemapIndex);
+      console.log(`Successfully updated sitemap index at ${indexPath}`);
+    } catch (writeError) {
+      console.error('Error writing sitemap index:', writeError);
+      throw writeError;
     }
     
     console.log('Condition sitemap generation completed successfully');

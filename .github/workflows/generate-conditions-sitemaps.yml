@@ -64,12 +64,37 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       
+      - name: Validate sitemap-index.xml
+        run: |
+          echo "Validating sitemap-index.xml..."
+          # Check if the file exists
+          if [ ! -f public/sitemap-index.xml ]; then
+            echo "ERROR: sitemap-index.xml doesn't exist!"
+            exit 1
+          fi
+          
+          # Check if the file starts with XML declaration
+          if ! grep -q "<?xml" public/sitemap-index.xml; then
+            echo "ERROR: sitemap-index.xml doesn't start with XML declaration!"
+            cat public/sitemap-index.xml | head -n 5
+            exit 1
+          fi
+          
+          # Count XML declarations (should be exactly 1)
+          XML_DECL_COUNT=$(grep -c "<?xml" public/sitemap-index.xml)
+          if [ "$XML_DECL_COUNT" -ne 1 ]; then
+            echo "ERROR: sitemap-index.xml has $XML_DECL_COUNT XML declarations, should have exactly 1!"
+            exit 1
+          fi
+          
+          echo "sitemap-index.xml is valid"
+      
       - name: List generated files
         run: |
           echo "Generated sitemap files:"
           ls -la public/sitemaps/
-          echo "Sitemap index content:"
-          cat public/sitemap-index.xml
+          echo "Sitemap index content (first 10 lines):"
+          head -n 10 public/sitemap-index.xml
       
       - name: Commit and push changes
         run: |
