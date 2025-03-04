@@ -143,7 +143,7 @@ ${groupConditions.map(condition => {
     const today = new Date().toISOString().split('T')[0];
     
     // Create sitemap index with exactly one XML declaration at the very beginning
-    const reviewPages = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178];
+    const reviewPages = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     
     // Start with XML declaration, no whitespace before it
     let newSitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
