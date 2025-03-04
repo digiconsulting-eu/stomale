@@ -109,8 +109,8 @@ const generateConditionsSitemap = async () => {
       
       console.log(`Generating sitemap for group ${group} with ${groupConditions.length} conditions`);
       
-      const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      // Ensure XML declaration is at the very beginning with no whitespace
+      const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${groupConditions.map(condition => {
   // Use encodeURIComponent for spaces
   const encodedCondition = encodeURIComponent(condition.Patologia.toLowerCase());
@@ -142,11 +142,11 @@ ${groupConditions.map(condition => {
     // Get the current date
     const today = new Date().toISOString().split('T')[0];
     
-    // Create sitemap index with exactly one XML declaration
+    // Create sitemap index with exactly one XML declaration at the very beginning
     const reviewPages = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178];
     
-    let newSitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+    // Start with XML declaration, no whitespace before it
+    let newSitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
     
     // Add static sitemap entry
     newSitemapIndex += `  <sitemap>

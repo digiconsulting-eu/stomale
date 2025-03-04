@@ -42,26 +42,28 @@ Deno.serve(async (req) => {
     const reviewPages = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178]
     const today = new Date().toISOString().split('T')[0]
     
-    // Initialize XML with exactly one XML declaration
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-${conditionGroups.map(group => `  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-${group}.xml</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-`).join('')}${reviewPages.map(page => `  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-${page}.xml</loc>
-    <lastmod>${today}</lastmod>
-  </sitemap>
-`).join('')}</sitemapindex>`
+    // Start XML with XML declaration at the very beginning
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     
-    // Log the first few lines to check for XML declaration
-    console.log('First few lines of generated XML:')
-    console.log(xml.substring(0, 200))
+    // Add static sitemap entry
+    xml += `  <sitemap>\n    <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
+    
+    // Add condition sitemap entries
+    for (const group of conditionGroups) {
+      xml += `  <sitemap>\n    <loc>https://stomale.info/sitemaps/sitemap-conditions-${group}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
+    }
+    
+    // Add review sitemap entries
+    for (const page of reviewPages) {
+      xml += `  <sitemap>\n    <loc>https://stomale.info/sitemap-reviews-${page}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
+    }
+    
+    // Close the sitemapindex tag
+    xml += '</sitemapindex>';
+    
+    // Log the first few characters to verify there's no whitespace before XML declaration
+    console.log('First 50 characters of generated XML:');
+    console.log(xml.substring(0, 50));
     
     return new Response(xml, { headers: corsHeaders })
     
