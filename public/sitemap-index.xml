@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
@@ -37,67 +38,35 @@
     <lastmod>2024-07-22</lastmod>
   </sitemap>
   <sitemap>
+    <loc>https://stomale.info/sitemap-reviews-2.xml</loc>
+    <lastmod>2024-07-22</lastmod>
+  </sitemap>
+  <sitemap>
     <loc>https://stomale.info/sitemap-reviews-3.xml</loc>
     <lastmod>2024-07-22</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-67.xml</loc>
+    <loc>https://stomale.info/sitemap-reviews-4.xml</loc>
     <lastmod>2024-07-22</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-68.xml</loc>
+    <loc>https://stomale.info/sitemap-reviews-5.xml</loc>
     <lastmod>2024-07-22</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-73.xml</loc>
+    <loc>https://stomale.info/sitemap-reviews-6.xml</loc>
     <lastmod>2024-07-22</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-74.xml</loc>
+    <loc>https://stomale.info/sitemap-reviews-7.xml</loc>
     <lastmod>2024-07-22</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-77.xml</loc>
+    <loc>https://stomale.info/sitemap-reviews-8.xml</loc>
     <lastmod>2024-07-22</lastmod>
   </sitemap>
   <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-79.xml</loc>
-    <lastmod>2024-07-22</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-81.xml</loc>
-    <lastmod>2024-07-22</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-82.xml</loc>
-    <lastmod>2024-07-22</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-86.xml</loc>
-    <lastmod>2024-07-22</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-89.xml</loc>
-    <lastmod>2024-07-22</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-90.xml</loc>
-    <lastmod>2024-07-22</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-91.xml</loc>
-    <lastmod>2024-07-22</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-150.xml</loc>
-    <lastmod>2024-07-22</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-151.xml</loc>
-    <lastmod>2024-07-22</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-178.xml</loc>
+    <loc>https://stomale.info/sitemap-reviews-9.xml</loc>
     <lastmod>2024-07-22</lastmod>
   </sitemap>
 </sitemapindex>

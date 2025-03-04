@@ -37,9 +37,9 @@ Deno.serve(async (req) => {
     const totalReviews = count || 0
     console.log(`Total review URLs: ${totalReviews}`)
     
-    // Define the condition groups and specific review pages
+    // Define the condition groups and specific review pages (now only 1-9)
     const conditionGroups = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z']
-    const reviewPages = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178]
+    const reviewPages = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     const today = new Date().toISOString().split('T')[0]
     
     // Build the XML string without any leading whitespace
@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       xml += `  <sitemap>\n    <loc>https://stomale.info/sitemaps/sitemap-conditions-${group}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
     }
     
-    // Add review sitemap entries
+    // Add review sitemap entries - now only 1-9
     for (const page of reviewPages) {
       xml += `  <sitemap>\n    <loc>https://stomale.info/sitemap-reviews-${page}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
     }
