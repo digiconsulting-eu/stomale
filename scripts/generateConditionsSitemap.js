@@ -1,3 +1,4 @@
+
 import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
@@ -136,19 +137,18 @@ ${groupConditions.map(condition => {
       }
     }
     
-    // Update sitemap index to include condition sitemaps
-    console.log('Updating sitemap index...');
+    // Update sitemap index - create from scratch to avoid XML declaration issues
+    console.log('Creating new sitemap index...');
 
     // Get the current date
     const today = new Date().toISOString().split('T')[0];
     
-    // We'll build a new complete sitemap instead of appending to an existing one
-    // This ensures we don't get duplicate XML declarations
+    // Create a brand new sitemap index with only one XML declaration
     let newSitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
     
-    // Add sitemap-reviews entries - these are existing files we want to keep
+    // Add review sitemap entries for specific pages that exist
     const reviewFiles = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178];
     for (const fileNum of reviewFiles) {
       newSitemapIndex += `  <sitemap>
@@ -158,7 +158,7 @@ ${groupConditions.map(condition => {
 `;
     }
     
-    // Add all generated condition sitemaps
+    // Add generated condition sitemaps
     for (const sitemap of generatedSitemaps) {
       newSitemapIndex += `  <sitemap>
     <loc>${sitemap.url}</loc>
@@ -173,8 +173,26 @@ ${groupConditions.map(condition => {
     // Write the new sitemap index
     try {
       const indexPath = path.join(publicDir, 'sitemap-index.xml');
+      
+      // Check the first few characters to debug any issues
+      console.log(`First few characters of sitemap index: "${newSitemapIndex.substring(0, 50)}"`);
+      
       fs.writeFileSync(indexPath, newSitemapIndex);
       console.log(`Successfully created new sitemap index at ${indexPath}`);
+      
+      // Verify the file was written correctly
+      if (fs.existsSync(indexPath)) {
+        const content = fs.readFileSync(indexPath, 'utf8');
+        console.log(`First 50 characters of written file: "${content.substring(0, 50)}"`);
+        
+        // Count XML declarations
+        const xmlDeclCount = (content.match(/<?xml/g) || []).length;
+        console.log(`Number of XML declarations in file: ${xmlDeclCount}`);
+        
+        if (xmlDeclCount !== 1) {
+          console.error('WARNING: File has incorrect number of XML declarations!');
+        }
+      }
     } catch (writeError) {
       console.error('Error writing sitemap index:', writeError);
       throw writeError;

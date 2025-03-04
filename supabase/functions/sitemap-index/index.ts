@@ -41,53 +41,44 @@ Deno.serve(async (req) => {
     const reviewsPerPage = 100
     const totalReviewPages = Math.ceil(totalReviews / reviewsPerPage)
     
-    // Generate XML sitemap index - Ensure only ONE XML declaration
+    // Generate XML sitemap index - Make sure there's only ONE XML declaration
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
+`
+    
+    // Add static sitemap entry
+    xml += `  <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-a.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-b.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-c.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-d.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-e-l.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-m-r.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-conditions-s-z.xml</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
   </sitemap>
 `
     
-    // Add entry for each review sitemap page
-    for (let page = 1; page <= totalReviewPages; page++) {
+    // Add condition sitemap entries
+    const conditionGroups = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z']
+    for (const group of conditionGroups) {
       xml += `  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-${page}.xml</loc>
+    <loc>https://stomale.info/sitemaps/sitemap-conditions-${group}.xml</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
   </sitemap>
 `
     }
     
+    // Add review sitemap entries for specific pages that exist
+    const reviewPages = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178]
+    for (const page of reviewPages) {
+      xml += `  <sitemap>
+    <loc>https://stomale.info/sitemap-reviews-${page}.xml</loc>
+    <lastmod>2023-10-19</lastmod>
+  </sitemap>
+`
+    }
+    
+    // Close the sitemapindex tag
     xml += `</sitemapindex>`
+    
+    // Log the first few lines to check for XML declaration
+    console.log('First few lines of generated XML:')
+    console.log(xml.substring(0, 200))
     
     return new Response(xml, { headers: corsHeaders })
     

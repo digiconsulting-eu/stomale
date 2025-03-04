@@ -1,8 +1,7 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>https://stomale.info/sitemaps/sitemap-reviews-1.xml</loc>
+    <loc>https://stomale.info/sitemap-reviews-1.xml</loc>
     <lastmod>2023-10-19T08:00:00+00:00</lastmod>
   </sitemap>
   <sitemap>
@@ -71,30 +70,30 @@
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-a.xml</loc>
-    <lastmod>2025-03-02</lastmod>
+    <lastmod>2025-03-04</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-b.xml</loc>
-    <lastmod>2025-03-02</lastmod>
+    <lastmod>2025-03-04</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-c.xml</loc>
-    <lastmod>2025-03-02</lastmod>
+    <lastmod>2025-03-04</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-d.xml</loc>
-    <lastmod>2025-03-02</lastmod>
+    <lastmod>2025-03-04</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-e-l.xml</loc>
-    <lastmod>2025-03-02</lastmod>
+    <lastmod>2025-03-04</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-m-r.xml</loc>
-    <lastmod>2025-03-02</lastmod>
+    <lastmod>2025-03-04</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-s-z.xml</loc>
-    <lastmod>2025-03-02</lastmod>
+    <lastmod>2025-03-04</lastmod>
   </sitemap>
 </sitemapindex>

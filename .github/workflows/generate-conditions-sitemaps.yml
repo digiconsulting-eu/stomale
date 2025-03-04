@@ -35,12 +35,10 @@ jobs:
           echo "Sitemaps directory:"
           ls -la public/sitemaps/
           
-          # Create sitemap-index.xml if it doesn't exist
-          if [ ! -f public/sitemap-index.xml ]; then
-            echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"></sitemapindex>" > public/sitemap-index.xml
-            echo "Created new sitemap-index.xml"
-          else
-            echo "sitemap-index.xml already exists"
+          # Make sure there's no sitemap-index.xml before starting to prevent merging issues
+          if [ -f public/sitemap-index.xml ]; then
+            echo "Removing existing sitemap-index.xml to create a fresh one"
+            rm public/sitemap-index.xml
           fi
       
       - name: Verify secrets
@@ -73,17 +71,19 @@ jobs:
             exit 1
           fi
           
-          # Check if the file starts with XML declaration
-          if ! grep -q "<?xml" public/sitemap-index.xml; then
-            echo "ERROR: sitemap-index.xml doesn't start with XML declaration!"
-            cat public/sitemap-index.xml | head -n 5
+          # Check if the file starts with XML declaration and only has one
+          XML_DECL=$(grep -c "<?xml" public/sitemap-index.xml)
+          if [ "$XML_DECL" -ne 1 ]; then
+            echo "ERROR: Found $XML_DECL XML declarations in sitemap-index.xml. There should be exactly 1!"
+            head -n 10 public/sitemap-index.xml
             exit 1
           fi
           
-          # Count XML declarations (should be exactly 1)
-          XML_DECL_COUNT=$(grep -c "<?xml" public/sitemap-index.xml)
-          if [ "$XML_DECL_COUNT" -ne 1 ]; then
-            echo "ERROR: sitemap-index.xml has $XML_DECL_COUNT XML declarations, should have exactly 1!"
+          # Check if the first line contains the XML declaration
+          FIRST_LINE=$(head -n 1 public/sitemap-index.xml)
+          if [[ "$FIRST_LINE" != *"<?xml"* ]]; then
+            echo "ERROR: First line doesn't contain XML declaration!"
+            echo "First line: $FIRST_LINE"
             exit 1
           fi
           
