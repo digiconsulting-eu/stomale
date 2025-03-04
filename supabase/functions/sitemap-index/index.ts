@@ -37,32 +37,27 @@ Deno.serve(async (req) => {
     const totalReviews = count || 0
     console.log(`Total review URLs: ${totalReviews}`)
     
-    // Calculate total pages needed (100 reviews per page)
-    const reviewsPerPage = 100
-    const totalReviewPages = Math.ceil(totalReviews / reviewsPerPage)
+    // Define the condition groups and specific review pages
+    const conditionGroups = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z']
+    const reviewPages = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178]
+    const today = new Date().toISOString().split('T')[0]
     
     // Initialize XML with exactly one XML declaration
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${today}</lastmod>
   </sitemap>
 ${conditionGroups.map(group => `  <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-${group}.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${today}</lastmod>
   </sitemap>
 `).join('')}${reviewPages.map(page => `  <sitemap>
     <loc>https://stomale.info/sitemap-reviews-${page}.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${today}</lastmod>
   </sitemap>
 `).join('')}</sitemapindex>`
-    
-    // Add static sitemap entry
-    const conditionGroups = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z']
-    
-    // Add review sitemap entries for specific pages that exist
-    const reviewPages = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178]
     
     // Log the first few lines to check for XML declaration
     console.log('First few lines of generated XML:')

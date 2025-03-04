@@ -148,18 +148,24 @@ ${groupConditions.map(condition => {
     let newSitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
     
-    // Add review sitemap entries
-    for (const fileNum of reviewPages) {
-      newSitemapIndex += `  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-${fileNum}.xml</loc>
-    <lastmod>2023-10-19T08:00:00+00:00</lastmod>
+    // Add static sitemap entry
+    newSitemapIndex += `  <sitemap>
+    <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>
+    <lastmod>${today}</lastmod>
   </sitemap>\n`;
-    }
     
     // Add generated condition sitemaps
     for (const sitemap of generatedSitemaps) {
       newSitemapIndex += `  <sitemap>
     <loc>${sitemap.url}</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>\n`;
+    }
+    
+    // Add review sitemap entries
+    for (const fileNum of reviewPages) {
+      newSitemapIndex += `  <sitemap>
+    <loc>https://stomale.info/sitemap-reviews-${fileNum}.xml</loc>
     <lastmod>${today}</lastmod>
   </sitemap>\n`;
     }
