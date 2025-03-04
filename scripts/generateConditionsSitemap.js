@@ -1,4 +1,3 @@
-
 import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
@@ -139,47 +138,24 @@ ${groupConditions.map(condition => {
     
     // Update sitemap index to include condition sitemaps
     console.log('Updating sitemap index...');
-    
-    // Read existing sitemap index
-    const indexPath = path.join(publicDir, 'sitemap-index.xml');
-    let existingSitemapUrls = [];
-    
-    try {
-      // Check if the file exists before reading
-      if (fs.existsSync(indexPath)) {
-        const sitemapIndexContent = fs.readFileSync(indexPath, 'utf8');
-        
-        // Extract existing sitemap URLs using regex
-        const urlRegex = /<loc>([^<]+)<\/loc>/g;
-        let match;
-        while ((match = urlRegex.exec(sitemapIndexContent)) !== null) {
-          existingSitemapUrls.push(match[1]);
-        }
-        
-        console.log(`Found ${existingSitemapUrls.length} existing sitemaps in the index`);
-      } else {
-        console.log('No existing sitemap index found, will create a new one');
-      }
-    } catch (readError) {
-      console.error('Error reading existing sitemap index:', readError);
-      // Continue with an empty array if we couldn't read the file
-    }
-    
-    // Build a new sitemap index from scratch to avoid XML declaration issues
+
+    // Get the current date
     const today = new Date().toISOString().split('T')[0];
+    
+    // We'll build a new complete sitemap instead of appending to an existing one
+    // This ensures we don't get duplicate XML declarations
     let newSitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
     
-    // Add all existing sitemaps that aren't generated conditions sitemaps
-    for (const url of existingSitemapUrls) {
-      if (!url.includes('sitemap-conditions-')) {
-        newSitemapIndex += `  <sitemap>
-    <loc>${url}</loc>
-    <lastmod>${url.includes('sitemap-reviews') ? '2023-10-19T08:00:00+00:00' : today}</lastmod>
+    // Add sitemap-reviews entries - these are existing files we want to keep
+    const reviewFiles = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178];
+    for (const fileNum of reviewFiles) {
+      newSitemapIndex += `  <sitemap>
+    <loc>https://stomale.info/sitemap-reviews-${fileNum}.xml</loc>
+    <lastmod>2023-10-19T08:00:00+00:00</lastmod>
   </sitemap>
 `;
-      }
     }
     
     // Add all generated condition sitemaps
@@ -192,13 +168,13 @@ ${groupConditions.map(condition => {
     }
     
     // Close the sitemapindex tag
-    newSitemapIndex += `</sitemapindex>
-`;
+    newSitemapIndex += `</sitemapindex>`;
     
     // Write the new sitemap index
     try {
+      const indexPath = path.join(publicDir, 'sitemap-index.xml');
       fs.writeFileSync(indexPath, newSitemapIndex);
-      console.log(`Successfully updated sitemap index at ${indexPath}`);
+      console.log(`Successfully created new sitemap index at ${indexPath}`);
     } catch (writeError) {
       console.error('Error writing sitemap index:', writeError);
       throw writeError;

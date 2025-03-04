@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
     const reviewsPerPage = 100
     const totalReviewPages = Math.ceil(totalReviews / reviewsPerPage)
     
-    // Generate XML sitemap index
+    // Generate XML sitemap index - Ensure only ONE XML declaration
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
