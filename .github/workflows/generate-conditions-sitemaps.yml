@@ -87,6 +87,13 @@ jobs:
             exit 1
           fi
           
+          # Check if there are any empty lines before the XML declaration
+          if grep -q "^$" public/sitemap-index.xml; then
+            echo "ERROR: Found empty lines in sitemap-index.xml!"
+            head -n 10 public/sitemap-index.xml
+            exit 1
+          fi
+          
           echo "sitemap-index.xml is valid"
       
       - name: List generated files
