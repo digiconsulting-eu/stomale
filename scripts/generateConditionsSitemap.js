@@ -120,8 +120,7 @@ ${groupConditions.map(condition => {
     <priority>0.8</priority>
   </url>`;
 }).join('\n')}
-</urlset>
-`;
+</urlset>`;
       
       const filePath = path.join(sitemapsDir, `sitemap-conditions-${group}.xml`);
       try {
@@ -137,25 +136,24 @@ ${groupConditions.map(condition => {
       }
     }
     
-    // Update sitemap index - create from scratch to avoid XML declaration issues
+    // Update sitemap index
     console.log('Creating new sitemap index...');
 
     // Get the current date
     const today = new Date().toISOString().split('T')[0];
     
-    // Create a brand new sitemap index with only one XML declaration
-    let newSitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-`;
+    // Create sitemap index with exactly one XML declaration
+    const reviewPages = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178];
     
-    // Add review sitemap entries for specific pages that exist
-    const reviewFiles = [1, 3, 67, 68, 73, 74, 77, 79, 81, 82, 86, 89, 90, 91, 150, 151, 178];
-    for (const fileNum of reviewFiles) {
+    let newSitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+    
+    // Add review sitemap entries
+    for (const fileNum of reviewPages) {
       newSitemapIndex += `  <sitemap>
     <loc>https://stomale.info/sitemap-reviews-${fileNum}.xml</loc>
     <lastmod>2023-10-19T08:00:00+00:00</lastmod>
-  </sitemap>
-`;
+  </sitemap>\n`;
     }
     
     // Add generated condition sitemaps
@@ -163,8 +161,7 @@ ${groupConditions.map(condition => {
       newSitemapIndex += `  <sitemap>
     <loc>${sitemap.url}</loc>
     <lastmod>${today}</lastmod>
-  </sitemap>
-`;
+  </sitemap>\n`;
     }
     
     // Close the sitemapindex tag
@@ -173,9 +170,6 @@ ${groupConditions.map(condition => {
     // Write the new sitemap index
     try {
       const indexPath = path.join(publicDir, 'sitemap-index.xml');
-      
-      // Check the first few characters to debug any issues
-      console.log(`First few characters of sitemap index: "${newSitemapIndex.substring(0, 50)}"`);
       
       fs.writeFileSync(indexPath, newSitemapIndex);
       console.log(`Successfully created new sitemap index at ${indexPath}`);
