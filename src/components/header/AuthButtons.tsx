@@ -37,8 +37,8 @@ export const AuthButtons = ({
         )}
         <Button 
           asChild 
-          variant={isDashboard ? "default" : "ghost"} 
-          className={`${buttonClass} ${isDashboard ? 'bg-[#0EA5E9] hover:bg-[#0284C7] text-white' : ''}`} 
+          variant="default"
+          className={`${buttonClass} bg-[#0EA5E9] hover:bg-[#0284C7] text-white`} 
           onClick={handleClick}
         >
           <Link to="/dashboard">Dashboard</Link>
