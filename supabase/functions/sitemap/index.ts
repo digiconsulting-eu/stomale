@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Fetch all reviews ordered by creation date
+    // Fetch all conditions ordered by creation date
     const { data: conditions } = await supabaseAdmin
       .from('PATOLOGIE')
       .select('Patologia')
@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
-    // Add URLs for each condition - usando il formato con spazi codificati
+    // Add URLs for each condition - usando sempre il formato con spazi codificati
     conditions?.forEach((condition) => {
       const slug = condition.Patologia.toLowerCase();
       
