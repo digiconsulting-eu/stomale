@@ -41,7 +41,7 @@ const UserDashboard = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="bg-gray-100 p-2 rounded-lg mb-6">
-          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-row gap-2 bg-transparent">
+          <TabsList className="w-full grid grid-cols-3 md:flex md:flex-row gap-2 bg-transparent">
             <TabsTrigger 
               value="notifications" 
               className="w-full md:w-auto rounded text-center px-3 md:px-4"
