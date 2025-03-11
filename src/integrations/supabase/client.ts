@@ -8,12 +8,15 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 // Opzioni per la configurazione del client
 const supabaseOptions = {
   auth: {
-    // La seguente configurazione permette di utilizzare un dominio personalizzato per l'autenticazione
-    // Per attivare questa funzionalità, è necessario configurare il dominio nella dashboard di Supabase
-    // sotto Authentication > URL Configuration > Site URL
+    // Configurazione del dominio personalizzato per l'autenticazione
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    flowType: 'pkce',
+    // Imposta il dominio personalizzato per l'autenticazione
+    domain: 'auth.stomale.info',
+    // Imposta URL pubblico per la tua app
+    redirectTo: 'https://stomale.info/dashboard'
   }
 };
 

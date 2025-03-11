@@ -13,10 +13,6 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
       setIsGoogleLoading(true);
       console.log("Initiating Google login...");
       
-      // Log additional information for debugging
-      console.log("Origin URL:", window.location.origin);
-      console.log("Redirect URL:", `${window.location.origin}/dashboard`);
-      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -30,7 +26,6 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
       
       if (error) {
         console.error("Google login error:", error);
-        // Log detailed error information
         console.error("Error code:", error.code);
         console.error("Error message:", error.message);
         console.error("Error details:", error);
