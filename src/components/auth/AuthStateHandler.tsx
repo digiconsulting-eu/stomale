@@ -1,12 +1,13 @@
 
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const AuthStateHandler = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Initialize auth state from session
@@ -50,7 +51,11 @@ export const AuthStateHandler = () => {
             queryClient.setQueryData(['adminStatus'], isAdmin);
             
             // Redirect to dashboard on successful sign in
-            navigate('/dashboard');
+            // Only redirect if we're not already on the dashboard
+            if (location.pathname !== '/dashboard') {
+              console.log("Redirecting to dashboard after sign in");
+              navigate('/dashboard', { replace: true });
+            }
           } catch (error) {
             console.error("Error checking admin status:", error);
           }
@@ -64,7 +69,7 @@ export const AuthStateHandler = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, queryClient]);
+  }, [navigate, queryClient, location.pathname]);
 
   return null;
 };

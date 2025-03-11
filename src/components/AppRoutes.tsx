@@ -23,6 +23,7 @@ import ReviewDetail from "@/pages/ReviewDetail";
 import Reviews from "@/pages/Reviews";
 import Welcome from "@/pages/Welcome";
 import ThankYou from "@/pages/ThankYou";
+import AuthCallback from "@/pages/AuthCallback";
 
 export const AppRoutes = () => {
   return (
@@ -34,6 +35,7 @@ export const AppRoutes = () => {
       <Route path="/registrati" element={<Register />} />
       <Route path="/recupera-password" element={<RecoverPassword />} />
       <Route path="/aggiorna-password" element={<UpdatePassword />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/cookie-policy" element={<CookiePolicy />} />

@@ -11,7 +11,7 @@ const supabaseOptions = {
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce' as const,
-    redirectTo: 'https://stomale.info/auth/callback',
+    redirectTo: window.location.origin + '/auth/callback',
     // Add custom domain URL
     url: 'https://auth.stomale.info'
   }

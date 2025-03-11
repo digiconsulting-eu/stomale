@@ -20,7 +20,7 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
             prompt: 'consent',
             access_type: 'offline',
           },
-          redirectTo: 'https://stomale.info/auth/callback',
+          redirectTo: window.location.origin + '/auth/callback',
         }
       });
       
