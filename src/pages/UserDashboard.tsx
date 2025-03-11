@@ -40,23 +40,40 @@ const UserDashboard = () => {
       <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8">Dashboard</h1>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full flex flex-wrap overflow-x-auto pb-1 justify-start md:justify-center mb-4">
-          <TabsTrigger value="notifications" className="px-2 md:px-4 py-1.5 text-sm md:text-base whitespace-nowrap">
-            Notifiche
-          </TabsTrigger>
-          <TabsTrigger value="reviews" className="px-2 md:px-4 py-1.5 text-sm md:text-base whitespace-nowrap">
-            Le mie recensioni
-          </TabsTrigger>
-          <TabsTrigger value="comments" className="px-2 md:px-4 py-1.5 text-sm md:text-base whitespace-nowrap">
-            I miei commenti
-          </TabsTrigger>
-          <TabsTrigger value="favorites" className="px-2 md:px-4 py-1.5 text-sm md:text-base whitespace-nowrap">
-            Patologie seguite
-          </TabsTrigger>
-          <TabsTrigger value="profile" className="px-2 md:px-4 py-1.5 text-sm md:text-base whitespace-nowrap">
-            Profilo
-          </TabsTrigger>
-        </TabsList>
+        <div className="bg-gray-100 p-2 rounded-lg mb-4">
+          <TabsList className="w-full grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-row gap-2 bg-transparent">
+            <TabsTrigger 
+              value="notifications" 
+              className="w-full md:w-auto rounded text-center px-3 md:px-4"
+            >
+              Notifiche
+            </TabsTrigger>
+            <TabsTrigger 
+              value="reviews" 
+              className="w-full md:w-auto rounded text-center px-3 md:px-4"
+            >
+              Recensioni
+            </TabsTrigger>
+            <TabsTrigger 
+              value="comments" 
+              className="w-full md:w-auto rounded text-center px-3 md:px-4"
+            >
+              Commenti
+            </TabsTrigger>
+            <TabsTrigger 
+              value="favorites" 
+              className="w-full md:w-auto rounded text-center px-3 md:px-4"
+            >
+              Patologie
+            </TabsTrigger>
+            <TabsTrigger 
+              value="profile" 
+              className="w-full md:w-auto rounded text-center px-3 md:px-4"
+            >
+              Profilo
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="notifications" className="pt-2">
           <NotificationsTab />

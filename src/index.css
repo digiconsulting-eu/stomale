@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -7,6 +8,13 @@
 @layer base {
   body {
     @apply bg-white text-text font-sans antialiased min-h-screen;
+  }
+  
+  /* Add better tap targets for mobile */
+  @media (max-width: 640px) {
+    button, a, input, select {
+      @apply min-h-[44px];
+    }
   }
 }
 
@@ -24,4 +32,15 @@
 
 .button-secondary {
   @apply px-6 py-2 bg-secondary text-text rounded-lg hover:bg-secondary-hover transition-colors shadow-sm hover:shadow-md;
+}
+
+/* Enhance mobile tab styles */
+@media (max-width: 640px) {
+  [role="tab"] {
+    @apply touch-manipulation py-2.5 px-4;
+  }
+  
+  [role="tab"][data-state="active"] {
+    @apply text-white bg-primary font-medium;
+  }
 }

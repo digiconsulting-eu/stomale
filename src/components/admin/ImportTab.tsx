@@ -6,10 +6,12 @@ import { DescriptionsImport } from "./import/DescriptionsImport";
 const ImportTab = () => {
   return (
     <Tabs defaultValue="reviews" className="space-y-4 md:space-y-6">
-      <TabsList className="w-full flex overflow-x-auto pb-1 justify-start md:justify-center">
-        <TabsTrigger value="reviews" className="flex-1 md:flex-none">Recensioni</TabsTrigger>
-        <TabsTrigger value="descriptions" className="flex-1 md:flex-none">Descrizioni Patologie</TabsTrigger>
-      </TabsList>
+      <div className="bg-gray-100 p-2 rounded-lg">
+        <TabsList className="w-full grid grid-cols-2 gap-2 bg-transparent">
+          <TabsTrigger value="reviews" className="w-full rounded text-center">Recensioni</TabsTrigger>
+          <TabsTrigger value="descriptions" className="w-full rounded text-center">Descrizioni Patologie</TabsTrigger>
+        </TabsList>
+      </div>
 
       <TabsContent value="reviews" className="space-y-4 md:space-y-6">
         <ReviewsImport />

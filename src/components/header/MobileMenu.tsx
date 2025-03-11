@@ -1,3 +1,4 @@
+
 import { AuthButtons } from "./AuthButtons";
 import { NavigationMenu } from "./NavigationMenu";
 
@@ -19,16 +20,18 @@ export const MobileMenu = ({
   if (!isOpen) return null;
 
   return (
-    <div className="md:hidden border-t border-gray-100">
+    <div className="md:hidden border-t border-gray-100 bg-white shadow-md animate-fade-in">
       <div className="container mx-auto px-4 py-4">
         <NavigationMenu isMobile onItemClick={onClose} />
-        <AuthButtons 
-          isLoggedIn={isLoggedIn} 
-          isAdmin={isAdmin} 
-          onLogout={onLogout} 
-          isMobile 
-          onNavigate={onClose}
-        />
+        <div className="mt-4">
+          <AuthButtons 
+            isLoggedIn={isLoggedIn} 
+            isAdmin={isAdmin} 
+            onLogout={onLogout} 
+            isMobile 
+            onNavigate={onClose}
+          />
+        </div>
       </div>
     </div>
   );
