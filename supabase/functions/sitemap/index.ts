@@ -29,11 +29,9 @@ Deno.serve(async (req) => {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
-    // Add URLs for each condition
+    // Add URLs for each condition - usando il formato con spazi codificati
     conditions?.forEach((condition) => {
-      const slug = condition.Patologia.toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '')
+      const slug = condition.Patologia.toLowerCase();
       
       xml += '  <url>\n'
       xml += `    <loc>https://stomale.info/patologia/${slug}</loc>\n`

@@ -1,5 +1,4 @@
 
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,10 +24,11 @@ export const ReviewCard = ({
   onDelete,
 }: ReviewCardProps) => {
   const formatUrlPath = (text: string) => {
-    return text.trim().toLowerCase().replace(/\s+/g, '-');
+    // Utilizzare spazi codificati (%20) al posto dei trattini
+    return text.trim().toLowerCase();
   };
 
-  const reviewPath = `/patologia/${formatUrlPath(condition)}/esperienza/${id}-${formatUrlPath(title)}`;
+  const reviewPath = `/patologia/${formatUrlPath(condition)}/esperienza/${id}-${formatUrlPath(title).replace(/\s+/g, '-')}`;
 
   return (
     <Card className="bg-white rounded-3xl border border-[#1EAEDB] shadow-sm">
@@ -69,4 +69,3 @@ export const ReviewCard = ({
     </Card>
   );
 };
-

@@ -8,9 +8,9 @@ const corsHeaders = {
   'Content-Type': 'application/xml; charset=utf-8',
 };
 
-// Formatta il nome della patologia per l'URL
+// Formatta il nome della patologia per l'URL - mantenendo gli spazi per la codifica %20
 function formatPathName(name: string) {
-  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  return name.toLowerCase();
 }
 
 Deno.serve(async (req) => {

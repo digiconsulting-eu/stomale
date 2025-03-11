@@ -17,6 +17,9 @@ export const ReviewHeader = ({
   date,
   username 
 }: ReviewHeaderProps) => {
+  // Formatta l'URL usando lo spazio codificato invece del trattino
+  const conditionPath = condition.toLowerCase();
+  
   return (
     <div>
       <h1 className="text-3xl font-bold mb-4 text-gray-900">{title}</h1>
@@ -28,7 +31,7 @@ export const ReviewHeader = ({
           <span>{date}</span>
         </div>
         <Link 
-          to={`/patologia/${condition.toLowerCase()}`}
+          to={`/patologia/${conditionPath}`}
           className="inline-block"
         >
           <Badge 
