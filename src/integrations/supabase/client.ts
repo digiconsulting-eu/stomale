@@ -14,9 +14,7 @@ const supabaseOptions = {
     detectSessionInUrl: true,
     flowType: 'pkce',
     // Imposta il dominio personalizzato per l'autenticazione
-    domain: 'auth.stomale.info',
-    // Imposta URL pubblico per la tua app
-    redirectTo: 'https://stomale.info/dashboard'
+    domain: 'auth.stomale.info'
   }
 };
 

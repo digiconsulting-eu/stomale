@@ -16,7 +16,7 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: window.location.origin + '/dashboard',
           queryParams: {
             prompt: 'consent',
             access_type: 'offline',
