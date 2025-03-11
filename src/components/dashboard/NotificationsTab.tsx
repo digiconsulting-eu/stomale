@@ -67,10 +67,10 @@ export const NotificationsTab = () => {
 
   if (!notifications?.length) {
     return (
-      <Card className="p-8 text-center">
-        <Bell className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-        <p className="text-gray-500">Non ci sono notifiche al momento</p>
-        <Button asChild variant="link" className="mt-2">
+      <Card className="p-6 md:p-8 text-center">
+        <Bell className="mx-auto h-10 w-10 md:h-12 md:w-12 text-gray-300 mb-3 md:mb-4" />
+        <p className="text-gray-500 text-sm md:text-base">Non ci sono notifiche al momento</p>
+        <Button asChild variant="link" className="mt-2 text-sm md:text-base">
           <Link to="/cerca-patologia">Cerca una patologia da seguire</Link>
         </Button>
       </Card>
@@ -78,21 +78,21 @@ export const NotificationsTab = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 md:space-y-4">
       {notifications.map((notification) => (
         <Card 
           key={notification.id} 
-          className={`p-4 transition-colors ${!notification.is_read ? 'bg-blue-50' : ''}`}
+          className={`p-3 md:p-4 transition-colors ${!notification.is_read ? 'bg-blue-50' : ''}`}
         >
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-3 md:gap-4">
             <div className="flex-shrink-0 mt-1">
               {getNotificationIcon(notification.type)}
             </div>
             <div className="flex-1">
-              <p className="text-gray-800">
+              <p className="text-gray-800 text-sm md:text-base">
                 {notification.content}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs md:text-sm text-gray-500 mt-1">
                 {new Date(notification.created_at).toLocaleDateString('it-IT', {
                   day: 'numeric',
                   month: 'long',
@@ -107,18 +107,18 @@ export const NotificationsTab = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => markAsRead(notification.id)}
-                className="flex-shrink-0"
+                className="flex-shrink-0 text-xs md:text-sm px-2 md:px-3 h-7 md:h-8"
               >
                 Segna come letto
               </Button>
             )}
           </div>
           {notification.related_review_id && (
-            <div className="mt-3">
+            <div className="mt-2 md:mt-3">
               <Button 
                 variant="link" 
                 asChild 
-                className="p-0 h-auto font-normal text-primary"
+                className="p-0 h-auto font-normal text-primary text-xs md:text-sm"
               >
                 <Link to={`/recensione/${notification.related_review_id}`}>
                   Vai alla recensione

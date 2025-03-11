@@ -51,16 +51,16 @@ export const ReviewsList = ({ reviews, isLoading }: ReviewsListProps) => {
   };
 
   if (isLoading) {
-    return <p className="text-gray-500">Caricamento recensioni...</p>;
+    return <p className="text-gray-500 text-center py-6">Caricamento recensioni...</p>;
   }
 
   if (!reviews?.length) {
     return (
-      <div className="text-center space-y-4">
-        <p className="text-gray-500">Non hai ancora scritto recensioni.</p>
+      <div className="text-center space-y-4 py-6">
+        <p className="text-gray-500 text-sm md:text-base">Non hai ancora scritto recensioni.</p>
         <Button 
           onClick={() => navigate('/nuova-recensione')}
-          className="text-xl py-6 px-8 text-white"
+          className="text-base md:text-xl py-3 md:py-6 px-6 md:px-8 text-white"
         >
           Racconta la tua Esperienza
         </Button>
@@ -70,7 +70,7 @@ export const ReviewsList = ({ reviews, isLoading }: ReviewsListProps) => {
 
   return (
     <>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 md:gap-6 sm:grid-cols-2">
         {reviews.map((review) => (
           <div key={review.id} className="relative">
             <ReviewCard
@@ -78,14 +78,14 @@ export const ReviewsList = ({ reviews, isLoading }: ReviewsListProps) => {
               title={review.title}
               condition={review.condition.Patologia}
               date={new Date(review.created_at).toLocaleDateString()}
-              preview={review.experience.slice(0, 200) + '...'}
+              preview={review.experience.slice(0, 150) + '...'}
               username={review.username || 'Anonimo'}
               onDelete={() => setReviewToDelete(review.id)}
             />
             {review.status === 'pending' && (
               <Badge 
                 variant="secondary" 
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 text-xs"
               >
                 In attesa di approvazione
               </Badge>

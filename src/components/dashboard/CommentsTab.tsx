@@ -85,10 +85,10 @@ export const CommentsTab = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="p-4">
-            <div className="h-20 animate-pulse bg-gray-100 rounded" />
+          <Card key={i} className="p-3 md:p-4">
+            <div className="h-16 md:h-20 animate-pulse bg-gray-100 rounded" />
           </Card>
         ))}
       </div>
@@ -97,10 +97,10 @@ export const CommentsTab = () => {
 
   if (!comments?.length) {
     return (
-      <Card className="p-8 text-center">
-        <MessageCircle className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-        <p className="text-gray-500">Non hai ancora scritto commenti</p>
-        <Button asChild variant="link" className="mt-2">
+      <Card className="p-6 md:p-8 text-center">
+        <MessageCircle className="mx-auto h-10 w-10 md:h-12 md:w-12 text-gray-300 mb-3 md:mb-4" />
+        <p className="text-gray-500 text-sm md:text-base">Non hai ancora scritto commenti</p>
+        <Button asChild variant="link" className="mt-2 text-sm md:text-base">
           <Link to="/recensioni">Leggi le recensioni</Link>
         </Button>
       </Card>
@@ -109,16 +109,16 @@ export const CommentsTab = () => {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         {comments.map((comment) => (
-          <Card key={comment.id} className="p-4">
+          <Card key={comment.id} className="p-3 md:p-4">
             <div className="space-y-2">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium text-gray-900 text-sm md:text-base line-clamp-2">
                     {comment.reviews?.title || 'Recensione non disponibile'}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs md:text-sm text-gray-500">
                     {new Date(comment.created_at).toLocaleDateString('it-IT', {
                       day: 'numeric',
                       month: 'long',
@@ -127,7 +127,7 @@ export const CommentsTab = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm px-2 py-1 rounded-full ${
+                  <span className={`text-xs md:text-sm px-2 py-0.5 md:py-1 rounded-full ${
                     comment.status === 'approved' 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-yellow-100 text-yellow-800'
@@ -137,16 +137,16 @@ export const CommentsTab = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 md:h-8 md:w-8"
                     onClick={() => setCommentToDelete(comment.id)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   </Button>
                 </div>
               </div>
-              <p className="text-gray-700">{comment.content}</p>
+              <p className="text-gray-700 text-xs md:text-sm line-clamp-3">{comment.content}</p>
               {comment.reviews?.condition?.Patologia && comment.reviews?.title && (
-                <Button asChild variant="link" className="p-0 h-auto">
+                <Button asChild variant="link" className="p-0 h-auto text-xs md:text-sm">
                   <Link to={`/patologia/${formatUrlPath(comment.reviews.condition.Patologia)}/esperienza/${comment.review_id}-${formatUrlPath(comment.reviews.title)}`}>
                     Vai alla recensione
                   </Link>

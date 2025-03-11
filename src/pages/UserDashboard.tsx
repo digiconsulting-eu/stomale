@@ -15,7 +15,7 @@ const UserDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(
-    location.state?.activeTab || "notifications"  // Cambiato il tab di default in notifications
+    location.state?.activeTab || "notifications"
   );
 
   const { data: session, isLoading: isSessionLoading } = useAuthSession();
@@ -36,35 +36,45 @@ const UserDashboard = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+    <div className="container mx-auto px-4 py-4 md:py-8">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8">Dashboard</h1>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="notifications">Notifiche</TabsTrigger>
-          <TabsTrigger value="reviews">Le mie recensioni</TabsTrigger>
-          <TabsTrigger value="comments">I miei commenti</TabsTrigger>
-          <TabsTrigger value="favorites">Patologie seguite</TabsTrigger>
-          <TabsTrigger value="profile">Profilo</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="w-full flex flex-wrap overflow-x-auto pb-1 justify-start md:justify-center mb-4">
+          <TabsTrigger value="notifications" className="px-2 md:px-4 py-1.5 text-sm md:text-base whitespace-nowrap">
+            Notifiche
+          </TabsTrigger>
+          <TabsTrigger value="reviews" className="px-2 md:px-4 py-1.5 text-sm md:text-base whitespace-nowrap">
+            Le mie recensioni
+          </TabsTrigger>
+          <TabsTrigger value="comments" className="px-2 md:px-4 py-1.5 text-sm md:text-base whitespace-nowrap">
+            I miei commenti
+          </TabsTrigger>
+          <TabsTrigger value="favorites" className="px-2 md:px-4 py-1.5 text-sm md:text-base whitespace-nowrap">
+            Patologie seguite
+          </TabsTrigger>
+          <TabsTrigger value="profile" className="px-2 md:px-4 py-1.5 text-sm md:text-base whitespace-nowrap">
+            Profilo
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="notifications">
+        <TabsContent value="notifications" className="pt-2">
           <NotificationsTab />
         </TabsContent>
 
-        <TabsContent value="reviews">
+        <TabsContent value="reviews" className="pt-2">
           <ReviewsList reviews={reviews} isLoading={isReviewsLoading} />
         </TabsContent>
 
-        <TabsContent value="comments">
+        <TabsContent value="comments" className="pt-2">
           <CommentsTab />
         </TabsContent>
 
-        <TabsContent value="favorites">
+        <TabsContent value="favorites" className="pt-2">
           <FavoritesTab />
         </TabsContent>
 
-        <TabsContent value="profile">
+        <TabsContent value="profile" className="pt-2">
           <ProfileTab />
         </TabsContent>
       </Tabs>

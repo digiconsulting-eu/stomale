@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -111,10 +112,10 @@ export const ProfileTab = () => {
   };
 
   return (
-    <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Il Tuo Profilo</h2>
+    <Card className="p-4 md:p-6">
+      <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Il Tuo Profilo</h2>
       
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         <div>
           <label htmlFor="username" className="block text-sm font-medium mb-1">
             Username
@@ -124,6 +125,7 @@ export const ProfileTab = () => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={isLoading}
+            className="text-sm md:text-base"
           />
         </div>
 
@@ -142,30 +144,30 @@ export const ProfileTab = () => {
         <Button
           onClick={handleUpdateProfile}
           disabled={isLoading}
-          className="w-full"
+          className="w-full text-sm md:text-base"
         >
           {isLoading ? "Aggiornamento..." : "Aggiorna Profilo"}
         </Button>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="w-full">
+            <Button variant="destructive" className="w-full text-sm md:text-base">
               Elimina Account
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-[90vw] md:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>Sei sicuro?</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogDescription className="text-sm">
                 Questa azione non può essere annullata. Eliminerà permanentemente il tuo account
                 e tutti i dati associati.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Annulla</AlertDialogCancel>
+              <AlertDialogCancel className="text-sm">Annulla</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteAccount}
-                className="bg-destructive text-destructive-foreground"
+                className="bg-destructive text-destructive-foreground text-sm"
               >
                 Elimina Account
               </AlertDialogAction>
