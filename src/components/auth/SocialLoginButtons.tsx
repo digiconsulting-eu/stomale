@@ -20,9 +20,7 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
             prompt: 'consent',
             access_type: 'offline',
           },
-          // This will use the auth.url from the client config automatically
-          // but we can explicitly set it if needed
-          redirectTo: 'https://stomale.info/auth/callback'
+          redirectTo: 'https://stomale.info/auth/callback',
         }
       });
       

@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,6 +48,9 @@ export const AuthStateHandler = () => {
             
             const isAdmin = Array.isArray(adminData) && adminData.length > 0;
             queryClient.setQueryData(['adminStatus'], isAdmin);
+            
+            // Redirect to dashboard on successful sign in
+            navigate('/dashboard');
           } catch (error) {
             console.error("Error checking admin status:", error);
           }

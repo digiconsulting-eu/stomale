@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
@@ -19,9 +20,9 @@ export default function Register() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event);
       if (event === 'SIGNED_IN') {
-        console.log("User signed in, redirecting to welcome page...");
+        console.log("User signed in, redirecting to dashboard...");
         toast.success("Registrazione completata con successo");
-        navigate('/welcome', { replace: true });
+        navigate('/dashboard', { replace: true });
       }
     });
 
