@@ -18,12 +18,14 @@ export const ImportInstructions = () => {
         <li><strong>Possibilità guarigione</strong> - Valore da 1 a 5</li>
         <li><strong>Disagio sociale</strong> - Valore da 1 a 5</li>
         <li><strong>Data</strong> - Data della recensione (opzionale)</li>
+        <li><strong>User ID</strong> - ID dell'utente a cui assegnare la recensione (opzionale)</li>
       </ul>
       <p className="text-gray-600 mt-4">
         <strong>Note importanti:</strong>
       </p>
       <ul className="list-disc pl-6 space-y-2 text-gray-600">
         <li>Se non specifichi un User ID, verrà utilizzato l'utente attualmente loggato</li>
+        <li>Per collegare una recensione a un utente specifico, inserisci l'ID dell'utente (es. "a1b2c3d4-e5f6-...") nella colonna "User ID"</li>
         <li>Se la patologia non esiste nel database, verrà creata automaticamente</li>
         <li>I campi numerici devono essere valori da 1 a 5</li>
         <li>Se importi molte recensioni, potrebbe richiedere alcuni secondi</li>

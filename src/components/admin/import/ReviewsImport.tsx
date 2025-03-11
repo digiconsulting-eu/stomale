@@ -1,17 +1,42 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, Users } from "lucide-react";
 import { ImportInstructions } from "./ImportInstructions";
 import { ImportTemplate } from "./ImportTemplate";
 import { validateRow } from "./ImportValidator";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 export const ReviewsImport = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastImportTimestamp, setLastImportTimestamp] = useState<string | null>(null);
+  const [users, setUsers] = useState<Array<{id: string, username: string}>>([]);
+  const { data: session } = useAuthSession();
+
+  // Carica la lista degli utenti per riferimento
+  useEffect(() => {
+    const loadUsers = async () => {
+      if (!session) return;
+      
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, username');
+      
+      if (error) {
+        console.error('Errore nel caricamento degli utenti:', error);
+        return;
+      }
+      
+      if (data) {
+        setUsers(data);
+      }
+    };
+    
+    loadUsers();
+  }, [session]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -42,7 +67,17 @@ export const ReviewsImport = () => {
           const validatedRow = await validateRow(row);
           
           if (validatedRow) {
-            console.log(`Inserting review for condition ID ${validatedRow.condition_id}`);
+            console.log(`Inserting review for condition ID ${validatedRow.condition_id} and user ID ${validatedRow.user_id}`);
+            
+            // Verifica che l'utente esista prima di inserire la recensione
+            if (validatedRow.user_id) {
+              const userExists = users.some(user => user.id === validatedRow.user_id);
+              if (!userExists) {
+                errors.push(`Riga ${index + 2}: User ID "${validatedRow.user_id}" non trovato nel database`);
+                continue;
+              }
+            }
+            
             const { error: insertError } = await supabase
               .from('reviews')
               .insert({
@@ -120,6 +155,15 @@ export const ReviewsImport = () => {
       
       <div className="flex flex-wrap items-center gap-4">
         <ImportTemplate />
+        
+        <Button
+          variant="outline"
+          onClick={() => window.open(`https://supabase.com/dashboard/project/hnuhdoycwpjfjhthfqbt/auth/users`, '_blank')}
+          className="flex items-center gap-2"
+        >
+          <Users className="h-4 w-4" />
+          Visualizza gli ID Utenti
+        </Button>
         
         <Button
           variant="outline"

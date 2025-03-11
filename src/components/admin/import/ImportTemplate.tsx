@@ -21,7 +21,8 @@ export const ImportTemplate = () => {
         "Efficacia farmaci": 4,
         "Possibilità guarigione": 2,
         "Disagio sociale": 3,
-        "Data": new Date().toISOString().split('T')[0]
+        "Data": new Date().toISOString().split('T')[0],
+        "User ID": "id-utente-specifico" // Campo aggiunto per specificare l'utente
       }
     ];
     
