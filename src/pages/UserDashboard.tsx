@@ -75,7 +75,7 @@ const UserDashboard = () => {
           </TabsList>
         </div>
 
-        <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-32 relative pb-10">
+        <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-48 relative pb-20">
           <TabsContent value="notifications" className="mt-0">
             <NotificationsTab />
           </TabsContent>

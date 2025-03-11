@@ -1,5 +1,4 @@
 
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -47,16 +46,16 @@
   
   /* Fix tabs spacing for mobile */
   [role="tabpanel"] {
-    @apply mt-0 pb-28 mb-16;
+    @apply mt-0 pb-40 mb-24;
   }
   
   /* Ensure tab content doesn't overflow */
   .tabs-content-container {
-    @apply overflow-visible pb-28 mb-16;
+    @apply overflow-visible pb-40 mb-24;
   }
   
   /* Add extra space at the bottom of the page for mobile */
   .dashboard-container {
-    @apply mb-36;
+    @apply mb-48;
   }
 }
