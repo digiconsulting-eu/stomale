@@ -1,3 +1,4 @@
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -87,15 +88,15 @@ export const ReviewFormFields = ({ form }: ReviewFormFieldsProps) => {
               <RadioGroup
                 onValueChange={field.onChange}
                 value={field.value}
-                className="flex flex-col space-y-1"
+                className="flex flex-col space-y-3"
               >
-                <div className="flex items-center space-x-3 space-y-0">
-                  <RadioGroupItem value="yes" id="yes" />
-                  <Label htmlFor="yes">Sì</Label>
+                <div className="flex items-center space-x-3 rounded-md border border-[#0EA5E9] p-3 bg-[#0EA5E9]/5">
+                  <RadioGroupItem id="yes" value="yes" className="border-[#0EA5E9]" />
+                  <Label htmlFor="yes" className="flex-1 cursor-pointer font-medium">Sì</Label>
                 </div>
-                <div className="flex items-center space-x-3 space-y-0">
-                  <RadioGroupItem value="no" id="no" />
-                  <Label htmlFor="no">No</Label>
+                <div className="flex items-center space-x-3 rounded-md border border-[#0EA5E9] p-3 bg-[#0EA5E9]/5">
+                  <RadioGroupItem id="no" value="no" className="border-[#0EA5E9]" />
+                  <Label htmlFor="no" className="flex-1 cursor-pointer font-medium">No</Label>
                 </div>
               </RadioGroup>
             </FormControl>
