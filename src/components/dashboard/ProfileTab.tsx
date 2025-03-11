@@ -111,7 +111,7 @@ export const ProfileTab = () => {
   };
 
   return (
-    <div className="space-y-4 pb-6">
+    <div className="space-y-4 pb-10 mb-2">
       <h2 className="text-xl md:text-2xl font-bold mb-4">Il Tuo Profilo</h2>
       
       <div className="space-y-4">
@@ -143,14 +143,14 @@ export const ProfileTab = () => {
         <Button
           onClick={handleUpdateProfile}
           disabled={isLoading}
-          className="w-full text-sm md:text-base mt-2"
+          className="w-full text-sm md:text-base mt-4"
         >
           {isLoading ? "Aggiornamento..." : "Aggiorna Profilo"}
         </Button>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="w-full text-sm md:text-base mt-4">
+            <Button variant="destructive" className="w-full text-sm md:text-base mt-6">
               Elimina Account
             </Button>
           </AlertDialogTrigger>

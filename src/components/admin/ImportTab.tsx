@@ -13,7 +13,7 @@ const ImportTab = () => {
         </TabsList>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 overflow-visible pb-10">
         <TabsContent value="reviews" className="mt-0">
           <ReviewsImport />
         </TabsContent>
