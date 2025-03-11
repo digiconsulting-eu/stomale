@@ -13,24 +13,39 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
       setIsGoogleLoading(true);
       console.log("Initiating Google login...");
       
+      // Log additional information for debugging
+      console.log("Origin URL:", window.location.origin);
+      console.log("Redirect URL:", `${window.location.origin}/dashboard`);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            prompt: 'consent',
+            access_type: 'offline',
+          }
         }
       });
       
       if (error) {
         console.error("Google login error:", error);
+        // Log detailed error information
+        console.error("Error code:", error.code);
+        console.error("Error message:", error.message);
+        console.error("Error details:", error);
+        
         toast.error("Errore durante il login con Google", {
-          description: error.message
+          description: `${error.message} (Codice: ${error.code || 'N/A'})`
         });
       } else {
-        console.log("Google login initiated:", data);
+        console.log("Google login initiated successfully:", data);
       }
     } catch (error: any) {
       console.error("Unexpected error during Google login:", error);
-      toast.error("Errore durante il login con Google");
+      toast.error("Errore durante il login con Google", {
+        description: error?.message || "Si è verificato un errore imprevisto"
+      });
     } finally {
       setIsGoogleLoading(false);
     }
