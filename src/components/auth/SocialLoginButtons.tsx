@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +13,6 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
       setIsGoogleLoading(true);
       console.log("Initiating Google login...");
       
-      // Simplified approach without custom redirectTo
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -25,10 +25,6 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
       
       if (error) {
         console.error("Google login error:", error);
-        console.error("Error code:", error.code);
-        console.error("Error message:", error.message);
-        console.error("Error details:", error);
-        
         toast.error("Errore durante il login con Google", {
           description: `${error.message} (Codice: ${error.code || 'N/A'})`
         });
@@ -44,7 +40,7 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
       setIsGoogleLoading(false);
     }
   };
-  
+
   return (
     <div className="flex justify-center">
       <Button
