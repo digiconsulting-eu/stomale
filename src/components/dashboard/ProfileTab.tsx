@@ -111,7 +111,7 @@ export const ProfileTab = () => {
   };
 
   return (
-    <div className="space-y-4 pb-20 mb-8">
+    <div className="space-y-4 pb-32 mb-16">
       <h2 className="text-xl md:text-2xl font-bold mb-4">Il Tuo Profilo</h2>
       
       <div className="space-y-4">
@@ -150,7 +150,7 @@ export const ProfileTab = () => {
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="w-full text-sm md:text-base mt-6">
+            <Button variant="destructive" className="w-full text-sm md:text-base mt-6 mb-10">
               Elimina Account
             </Button>
           </AlertDialogTrigger>
