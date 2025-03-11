@@ -38,7 +38,7 @@ export const AuthButtons = ({
         <Button 
           asChild 
           variant={isDashboard ? "default" : "ghost"} 
-          className={`${buttonClass} ${isDashboard ? 'bg-[#0EA5E9] hover:bg-[#0284C7]' : ''}`} 
+          className={`${buttonClass} ${isDashboard ? 'bg-[#0EA5E9] hover:bg-[#0284C7] text-white' : ''}`} 
           onClick={handleClick}
         >
           <Link to="/dashboard">Dashboard</Link>
@@ -62,7 +62,7 @@ export const AuthButtons = ({
       <Button asChild variant="ghost" className={buttonClass} onClick={handleClick}>
         <Link to="/login">Accedi</Link>
       </Button>
-      <Button asChild className={buttonClass} onClick={handleClick}>
+      <Button asChild className={`${buttonClass} text-white`} onClick={handleClick}>
         <Link to="/registrati">Registrati</Link>
       </Button>
     </div>

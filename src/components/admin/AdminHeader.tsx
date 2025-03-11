@@ -28,7 +28,7 @@ export const AdminHeader = () => {
         <Button 
           asChild 
           variant={isReviews ? "default" : "outline"} 
-          className={`gap-2 w-full sm:w-auto justify-center py-2.5 ${isReviews ? 'bg-[#0EA5E9] hover:bg-[#0284C7]' : ''}`}
+          className={`gap-2 w-full sm:w-auto justify-center py-2.5 ${isReviews ? 'bg-[#0EA5E9] hover:bg-[#0284C7] text-white' : ''}`}
         >
           <Link to="/admin/reviews">
             <ClipboardList className="h-4 w-4" />
@@ -38,7 +38,7 @@ export const AdminHeader = () => {
         <Button 
           asChild 
           variant={isUsers ? "default" : "outline"}
-          className={`gap-2 w-full sm:w-auto justify-center py-2.5 ${isUsers ? 'bg-[#0EA5E9] hover:bg-[#0284C7]' : ''}`}
+          className={`gap-2 w-full sm:w-auto justify-center py-2.5 ${isUsers ? 'bg-[#0EA5E9] hover:bg-[#0284C7] text-white' : ''}`}
         >
           <Link to="/admin/users">
             <Users className="h-4 w-4" />

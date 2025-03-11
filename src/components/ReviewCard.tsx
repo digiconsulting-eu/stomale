@@ -60,7 +60,7 @@ export const ReviewCard = ({
           asChild 
           className="w-full bg-primary text-white hover:bg-primary-hover justify-center rounded-xl py-6"
         >
-          <Link to={reviewPath}>
+          <Link to={reviewPath} className="text-white">
             Leggi l'esperienza completa
             <ArrowRight className="h-4 w-4 ml-2" />
           </Link>

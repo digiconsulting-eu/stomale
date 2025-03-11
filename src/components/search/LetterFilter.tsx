@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 
 interface LetterFilterProps {
@@ -16,7 +17,7 @@ export const LetterFilter = ({ selectedLetter, onLetterSelect }: LetterFilterPro
           key={letter}
           variant={selectedLetter === letter ? "default" : "outline"}
           onClick={() => onLetterSelect(letter)}
-          className="min-w-[40px]"
+          className={`min-w-[40px] ${selectedLetter === letter ? "text-white" : ""}`}
         >
           {letter}
         </Button>
