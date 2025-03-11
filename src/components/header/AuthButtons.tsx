@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 interface AuthButtonsProps {
   isLoggedIn: boolean;
@@ -16,7 +17,10 @@ export const AuthButtons = ({
   isMobile = false,
   onNavigate
 }: AuthButtonsProps) => {
+  const location = useLocation();
+  const isDashboard = location.pathname === '/dashboard';
   const buttonClass = isMobile ? "w-full justify-center" : "";
+  
   const handleClick = () => {
     if (onNavigate) {
       onNavigate();
@@ -31,7 +35,12 @@ export const AuthButtons = ({
             <Link to="/admin">Admin</Link>
           </Button>
         )}
-        <Button asChild variant="ghost" className={buttonClass} onClick={handleClick}>
+        <Button 
+          asChild 
+          variant={isDashboard ? "default" : "ghost"} 
+          className={`${buttonClass} ${isDashboard ? 'bg-[#0EA5E9] hover:bg-[#0284C7]' : ''}`} 
+          onClick={handleClick}
+        >
           <Link to="/dashboard">Dashboard</Link>
         </Button>
         <Button 
