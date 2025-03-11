@@ -40,7 +40,7 @@ const UserDashboard = () => {
       <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8">Dashboard</h1>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="bg-gray-100 p-2 rounded-lg mb-4">
+        <div className="bg-gray-100 p-2 rounded-lg mb-6">
           <TabsList className="w-full grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-row gap-2 bg-transparent">
             <TabsTrigger 
               value="notifications" 
@@ -75,25 +75,27 @@ const UserDashboard = () => {
           </TabsList>
         </div>
 
-        <TabsContent value="notifications" className="pt-2">
-          <NotificationsTab />
-        </TabsContent>
+        <div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <TabsContent value="notifications">
+            <NotificationsTab />
+          </TabsContent>
 
-        <TabsContent value="reviews" className="pt-2">
-          <ReviewsList reviews={reviews} isLoading={isReviewsLoading} />
-        </TabsContent>
+          <TabsContent value="reviews">
+            <ReviewsList reviews={reviews} isLoading={isReviewsLoading} />
+          </TabsContent>
 
-        <TabsContent value="comments" className="pt-2">
-          <CommentsTab />
-        </TabsContent>
+          <TabsContent value="comments">
+            <CommentsTab />
+          </TabsContent>
 
-        <TabsContent value="favorites" className="pt-2">
-          <FavoritesTab />
-        </TabsContent>
+          <TabsContent value="favorites">
+            <FavoritesTab />
+          </TabsContent>
 
-        <TabsContent value="profile" className="pt-2">
-          <ProfileTab />
-        </TabsContent>
+          <TabsContent value="profile">
+            <ProfileTab />
+          </TabsContent>
+        </div>
       </Tabs>
     </div>
   );

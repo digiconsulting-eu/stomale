@@ -43,4 +43,10 @@
   [role="tab"][data-state="active"] {
     @apply text-white bg-primary font-medium;
   }
+  
+  /* Fix tabs spacing for mobile */
+  [role="tabpanel"] {
+    @apply mt-4;
+  }
 }
+
