@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,12 +12,10 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
       setIsGoogleLoading(true);
       console.log("Initiating Google login...");
       
-      // Use the specific callback URL format that Supabase expects
-      // This should match exactly what's configured in Google Cloud Console
+      // Simplified approach without custom redirectTo
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
           queryParams: {
             prompt: 'consent',
             access_type: 'offline',

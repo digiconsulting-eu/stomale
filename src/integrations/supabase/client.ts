@@ -12,9 +12,8 @@ const supabaseOptions = {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    flowType: 'pkce' as const,
-    // Set the custom domain for authentication
-    domain: 'auth.stomale.info'
+    flowType: 'pkce' as const
+    // Remove the custom domain for now
   }
 };
 
