@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -112,10 +111,10 @@ export const ProfileTab = () => {
   };
 
   return (
-    <div className="space-y-3 md:space-y-4 pb-4">
-      <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Il Tuo Profilo</h2>
+    <div className="space-y-4 pb-6">
+      <h2 className="text-xl md:text-2xl font-bold mb-4">Il Tuo Profilo</h2>
       
-      <div className="space-y-3 md:space-y-4">
+      <div className="space-y-4">
         <div>
           <label htmlFor="username" className="block text-sm font-medium mb-1">
             Username
@@ -144,14 +143,14 @@ export const ProfileTab = () => {
         <Button
           onClick={handleUpdateProfile}
           disabled={isLoading}
-          className="w-full text-sm md:text-base"
+          className="w-full text-sm md:text-base mt-2"
         >
           {isLoading ? "Aggiornamento..." : "Aggiorna Profilo"}
         </Button>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="w-full text-sm md:text-base mt-2">
+            <Button variant="destructive" className="w-full text-sm md:text-base mt-4">
               Elimina Account
             </Button>
           </AlertDialogTrigger>

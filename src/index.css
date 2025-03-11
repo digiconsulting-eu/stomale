@@ -46,11 +46,11 @@
   
   /* Fix tabs spacing for mobile */
   [role="tabpanel"] {
-    @apply mt-4 pb-4;
+    @apply mt-0 pb-6;
   }
   
   /* Ensure tab content doesn't overflow */
   .tabs-content-container {
-    @apply overflow-hidden pb-4;
+    @apply overflow-hidden pb-6;
   }
 }
