@@ -111,7 +111,7 @@ export const ProfileTab = () => {
   };
 
   return (
-    <div className="space-y-4 pb-10 mb-2">
+    <div className="space-y-4 pb-14 mb-4">
       <h2 className="text-xl md:text-2xl font-bold mb-4">Il Tuo Profilo</h2>
       
       <div className="space-y-4">

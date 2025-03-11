@@ -36,7 +36,7 @@ const UserDashboard = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-4 md:py-8">
+    <div className="container mx-auto px-4 py-4 md:py-8 mb-20">
       <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8">Dashboard</h1>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -75,7 +75,7 @@ const UserDashboard = () => {
           </TabsList>
         </div>
 
-        <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-100 p-4 overflow-visible pb-12 relative">
+        <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-12 relative">
           <TabsContent value="notifications" className="mt-0">
             <NotificationsTab />
           </TabsContent>

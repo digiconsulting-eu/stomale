@@ -46,12 +46,16 @@
   
   /* Fix tabs spacing for mobile */
   [role="tabpanel"] {
-    @apply mt-0 pb-8 mb-4;
+    @apply mt-0 pb-12 mb-4;
   }
   
   /* Ensure tab content doesn't overflow */
   .tabs-content-container {
-    @apply overflow-visible pb-8 mb-4;
+    @apply overflow-visible pb-12 mb-6;
+  }
+  
+  /* Add extra space at the bottom of the page for mobile */
+  .dashboard-container {
+    @apply mb-24;
   }
 }
-
