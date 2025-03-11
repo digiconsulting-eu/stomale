@@ -13,10 +13,12 @@ export const SocialLoginButtons = ({ isLoading: parentIsLoading }: { isLoading: 
       setIsGoogleLoading(true);
       console.log("Initiating Google login...");
       
+      // Use the specific callback URL format that Supabase expects
+      // This should match exactly what's configured in Google Cloud Console
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `https://stomale.info/dashboard`,
+          redirectTo: `${window.location.origin}/dashboard`,
           queryParams: {
             prompt: 'consent',
             access_type: 'offline',
