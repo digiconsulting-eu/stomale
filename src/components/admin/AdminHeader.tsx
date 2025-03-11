@@ -14,7 +14,7 @@ export const AdminHeader = () => {
       <h1 className="text-2xl md:text-3xl font-bold">Area Amministrazione</h1>
       <div className="flex flex-col sm:flex-row gap-3">
         {!isMainAdmin && (
-          <Button asChild variant={isMainAdmin ? "default" : "outline"} className="gap-2">
+          <Button asChild variant="outline" className="gap-2">
             <Link to="/admin">
               <Home className="h-4 w-4" />
               Dashboard
