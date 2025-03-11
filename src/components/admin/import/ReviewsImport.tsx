@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
 import { Loader2, Trash2 } from "lucide-react";
 import { ImportInstructions } from "./ImportInstructions";
+import { ImportTemplate } from "./ImportTemplate";
 import { validateRow } from "./ImportValidator";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -116,7 +118,9 @@ export const ReviewsImport = () => {
     <div className="space-y-6">
       <ImportInstructions />
       
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
+        <ImportTemplate />
+        
         <Button
           variant="outline"
           className="relative"
