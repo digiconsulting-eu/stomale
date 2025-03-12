@@ -10,6 +10,7 @@ import { ReviewsList } from "@/components/dashboard/ReviewsList";
 import { CommentsTab } from "@/components/dashboard/CommentsTab";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { useUserReviews } from "@/hooks/useUserReviews";
+import { supabase } from "@/integrations/supabase/client";
 
 const UserDashboard = () => {
   const location = useLocation();
@@ -17,6 +18,7 @@ const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState(
     location.state?.activeTab || "notifications"
   );
+  const [username, setUsername] = useState<string | null>(null);
 
   const { data: session, isLoading: isSessionLoading } = useAuthSession();
   const { data: reviews, isLoading: isReviewsLoading } = useUserReviews(session?.user?.id);
@@ -26,6 +28,24 @@ const UserDashboard = () => {
       navigate('/login', { state: { returnTo: '/dashboard' } });
     }
   }, [session, isSessionLoading, navigate]);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (session?.user) {
+        const { data, error } = await supabase
+          .from('users')
+          .select('username')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (!error && data) {
+          setUsername(data.username);
+        }
+      }
+    };
+
+    fetchUserInfo();
+  }, [session]);
 
   if (isSessionLoading) {
     return <DashboardLoader />;
@@ -37,7 +57,15 @@ const UserDashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-4 md:py-8 mb-32">
-      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-8">Dashboard</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2 md:mb-0">Dashboard</h1>
+        {session && username && (
+          <div className="bg-blue-50 p-3 rounded-lg text-sm">
+            <p><span className="font-semibold">Email:</span> {session.user.email}</p>
+            <p><span className="font-semibold">Username:</span> {username}</p>
+          </div>
+        )}
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="bg-gray-100 p-2 rounded-lg mb-6">
