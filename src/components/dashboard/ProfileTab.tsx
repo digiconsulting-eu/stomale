@@ -23,6 +23,7 @@ export const ProfileTab = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [birthYear, setBirthYear] = useState("");
   const [gender, setGender] = useState("");
 
@@ -31,6 +32,9 @@ export const ProfileTab = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
+
+      // Set email from session
+      setEmail(session.user.email || "");
 
       const { data: profile, error } = await supabase
         .from('users')
@@ -126,6 +130,21 @@ export const ProfileTab = () => {
             className="text-sm md:text-base bg-gray-100"
           />
           <p className="text-xs text-muted-foreground mt-1">Il nome utente non può essere modificato</p>
+        </div>
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium mb-1">
+            Email
+          </label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            readOnly
+            disabled
+            className="text-sm md:text-base bg-gray-100"
+          />
+          <p className="text-xs text-muted-foreground mt-1">L'indirizzo email non può essere modificato</p>
         </div>
 
         <BirthYearSelect
