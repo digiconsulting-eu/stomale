@@ -66,7 +66,6 @@ export const ProfileTab = () => {
       const { error } = await supabase
         .from('users')
         .update({
-          username,
           birth_year: birthYear,
           gender,
         })
@@ -122,10 +121,11 @@ export const ProfileTab = () => {
           <Input
             id="username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            disabled={isLoading}
-            className="text-sm md:text-base"
+            readOnly
+            disabled
+            className="text-sm md:text-base bg-gray-100"
           />
+          <p className="text-xs text-muted-foreground mt-1">Il nome utente non può essere modificato</p>
         </div>
 
         <BirthYearSelect
