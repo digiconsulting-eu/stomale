@@ -46,13 +46,13 @@
   
   /* Fix tabs spacing for mobile */
   [role="tabpanel"] {
-    @apply mb-20;
+    @apply mb-24;
   }
   
   /* Add extra padding for profile and favorites tabs */
   [role="tabpanel"][data-state="active"][data-orientation="horizontal"]:has(.ProfileTab),
   [role="tabpanel"][data-state="active"][data-orientation="horizontal"]:has(.FavoritesTab) {
-    @apply pb-32 mb-32;
+    @apply pb-40 mb-40;
   }
   
   .dashboard-container {
