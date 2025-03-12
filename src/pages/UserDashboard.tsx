@@ -75,24 +75,24 @@ const UserDashboard = () => {
           </TabsList>
         </div>
 
-        <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-48 relative pb-20">
-          <TabsContent value="notifications" className="mt-0">
+        <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-8">
+          <TabsContent value="notifications" className="mt-0 pb-0 mb-0">
             <NotificationsTab />
           </TabsContent>
 
-          <TabsContent value="reviews" className="mt-0">
+          <TabsContent value="reviews" className="mt-0 pb-0 mb-0">
             <ReviewsList reviews={reviews} isLoading={isReviewsLoading} />
           </TabsContent>
 
-          <TabsContent value="comments" className="mt-0">
+          <TabsContent value="comments" className="mt-0 pb-0 mb-0">
             <CommentsTab />
           </TabsContent>
 
-          <TabsContent value="favorites" className="mt-0">
+          <TabsContent value="favorites" className="mt-0 pb-0 mb-0">
             <FavoritesTab />
           </TabsContent>
 
-          <TabsContent value="profile" className="mt-0">
+          <TabsContent value="profile" className="mt-0 pb-0 mb-0">
             <ProfileTab />
           </TabsContent>
         </div>
