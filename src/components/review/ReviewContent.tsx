@@ -58,6 +58,7 @@ export const ReviewContent = ({
     setIsLiking(true);
     
     try {
+      // Removed authentication check - all users can like now
       const { error } = await supabase
         .from('reviews')
         .update({ likes_count: likesCount + 1 })
@@ -73,6 +74,9 @@ export const ReviewContent = ({
       setHasLiked(true);
       toast.success("Grazie per il tuo apprezzamento!");
       
+      // Store like in localStorage to remember user liked this review
+      localStorage.setItem(`review_liked_${reviewId}`, 'true');
+      
     } catch (error) {
       console.error('Error in like function:', error);
       toast.error("Si è verificato un errore. Riprova più tardi.");
@@ -80,6 +84,14 @@ export const ReviewContent = ({
       setIsLiking(false);
     }
   };
+
+  // Check if user already liked this review on component mount
+  useState(() => {
+    const hasAlreadyLiked = localStorage.getItem(`review_liked_${reviewId}`) === 'true';
+    if (hasAlreadyLiked) {
+      setHasLiked(true);
+    }
+  });
 
   const { data: otherReviews } = useQuery({
     queryKey: ['condition-reviews', condition],
