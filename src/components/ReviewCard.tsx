@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Trash2 } from "lucide-react";
+import { ArrowRight, Trash2, Heart, MessageCircle } from "lucide-react";
 
 interface ReviewCardProps {
   id: number;
@@ -11,6 +11,8 @@ interface ReviewCardProps {
   preview: string;
   date: string;
   username: string;
+  likesCount?: number;
+  commentsCount?: number;
   onDelete?: () => void;
 }
 
@@ -21,6 +23,8 @@ export const ReviewCard = ({
   preview,
   date,
   username,
+  likesCount = 0,
+  commentsCount = 0,
   onDelete,
 }: ReviewCardProps) => {
   const formatUrlPath = (text: string) => {
@@ -56,6 +60,19 @@ export const ReviewCard = ({
           {condition.toUpperCase()}
         </Link>
         <p className="text-gray-600 line-clamp-2 mb-4">{preview}</p>
+        
+        {/* Likes and Comments counts */}
+        <div className="flex items-center gap-6 mb-4 text-gray-500">
+          <div className="flex items-center gap-2">
+            <Heart className="h-5 w-5 text-red-400" />
+            <span className="text-gray-600">{likesCount}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-gray-400" />
+            <span className="text-gray-600">{commentsCount}</span>
+          </div>
+        </div>
+        
         <Button 
           asChild 
           className="w-full bg-primary text-white hover:bg-primary-hover justify-center rounded-xl py-6"

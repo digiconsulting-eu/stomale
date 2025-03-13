@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,8 @@ export default function Index() {
           username,
           created_at,
           condition_id,
+          likes_count,
+          comments_count,
           PATOLOGIE (
             id,
             Patologia
@@ -100,6 +103,8 @@ export default function Index() {
                 date={new Date(review.created_at).toLocaleDateString()}
                 preview={review.experience.slice(0, 200) + '...'}
                 username={review.username || 'Anonimo'}
+                likesCount={review.likes_count || 0}
+                commentsCount={review.comments_count || 0}
               />
             ))}
           </div>

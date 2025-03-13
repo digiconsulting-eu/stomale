@@ -1,3 +1,4 @@
+
 import { ReviewCard } from "@/components/ReviewCard";
 
 interface Review {
@@ -16,6 +17,8 @@ interface Review {
     id: number;
     Patologia: string;
   };
+  likes_count?: number;
+  comments_count?: number;
 }
 
 interface ReviewsGridProps {
@@ -45,6 +48,8 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
           date={new Date(review.created_at).toLocaleDateString()}
           preview={review.experience.slice(0, 200) + '...'}
           username={review.username}
+          likesCount={review.likes_count || 0}
+          commentsCount={review.comments_count || 0}
         />
       ))}
     </div>

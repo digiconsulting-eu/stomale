@@ -19,6 +19,8 @@ interface Review {
   status: string;
   created_at: string;
   username: string;
+  likes_count?: number;
+  comments_count?: number;
 }
 
 interface ReviewsListProps {
@@ -80,6 +82,8 @@ export const ReviewsList = ({ reviews, isLoading }: ReviewsListProps) => {
               date={new Date(review.created_at).toLocaleDateString()}
               preview={review.experience.slice(0, 150) + '...'}
               username={review.username || 'Anonimo'}
+              likesCount={review.likes_count || 0}
+              commentsCount={review.comments_count || 0}
               onDelete={() => setReviewToDelete(review.id)}
             />
             {review.status === 'pending' && (

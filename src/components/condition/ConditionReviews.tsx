@@ -1,3 +1,4 @@
+
 import { ReviewCard } from "@/components/ReviewCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -18,6 +19,8 @@ interface Review {
   };
   username: string;
   created_at: string;
+  likes_count?: number;
+  comments_count?: number;
 }
 
 interface ConditionReviewsProps {
@@ -60,6 +63,8 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
             date={new Date(review.created_at).toLocaleDateString()}
             preview={review.experience.slice(0, 200) + '...'}
             username={review.username}
+            likesCount={review.likes_count || 0}
+            commentsCount={review.comments_count || 0}
           />
         );
       })}
