@@ -125,6 +125,18 @@ export const CommentSection = ({ reviewId, showBottomButton = false }: CommentSe
     }
   };
 
+  // Format date function to show full date with time
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('it-IT', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   return (
     <div className="space-y-4">
       {isCommentBoxOpen && (
@@ -164,7 +176,7 @@ export const CommentSection = ({ reviewId, showBottomButton = false }: CommentSe
               <div className="flex justify-between items-start mb-2">
                 <span className="font-medium text-[#2C3E50]">{comment.users?.username || 'Utente'}</span>
                 <span className="text-sm text-[#8E9196]">
-                  {new Date(comment.created_at).toLocaleDateString('it-IT')}
+                  {formatDate(comment.created_at)}
                 </span>
               </div>
               <p className="text-[#2C3E50] whitespace-pre-wrap">{comment.content}</p>
