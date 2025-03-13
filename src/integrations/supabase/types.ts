@@ -270,6 +270,7 @@ export type Database = {
       }
       reviews: {
         Row: {
+          comments_count: number | null
           condition_id: number | null
           created_at: string | null
           diagnosis_difficulty: number | null
@@ -278,6 +279,7 @@ export type Database = {
           healing_possibility: number | null
           id: number
           import_timestamp: string | null
+          likes_count: number | null
           medication_effectiveness: number | null
           social_discomfort: number | null
           status: string | null
@@ -289,6 +291,7 @@ export type Database = {
           username: string | null
         }
         Insert: {
+          comments_count?: number | null
           condition_id?: number | null
           created_at?: string | null
           diagnosis_difficulty?: number | null
@@ -297,6 +300,7 @@ export type Database = {
           healing_possibility?: number | null
           id?: number
           import_timestamp?: string | null
+          likes_count?: number | null
           medication_effectiveness?: number | null
           social_discomfort?: number | null
           status?: string | null
@@ -308,6 +312,7 @@ export type Database = {
           username?: string | null
         }
         Update: {
+          comments_count?: number | null
           condition_id?: number | null
           created_at?: string | null
           diagnosis_difficulty?: number | null
@@ -316,6 +321,7 @@ export type Database = {
           healing_possibility?: number | null
           id?: number
           import_timestamp?: string | null
+          likes_count?: number | null
           medication_effectiveness?: number | null
           social_discomfort?: number | null
           status?: string | null

@@ -61,6 +61,8 @@ const Reviews = () => {
             created_at,
             symptoms,
             condition_id,
+            likes_count,
+            comments_count,
             PATOLOGIE (
               id,
               Patologia

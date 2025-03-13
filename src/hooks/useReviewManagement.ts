@@ -1,3 +1,4 @@
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -45,6 +46,8 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
             social_discomfort,
             username,
             created_at,
+            likes_count,
+            comments_count,
             PATOLOGIE (
               id,
               Patologia

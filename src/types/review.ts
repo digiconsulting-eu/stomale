@@ -1,3 +1,4 @@
+
 export interface DatabaseReview {
   id: number;
   condition_id: number;
@@ -15,6 +16,8 @@ export interface DatabaseReview {
   updated_at?: string;
   symptoms_searchable?: any;
   username?: string;
+  likes_count?: number;
+  comments_count?: number;
   PATOLOGIE?: {
     id: number;
     Patologia: string;
@@ -34,6 +37,8 @@ export interface Review {
   social_discomfort?: number;
   username: string;
   created_at: string;
+  likes_count?: number;
+  comments_count?: number;
   PATOLOGIE?: {
     id: number;
     Patologia: string;
