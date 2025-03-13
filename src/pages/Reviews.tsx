@@ -12,11 +12,15 @@ const REVIEWS_PER_PAGE = 20;
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading, error } = useQuery({
+  // Add explicit refetch function
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['reviews', currentPage, REVIEWS_PER_PAGE],
     queryFn: async () => {
       console.log('Starting reviews fetch for page:', currentPage);
       try {
+        // Clear old data from the supabase client cache
+        await supabase.auth.refreshSession();
+        
         // First get total count of approved reviews
         const { count: totalCount, error: countError } = await supabase
           .from('reviews')
@@ -33,6 +37,7 @@ const Reviews = () => {
         console.log('Numero totale di recensioni approvate:', totalCount);
 
         if (totalCount === 0) {
+          console.log('No reviews found in database');
           return {
             reviews: [],
             totalCount: 0,
@@ -44,7 +49,7 @@ const Reviews = () => {
         const from = (currentPage - 1) * REVIEWS_PER_PAGE;
         const to = from + REVIEWS_PER_PAGE - 1;
 
-        // Then get paginated reviews
+        // Add cache control headers to prevent Chrome from caching
         const { data: reviewsData, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
@@ -81,11 +86,11 @@ const Reviews = () => {
         console.log('Raw reviews data:', reviewsData);
         
         if (!reviewsData || reviewsData.length === 0) {
-          console.log('No reviews data returned');
+          console.log('No reviews data returned from query');
           return {
             reviews: [],
-            totalCount: 0,
-            totalPages: 0
+            totalCount: totalCount || 0,
+            totalPages: Math.ceil((totalCount || 0) / REVIEWS_PER_PAGE)
           };
         }
 
@@ -113,9 +118,15 @@ const Reviews = () => {
     staleTime: 0, // Don't cache, always fetch fresh data
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Cap retry delay at 30 seconds
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true, // Changed to true to refetch when window regains focus
     refetchOnReconnect: true
   });
+
+  // Attempt to refetch on mount to ensure fresh data
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Ultime Recensioni"));
@@ -126,7 +137,13 @@ const Reviews = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center text-red-500">
-          Si è verificato un errore nel caricamento delle recensioni. Riprova tra qualche secondo.
+          <p>Si è verificato un errore nel caricamento delle recensioni. Riprova tra qualche secondo.</p>
+          <button 
+            onClick={() => refetch()} 
+            className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+          >
+            Riprova
+          </button>
         </div>
       </div>
     );

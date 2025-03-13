@@ -15,48 +15,72 @@ export default function Index() {
     setPageTitle("Stomale.info | Recensioni su malattie, sintomi e patologie");
   }, []);
 
-  const { data: latestReviews, isLoading, isError } = useQuery({
+  const { data: latestReviews, isLoading, isError, refetch } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
-      console.log('Starting reviews fetch...');
+      console.log('Starting reviews fetch for homepage...');
       
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          title,
-          experience,
-          username,
-          created_at,
-          condition_id,
-          likes_count,
-          comments_count,
-          PATOLOGIE (
+      try {
+        // Force a session refresh to clear any cached data
+        await supabase.auth.refreshSession();
+        
+        const { data, error } = await supabase
+          .from('reviews')
+          .select(`
             id,
-            Patologia
-          )
-        `)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(12);
+            title,
+            experience,
+            username,
+            created_at,
+            condition_id,
+            likes_count,
+            comments_count,
+            PATOLOGIE (
+              id,
+              Patologia
+            )
+          `)
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false })
+          .limit(12);
 
-      if (error) {
-        console.error('Error fetching reviews:', error);
+        if (error) {
+          console.error('Error fetching reviews:', error);
+          throw error;
+        }
+
+        console.log('Fetched reviews for homepage:', data?.length || 0);
+        return data || [];
+      } catch (error) {
+        console.error('Error in homepage reviews fetch:', error);
+        toast.error("Errore nel caricamento delle recensioni");
         throw error;
       }
-
-      console.log('Fetched reviews:', data);
-      return data || [];
-    }
+    },
+    staleTime: 0, // Don't cache results
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    retry: 3
   });
+
+  // Force a refetch on mount
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isError) {
     console.error('Error loading reviews');
-    toast.error("Errore nel caricamento delle recensioni");
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center text-red-500">
-          Si è verificato un errore nel caricamento delle recensioni.
+          <p>Si è verificato un errore nel caricamento delle recensioni.</p>
+          <button 
+            onClick={() => refetch()} 
+            className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+          >
+            Riprova
+          </button>
         </div>
       </div>
     );
