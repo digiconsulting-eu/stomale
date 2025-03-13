@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { setPageTitle } from "@/utils/pageTitle";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle, Activity, MessageSquare } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function Index() {
   useEffect(() => {
@@ -88,100 +88,85 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section with a gradient background */}
-      <div className="relative bg-gradient-to-b from-blue-50 to-white pt-12 pb-24 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/hero-bg-pills.png')] bg-repeat opacity-10"></div>
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 animate-fade-in">
-              Come stai <span className="text-primary">oggi?</span>
+    <div className="w-full overflow-hidden">
+      {/* Hero Section with gradient */}
+      <div className="relative py-20 overflow-hidden bg-gradient-to-br from-blue-50 to-white">
+        <div className="absolute inset-0 z-0 opacity-10 bg-repeat">
+          <div className="absolute w-full h-full bg-[url('/hero-bg-pills.png')] bg-repeat opacity-50"></div>
+        </div>
+        <div className="container relative z-10 mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-6 animate-fade-in">
+              Condividi la tua esperienza
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Leggi e condividi esperienze reali su malattie, sintomi e trattamenti
+            
+            <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Aiuta altri pazienti condividendo la tua storia e scopri le esperienze di chi ha vissuto la tua stessa condizione
             </p>
             
-            <div className="w-full max-w-2xl mx-auto mb-12 relative">
+            <div className="w-full max-w-xl mx-auto mb-12">
               <SearchBar />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                <div className="flex flex-col items-center">
-                  <CheckCircle className="h-12 w-12 text-primary mb-4" />
-                  <h3 className="font-semibold text-gray-800 mb-2">Esperienze Verificate</h3>
-                  <p className="text-gray-600 text-sm text-center">Recensioni reali da persone che hanno vissuto i sintomi</p>
-                </div>
-              </div>
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                <div className="flex flex-col items-center">
-                  <Activity className="h-12 w-12 text-primary mb-4" />
-                  <h3 className="font-semibold text-gray-800 mb-2">Scopri Trattamenti</h3>
-                  <p className="text-gray-600 text-sm text-center">Trova cosa ha funzionato per altre persone</p>
-                </div>
-              </div>
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                <div className="flex flex-col items-center">
-                  <MessageSquare className="h-12 w-12 text-primary mb-4" />
-                  <h3 className="font-semibold text-gray-800 mb-2">Condividi la Tua Storia</h3>
-                  <p className="text-gray-600 text-sm text-center">Aiuta altri pazienti condividendo la tua esperienza</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-12">
+            <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
               <Link to="/nuova-recensione">
-                <Button size="lg" className="bg-primary text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all">
-                  Racconta la tua esperienza <ArrowRight className="ml-2 h-5 w-5" />
+                <Button className="w-full sm:w-auto text-base px-8 py-6 bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all">
+                  Scrivi una recensione
+                </Button>
+              </Link>
+              <Link to="/cerca-patologia">
+                <Button variant="outline" className="w-full sm:w-auto text-base px-8 py-6 border-2 shadow-md hover:shadow-lg transition-all">
+                  Esplora patologie
                 </Button>
               </Link>
             </div>
           </div>
         </div>
-        
-        {/* Wave separator */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full">
-            <path fill="#f9fafb" fillOpacity="1" d="M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,218.7C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-          </svg>
-        </div>
+      </div>
+      
+      {/* Wave separator */}
+      <div className="w-full">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" className="w-full h-20 -mt-1">
+          <path 
+            fill="#f9fafb" 
+            fillOpacity="1" 
+            d="M0,64L80,58.7C160,53,320,43,480,48C640,53,800,75,960,74.7C1120,75,1280,53,1360,42.7L1440,32L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+          ></path>
+        </svg>
       </div>
       
       {/* Reviews Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-10">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">Recensioni recenti</h2>
-              <p className="text-gray-600 mt-2">Esperienze condivise da altri pazienti</p>
-            </div>
+          <div className="flex justify-between items-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-primary relative">
+              <span className="relative z-10">Recensioni in evidenza</span>
+              <span className="absolute -bottom-2 left-0 w-12 h-1.5 bg-blue-200 rounded-full"></span>
+            </h2>
             <Link to="/recensioni" className="group">
-              <Button variant="outline" className="rounded-full border-primary text-primary hover:bg-primary hover:text-white">
+              <Button variant="outline" className="border-2 border-gray-200 bg-white hover:bg-gray-50 flex items-center gap-2">
                 Tutte le recensioni
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
           </div>
           
           {isLoading ? (
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl p-6 shadow-sm h-[320px]">
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/4 mb-6" />
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-3/4 mb-6" />
-                  <Skeleton className="h-20 w-full mb-4" />
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl p-6 shadow-sm h-[300px]">
+                  <Skeleton className="h-5 w-3/4 mb-4" />
+                  <Skeleton className="h-4 w-1/4 mb-8" />
+                  <Skeleton className="h-32 w-full mb-4" />
                   <div className="flex justify-between">
-                    <Skeleton className="h-10 w-1/3" />
-                    <Skeleton className="h-10 w-1/3" />
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-4 w-1/5" />
                   </div>
                 </div>
               ))}
             </div>
           ) : latestReviews && latestReviews.length > 0 ? (
-            <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {latestReviews.map((review) => (
                 <ReviewCard
                   key={review.id}
@@ -200,54 +185,12 @@ export default function Index() {
             <div className="text-center py-12 bg-white rounded-lg shadow-sm">
               <p className="text-gray-500 mb-4">Non ci sono ancora recensioni approvate.</p>
               <Link to="/nuova-recensione">
-                <Button className="bg-primary hover:bg-primary/90 text-white rounded-full">
+                <Button className="bg-primary hover:bg-primary/90 text-white">
                   Scrivi la prima recensione
                 </Button>
               </Link>
             </div>
           )}
-          
-          <div className="mt-12 text-center">
-            <Link to="/cerca-patologia" className="inline-block">
-              <Button variant="outline" size="lg" className="border-2 border-gray-200 rounded-full px-8">
-                Esplora tutte le patologie
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-      
-      {/* Stats Section */}
-      <section className="bg-gradient-to-r from-blue-500 to-blue-600 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold">Perché Stomale.info?</h2>
-            <p className="mt-2 text-blue-100">Una comunità per supportarsi a vicenda</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="text-4xl font-bold mb-2">5000+</div>
-              <div className="text-blue-100">Recensioni condivise</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold mb-2">3200+</div>
-              <div className="text-blue-100">Utenti registrati</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold mb-2">800+</div>
-              <div className="text-blue-100">Patologie recensite</div>
-            </div>
-          </div>
-          
-          <div className="mt-12 text-center">
-            <Link to="/register">
-              <Button className="bg-white text-blue-600 hover:bg-blue-50 rounded-full px-8 py-6 text-lg font-medium shadow-lg">
-                Unisciti alla nostra comunità
-              </Button>
-            </Link>
-          </div>
         </div>
       </section>
     </div>
