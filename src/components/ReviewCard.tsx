@@ -27,14 +27,12 @@ export const ReviewCard = ({
   commentsCount = 0,
   onDelete,
 }: ReviewCardProps) => {
-  // Log the review data to debug
-  console.log(`ReviewCard for ID ${id}, title: ${title}, commentsCount:`, commentsCount);
-  
-  // Ensure commentsCount is a valid number
+  // Ensure comment count is always a valid number
   const displayCommentsCount = typeof commentsCount === 'number' && !isNaN(commentsCount) ? commentsCount : 0;
   
+  console.log(`ReviewCard ${id} (${title}) rendering with comments count:`, displayCommentsCount, 'raw value:', commentsCount);
+  
   const formatUrlPath = (text: string) => {
-    // Utilizzare spazi codificati (%20) al posto dei trattini
     return text.trim().toLowerCase();
   };
 

@@ -89,39 +89,15 @@ const Reviews = () => {
           };
         }
 
-        // Force async update of comments_count for all reviews to reflect actual counts
-        const updatePromises = reviewsData.map(async (review) => {
-          const { count } = await supabase
-            .from('comments')
-            .select('*', { count: 'exact' })
-            .eq('review_id', review.id)
-            .eq('status', 'approved');
-          
-          if (count !== review.comments_count) {
-            console.log(`Updating comments_count for review ${review.id} from ${review.comments_count} to ${count}`);
-            
-            // Update in database
-            await supabase
-              .from('reviews')
-              .update({ comments_count: count })
-              .eq('id', review.id);
-            
-            // Update in local data
-            review.comments_count = count;
-          }
-          
-          return {
-            ...review,
-            username: review.username || 'Anonimo',
-            // Ensure comments_count is a number
-            comments_count: count
-          };
-        });
-        
-        // Wait for all updates to complete
-        const transformedReviews = await Promise.all(updatePromises) as DatabaseReview[];
+        // Transform reviews without relying on additional DB calls
+        const transformedReviews = reviewsData.map(review => ({
+          ...review,
+          username: review.username || 'Anonimo',
+          // Ensure comments_count is always a number
+          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0
+        })) as DatabaseReview[];
 
-        console.log('Transformed reviews with updated counts:', transformedReviews);
+        console.log('Transformed reviews:', transformedReviews);
 
         return {
           reviews: transformedReviews,
@@ -134,7 +110,7 @@ const Reviews = () => {
         throw error;
       }
     },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 0, // Don't cache, always fetch fresh data
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Cap retry delay at 30 seconds
     refetchOnWindowFocus: false,
