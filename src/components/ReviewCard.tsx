@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Trash2, Heart, MessageCircle } from "lucide-react";
+import { generateReviewPath } from "@/utils/urlUtils";
 
 interface ReviewCardProps {
   id: number;
@@ -65,16 +66,16 @@ export const ReviewCard = ({
         </Link>
         <p className="text-gray-600 line-clamp-2 mb-4">{preview}</p>
         
-        {/* Likes and Comments counts */}
+        {/* Likes and Comments counts - Now clickable */}
         <div className="flex items-center gap-6 mb-4 text-gray-500">
-          <div className="flex items-center gap-2">
+          <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
             <Heart className="h-5 w-5 text-red-400" />
             <span className="text-gray-600">{likesCount || 0}</span>
-          </div>
-          <div className="flex items-center gap-2">
+          </Link>
+          <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
             <MessageCircle className="h-5 w-5 text-green-500" />
             <span className="text-gray-600">{displayCommentsCount}</span>
-          </div>
+          </Link>
         </div>
         
         <Button 
