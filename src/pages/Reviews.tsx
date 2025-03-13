@@ -89,13 +89,39 @@ const Reviews = () => {
           };
         }
 
-        // Transform the data to ensure username is properly handled
-        const transformedReviews = reviewsData.map(review => ({
-          ...review,
-          username: review.username || 'Anonimo'
-        })) as DatabaseReview[];
+        // Force async update of comments_count for all reviews to reflect actual counts
+        const updatePromises = reviewsData.map(async (review) => {
+          const { count } = await supabase
+            .from('comments')
+            .select('*', { count: 'exact' })
+            .eq('review_id', review.id)
+            .eq('status', 'approved');
+          
+          if (count !== review.comments_count) {
+            console.log(`Updating comments_count for review ${review.id} from ${review.comments_count} to ${count}`);
+            
+            // Update in database
+            await supabase
+              .from('reviews')
+              .update({ comments_count: count })
+              .eq('id', review.id);
+            
+            // Update in local data
+            review.comments_count = count;
+          }
+          
+          return {
+            ...review,
+            username: review.username || 'Anonimo',
+            // Ensure comments_count is a number
+            comments_count: count
+          };
+        });
+        
+        // Wait for all updates to complete
+        const transformedReviews = await Promise.all(updatePromises) as DatabaseReview[];
 
-        console.log('Transformed reviews:', transformedReviews);
+        console.log('Transformed reviews with updated counts:', transformedReviews);
 
         return {
           reviews: transformedReviews,

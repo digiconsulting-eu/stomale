@@ -27,15 +27,20 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
         return null;
       }
 
-      // Effettuiamo una query per verificare il conteggio dei commenti attuale
-      const { count } = await supabase
+      // First fetch the actual comment count directly
+      const { count: actualCommentsCount, error: countError } = await supabase
         .from('comments')
         .select('*', { count: 'exact' })
         .eq('review_id', reviewId)
         .eq('status', 'approved');
       
-      console.log(`Found ${count} approved comments for review ID ${reviewId}`);
+      if (countError) {
+        console.error('Error fetching comment count:', countError);
+      }
+      
+      console.log(`Found ${actualCommentsCount} approved comments for review ID ${reviewId}`);
 
+      // Then fetch the review data
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -65,25 +70,23 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
         return null;
       }
 
-      // Log del conteggio dei commenti nella recensione
-      console.log(`Review ID ${reviewId} has comments_count: ${data.comments_count} in the database`);
+      // Always update the comment count in the returned data
+      console.log(`Review ID ${reviewId} has stored comments_count: ${data.comments_count}, actual count: ${actualCommentsCount}`);
       
-      // Se il conteggio dei commenti nel database è diverso da quelli trovati, aggiorniamo
-      if (data.comments_count !== count) {
-        console.log(`Updating comments_count for review ID ${reviewId} from ${data.comments_count} to ${count}`);
+      // Force the comments_count to match the actual count
+      data.comments_count = actualCommentsCount;
+      
+      // Also update in the database if there's a mismatch
+      if (data.comments_count !== actualCommentsCount) {
+        console.log(`Updating database comments_count for review ID ${reviewId} from ${data.comments_count} to ${actualCommentsCount}`);
         
-        // Aggiorniamo il conteggio dei commenti nella recensione
-        const { error: updateError } = await supabase
+        await supabase
           .from('reviews')
-          .update({ comments_count: count })
+          .update({ comments_count: actualCommentsCount })
           .eq('id', reviewId);
-          
-        if (!updateError) {
-          data.comments_count = count;
-        }
       }
 
-      console.log('Fetched review:', data);
+      console.log('Returning review with comments_count:', data.comments_count);
       return data;
     },
     meta: {
