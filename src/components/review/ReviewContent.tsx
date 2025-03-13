@@ -1,3 +1,4 @@
+
 import { Disclaimer } from "@/components/Disclaimer";
 import { ReviewStats } from "@/components/ReviewStats";
 import { ReviewHeader } from "./ReviewHeader";
@@ -68,17 +69,31 @@ export const ReviewContent = ({
     setIsLiking(true);
     
     try {
-      setLikesCount(prevCount => prevCount + 1);
+      // Store the current value to use in the API call
+      const newLikesCount = likesCount + 1;
+      
+      setLikesCount(newLikesCount);
       setHasLiked(true);
+      
+      // Fetch the current likes count from the database to ensure accuracy
+      const { data: currentReview } = await supabase
+        .from('reviews')
+        .select('likes_count')
+        .eq('id', parseInt(reviewId))
+        .single();
+      
+      // Use the database value (or fallback to our calculated value if fetch fails)
+      const currentLikesCount = currentReview?.likes_count ?? (likesCount);
+      const updatedLikesCount = currentLikesCount + 1;
       
       const { error } = await supabase
         .from('reviews')
-        .update({ likes_count: likesCount + 1 })
+        .update({ likes_count: updatedLikesCount })
         .eq('id', parseInt(reviewId));
         
       if (error) {
         console.error('Error updating likes count:', error);
-        setLikesCount(prevCount => prevCount - 1);
+        setLikesCount(likesCount); // Revert to original count
         setHasLiked(false);
         toast.error("Errore nell'aggiornamento dei like. Riprova più tardi.");
         return;
@@ -95,7 +110,7 @@ export const ReviewContent = ({
       
     } catch (error) {
       console.error('Error in like function:', error);
-      setLikesCount(prevCount => prevCount - 1);
+      setLikesCount(likesCount); // Revert to original count
       setHasLiked(false);
       toast.error("Si è verificato un errore. Riprova più tardi.");
     } finally {
