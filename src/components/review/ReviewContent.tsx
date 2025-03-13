@@ -12,7 +12,7 @@ import { ReviewCard } from "@/components/ReviewCard";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 interface ReviewContentProps {
@@ -52,6 +52,14 @@ export const ReviewContent = ({
   const [isLiking, setIsLiking] = useState(false);
   const [hasLiked, setHasLiked] = useState(false);
   
+  // Check if user already liked this review on component mount
+  useEffect(() => {
+    const hasAlreadyLiked = localStorage.getItem(`review_liked_${reviewId}`) === 'true';
+    if (hasAlreadyLiked) {
+      setHasLiked(true);
+    }
+  }, [reviewId]);
+  
   const handleLike = async () => {
     if (isLiking || hasLiked) return;
     
@@ -75,7 +83,13 @@ export const ReviewContent = ({
       toast.success("Grazie per il tuo apprezzamento!");
       
       // Store like in localStorage to remember user liked this review
-      localStorage.setItem(`review_liked_${reviewId}`, 'true');
+      try {
+        localStorage.setItem(`review_liked_${reviewId}`, 'true');
+        console.log(`Like saved for review ${reviewId}`);
+      } catch (storageError) {
+        console.error('Error saving like to localStorage:', storageError);
+        // Continue even if localStorage fails - at least the like was counted in the database
+      }
       
     } catch (error) {
       console.error('Error in like function:', error);
@@ -84,14 +98,6 @@ export const ReviewContent = ({
       setIsLiking(false);
     }
   };
-
-  // Check if user already liked this review on component mount
-  useState(() => {
-    const hasAlreadyLiked = localStorage.getItem(`review_liked_${reviewId}`) === 'true';
-    if (hasAlreadyLiked) {
-      setHasLiked(true);
-    }
-  });
 
   const { data: otherReviews } = useQuery({
     queryKey: ['condition-reviews', condition],

@@ -33,11 +33,8 @@ export const ReviewCard = ({
   
   console.log(`ReviewCard ${id} (${title}) rendering with comments count:`, displayCommentsCount, 'raw value:', commentsCount);
   
-  const formatUrlPath = (text: string) => {
-    return text.trim().toLowerCase();
-  };
-
-  const reviewPath = `/patologia/${formatUrlPath(condition)}/esperienza/${id}-${formatUrlPath(title).replace(/\s+/g, '-')}`;
+  // Generate the review path using our utility function
+  const reviewPath = generateReviewPath(condition, id, title);
 
   return (
     <Card className="bg-white rounded-3xl border border-[#1EAEDB] shadow-sm">
@@ -59,7 +56,7 @@ export const ReviewCard = ({
         </div>
         <p className="text-sm text-gray-500 mb-2">{username}</p>
         <Link 
-          to={`/patologia/${formatUrlPath(condition)}`}
+          to={`/patologia/${condition.trim().toLowerCase()}`}
           className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
         >
           {condition.toUpperCase()}
