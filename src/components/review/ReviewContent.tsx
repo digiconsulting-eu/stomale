@@ -1,4 +1,3 @@
-
 import { Disclaimer } from "@/components/Disclaimer";
 import { ReviewStats } from "@/components/ReviewStats";
 import { ReviewHeader } from "./ReviewHeader";
@@ -58,7 +57,6 @@ export const ReviewContent = ({
     setIsLiking(true);
     
     try {
-      // Update likes count in the database
       const { error } = await supabase
         .from('reviews')
         .update({ likes_count: likesCount + 1 })
@@ -70,7 +68,6 @@ export const ReviewContent = ({
         return;
       }
       
-      // Update local state
       setLikesCount(prevCount => prevCount + 1);
       setHasLiked(true);
       toast.success("Grazie per il tuo apprezzamento!");
@@ -124,7 +121,6 @@ export const ReviewContent = ({
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Back link */}
         <Link 
           to={`/patologia/${condition.toLowerCase()}`}
           className="inline-flex items-center text-primary hover:text-primary/80 mb-6 text-sm"
@@ -134,7 +130,6 @@ export const ReviewContent = ({
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main content */}
           <div className="col-span-1 lg:col-span-8 space-y-6">
             <div className="bg-white rounded-xl p-8 shadow-sm">
               <ReviewHeader 
@@ -143,20 +138,6 @@ export const ReviewContent = ({
                 date={date}
                 username={username}
               />
-              
-              {/* Like Button */}
-              <div className="mt-4 flex items-center">
-                <Button 
-                  variant="outline"
-                  className={`flex items-center gap-2 px-4 py-2 ${hasLiked ? 'bg-red-50 text-red-500 border-red-200' : 'hover:bg-red-50 hover:text-red-500 hover:border-red-200'}`}
-                  onClick={handleLike}
-                  disabled={isLiking || hasLiked}
-                >
-                  <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                  <span className="font-medium">{likesCount}</span>
-                  <span className="ml-1">{hasLiked ? 'Apprezzato' : 'Apprezza'}</span>
-                </Button>
-              </div>
 
               <div className="mt-8">
                 <h3 className="text-xl font-semibold mb-6">Statistiche della Recensione</h3>
@@ -176,6 +157,18 @@ export const ReviewContent = ({
                   experience={experience}
                 />
               </div>
+
+              <div className="mt-6 flex items-center">
+                <Button 
+                  variant="outline"
+                  className={`flex items-center gap-2 px-4 py-2 ${hasLiked ? 'bg-red-50 text-red-500 border-red-200' : 'hover:bg-red-50 hover:text-red-500 hover:border-red-200'}`}
+                  onClick={handleLike}
+                  disabled={isLiking || hasLiked}
+                >
+                  <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                  <span className="font-medium">{likesCount}</span>
+                </Button>
+              </div>
             </div>
 
             <div className="bg-white rounded-xl p-8 shadow-sm">
@@ -189,7 +182,6 @@ export const ReviewContent = ({
             </div>
           </div>
           
-          {/* Right sidebar */}
           <div className="col-span-1 lg:col-span-4 space-y-6">
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h3 className="text-xl font-semibold mb-4">
