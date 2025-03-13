@@ -171,7 +171,17 @@ export const CommentSection = ({ reviewId, showBottomButton = false }: CommentSe
             </div>
           ))}
 
-          {/* Bottom comment button is also removed as per user request */}
+          {/* Restored bottom comment button */}
+          {showBottomButton && !isCommentBoxOpen && (
+            <div className="flex justify-end mt-6">
+              <Button 
+                onClick={handleOpenCommentBox}
+                className="bg-primary hover:bg-primary/90"
+              >
+                Aggiungi un commento
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
