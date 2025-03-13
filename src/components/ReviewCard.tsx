@@ -30,8 +30,9 @@ export const ReviewCard = ({
 }: ReviewCardProps) => {
   // Ensure comment count is always a valid number
   const displayCommentsCount = typeof commentsCount === 'number' && !isNaN(commentsCount) ? commentsCount : 0;
+  const displayLikesCount = typeof likesCount === 'number' && !isNaN(likesCount) ? likesCount : 0;
   
-  console.log(`ReviewCard ${id} (${title}) rendering with comments count:`, displayCommentsCount, 'raw value:', commentsCount);
+  console.log(`ReviewCard ${id} (${title}) rendering with comments count:`, displayCommentsCount, 'raw value:', commentsCount, 'likes count:', displayLikesCount);
   
   // Generate the review path using our utility function
   const reviewPath = generateReviewPath(condition, id, title);
@@ -67,7 +68,7 @@ export const ReviewCard = ({
         <div className="flex items-center gap-6 mb-4 text-gray-500">
           <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
             <Heart className="h-5 w-5 text-red-400" />
-            <span className="text-gray-600">{likesCount || 0}</span>
+            <span className="text-gray-600">{displayLikesCount}</span>
           </Link>
           <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
             <MessageCircle className="h-5 w-5 text-green-500" />

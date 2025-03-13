@@ -54,9 +54,14 @@ export const ReviewContent = ({
   
   // Check if user already liked this review on component mount
   useEffect(() => {
-    const hasAlreadyLiked = localStorage.getItem(`review_liked_${reviewId}`) === 'true';
-    if (hasAlreadyLiked) {
-      setHasLiked(true);
+    try {
+      const hasAlreadyLiked = localStorage.getItem(`review_liked_${reviewId}`) === 'true';
+      if (hasAlreadyLiked) {
+        setHasLiked(true);
+      }
+    } catch (error) {
+      console.error('Error checking localStorage for likes:', error);
+      // Continue even if localStorage check fails
     }
   }, [reviewId]);
   
@@ -66,7 +71,11 @@ export const ReviewContent = ({
     setIsLiking(true);
     
     try {
-      // Removed authentication check - all users can like now
+      // First update local state immediately for responsive UI
+      setLikesCount(prevCount => prevCount + 1);
+      setHasLiked(true);
+      
+      // Then update the database
       const { error } = await supabase
         .from('reviews')
         .update({ likes_count: likesCount + 1 })
@@ -74,12 +83,13 @@ export const ReviewContent = ({
         
       if (error) {
         console.error('Error updating likes count:', error);
+        // Revert the local state change if the database update failed
+        setLikesCount(prevCount => prevCount - 1);
+        setHasLiked(false);
         toast.error("Errore nell'aggiornamento dei like. Riprova più tardi.");
         return;
       }
       
-      setLikesCount(prevCount => prevCount + 1);
-      setHasLiked(true);
       toast.success("Grazie per il tuo apprezzamento!");
       
       // Store like in localStorage to remember user liked this review
@@ -93,6 +103,9 @@ export const ReviewContent = ({
       
     } catch (error) {
       console.error('Error in like function:', error);
+      // Revert the local state change if there was an error
+      setLikesCount(prevCount => prevCount - 1);
+      setHasLiked(false);
       toast.error("Si è verificato un errore. Riprova più tardi.");
     } finally {
       setIsLiking(false);
@@ -177,14 +190,20 @@ export const ReviewContent = ({
                 />
               </div>
 
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-between items-center">
+                <div className="text-gray-600 flex items-center gap-2">
+                  <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+                  <span>{likesCount} {likesCount === 1 ? 'like' : 'likes'}</span>
+                </div>
+                
                 <Button 
                   variant="outline"
                   className={`flex items-center ${hasLiked ? 'bg-red-50 text-red-500 border-red-200' : 'hover:bg-red-50 hover:text-red-500 hover:border-red-200'}`}
                   onClick={handleLike}
                   disabled={isLiking || hasLiked}
                 >
-                  <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                  <Heart className={`h-5 w-5 mr-2 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                  {hasLiked ? 'Apprezzato' : 'Apprezza'}
                 </Button>
               </div>
             </div>
