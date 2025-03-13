@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -76,7 +77,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       const { data: patologiaData, error: patologiaError } = await supabase
         .from('PATOLOGIE')
         .select('id')
-        .eq('Patologia', data.condition.toUpperCase())
+        .eq('Patologia', data.condition)
         .single();
 
       if (patologiaError || !patologiaData) {
