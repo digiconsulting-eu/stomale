@@ -1,3 +1,4 @@
+
 import { Disclaimer } from "@/components/Disclaimer";
 import { ReviewStats } from "@/components/ReviewStats";
 import { ReviewHeader } from "./ReviewHeader";
@@ -158,15 +159,14 @@ export const ReviewContent = ({
                 />
               </div>
 
-              <div className="mt-6 flex items-center">
+              <div className="mt-6 flex justify-end">
                 <Button 
                   variant="outline"
-                  className={`flex items-center gap-2 px-4 py-2 ${hasLiked ? 'bg-red-50 text-red-500 border-red-200' : 'hover:bg-red-50 hover:text-red-500 hover:border-red-200'}`}
+                  className={`flex items-center ${hasLiked ? 'bg-red-50 text-red-500 border-red-200' : 'hover:bg-red-50 hover:text-red-500 hover:border-red-200'}`}
                   onClick={handleLike}
                   disabled={isLiking || hasLiked}
                 >
                   <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                  <span className="font-medium">{likesCount}</span>
                 </Button>
               </div>
             </div>
