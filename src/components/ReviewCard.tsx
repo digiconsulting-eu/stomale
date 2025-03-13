@@ -27,6 +27,9 @@ export const ReviewCard = ({
   commentsCount = 0,
   onDelete,
 }: ReviewCardProps) => {
+  // Debuggare i valori ricevuti
+  console.log(`ReviewCard for ID ${id}, title: ${title}, commentsCount: ${commentsCount}`);
+  
   const formatUrlPath = (text: string) => {
     // Utilizzare spazi codificati (%20) al posto dei trattini
     return text.trim().toLowerCase();
@@ -65,11 +68,11 @@ export const ReviewCard = ({
         <div className="flex items-center gap-6 mb-4 text-gray-500">
           <div className="flex items-center gap-2">
             <Heart className="h-5 w-5 text-red-400" />
-            <span className="text-gray-600">{likesCount}</span>
+            <span className="text-gray-600">{likesCount || 0}</span>
           </div>
           <div className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5 text-green-500" />
-            <span className="text-gray-600">{commentsCount}</span>
+            <span className="text-gray-600">{commentsCount || 0}</span>
           </div>
         </div>
         

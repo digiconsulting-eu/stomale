@@ -64,10 +64,17 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
 
         console.log('Successfully fetched reviews:', data);
         
+        // Check if all records have comments_count
+        data?.forEach(review => {
+          console.log(`Review ID ${review.id}, Title: ${review.title}, Comments Count: ${review.comments_count}`);
+        });
+        
         // Transform the data to ensure username is properly handled
         const transformedReviews = data?.map(review => ({
           ...review,
-          username: review.username || 'Anonimo'
+          username: review.username || 'Anonimo',
+          // Ensure comments_count is a number or 0
+          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0
         })) || [];
 
         console.log('Transformed reviews:', transformedReviews);

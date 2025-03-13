@@ -54,6 +54,9 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
     <div className="space-y-4">
       {reviews.map((review) => {
         console.log('Rendering review:', review);
+        // Assicuriamoci che commentsCount sia un numero
+        const commentsCount = typeof review.comments_count === 'number' ? review.comments_count : 0;
+        
         return (
           <ReviewCard 
             key={review.id}
@@ -64,7 +67,7 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
             preview={review.experience.slice(0, 200) + '...'}
             username={review.username}
             likesCount={review.likes_count || 0}
-            commentsCount={review.comments_count || 0}
+            commentsCount={commentsCount}
           />
         );
       })}

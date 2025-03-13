@@ -27,6 +27,15 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
         return null;
       }
 
+      // Effettuiamo una query per verificare il conteggio dei commenti attuale
+      const { count } = await supabase
+        .from('comments')
+        .select('*', { count: 'exact' })
+        .eq('review_id', reviewId)
+        .eq('status', 'approved');
+      
+      console.log(`Found ${count} approved comments for review ID ${reviewId}`);
+
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -54,6 +63,24 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
       if (data.PATOLOGIE?.Patologia.toLowerCase() !== decodeURIComponent(condition).toLowerCase()) {
         console.log('Condition mismatch');
         return null;
+      }
+
+      // Log del conteggio dei commenti nella recensione
+      console.log(`Review ID ${reviewId} has comments_count: ${data.comments_count} in the database`);
+      
+      // Se il conteggio dei commenti nel database è diverso da quelli trovati, aggiorniamo
+      if (data.comments_count !== count) {
+        console.log(`Updating comments_count for review ID ${reviewId} from ${data.comments_count} to ${count}`);
+        
+        // Aggiorniamo il conteggio dei commenti nella recensione
+        const { error: updateError } = await supabase
+          .from('reviews')
+          .update({ comments_count: count })
+          .eq('id', reviewId);
+          
+        if (!updateError) {
+          data.comments_count = count;
+        }
       }
 
       console.log('Fetched review:', data);
