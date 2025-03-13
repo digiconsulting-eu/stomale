@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -170,14 +171,14 @@ export const CommentSection = ({ reviewId, showBottomButton = false }: CommentSe
         <div className="space-y-4 mt-8">
           <h3 className="text-xl font-semibold mb-4">Commenti</h3>
           {commentsData.map((comment) => (
-            <div key={comment.id} className="bg-gray-50 p-4 rounded-lg">
+            <div key={comment.id} className="bg-gradient-to-r from-[#E4F1FF] to-[#F0F8FF] p-4 rounded-lg shadow-sm border border-[#D0E6FF]">
               <div className="flex justify-between items-start mb-2">
-                <span className="font-medium">{comment.users?.username || 'Utente'}</span>
-                <span className="text-sm text-gray-500">
+                <span className="font-medium text-[#2C3E50]">{comment.users?.username || 'Utente'}</span>
+                <span className="text-sm text-[#8E9196]">
                   {new Date(comment.created_at).toLocaleDateString('it-IT')}
                 </span>
               </div>
-              <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+              <p className="text-[#2C3E50] whitespace-pre-wrap">{comment.content}</p>
             </div>
           ))}
 
