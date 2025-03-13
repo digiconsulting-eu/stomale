@@ -1,4 +1,3 @@
-
 import { Disclaimer } from "@/components/Disclaimer";
 import { ReviewStats } from "@/components/ReviewStats";
 import { ReviewHeader } from "./ReviewHeader";
@@ -52,7 +51,6 @@ export const ReviewContent = ({
   const [isLiking, setIsLiking] = useState(false);
   const [hasLiked, setHasLiked] = useState(false);
   
-  // Check if user already liked this review on component mount
   useEffect(() => {
     try {
       const hasAlreadyLiked = localStorage.getItem(`review_liked_${reviewId}`) === 'true';
@@ -61,7 +59,6 @@ export const ReviewContent = ({
       }
     } catch (error) {
       console.error('Error checking localStorage for likes:', error);
-      // Continue even if localStorage check fails
     }
   }, [reviewId]);
   
@@ -71,11 +68,9 @@ export const ReviewContent = ({
     setIsLiking(true);
     
     try {
-      // First update local state immediately for responsive UI
       setLikesCount(prevCount => prevCount + 1);
       setHasLiked(true);
       
-      // Then update the database
       const { error } = await supabase
         .from('reviews')
         .update({ likes_count: likesCount + 1 })
@@ -83,7 +78,6 @@ export const ReviewContent = ({
         
       if (error) {
         console.error('Error updating likes count:', error);
-        // Revert the local state change if the database update failed
         setLikesCount(prevCount => prevCount - 1);
         setHasLiked(false);
         toast.error("Errore nell'aggiornamento dei like. Riprova più tardi.");
@@ -92,18 +86,15 @@ export const ReviewContent = ({
       
       toast.success("Grazie per il tuo apprezzamento!");
       
-      // Store like in localStorage to remember user liked this review
       try {
         localStorage.setItem(`review_liked_${reviewId}`, 'true');
         console.log(`Like saved for review ${reviewId}`);
       } catch (storageError) {
         console.error('Error saving like to localStorage:', storageError);
-        // Continue even if localStorage fails - at least the like was counted in the database
       }
       
     } catch (error) {
       console.error('Error in like function:', error);
-      // Revert the local state change if there was an error
       setLikesCount(prevCount => prevCount - 1);
       setHasLiked(false);
       toast.error("Si è verificato un errore. Riprova più tardi.");
@@ -202,8 +193,7 @@ export const ReviewContent = ({
                   onClick={handleLike}
                   disabled={isLiking || hasLiked}
                 >
-                  <Heart className={`h-5 w-5 mr-2 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                  {hasLiked ? 'Apprezzato' : 'Apprezza'}
+                  <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
               </div>
             </div>
