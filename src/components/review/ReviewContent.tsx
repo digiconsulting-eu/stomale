@@ -1,19 +1,12 @@
 
 import { Disclaimer } from "@/components/Disclaimer";
-import { ReviewStats } from "@/components/ReviewStats";
-import { ReviewHeader } from "./ReviewHeader";
-import { ReviewBody } from "./ReviewBody";
-import { ReviewActions } from "./ReviewActions";
 import { CommentSection } from "@/components/comments/CommentSection";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { ReviewCard } from "@/components/ReviewCard";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
+import { ReviewMainContent } from "./ReviewMainContent";
+import { ReviewActions } from "./ReviewActions";
+import { RelatedReviews } from "./RelatedReviews";
 
 interface ReviewContentProps {
   title: string;
@@ -46,116 +39,8 @@ export const ReviewContent = ({
   socialDiscomfort,
   reviewId,
   username,
-  likesCount: initialLikesCount = 0
+  likesCount = 0
 }: ReviewContentProps) => {
-  const [likesCount, setLikesCount] = useState(initialLikesCount);
-  const [isLiking, setIsLiking] = useState(false);
-  const [hasLiked, setHasLiked] = useState(false);
-  
-  useEffect(() => {
-    try {
-      const hasAlreadyLiked = localStorage.getItem(`review_liked_${reviewId}`) === 'true';
-      if (hasAlreadyLiked) {
-        setHasLiked(true);
-      }
-    } catch (error) {
-      console.error('Error checking localStorage for likes:', error);
-    }
-  }, [reviewId]);
-  
-  const handleLike = async () => {
-    if (isLiking || hasLiked) return;
-    
-    setIsLiking(true);
-    
-    try {
-      // Store the current value to use in the API call
-      const newLikesCount = likesCount + 1;
-      
-      setLikesCount(newLikesCount);
-      setHasLiked(true);
-      
-      // Fetch the current likes count from the database to ensure accuracy
-      const { data: currentReview } = await supabase
-        .from('reviews')
-        .select('likes_count')
-        .eq('id', parseInt(reviewId))
-        .single();
-      
-      // Use the database value (or fallback to our calculated value if fetch fails)
-      const currentLikesCount = currentReview?.likes_count ?? (likesCount);
-      const updatedLikesCount = currentLikesCount + 1;
-      
-      const { error } = await supabase
-        .from('reviews')
-        .update({ likes_count: updatedLikesCount })
-        .eq('id', parseInt(reviewId));
-        
-      if (error) {
-        console.error('Error updating likes count:', error);
-        setLikesCount(likesCount); // Revert to original count
-        setHasLiked(false);
-        toast.error("Errore nell'aggiornamento dei like. Riprova più tardi.");
-        return;
-      }
-      
-      toast.success("Grazie per il tuo apprezzamento!");
-      
-      try {
-        localStorage.setItem(`review_liked_${reviewId}`, 'true');
-        console.log(`Like saved for review ${reviewId}`);
-      } catch (storageError) {
-        console.error('Error saving like to localStorage:', storageError);
-      }
-      
-    } catch (error) {
-      console.error('Error in like function:', error);
-      setLikesCount(likesCount); // Revert to original count
-      setHasLiked(false);
-      toast.error("Si è verificato un errore. Riprova più tardi.");
-    } finally {
-      setIsLiking(false);
-    }
-  };
-
-  const { data: otherReviews } = useQuery({
-    queryKey: ['condition-reviews', condition],
-    queryFn: async () => {
-      console.log('Fetching other reviews for condition:', condition);
-      const { data: patologiaData } = await supabase
-        .from('PATOLOGIE')
-        .select('id')
-        .eq('Patologia', condition.toUpperCase())
-        .single();
-
-      if (!patologiaData) {
-        throw new Error('Condition not found');
-      }
-
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          title,
-          experience,
-          username,
-          created_at
-        `)
-        .eq('condition_id', patologiaData.id)
-        .eq('status', 'approved')
-        .neq('id', parseInt(reviewId))
-        .limit(5);
-
-      if (error) {
-        console.error('Error fetching other reviews:', error);
-        throw error;
-      }
-
-      console.log('Fetched other reviews:', data);
-      return data;
-    }
-  });
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -169,49 +54,22 @@ export const ReviewContent = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="col-span-1 lg:col-span-8 space-y-6">
-            <div className="bg-white rounded-xl p-8 shadow-sm">
-              <ReviewHeader 
-                title={title}
-                condition={condition}
-                date={date}
-                username={username}
-              />
-
-              <div className="mt-8">
-                <h3 className="text-xl font-semibold mb-6">Statistiche della Recensione</h3>
-                <ReviewStats
-                  diagnosisDifficulty={diagnosisDifficulty}
-                  symptomSeverity={symptomSeverity}
-                  hasMedication={hasMedication}
-                  medicationEffectiveness={medicationEffectiveness}
-                  healingPossibility={healingPossibility}
-                  socialDiscomfort={socialDiscomfort}
-                />
-              </div>
-
-              <div className="mt-8">
-                <ReviewBody 
-                  symptoms={symptoms}
-                  experience={experience}
-                />
-              </div>
-
-              <div className="mt-6 flex justify-between items-center">
-                <div className="text-gray-600 flex items-center gap-2">
-                  <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
-                  <span>{likesCount} {likesCount === 1 ? 'like' : 'likes'}</span>
-                </div>
-                
-                <Button 
-                  variant="outline"
-                  className={`flex items-center ${hasLiked ? 'bg-red-50 text-red-500 border-red-200' : 'hover:bg-red-50 hover:text-red-500 hover:border-red-200'}`}
-                  onClick={handleLike}
-                  disabled={isLiking || hasLiked}
-                >
-                  <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                </Button>
-              </div>
-            </div>
+            <ReviewMainContent 
+              title={title}
+              condition={condition}
+              date={date}
+              symptoms={symptoms}
+              experience={experience}
+              diagnosisDifficulty={diagnosisDifficulty}
+              symptomSeverity={symptomSeverity}
+              hasMedication={hasMedication}
+              medicationEffectiveness={medicationEffectiveness}
+              healingPossibility={healingPossibility}
+              socialDiscomfort={socialDiscomfort}
+              reviewId={reviewId}
+              username={username}
+              likesCount={likesCount}
+            />
 
             <div className="bg-white rounded-xl p-8 shadow-sm">
               <CommentSection reviewId={reviewId} showBottomButton={true} />
@@ -225,24 +83,7 @@ export const ReviewContent = ({
           </div>
           
           <div className="col-span-1 lg:col-span-4 space-y-6">
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h3 className="text-xl font-semibold mb-4">
-                Altre esperienze su {condition.toUpperCase()}
-              </h3>
-              <div className="space-y-4">
-                {otherReviews?.map((review) => (
-                  <ReviewCard
-                    key={review.id}
-                    id={review.id}
-                    title={review.title}
-                    condition={condition}
-                    date={new Date(review.created_at).toLocaleDateString()}
-                    preview={review.experience.slice(0, 150) + '...'}
-                    username={review.username}
-                  />
-                ))}
-              </div>
-            </div>
+            <RelatedReviews condition={condition} reviewId={reviewId} />
           </div>
         </div>
       </div>
