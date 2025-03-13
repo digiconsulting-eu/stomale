@@ -73,11 +73,11 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
 
       console.log('Found username:', userData.username);
 
-      // Get condition ID
+      // Get condition ID - use case-insensitive matching with ilike
       const { data: patologiaData, error: patologiaError } = await supabase
         .from('PATOLOGIE')
         .select('id')
-        .eq('Patologia', data.condition)
+        .ilike('Patologia', data.condition)
         .single();
 
       if (patologiaError || !patologiaData) {

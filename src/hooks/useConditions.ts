@@ -27,7 +27,7 @@ export const useConditions = ({
         .from('PATOLOGIE')
         .select('id, Patologia', { count: 'exact' });
 
-      // Apply search filter if present
+      // Apply search filter if present - using ilike for case-insensitive matching
       if (searchTerm) {
         query = query.ilike('Patologia', `%${searchTerm}%`);
       } 

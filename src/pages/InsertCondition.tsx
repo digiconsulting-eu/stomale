@@ -87,12 +87,14 @@ export default function InsertCondition() {
     try {
       setIsSubmitting(true);
       console.log("Submitting condition:", values);
+      
+      const formattedPatologia = values.patologia.toUpperCase();
 
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .insert([
           {
-            Patologia: values.patologia.toUpperCase(),
+            Patologia: formattedPatologia,
           }
         ])
         .select()
@@ -169,4 +171,4 @@ export default function InsertCondition() {
       </div>
     </div>
   );
-}
+};
