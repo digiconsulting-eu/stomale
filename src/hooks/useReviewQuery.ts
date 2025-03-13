@@ -76,6 +76,11 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
       // Force the comments_count to match the actual count
       data.comments_count = actualCommentsCount;
       
+      // Also ensure likes_count is always a number
+      data.likes_count = typeof data.likes_count === 'number' ? data.likes_count : 0;
+      
+      console.log(`Review has likes_count: ${data.likes_count}`);
+      
       // Also update in the database if there's a mismatch
       if (data.comments_count !== actualCommentsCount) {
         console.log(`Updating database comments_count for review ID ${reviewId} from ${data.comments_count} to ${actualCommentsCount}`);

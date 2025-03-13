@@ -10,7 +10,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewCard } from "@/components/ReviewCard";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface ReviewContentProps {
   title: string;
@@ -26,6 +29,7 @@ interface ReviewContentProps {
   socialDiscomfort: number;
   reviewId: string;
   username?: string;
+  likesCount?: number;
 }
 
 export const ReviewContent = ({ 
@@ -41,8 +45,44 @@ export const ReviewContent = ({
   healingPossibility,
   socialDiscomfort,
   reviewId,
-  username
+  username,
+  likesCount: initialLikesCount = 0
 }: ReviewContentProps) => {
+  const [likesCount, setLikesCount] = useState(initialLikesCount);
+  const [isLiking, setIsLiking] = useState(false);
+  const [hasLiked, setHasLiked] = useState(false);
+  
+  const handleLike = async () => {
+    if (isLiking || hasLiked) return;
+    
+    setIsLiking(true);
+    
+    try {
+      // Update likes count in the database
+      const { error } = await supabase
+        .from('reviews')
+        .update({ likes_count: likesCount + 1 })
+        .eq('id', parseInt(reviewId));
+        
+      if (error) {
+        console.error('Error updating likes count:', error);
+        toast.error("Errore nell'aggiornamento dei like. Riprova più tardi.");
+        return;
+      }
+      
+      // Update local state
+      setLikesCount(prevCount => prevCount + 1);
+      setHasLiked(true);
+      toast.success("Grazie per il tuo apprezzamento!");
+      
+    } catch (error) {
+      console.error('Error in like function:', error);
+      toast.error("Si è verificato un errore. Riprova più tardi.");
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
   const { data: otherReviews } = useQuery({
     queryKey: ['condition-reviews', condition],
     queryFn: async () => {
@@ -103,6 +143,20 @@ export const ReviewContent = ({
                 date={date}
                 username={username}
               />
+              
+              {/* Like Button */}
+              <div className="mt-4 flex items-center">
+                <Button 
+                  variant="outline"
+                  className={`flex items-center gap-2 px-4 py-2 ${hasLiked ? 'bg-red-50 text-red-500 border-red-200' : 'hover:bg-red-50 hover:text-red-500 hover:border-red-200'}`}
+                  onClick={handleLike}
+                  disabled={isLiking || hasLiked}
+                >
+                  <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                  <span className="font-medium">{likesCount}</span>
+                  <span className="ml-1">{hasLiked ? 'Apprezzato' : 'Apprezza'}</span>
+                </Button>
+              </div>
 
               <div className="mt-8">
                 <h3 className="text-xl font-semibold mb-6">Statistiche della Recensione</h3>

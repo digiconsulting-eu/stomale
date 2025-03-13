@@ -50,6 +50,7 @@ const ReviewDetail = () => {
       socialDiscomfort={review.social_discomfort}
       reviewId={review.id.toString()}
       date={new Date(review.created_at).toLocaleDateString('it-IT')}
+      likesCount={review.likes_count || 0}
     />
   );
 };
