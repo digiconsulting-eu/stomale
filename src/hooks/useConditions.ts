@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -45,13 +46,16 @@ export const useConditions = ({
         throw error;
       }
 
+      console.log('Fetched conditions:', data);
+      console.log('Total count:', count);
+
       return {
         conditions: data || [],
         totalCount: count || 0,
         totalPages: Math.ceil((count || 0) / limit)
       };
     },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 0, // No caching, always fetch fresh data
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Cap retry delay at 30 seconds
     refetchOnWindowFocus: false, // Don't refetch on window focus
