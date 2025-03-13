@@ -127,17 +127,6 @@ export const CommentSection = ({ reviewId, showBottomButton = false }: CommentSe
 
   return (
     <div className="space-y-4">
-      {!isCommentBoxOpen && (
-        <div className="flex justify-end">
-          <Button 
-            onClick={handleOpenCommentBox}
-            className="bg-primary hover:bg-primary/90"
-          >
-            Commenta
-          </Button>
-        </div>
-      )}
-
       {isCommentBoxOpen && (
         <form onSubmit={handleSubmitComment} className="space-y-4">
           <Textarea
@@ -182,17 +171,7 @@ export const CommentSection = ({ reviewId, showBottomButton = false }: CommentSe
             </div>
           ))}
 
-          {/* Bottom comment button */}
-          {showBottomButton && !isCommentBoxOpen && (
-            <div className="flex justify-end mt-6">
-              <Button 
-                onClick={handleOpenCommentBox}
-                className="bg-primary hover:bg-primary/90"
-              >
-                Aggiungi un commento
-              </Button>
-            </div>
-          )}
+          {/* Bottom comment button is also removed as per user request */}
         </div>
       )}
     </div>
