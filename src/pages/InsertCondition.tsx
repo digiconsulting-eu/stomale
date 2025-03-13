@@ -108,6 +108,10 @@ export default function InsertCondition() {
       toast.success("Patologia inserita con successo");
       form.reset();
       
+      // Reindirizza alla pagina della patologia appena creata
+      const conditionSlug = values.patologia.trim().toLowerCase();
+      navigate(`/patologia/${conditionSlug}`);
+      
     } catch (error) {
       console.error("Error in submission:", error);
       toast.error("Si è verificato un errore durante l'inserimento");
