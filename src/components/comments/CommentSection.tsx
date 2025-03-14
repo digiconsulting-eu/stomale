@@ -8,17 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';
-
-interface Comment {
-  id: number;
-  content: string;
-  created_at: string;
-  status: string;
-  user_id: string;
-  users?: {
-    username: string;
-  };
-}
+import { DatabaseComment } from '@/types/comment';
 
 interface CommentSectionProps {
   reviewId: string;
@@ -42,6 +32,7 @@ export const CommentSection = ({ reviewId, showBottomButton = false }: CommentSe
           created_at,
           status,
           user_id,
+          review_id,
           users (
             username
           )
@@ -58,7 +49,7 @@ export const CommentSection = ({ reviewId, showBottomButton = false }: CommentSe
       return (data || []).filter(comment => 
         comment.status === 'approved' || 
         (session?.user.id && comment.user_id === session.user.id)
-      ) as Comment[];
+      ) as DatabaseComment[];
     },
     enabled: true,
     meta: {
