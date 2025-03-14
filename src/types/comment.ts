@@ -8,7 +8,7 @@ export interface DatabaseComment {
   created_at: string;
   updated_at?: string;
   users?: {
-    id: string;
+    id?: string;
     username: string;
     email?: string;
   };
