@@ -2,20 +2,10 @@
 import React from 'react';
 import { formatDate } from '@/utils/dateUtils';
 import { Button } from '@/components/ui/button';
-
-interface Comment {
-  id: number;
-  content: string;
-  created_at: string;
-  status: string;
-  user_id: string;
-  users?: {
-    username: string;
-  };
-}
+import { DatabaseComment } from '@/types/comment';
 
 interface CommentListProps {
-  comments: Comment[];
+  comments: DatabaseComment[];
   onOpenCommentForm: () => void;
   showBottomButton: boolean;
 }
