@@ -28,31 +28,33 @@ export const ReviewCard = ({
   commentsCount = 0,
   onDelete,
 }: ReviewCardProps) => {
-  // Ensure counts are always valid numbers
+  // Ensure counts are always valid numbers for Safari
   const displayCommentsCount = typeof commentsCount === 'number' && !isNaN(commentsCount) ? commentsCount : 0;
   const displayLikesCount = typeof likesCount === 'number' && !isNaN(likesCount) ? likesCount : 0;
   
-  console.log(`ReviewCard ${id} rendering with:`, {
+  console.log(`ReviewCard ${id} rendering with Safari compatibility:`, {
+    id,
     condition,
     title,
     commentsCount: displayCommentsCount,
     likesCount: displayLikesCount
   });
   
-  // Ensure condition is a valid string to prevent routing errors
+  // Ensure condition is a valid string to prevent routing errors in Safari
   const safeCondition = condition && typeof condition === 'string' ? condition.trim().toLowerCase() : '';
   
-  // Check for valid ID value
-  if (!id || typeof id !== 'number') {
-    console.error('Invalid review ID:', id);
+  // Check for valid ID value for Safari
+  if (!id || typeof id !== 'number' || isNaN(id)) {
+    console.error('Invalid review ID for Safari:', id);
     return null;
   }
   
-  // Ensure title is valid
-  const safeTitle = title || 'Recensione senza titolo';
+  // Ensure title is valid for Safari
+  const safeTitle = title && typeof title === 'string' ? title : 'Recensione senza titolo';
   
   // Generate the review path using our utility function
   const reviewPath = generateReviewPath(safeCondition, id, safeTitle);
+  console.log('Generated review path for Safari:', reviewPath);
 
   return (
     <Card className="bg-white rounded-3xl border border-[#1EAEDB] shadow-sm">

@@ -10,16 +10,19 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 export const FeaturedReviews = () => {
+  const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
+
   const { data: latestReviews, isLoading, isError, refetch } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
       console.log('Starting reviews fetch for homepage...');
+      setHasAttemptedFetch(true);
       
       try {
         // Force a session refresh to clear any cached data
         await supabase.auth.refreshSession();
         
-        console.log('Fetching latest approved reviews...');
+        console.log('Fetching latest approved reviews for Safari compatibility...');
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -45,28 +48,36 @@ export const FeaturedReviews = () => {
           throw error;
         }
 
-        console.log('Fetched reviews for homepage:', data?.length || 0);
+        console.log('Fetched reviews for homepage:', data?.length || 0, data);
         
         if (!data || data.length === 0) {
           console.log('No reviews found in database');
           return [];
         }
         
-        // Ensure all data fields are properly formatted
+        // Ensure all data fields are properly formatted and deeply check for Safari compatibility
         const processedData = data.map(review => {
-          console.log('Processing review:', review.id, 'with condition:', review.PATOLOGIE);
+          console.log('Processing review for Safari:', review?.id, 'with condition:', review?.PATOLOGIE);
           return {
-            ...review,
+            id: typeof review.id === 'number' ? review.id : 0,
+            title: review.title || 'Titolo non disponibile',
+            experience: review.experience || 'Contenuto non disponibile',
             username: review.username || 'Anonimo',
+            created_at: review.created_at || new Date().toISOString(),
+            condition_id: review.condition_id || 0,
             comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
             likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
-            PATOLOGIE: review.PATOLOGIE || { id: 0, Patologia: 'Sconosciuta' }
+            PATOLOGIE: review.PATOLOGIE ? {
+              id: review.PATOLOGIE.id || 0,
+              Patologia: review.PATOLOGIE.Patologia || 'Sconosciuta'
+            } : { id: 0, Patologia: 'Sconosciuta' }
           };
         });
         
+        console.log('Processed data for Safari:', processedData);
         return processedData;
       } catch (error) {
-        console.error('Error in homepage reviews fetch:', error);
+        console.error('Error in homepage reviews fetch for Safari:', error);
         toast.error("Errore nel caricamento delle recensioni");
         throw error;
       }
@@ -74,13 +85,35 @@ export const FeaturedReviews = () => {
     staleTime: 0, 
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    retry: 3
+    retry: 5,  // Increase retry attempts for Safari
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000)  // Cap at 10 seconds
   });
 
-  // Force a refetch on mount
+  // Force a refetch on mount and make it more aggressive for Safari
   useEffect(() => {
-    console.log('Refetching latest reviews on FeaturedReviews component mount');
-    refetch();
+    console.log('FeaturedReviews component mounted - forcing refetch for Safari');
+    
+    // Clear any stale query cache that might be causing issues in Safari
+    const fetchData = async () => {
+      try {
+        await refetch();
+        console.log('Refetch completed');
+      } catch (error) {
+        console.error('Error during refetch:', error);
+      }
+    };
+
+    fetchData();
+
+    // Add a redundant fetch after a small delay for Safari
+    const timer = setTimeout(() => {
+      if (!hasAttemptedFetch) {
+        console.log('Backup fetch for Safari after timeout');
+        fetchData();
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -137,7 +170,7 @@ export const FeaturedReviews = () => {
                 title={review.title}
                 condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
                 date={new Date(review.created_at).toLocaleDateString()}
-                preview={review.experience.slice(0, 150) + '...'}
+                preview={review.experience ? (review.experience.slice(0, 150) + '...') : 'Nessun contenuto disponibile'}
                 username={review.username || 'Anonimo'}
                 likesCount={review.likes_count || 0}
                 commentsCount={review.comments_count || 0}
