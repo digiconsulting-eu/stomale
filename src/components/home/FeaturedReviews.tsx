@@ -55,27 +55,21 @@ export const FeaturedReviews = () => {
           return [];
         }
         
-        // Ensure all data fields are properly formatted and deeply check for compatibility
-        const processedData = data.map(review => {
-          console.log('Processing review:', review?.id, 'with condition:', review?.PATOLOGIE);
-          return {
-            id: typeof review.id === 'number' ? review.id : 0,
-            title: review.title || 'Titolo non disponibile',
-            experience: review.experience || 'Contenuto non disponibile',
-            username: review.username || 'Anonimo',
-            created_at: review.created_at || new Date().toISOString(),
-            condition_id: review.condition_id || 0,
-            comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
-            likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
-            PATOLOGIE: review.PATOLOGIE ? {
-              id: review.PATOLOGIE.id || 0,
-              Patologia: review.PATOLOGIE.Patologia || 'Sconosciuta'
-            } : { id: 0, Patologia: 'Sconosciuta' }
-          };
-        });
-        
-        console.log('Processed data for homepage:', processedData);
-        return processedData;
+        // Process the data to ensure all fields are properly formatted
+        return data.map(review => ({
+          id: review.id,
+          title: review.title || 'Titolo non disponibile',
+          experience: review.experience || 'Contenuto non disponibile',
+          username: review.username || 'Anonimo',
+          created_at: review.created_at || new Date().toISOString(),
+          condition_id: review.condition_id || 0,
+          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
+          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
+          PATOLOGIE: review.PATOLOGIE ? {
+            id: review.PATOLOGIE.id || 0,
+            Patologia: review.PATOLOGIE.Patologia || 'Sconosciuta'
+          } : { id: 0, Patologia: 'Sconosciuta' }
+        }));
       } catch (error) {
         console.error('Error in homepage reviews fetch:', error);
         toast.error("Errore nel caricamento delle recensioni");
