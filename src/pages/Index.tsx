@@ -51,7 +51,15 @@ export default function Index() {
         }
 
         console.log('Fetched reviews for homepage:', data?.length || 0);
-        return data || [];
+        
+        // Ensure comments_count is always a number
+        const processedData = data?.map(review => ({
+          ...review,
+          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
+          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0
+        }));
+        
+        return processedData || [];
       } catch (error) {
         console.error('Error in homepage reviews fetch:', error);
         toast.error("Errore nel caricamento delle recensioni");
