@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Heart, MessageCircle } from "lucide-react";
+import { ArrowRight, Heart, MessageCircle, Trash2 } from "lucide-react";
 import { generateReviewPath } from "@/utils/urlUtils";
 
 interface ReviewCardProps {
