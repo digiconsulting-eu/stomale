@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Trash2, Heart, MessageCircle } from "lucide-react";
+import { ArrowRight, Heart, MessageCircle } from "lucide-react";
 import { generateReviewPath } from "@/utils/urlUtils";
 
 interface ReviewCardProps {
@@ -88,7 +88,7 @@ export const ReviewCard = ({
         {/* Likes and Comments counts with filled red heart */}
         <div className="flex items-center gap-6 mb-4 text-gray-500">
           <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
-            <Heart className="h-5 w-5 fill-red-500 text-red-500" />
+            <Heart className="h-5 w-5 fill-red-500 text-red-500" stroke="red" />
             <span className="text-gray-600">{displayLikesCount}</span>
           </Link>
           <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
