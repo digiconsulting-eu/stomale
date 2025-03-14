@@ -84,7 +84,7 @@ export const ReviewLikeButton = ({ reviewId, initialLikesCount }: ReviewLikeButt
   return (
     <div className="mt-6 flex justify-between items-center">
       <div className="text-gray-600 flex items-center gap-2">
-        <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : 'text-red-500'}`} />
+        <Heart className="h-5 w-5 fill-red-500 text-red-500" />
         <span>{likesCount} {likesCount === 1 ? 'like' : 'likes'}</span>
       </div>
       
@@ -94,7 +94,7 @@ export const ReviewLikeButton = ({ reviewId, initialLikesCount }: ReviewLikeButt
         onClick={handleLike}
         disabled={isLiking || hasLiked}
       >
-        <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500' : 'fill-red-500'}`} />
+        <Heart className="h-5 w-5 fill-red-500" />
       </Button>
     </div>
   );

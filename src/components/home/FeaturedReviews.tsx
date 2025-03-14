@@ -22,7 +22,7 @@ export const FeaturedReviews = () => {
         // Force a session refresh to clear any cached data
         await supabase.auth.refreshSession();
         
-        console.log('Fetching latest approved reviews for Safari compatibility...');
+        console.log('Fetching latest approved reviews for homepage...');
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -55,9 +55,9 @@ export const FeaturedReviews = () => {
           return [];
         }
         
-        // Ensure all data fields are properly formatted and deeply check for Safari compatibility
+        // Ensure all data fields are properly formatted and deeply check for compatibility
         const processedData = data.map(review => {
-          console.log('Processing review for Safari:', review?.id, 'with condition:', review?.PATOLOGIE);
+          console.log('Processing review:', review?.id, 'with condition:', review?.PATOLOGIE);
           return {
             id: typeof review.id === 'number' ? review.id : 0,
             title: review.title || 'Titolo non disponibile',
@@ -74,10 +74,10 @@ export const FeaturedReviews = () => {
           };
         });
         
-        console.log('Processed data for Safari:', processedData);
+        console.log('Processed data for homepage:', processedData);
         return processedData;
       } catch (error) {
-        console.error('Error in homepage reviews fetch for Safari:', error);
+        console.error('Error in homepage reviews fetch:', error);
         toast.error("Errore nel caricamento delle recensioni");
         throw error;
       }
@@ -85,15 +85,15 @@ export const FeaturedReviews = () => {
     staleTime: 0, 
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    retry: 5,  // Increase retry attempts for Safari
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000)  // Cap at 10 seconds
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000)
   });
 
-  // Force a refetch on mount and make it more aggressive for Safari
+  // Force a refetch on mount
   useEffect(() => {
-    console.log('FeaturedReviews component mounted - forcing refetch for Safari');
+    console.log('FeaturedReviews component mounted - forcing refetch');
     
-    // Clear any stale query cache that might be causing issues in Safari
+    // Clear any stale query cache that might be causing issues
     const fetchData = async () => {
       try {
         await refetch();
@@ -105,10 +105,10 @@ export const FeaturedReviews = () => {
 
     fetchData();
 
-    // Add a redundant fetch after a small delay for Safari
+    // Add a redundant fetch after a small delay
     const timer = setTimeout(() => {
       if (!hasAttemptedFetch) {
-        console.log('Backup fetch for Safari after timeout');
+        console.log('Backup fetch after timeout');
         fetchData();
       }
     }, 1000);
@@ -119,7 +119,7 @@ export const FeaturedReviews = () => {
 
   if (isError) {
     return (
-      <div className="text-center text-red-500">
+      <div className="text-center text-red-500 py-8">
         <p>Si è verificato un errore nel caricamento delle recensioni.</p>
         <button 
           onClick={() => refetch()} 

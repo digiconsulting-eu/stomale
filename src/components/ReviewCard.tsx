@@ -28,11 +28,11 @@ export const ReviewCard = ({
   commentsCount = 0,
   onDelete,
 }: ReviewCardProps) => {
-  // Ensure counts are always valid numbers for Safari
+  // Ensure counts are always valid numbers
   const displayCommentsCount = typeof commentsCount === 'number' && !isNaN(commentsCount) ? commentsCount : 0;
   const displayLikesCount = typeof likesCount === 'number' && !isNaN(likesCount) ? likesCount : 0;
   
-  console.log(`ReviewCard ${id} rendering with Safari compatibility:`, {
+  console.log(`ReviewCard ${id} rendering:`, {
     id,
     condition,
     title,
@@ -40,21 +40,21 @@ export const ReviewCard = ({
     likesCount: displayLikesCount
   });
   
-  // Ensure condition is a valid string to prevent routing errors in Safari
+  // Ensure condition is a valid string to prevent routing errors
   const safeCondition = condition && typeof condition === 'string' ? condition.trim().toLowerCase() : '';
   
-  // Check for valid ID value for Safari
+  // Check for valid ID value
   if (!id || typeof id !== 'number' || isNaN(id)) {
-    console.error('Invalid review ID for Safari:', id);
+    console.error('Invalid review ID:', id);
     return null;
   }
   
-  // Ensure title is valid for Safari
+  // Ensure title is valid
   const safeTitle = title && typeof title === 'string' ? title : 'Recensione senza titolo';
   
   // Generate the review path using our utility function
   const reviewPath = generateReviewPath(safeCondition, id, safeTitle);
-  console.log('Generated review path for Safari:', reviewPath);
+  console.log('Generated review path:', reviewPath);
 
   return (
     <Card className="bg-white rounded-3xl border border-[#1EAEDB] shadow-sm">
@@ -85,10 +85,10 @@ export const ReviewCard = ({
         )}
         <p className="text-gray-600 line-clamp-2 mb-4">{preview || 'Nessun contenuto disponibile'}</p>
         
-        {/* Likes and Comments counts - Now with red heart */}
+        {/* Likes and Comments counts with filled red heart */}
         <div className="flex items-center gap-6 mb-4 text-gray-500">
           <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
-            <Heart className="h-5 w-5 text-red-500" />
+            <Heart className="h-5 w-5 fill-red-500 text-red-500" />
             <span className="text-gray-600">{displayLikesCount}</span>
           </Link>
           <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
