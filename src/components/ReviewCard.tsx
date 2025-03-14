@@ -85,10 +85,10 @@ export const ReviewCard = ({
         )}
         <p className="text-gray-600 line-clamp-2 mb-4">{preview || 'Nessun contenuto disponibile'}</p>
         
-        {/* Likes and Comments counts - Now clickable */}
+        {/* Likes and Comments counts - Now with red heart */}
         <div className="flex items-center gap-6 mb-4 text-gray-500">
           <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
-            <Heart className="h-5 w-5 text-red-400" />
+            <Heart className="h-5 w-5 text-red-500" />
             <span className="text-gray-600">{displayLikesCount}</span>
           </Link>
           <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
