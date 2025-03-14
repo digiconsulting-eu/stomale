@@ -62,7 +62,7 @@ export const ReviewLikeButton = ({ reviewId, initialLikesCount }: ReviewLikeButt
         return;
       }
       
-      toast.success("Grazie per il tuo apprezzamento!");
+      toast.success("Grazie per il tuo like!");
       
       try {
         localStorage.setItem(`review_liked_${reviewId}`, 'true');
