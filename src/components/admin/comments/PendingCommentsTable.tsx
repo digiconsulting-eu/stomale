@@ -1,4 +1,3 @@
-
 import {
   Table,
   TableBody,
@@ -182,7 +181,9 @@ export const PendingCommentsTable = () => {
         <TableBody>
           {pendingComments.map((comment) => (
             <TableRow key={comment.id}>
-              <TableCell>{comment.users?.username || comment.users?.email || 'Utente anonimo'}</TableCell>
+              <TableCell className="break-words max-w-[150px]">
+                {comment.users?.username || comment.users?.email || 'Utente anonimo'}
+              </TableCell>
               <TableCell className="whitespace-pre-wrap break-words max-w-md">
                 {comment.content}
               </TableCell>
