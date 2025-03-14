@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle, setMetaDescription, getSearchMetaDescription } from "@/utils/pageTitle";
@@ -24,13 +25,21 @@ export default function SearchCondition() {
   const { 
     data,
     isLoading,
-    error 
+    error,
+    refetch 
   } = useConditions({
     page: currentPage,
     limit: ITEMS_PER_PAGE,
     searchTerm,
     letter: searchTerm ? "" : selectedLetter
   });
+
+  // Force refetch on mount
+  useEffect(() => {
+    console.log('SearchCondition component mounted, forcing refetch');
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Cerca Patologia"));
@@ -48,9 +57,20 @@ export default function SearchCondition() {
     setCurrentPage(1);
   }, [searchTerm, selectedLetter]);
 
+  // Log data when it changes
+  useEffect(() => {
+    console.log('Data from useConditions:', data);
+  }, [data]);
+
   const handleLetterSelect = (letter: string) => {
+    console.log('Letter selected:', letter);
     setSelectedLetter(letter);
     setSearchTerm("");
+  };
+
+  const handleSearch = (term: string) => {
+    console.log('Search term:', term);
+    setSearchTerm(term);
   };
 
   return (
@@ -59,7 +79,7 @@ export default function SearchCondition() {
       
       <SearchInput 
         value={searchTerm}
-        onChange={setSearchTerm}
+        onChange={handleSearch}
       />
 
       <LetterFilter 

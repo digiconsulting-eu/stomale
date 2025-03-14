@@ -44,13 +44,16 @@ export const useConditions = ({
         else if (letter && letter !== "TUTTE") {
           console.log('Applying letter filter with letter:', letter);
           // Use UPPER on both sides to ensure case-insensitive matching
-          // This is more compatible across different Postgres setups
           query = query.ilike('Patologia', `${letter}%`);
         }
 
+        // Execute the query with explicit pagination
         const { data, count, error } = await query
           .order('Patologia')
           .range(offset, offset + limit - 1);
+
+        // Log detailed results for debugging
+        console.log('Query result:', { dataLength: data?.length, count, error });
 
         if (error) {
           console.error('Error fetching conditions:', error);
@@ -84,11 +87,6 @@ export const useConditions = ({
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Cap retry delay at 30 seconds
     refetchOnWindowFocus: true, // Refetch on window focus to ensure up-to-date data
     refetchOnReconnect: true, // Refetch when reconnecting
-    meta: {
-      onError: (error: Error) => {
-        console.error('Query error:', error);
-        toast.error("Errore nel caricamento delle patologie. Riprova tra qualche secondo.");
-      }
-    }
+    refetchOnMount: true, // Always refetch when component mounts
   });
 };

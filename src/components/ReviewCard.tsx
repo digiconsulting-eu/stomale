@@ -32,25 +32,34 @@ export const ReviewCard = ({
   const displayCommentsCount = typeof commentsCount === 'number' && !isNaN(commentsCount) ? commentsCount : 0;
   const displayLikesCount = typeof likesCount === 'number' && !isNaN(likesCount) ? likesCount : 0;
   
-  console.log(`ReviewCard ${id} (${title}) rendering with:`, {
+  console.log(`ReviewCard ${id} rendering with:`, {
     condition,
+    title,
     commentsCount: displayCommentsCount,
-    likesCount: displayLikesCount,
-    rawCommentsValue: commentsCount
+    likesCount: displayLikesCount
   });
   
   // Ensure condition is a valid string to prevent routing errors
   const safeCondition = condition && typeof condition === 'string' ? condition.trim().toLowerCase() : '';
   
+  // Check for valid ID value
+  if (!id || typeof id !== 'number') {
+    console.error('Invalid review ID:', id);
+    return null;
+  }
+  
+  // Ensure title is valid
+  const safeTitle = title || 'Recensione senza titolo';
+  
   // Generate the review path using our utility function
-  const reviewPath = generateReviewPath(safeCondition, id, title);
+  const reviewPath = generateReviewPath(safeCondition, id, safeTitle);
 
   return (
     <Card className="bg-white rounded-3xl border border-[#1EAEDB] shadow-sm">
       <div className="p-6">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary">
-            <Link to={reviewPath}>{title}</Link>
+            <Link to={reviewPath}>{safeTitle}</Link>
           </h3>
           {onDelete && (
             <Button
@@ -63,14 +72,16 @@ export const ReviewCard = ({
             </Button>
           )}
         </div>
-        <p className="text-sm text-gray-500 mb-2">{username}</p>
-        <Link 
-          to={`/patologia/${safeCondition}`}
-          className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
-        >
-          {condition ? condition.toUpperCase() : 'CATEGORIA NON SPECIFICATA'}
-        </Link>
-        <p className="text-gray-600 line-clamp-2 mb-4">{preview}</p>
+        <p className="text-sm text-gray-500 mb-2">{username || 'Anonimo'}</p>
+        {safeCondition && (
+          <Link 
+            to={`/patologia/${safeCondition}`}
+            className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
+          >
+            {safeCondition ? safeCondition.toUpperCase() : 'CATEGORIA NON SPECIFICATA'}
+          </Link>
+        )}
+        <p className="text-gray-600 line-clamp-2 mb-4">{preview || 'Nessun contenuto disponibile'}</p>
         
         {/* Likes and Comments counts - Now clickable */}
         <div className="flex items-center gap-6 mb-4 text-gray-500">
