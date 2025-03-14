@@ -25,6 +25,7 @@ export default function Index() {
         // Force a session refresh to clear any cached data
         await supabase.auth.refreshSession();
         
+        console.log('Fetching latest approved reviews...');
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -51,15 +52,25 @@ export default function Index() {
         }
 
         console.log('Fetched reviews for homepage:', data?.length || 0);
+        console.log('Review data sample:', data?.[0] || 'No reviews found');
         
-        // Ensure comments_count is always a number
-        const processedData = data?.map(review => ({
-          ...review,
-          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
-          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0
-        }));
+        if (!data || data.length === 0) {
+          console.log('No reviews found in database');
+          return [];
+        }
         
-        return processedData || [];
+        // Ensure all data fields are properly formatted
+        const processedData = data.map(review => {
+          console.log('Processing review:', review.id, 'with condition:', review.PATOLOGIE);
+          return {
+            ...review,
+            username: review.username || 'Anonimo',
+            comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
+            likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0
+          };
+        });
+        
+        return processedData;
       } catch (error) {
         console.error('Error in homepage reviews fetch:', error);
         toast.error("Errore nel caricamento delle recensioni");
@@ -74,6 +85,7 @@ export default function Index() {
 
   // Force a refetch on mount
   useEffect(() => {
+    console.log('Refetching latest reviews on Index component mount');
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

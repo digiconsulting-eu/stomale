@@ -49,7 +49,8 @@ const Reviews = () => {
         const from = (currentPage - 1) * REVIEWS_PER_PAGE;
         const to = from + REVIEWS_PER_PAGE - 1;
 
-        // Add cache control headers to prevent Chrome from caching
+        // Fetch reviews with explicit field selection to ensure consistent data structure
+        console.log(`Fetching reviews from ${from} to ${to}`);
         const { data: reviewsData, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
@@ -95,13 +96,16 @@ const Reviews = () => {
         }
 
         // Transform reviews without relying on additional DB calls
-        const transformedReviews = reviewsData.map(review => ({
-          ...review,
-          username: review.username || 'Anonimo',
-          // Ensure comments_count is always a number
-          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
-          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0
-        })) as DatabaseReview[];
+        const transformedReviews = reviewsData.map(review => {
+          console.log('Processing review:', review.id, 'with condition:', review.PATOLOGIE);
+          return {
+            ...review,
+            username: review.username || 'Anonimo',
+            // Ensure numeric fields are always numbers
+            comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
+            likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0
+          };
+        }) as DatabaseReview[];
 
         console.log('Transformed reviews:', transformedReviews);
 
@@ -125,6 +129,7 @@ const Reviews = () => {
 
   // Attempt to refetch on mount to ensure fresh data
   useEffect(() => {
+    console.log('Refetching reviews on component mount');
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
