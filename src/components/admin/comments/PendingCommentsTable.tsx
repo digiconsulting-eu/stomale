@@ -1,49 +1,75 @@
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { DatabaseComment } from "@/types/comment";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { DatabaseComment } from "@/types/comment";
+import { toast } from "sonner";
 import { EmptyComments } from "./EmptyComments";
 import { CommentItem } from "./CommentItem";
 
 export const PendingCommentsTable = () => {
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const { data: comments, isLoading, isError, refetch } = useQuery({
+  const {
+    data: comments,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["pending-comments"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("comments")
-        .select("*, users(username)")
+        .select(`
+          *,
+          users (
+            id,
+            username,
+            email
+          ),
+          reviews (
+            id, 
+            title
+          )
+        `)
         .eq("status", "pending")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-
-      // Transform data to include username field
-      return data.map((comment) => ({
-        ...comment,
-        username: comment.users?.username || "Utente anonimo",
-      })) as DatabaseComment[];
+      return data as DatabaseComment[];
     },
   });
 
   useEffect(() => {
-    if (isError) {
-      toast.error("Errore nel caricamento dei commenti");
-    }
-  }, [isError]);
+    const subscription = supabase
+      .channel("comments")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "comments",
+          filter: "status=eq.pending",
+        },
+        () => {
+          refetch();
+        }
+      )
+      .subscribe();
 
-  const handleApproveComment = async (id: number) => {
-    setIsUpdating(true);
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [refetch]);
+
+  const handleApproveComment = async (commentId: number) => {
+    setIsProcessing(true);
     try {
       const { error } = await supabase
         .from("comments")
         .update({ status: "approved" })
-        .eq("id", id);
+        .eq("id", commentId);
 
       if (error) throw error;
       toast.success("Commento approvato con successo");
@@ -52,17 +78,17 @@ export const PendingCommentsTable = () => {
       console.error("Error approving comment:", error);
       toast.error("Errore nell'approvazione del commento");
     } finally {
-      setIsUpdating(false);
+      setIsProcessing(false);
     }
   };
 
-  const handleRejectComment = async (id: number) => {
-    setIsUpdating(true);
+  const handleRejectComment = async (commentId: number) => {
+    setIsProcessing(true);
     try {
       const { error } = await supabase
         .from("comments")
         .update({ status: "rejected" })
-        .eq("id", id);
+        .eq("id", commentId);
 
       if (error) throw error;
       toast.success("Commento rifiutato con successo");
@@ -71,44 +97,39 @@ export const PendingCommentsTable = () => {
       console.error("Error rejecting comment:", error);
       toast.error("Errore nel rifiuto del commento");
     } finally {
-      setIsUpdating(false);
+      setIsProcessing(false);
     }
   };
 
-  const isPending = comments && comments.length > 0;
+  if (isLoading) {
+    return (
+      <Card className="w-full p-4">
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+        </div>
+      </Card>
+    );
+  }
+
+  if (!comments || comments.length === 0) {
+    return <EmptyComments />;
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Commenti in attesa di moderazione</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => refetch()}
-          disabled={isLoading}
-        >
-          <RefreshCcw className="h-4 w-4 mr-2" />
-          Aggiorna
-        </Button>
-      </div>
-
-      {isLoading ? (
-        <div className="text-center p-4">Caricamento commenti...</div>
-      ) : !isPending ? (
-        <EmptyComments />
-      ) : (
-        <div className="space-y-2">
-          {comments?.map((comment) => (
-            <CommentItem
+    <Card className="w-full">
+      <div className="rounded-lg border bg-card overflow-hidden">
+        <div className="flex flex-col">
+          {comments.map((comment) => (
+            <CommentItem 
               key={comment.id}
               comment={comment}
               onApprove={handleApproveComment}
               onReject={handleRejectComment}
-              isLoading={isUpdating}
+              isLoading={isProcessing}
             />
           ))}
         </div>
-      )}
-    </div>
+      </div>
+    </Card>
   );
 };
