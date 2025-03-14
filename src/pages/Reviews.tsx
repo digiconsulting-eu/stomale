@@ -36,7 +36,7 @@ const Reviews = () => {
         // Log total count of approved reviews
         console.log('Numero totale di recensioni approvate:', totalCount);
 
-        if (totalCount === 0) {
+        if (!totalCount || totalCount === 0) {
           console.log('No reviews found in database');
           return {
             reviews: [],
@@ -103,7 +103,9 @@ const Reviews = () => {
             username: review.username || 'Anonimo',
             // Ensure numeric fields are always numbers
             comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
-            likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0
+            likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
+            // Ensure PATOLOGIE is never undefined
+            PATOLOGIE: review.PATOLOGIE || { id: 0, Patologia: 'Sconosciuta' }
           };
         }) as DatabaseReview[];
 

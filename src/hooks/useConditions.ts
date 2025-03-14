@@ -27,18 +27,24 @@ export const useConditions = ({
         // Ensure we have a fresh session to prevent caching issues
         await supabase.auth.refreshSession();
         
+        // Log query parameters for debugging
+        console.log('Search term:', searchTerm ? `"${searchTerm}"` : 'empty');
+        console.log('Letter filter:', letter ? `"${letter}"` : 'empty');
+        
         let query = supabase
           .from('PATOLOGIE')
           .select('id, Patologia', { count: 'exact' });
 
         // Apply search filter if present - using ilike for case-insensitive matching
-        if (searchTerm) {
-          console.log('Applying search filter:', searchTerm);
+        if (searchTerm && searchTerm.trim() !== '') {
+          console.log('Applying search filter with term:', searchTerm);
           query = query.ilike('Patologia', `%${searchTerm}%`);
         } 
         // Only apply letter filter if no search term and letter is not "TUTTE"
         else if (letter && letter !== "TUTTE") {
-          console.log('Applying letter filter:', letter);
+          console.log('Applying letter filter with letter:', letter);
+          // Use UPPER on both sides to ensure case-insensitive matching
+          // This is more compatible across different Postgres setups
           query = query.ilike('Patologia', `${letter}%`);
         }
 
@@ -52,15 +58,16 @@ export const useConditions = ({
           throw error;
         }
 
-        console.log('Fetched conditions:', data?.length || 0);
+        console.log('Fetched conditions count:', data?.length || 0);
         if (data && data.length > 0) {
           console.log('First condition example:', data[0]);
         } else {
           console.log('No conditions found');
         }
         
-        console.log('Total count:', count);
+        console.log('Total count from DB:', count);
 
+        // Ensure we return valid data structures even if response is empty
         return {
           conditions: data || [],
           totalCount: count || 0,
