@@ -94,7 +94,7 @@ export const ReviewLikeButton = ({ reviewId, initialLikesCount }: ReviewLikeButt
         onClick={handleLike}
         disabled={isLiking || hasLiked}
       >
-        <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : 'text-red-500'}`} />
+        <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500' : 'fill-red-500'}`} />
       </Button>
     </div>
   );
