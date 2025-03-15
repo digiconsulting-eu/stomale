@@ -1,5 +1,5 @@
 
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
@@ -94,6 +94,13 @@ export const AppRoutes = () => {
       <Route path="/recensioni" element={<Reviews />} />
       <Route path="/nuova-recensione" element={<NewReview />} />
       <Route path="/grazie" element={<ThankYou />} />
+      
+      {/* Redirect old paths */}
+      <Route 
+        path="/news/nutella-e-colesterolo-sono-correlati" 
+        element={<Navigate to="/patologia/colesterolo%20alto/esperienza/1004-nutella-e-colesterolo,-sono-correlati" replace />} 
+      />
+      <Route path="/news/*" element={<Navigate to="/recensioni" replace />} />
     </Routes>
   );
 };
