@@ -74,7 +74,11 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
   const [filteredConditions, setFilteredConditions] = useState<string[]>([]);
-  const { data: conditionsData, isLoading: isLoadingConditions, error } = useConditions();
+  const [isCustomValue, setIsCustomValue] = useState(false);
+  const { data: conditionsData, isLoading: isLoadingConditions, error } = useConditions({
+    searchTerm: searchQuery,
+    limit: 50 // Aumentiamo il limite per mostrare più risultati
+  });
   
   // Use database conditions if available, otherwise use static list
   useEffect(() => {
@@ -82,6 +86,14 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
       // Map database conditions to string array
       const dbConditions = conditionsData.conditions.map(c => c.Patologia);
       console.log(`Loaded ${dbConditions.length} conditions from database`);
+      
+      // Check if the current search query matches any item exactly
+      const exactMatch = dbConditions.some(condition => 
+        condition.toLowerCase() === searchQuery.toLowerCase()
+      );
+      
+      // Set custom value flag
+      setIsCustomValue(searchQuery.length > 0 && !exactMatch);
       
       // Filter conditions based on search query
       if (searchQuery) {
@@ -97,6 +109,14 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
       if (error) {
         console.warn('Using static conditions list due to API error:', error);
       }
+      
+      // Check if the current search query matches any item exactly
+      const exactMatch = allConditions.some(condition => 
+        condition.toLowerCase() === searchQuery.toLowerCase()
+      );
+      
+      // Set custom value flag
+      setIsCustomValue(searchQuery.length > 0 && !exactMatch);
       
       if (searchQuery) {
         const filtered = allConditions.filter(condition => 
@@ -116,6 +136,13 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
     }
   }, [form]);
 
+  // Reset custom value state when dropdown closes
+  useEffect(() => {
+    if (!open) {
+      setIsCustomValue(false);
+    }
+  }, [open]);
+
   return (
     <FormField
       control={form.control}
@@ -132,7 +159,8 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                   aria-expanded={open}
                   className={cn(
                     "w-full px-6 py-7 pl-14 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white/80 backdrop-blur-sm shadow-lg text-lg justify-start font-normal hover:bg-white/90 relative",
-                    !field.value && "text-gray-500"
+                    !field.value && "text-gray-500",
+                    isCustomValue && "border-red-300"
                   )}
                 >
                   <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary" size={24} />
@@ -157,6 +185,12 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                     </div>
                   )}
                   
+                  {isCustomValue && (
+                    <div className="p-2 text-sm text-red-500 bg-red-50 rounded border border-red-100 mb-2">
+                      <p>Patologia non trovata. Seleziona una patologia dall'elenco.</p>
+                    </div>
+                  )}
+                  
                   <CommandEmpty className="py-6 text-center text-gray-500">
                     Nessuna patologia trovata con "{searchQuery}".
                   </CommandEmpty>
@@ -168,8 +202,9 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                         value={condition}
                         onSelect={() => {
                           console.log('Selected condition:', condition);
-                          form.setValue("condition", condition);
+                          form.setValue("condition", condition, { shouldValidate: true });
                           setSelectedValue(condition);
+                          setIsCustomValue(false);
                           setOpen(false);
                         }}
                         className="relative flex cursor-pointer select-none items-center rounded-md px-4 py-3 text-gray-900 text-[15px] outline-none hover:bg-gray-100 data-[selected=true]:bg-gray-100"

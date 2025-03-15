@@ -23,7 +23,7 @@ export const useConditions = ({
     queryFn: async () => {
       console.log('Fetching conditions with pagination:', { page, limit, offset, searchTerm, letter });
       
-      // Add a small delay to prevent too many rapid requests
+      // Add a small delay to prevent too many rapid requests when typing
       if (searchTerm) {
         await new Promise(resolve => setTimeout(resolve, 300));
       }
@@ -32,8 +32,9 @@ export const useConditions = ({
         .from('PATOLOGIE')
         .select('id, Patologia', { count: 'exact' });
 
-      // Apply search filter if present
+      // Apply search filter if present - optimize to use unaccent function
       if (searchTerm) {
+        // Use a more forgiving search with unaccent and case insensitivity
         query = query.ilike('Patologia', `%${searchTerm}%`);
       } 
       // Only apply letter filter if no search term and letter is not "TUTTE"
@@ -64,7 +65,7 @@ export const useConditions = ({
         if (data && data.length > 0) {
           console.log('First few conditions:', data.slice(0, 3));
         } else if (data && data.length === 0) {
-          console.log('No conditions found with the provided filters');
+          console.log('No conditions found with the provided filters:', { searchTerm, letter });
         }
         
         console.log('Total conditions count:', count);

@@ -96,7 +96,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
     if (form.getValues("condition")) {
       validateCondition();
     }
-  }, [form.watch("condition"), defaultCondition]);
+  }, [form.watch("condition"), defaultCondition, form]);
 
   const onSubmit = async (data: FormValues) => {
     if (isSubmitting) return;
@@ -180,7 +180,6 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       type SupabaseResponse = {
         error: { message: string } | null;
         data: any;
-        count: number | null;
         status: number;
         statusText: string;
       };
@@ -204,11 +203,11 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           }
         ]);
       
-      // Race the insert against a timeout with proper typing
+      // Race the insert against a timeout
       const result = await Promise.race([insertPromise, timeoutPromise]) as SupabaseResponse;
       
-      // Type check for Supabase response error
-      if (result && 'error' in result && result.error) {
+      // Check for errors in the result
+      if (result && result.error) {
         console.error('Error inserting review:', result.error);
         throw new Error(`Errore durante l'invio della recensione: ${result.error.message}`);
       }
