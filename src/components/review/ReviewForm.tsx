@@ -176,6 +176,15 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         setTimeout(() => reject(new Error("Timeout durante l'invio della recensione")), 15000)
       );
       
+      // Define the type for Supabase response
+      type SupabaseResponse = {
+        error: { message: string } | null;
+        data: any;
+        count: number | null;
+        status: number;
+        statusText: string;
+      };
+      
       const insertPromise = supabase
         .from('reviews')
         .insert([
@@ -196,10 +205,10 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         ]);
       
       // Race the insert against a timeout with proper typing
-      const result = await Promise.race([insertPromise, timeoutPromise]);
+      const result = await Promise.race([insertPromise, timeoutPromise]) as SupabaseResponse;
       
       // Type check for Supabase response error
-      if ('error' in result && result.error) {
+      if (result && 'error' in result && result.error) {
         console.error('Error inserting review:', result.error);
         throw new Error(`Errore durante l'invio della recensione: ${result.error.message}`);
       }
