@@ -28,6 +28,7 @@ export interface Review {
   id: number;
   title: string;
   condition: string;
+  condition_id: number;
   experience: string;
   diagnosis_difficulty?: number;
   symptoms_severity?: number;
@@ -37,7 +38,6 @@ export interface Review {
   social_discomfort?: number;
   username: string;
   created_at: string;
-  condition_id: number;
   likes_count?: number;
   comments_count?: number;
   PATOLOGIE?: {
