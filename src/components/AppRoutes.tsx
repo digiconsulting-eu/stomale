@@ -98,7 +98,7 @@ export const AppRoutes = () => {
       {/* Redirect old paths */}
       <Route 
         path="/news/nutella-e-colesterolo-sono-correlati" 
-        element={<Navigate to="/patologia/colesterolo%20alto/esperienza/1004-nutella-e-colesterolo,-sono-correlati" replace />} 
+        element={<Navigate to="/patologia/colesterolo%20alto/esperienza/1004-nutella-e-colesterolo-sono-correlati?-la-nutella-fa-male-al-colesterolo?" replace />} 
       />
       <Route path="/news/*" element={<Navigate to="/recensioni" replace />} />
     </Routes>

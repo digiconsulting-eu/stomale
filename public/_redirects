@@ -9,6 +9,6 @@
 # Reindirizzamento da URL con trattini a URL con spazi codificati per le patologie
 /patologia/:condition-* /patologia/:condition%20:splat 301
 # Reindirizzamento da vecchi articoli a nuove recensioni - specifico per Nutella
-/news/nutella-e-colesterolo-sono-correlati /patologia/colesterolo%20alto/esperienza/1004-nutella-e-colesterolo,-sono-correlati 301!
+/news/nutella-e-colesterolo-sono-correlati /patologia/colesterolo%20alto/esperienza/1004-nutella-e-colesterolo-sono-correlati?-la-nutella-fa-male-al-colesterolo? 301!
 # Rotta catch-all che deve venire DOPO gli specifici reindirizzamenti
 /news/* /recensioni 301!
