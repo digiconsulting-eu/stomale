@@ -56,7 +56,28 @@ export const CommentSection = ({ reviewId, showBottomButton = false }: CommentSe
       }
 
       console.log('Fetched comments:', data);
-      return (data || []).filter(comment => 
+      
+      // Further process the comments to ensure we have proper usernames
+      const processedComments = await Promise.all((data || []).map(async (comment) => {
+        if (!comment.users?.username && comment.user_id) {
+          // If we don't have a username in the join, try to fetch it directly
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('username')
+            .eq('id', comment.user_id)
+            .single();
+            
+          if (!userError && userData) {
+            return {
+              ...comment,
+              users: { username: userData.username }
+            };
+          }
+        }
+        return comment;
+      }));
+      
+      return processedComments.filter(comment => 
         comment.status === 'approved' || 
         (session?.user.id && comment.user_id === session.user.id)
       ) as Comment[];
