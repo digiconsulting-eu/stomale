@@ -11,6 +11,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 
+// Define a type for Supabase response
+interface SupabaseResponse {
+  error: { message: string } | null;
+  data: any;
+  status?: number;
+  statusText?: string;
+}
+
 const formSchema = z.object({
   condition: z.string().min(1, "Seleziona una patologia"),
   title: z.string().min(1, "Il titolo è obbligatorio").max(200, "Il titolo non può superare i 200 caratteri"),
@@ -65,7 +73,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         const { data, error } = await supabase
           .from('PATOLOGIE')
           .select('id')
-          .eq('Patologia', currentCondition)
+          .ilike('Patologia', currentCondition)
           .maybeSingle();
         
         if (error) {
@@ -74,6 +82,30 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           setConditionValidated(false);
         } else if (!data) {
           console.warn('Condition not found:', currentCondition);
+          
+          // Try a more flexible search (case insensitive)
+          const { data: flexibleData, error: flexibleError } = await supabase
+            .from('PATOLOGIE')
+            .select('id, Patologia')
+            .ilike('Patologia', `%${currentCondition}%`)
+            .limit(5);
+          
+          if (!flexibleError && flexibleData && flexibleData.length > 0) {
+            console.log('Found similar conditions:', flexibleData);
+            
+            // Check if there's a close enough match
+            const exactMatch = flexibleData.find(
+              c => c.Patologia.toLowerCase() === currentCondition.toLowerCase()
+            );
+            
+            if (exactMatch) {
+              console.log('Found exact match (case-insensitive):', exactMatch);
+              form.clearErrors('condition');
+              setConditionValidated(true);
+              return;
+            }
+          }
+          
           form.setError('condition', { 
             type: 'manual', 
             message: 'Patologia non trovata. Seleziona una patologia dall\'elenco.' 
@@ -156,7 +188,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       const { data: patologiaData, error: patologiaError } = await supabase
         .from('PATOLOGIE')
         .select('id')
-        .eq('Patologia', data.condition)
+        .ilike('Patologia', data.condition)
         .single();
 
       if (patologiaError) {
@@ -176,14 +208,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         setTimeout(() => reject(new Error("Timeout durante l'invio della recensione")), 15000)
       );
       
-      // Define the type for Supabase response
-      type SupabaseResponse = {
-        error: { message: string } | null;
-        data: any;
-        status: number;
-        statusText: string;
-      };
-      
+      // Race the insert against a timeout
       const insertPromise = supabase
         .from('reviews')
         .insert([
@@ -203,7 +228,6 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           }
         ]);
       
-      // Race the insert against a timeout
       const result = await Promise.race([insertPromise, timeoutPromise]) as SupabaseResponse;
       
       // Check for errors in the result

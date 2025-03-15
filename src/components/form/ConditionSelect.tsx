@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Search, Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
-  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -69,11 +68,16 @@ const HighlightMatch = ({ text, query }: { text: string; query: string }) => {
   );
 };
 
+// Helper function to normalize text for comparison
+const normalizeText = (text: string): string => {
+  return text.toLowerCase().trim().replace(/\s+/g, ' ');
+};
+
 export const ConditionSelect = ({ form }: ConditionSelectProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
-  const [filteredConditions, setFilteredConditions] = useState<string[]>([]);
+  const [filteredConditions, setFilteredConditions] = useState<{id?: number; Patologia: string}[]>([]);
   const [isCustomValue, setIsCustomValue] = useState(false);
   const { data: conditionsData, isLoading: isLoadingConditions, error } = useConditions({
     searchTerm: searchQuery,
@@ -83,25 +87,39 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
   // Use database conditions if available, otherwise use static list
   useEffect(() => {
     if (conditionsData?.conditions) {
-      // Map database conditions to string array
-      const dbConditions = conditionsData.conditions.map(c => c.Patologia);
+      // Directly use the database format (with id and Patologia)
+      const dbConditions = conditionsData.conditions;
       console.log(`Loaded ${dbConditions.length} conditions from database`);
       
-      // Check if the current search query matches any item exactly
-      const exactMatch = dbConditions.some(condition => 
-        condition.toLowerCase() === searchQuery.toLowerCase()
-      );
+      const normalizedSearchQuery = normalizeText(searchQuery);
       
-      // Set custom value flag
-      setIsCustomValue(searchQuery.length > 0 && !exactMatch);
-      
-      // Filter conditions based on search query
-      if (searchQuery) {
-        const filtered = dbConditions.filter(condition => 
-          condition.toLowerCase().includes(searchQuery.toLowerCase())
+      if (normalizedSearchQuery) {
+        // Check if the current search query matches any item
+        const exactMatch = dbConditions.some(condition => 
+          normalizeText(condition.Patologia) === normalizedSearchQuery
         );
+        
+        // Additional check for close matches (e.g., with/without capitalization or spaces)
+        const closeMatch = dbConditions.some(condition => {
+          const condNormalized = normalizeText(condition.Patologia);
+          return (
+            condNormalized.includes(normalizedSearchQuery) || 
+            normalizedSearchQuery.includes(condNormalized)
+          );
+        });
+        
+        // Set custom value flag
+        setIsCustomValue(searchQuery.length > 0 && !exactMatch && !closeMatch);
+        
+        // Filter conditions based on search query
+        const filtered = dbConditions.filter(condition => 
+          normalizeText(condition.Patologia).includes(normalizedSearchQuery)
+        );
+        
+        console.log(`Found ${filtered.length} matches for "${searchQuery}"`, filtered.slice(0, 3));
         setFilteredConditions(filtered);
       } else {
+        setIsCustomValue(false);
         setFilteredConditions(dbConditions);
       }
     } else {
@@ -110,21 +128,33 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
         console.warn('Using static conditions list due to API error:', error);
       }
       
-      // Check if the current search query matches any item exactly
-      const exactMatch = allConditions.some(condition => 
-        condition.toLowerCase() === searchQuery.toLowerCase()
-      );
+      const staticConditions = allConditions.map(cond => ({ Patologia: cond }));
       
-      // Set custom value flag
-      setIsCustomValue(searchQuery.length > 0 && !exactMatch);
+      // Add debugging for fallback conditions
+      console.log(`Using ${staticConditions.length} conditions from static list`);
       
-      if (searchQuery) {
-        const filtered = allConditions.filter(condition => 
-          condition.toLowerCase().includes(searchQuery.toLowerCase())
+      const normalizedSearchQuery = normalizeText(searchQuery);
+      
+      if (normalizedSearchQuery) {
+        // Check if the current search query matches any item exactly
+        const exactMatch = staticConditions.some(condition => 
+          normalizeText(condition.Patologia) === normalizedSearchQuery
         );
-        setFilteredConditions(filtered);
+        
+        // Set custom value flag
+        setIsCustomValue(searchQuery.length > 0 && !exactMatch);
+        
+        if (searchQuery) {
+          const filtered = staticConditions.filter(condition => 
+            normalizeText(condition.Patologia).includes(normalizedSearchQuery)
+          );
+          setFilteredConditions(filtered);
+        } else {
+          setFilteredConditions(staticConditions);
+        }
       } else {
-        setFilteredConditions(allConditions);
+        setIsCustomValue(false);
+        setFilteredConditions(staticConditions);
       }
     }
   }, [conditionsData, searchQuery, error]);
@@ -140,8 +170,15 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
   useEffect(() => {
     if (!open) {
       setIsCustomValue(false);
+      
+      // If we have a selected value but it's not validated, clear it
+      if (selectedValue && isCustomValue) {
+        console.log('Clearing invalid selected value:', selectedValue);
+        form.setValue("condition", "", { shouldValidate: true });
+        setSelectedValue("");
+      }
     }
-  }, [open]);
+  }, [open, form, isCustomValue, selectedValue]);
 
   return (
     <FormField
@@ -198,12 +235,12 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                   <CommandGroup>
                     {filteredConditions.map((condition) => (
                       <CommandItem
-                        key={condition}
-                        value={condition}
+                        key={condition.id || condition.Patologia}
+                        value={condition.Patologia}
                         onSelect={() => {
-                          console.log('Selected condition:', condition);
-                          form.setValue("condition", condition, { shouldValidate: true });
-                          setSelectedValue(condition);
+                          console.log('Selected condition:', condition.Patologia);
+                          form.setValue("condition", condition.Patologia, { shouldValidate: true });
+                          setSelectedValue(condition.Patologia);
                           setIsCustomValue(false);
                           setOpen(false);
                         }}
@@ -212,12 +249,12 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                         <Check
                           className={cn(
                             "mr-3 h-4 w-4 text-primary",
-                            condition === field.value
+                            condition.Patologia === field.value
                               ? "opacity-100"
                               : "opacity-0"
                           )}
                         />
-                        <HighlightMatch text={condition} query={searchQuery} />
+                        <HighlightMatch text={condition.Patologia} query={searchQuery} />
                       </CommandItem>
                     ))}
                   </CommandGroup>

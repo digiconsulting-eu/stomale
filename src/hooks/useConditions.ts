@@ -34,8 +34,12 @@ export const useConditions = ({
 
       // Apply search filter if present - optimize to use unaccent function
       if (searchTerm) {
-        // Use a more forgiving search with unaccent and case insensitivity
-        query = query.ilike('Patologia', `%${searchTerm}%`);
+        const normalizedSearchTerm = searchTerm.toLowerCase().trim();
+        console.log('Searching for normalized term:', normalizedSearchTerm);
+        
+        // Use a more forgiving search with case insensitivity
+        // This version doesn't rely on unaccent and is more permissive with partial matches
+        query = query.or(`Patologia.ilike.%${normalizedSearchTerm}%,Patologia.ilike.%${normalizedSearchTerm.replace(/\s+/g, '%')}%`);
       } 
       // Only apply letter filter if no search term and letter is not "TUTTE"
       else if (letter && letter !== "TUTTE") {
@@ -66,6 +70,20 @@ export const useConditions = ({
           console.log('First few conditions:', data.slice(0, 3));
         } else if (data && data.length === 0) {
           console.log('No conditions found with the provided filters:', { searchTerm, letter });
+          
+          // If no exact match is found with the original query, try a more flexible search
+          if (searchTerm) {
+            console.log('Attempting more flexible search for:', searchTerm);
+            const { data: flexData, error: flexError } = await supabase
+              .from('PATOLOGIE')
+              .select('id, Patologia')
+              .or(`Patologia.ilike.${searchTerm}%,Patologia.ilike.%${searchTerm}%`)
+              .limit(10);
+              
+            if (!flexError && flexData && flexData.length > 0) {
+              console.log('Found similar conditions with flexible search:', flexData);
+            }
+          }
         }
         
         console.log('Total conditions count:', count);
