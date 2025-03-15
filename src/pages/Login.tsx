@@ -18,20 +18,23 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (data: LoginFormValues) => {
+    // Prevent multiple submissions
     if (isLoading) return;
     
     setIsLoading(true);
     console.log("Starting login process for:", data.email);
     
+    // Create an AbortController to handle timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+      setIsLoading(false);
+      toast.error("La richiesta è scaduta", {
+        description: "Si è verificato un problema durante l'accesso. Riprova più tardi."
+      });
+    }, 10000); // Reduced to 10 seconds for faster feedback
+    
     try {
-      // Set a timeout to handle stalled requests
-      const timeoutId = setTimeout(() => {
-        setIsLoading(false);
-        toast.error("La richiesta è scaduta", {
-          description: "Si è verificato un problema durante l'accesso. Riprova più tardi."
-        });
-      }, 15000); // 15 seconds timeout
-      
       // First attempt to sign in
       console.log("Attempting login for:", data.email);
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -77,27 +80,31 @@ export default function Login() {
       );
 
       // Redirect to dashboard instead of home
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 100);
+      navigate('/dashboard');
       
     } catch (error: any) {
+      clearTimeout(timeoutId);
       console.error('Error during login process:', error);
       
-      if (error.message.includes('Invalid login credentials')) {
+      if (error.message?.includes('Invalid login credentials')) {
         toast.error("Credenziali non valide", {
           description: "Email o password non corretti. Verifica le tue credenziali e riprova."
         });
-      } else if (error.message.includes('Email not confirmed')) {
+      } else if (error.message?.includes('Email not confirmed')) {
         toast.error("Email non confermata", {
           description: "Per favore controlla la tua casella email e clicca sul link di conferma"
         });
+      } else if (error.name === 'AbortError') {
+        toast.error("Richiesta interrotta", {
+          description: "La connessione ha impiegato troppo tempo. Controlla la tua connessione e riprova."
+        });
       } else {
         toast.error("Errore durante il login", {
-          description: error.message
+          description: error.message || "Si è verificato un errore imprevisto. Riprova più tardi."
         });
       }
     } finally {
+      // Ensure isLoading is always reset to false when done
       setIsLoading(false);
     }
   };
