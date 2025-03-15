@@ -9,6 +9,7 @@ import { ConditionSelect } from "@/components/form/ConditionSelect";
 import { ReviewFormFields } from "./ReviewFormFields";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
 const formSchema = z.object({
   condition: z.string().min(1, "Seleziona una patologia"),
@@ -27,6 +28,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export const ReviewForm = ({ defaultCondition = "" }) => {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -45,7 +47,10 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
   });
 
   const onSubmit = async (data: FormValues) => {
+    if (isSubmitting) return;
+    
     try {
+      setIsSubmitting(true);
       console.log('Starting review submission with data:', data);
 
       // Check authentication
@@ -119,6 +124,8 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
     } catch (error) {
       console.error('Error submitting review:', error);
       toast.error("Si è verificato un errore durante l'invio della recensione. Riprova più tardi.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -127,8 +134,12 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <ConditionSelect form={form} />
         <ReviewFormFields form={form} />
-        <Button type="submit" className="w-full">
-          Invia la tua esperienza
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Invio in corso..." : "Invia la tua esperienza"}
         </Button>
       </form>
     </Form>

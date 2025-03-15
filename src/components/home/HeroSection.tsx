@@ -1,9 +1,44 @@
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/SearchBar";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const HeroSection = () => {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session);
+    };
+    
+    checkAuth();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      setIsLoggedIn(event === 'SIGNED_IN');
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  
+  const handleNewReview = (e: React.MouseEvent) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      toast.error("Devi effettuare l'accesso per raccontare la tua esperienza", {
+        description: "Registrati o accedi per condividere la tua esperienza"
+      });
+      navigate("/registrati");
+      return false;
+    }
+    return true;
+  };
+  
   return (
     <>
       {/* Hero Section with gradient */}
@@ -26,7 +61,7 @@ export const HeroSection = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-              <Link to="/nuova-recensione">
+              <Link to="/nuova-recensione" onClick={handleNewReview}>
                 <Button className="w-full sm:w-auto text-base px-8 py-6 bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all">
                   Scrivi una recensione
                 </Button>
