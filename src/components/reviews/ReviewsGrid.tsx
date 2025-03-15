@@ -1,5 +1,6 @@
 
 import { ReviewCard } from "@/components/ReviewCard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Review {
   id: number;
@@ -28,8 +29,18 @@ interface ReviewsGridProps {
 
 export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
   console.log('Reviews in grid:', reviews);
+  
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, i) => (
+          <Skeleton key={i} className="h-[300px]" />
+        ))}
+      </div>
+    );
+  }
 
-  if (reviews.length === 0 && !isLoading) {
+  if (reviews.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
@@ -37,14 +48,32 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
     );
   }
 
+  // Filter out any potentially malformed reviews
+  const validReviews = reviews.filter(review => 
+    review.id && 
+    review.title && 
+    review.experience && 
+    (review.PATOLOGIE?.Patologia || review.condition)
+  );
+  
+  console.log('Valid reviews after filtering:', validReviews.length);
+
+  if (validReviews.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">Non ci sono recensioni valide da mostrare.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {reviews.map((review) => (
+      {validReviews.map((review) => (
         <ReviewCard
           key={review.id}
           id={review.id}
           title={review.title}
-          condition={review.PATOLOGIE?.Patologia || ''}
+          condition={review.PATOLOGIE?.Patologia || review.condition || ''}
           date={new Date(review.created_at).toLocaleDateString()}
           preview={review.experience.slice(0, 200) + '...'}
           username={review.username}

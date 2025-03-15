@@ -64,17 +64,26 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
 
         console.log('Successfully fetched reviews:', data);
         
-        // Check if all records have comments_count
-        data?.forEach(review => {
-          console.log(`Review ID ${review.id}, Title: ${review.title}, Comments Count: ${review.comments_count}`);
-        });
+        // Check for malformed reviews
+        const invalidReviews = data?.filter(review => 
+          !review.title || 
+          !review.experience || 
+          !review.PATOLOGIE?.Patologia
+        );
+        
+        if (invalidReviews && invalidReviews.length > 0) {
+          console.warn('Found invalid reviews:', invalidReviews.length);
+          console.warn('First invalid review:', invalidReviews[0]);
+        }
         
         // Transform the data to ensure username is properly handled
         const transformedReviews = data?.map(review => ({
           ...review,
           username: review.username || 'Anonimo',
           // Ensure comments_count is a number or 0
-          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0
+          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
+          // Ensure likes_count is a number or 0
+          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0
         })) || [];
 
         console.log('Transformed reviews:', transformedReviews);
@@ -99,7 +108,8 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
         console.error('Query error:', error);
       }
     },
-    retry: 1
+    retry: 1,
+    refetchOnWindowFocus: true
   });
 
   const updateReviewStatus = useMutation({

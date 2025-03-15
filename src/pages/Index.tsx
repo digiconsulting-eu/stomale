@@ -50,8 +50,22 @@ export default function Index() {
           throw error;
         }
 
-        console.log('Fetched reviews for homepage:', data?.length || 0);
-        return data || [];
+        console.log('Fetched reviews for homepage:', data);
+        
+        // Validate that the reviews contain necessary data
+        const validReviews = data?.filter(review => 
+          review.title && 
+          review.experience && 
+          review.PATOLOGIE?.Patologia
+        ) || [];
+        
+        console.log('Valid reviews after filtering:', validReviews.length);
+        
+        if (validReviews.length === 0 && data?.length > 0) {
+          console.warn('Reviews were found but none contain all required fields');
+        }
+        
+        return validReviews;
       } catch (error) {
         console.error('Error in homepage reviews fetch:', error);
         toast.error("Errore nel caricamento delle recensioni");

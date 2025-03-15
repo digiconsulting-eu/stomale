@@ -28,14 +28,23 @@ export const ReviewCard = ({
   commentsCount = 0,
   onDelete,
 }: ReviewCardProps) => {
+  // Validate that we have the necessary data
+  if (!id || !title || !condition) {
+    console.error('ReviewCard missing required data:', { id, title, condition });
+    return null;
+  }
+  
   // Ensure comment count is always a valid number
   const displayCommentsCount = typeof commentsCount === 'number' && !isNaN(commentsCount) ? commentsCount : 0;
   const displayLikesCount = typeof likesCount === 'number' && !isNaN(likesCount) ? likesCount : 0;
   
   console.log(`ReviewCard ${id} (${title}) rendering with comments count:`, displayCommentsCount, 'raw value:', commentsCount, 'likes count:', displayLikesCount);
   
+  // Make sure condition is properly formatted
+  const safeCondition = condition.trim().toLowerCase();
+  
   // Generate the review path using our utility function
-  const reviewPath = generateReviewPath(condition, id, title);
+  const reviewPath = generateReviewPath(safeCondition, id, title);
 
   return (
     <Card className="bg-white rounded-3xl border border-[#1EAEDB] shadow-sm">
@@ -57,7 +66,7 @@ export const ReviewCard = ({
         </div>
         <p className="text-sm text-gray-500 mb-2">{username}</p>
         <Link 
-          to={`/patologia/${condition.trim().toLowerCase()}`}
+          to={`/patologia/${safeCondition}`}
           className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
         >
           {condition.toUpperCase()}
