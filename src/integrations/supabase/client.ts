@@ -12,7 +12,11 @@ const supabaseOptions = {
     storageKey: 'stomale-auth',
     autoRefreshToken: true,
     detectSessionInUrl: true
+  },
+  global: {
+    fetch: (...args) => fetch(...args)
   }
 };
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, supabaseOptions);
+
