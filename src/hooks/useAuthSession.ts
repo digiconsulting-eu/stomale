@@ -32,9 +32,11 @@ export const useAuthSession = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    onError: (error) => {
-      console.error('Session query error:', error);
-      queryClient.setQueryData(['auth-session'], null);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Session query error:', error);
+        queryClient.setQueryData(['auth-session'], null);
+      }
     }
   });
 };
