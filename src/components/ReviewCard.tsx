@@ -28,23 +28,29 @@ export const ReviewCard = ({
   commentsCount = 0,
   onDelete,
 }: ReviewCardProps) => {
-  // Validate that we have the necessary data
-  if (!id || !title || !condition) {
-    console.error('ReviewCard missing required data:', { id, title, condition });
+  // Enhanced validation
+  if (!id || !title) {
+    console.error('ReviewCard missing required data:', { id, title });
     return null;
   }
   
-  // Ensure comment count is always a valid number
+  // Make sure condition is always a string
+  const safeCondition = condition?.trim() || 'Patologia non specificata';
+  
+  // Ensure counts are always valid numbers
   const displayCommentsCount = typeof commentsCount === 'number' && !isNaN(commentsCount) ? commentsCount : 0;
   const displayLikesCount = typeof likesCount === 'number' && !isNaN(likesCount) ? likesCount : 0;
   
-  console.log(`ReviewCard ${id} (${title}) rendering with comments count:`, displayCommentsCount, 'raw value:', commentsCount, 'likes count:', displayLikesCount);
+  // Ensure preview is a valid string
+  const safePreview = preview || 'Nessuna descrizione disponibile';
   
-  // Make sure condition is properly formatted
-  const safeCondition = condition.trim().toLowerCase();
+  // Ensure username is always a string
+  const safeUsername = username || 'Anonimo';
+  
+  console.log(`ReviewCard ${id} rendering with title: "${title}", condition: "${safeCondition}", comments: ${displayCommentsCount}, likes: ${displayLikesCount}`);
   
   // Generate the review path using our utility function
-  const reviewPath = generateReviewPath(safeCondition, id, title);
+  const reviewPath = generateReviewPath(safeCondition.toLowerCase(), id, title);
 
   return (
     <Card className="bg-white rounded-3xl border border-[#1EAEDB] shadow-sm">
@@ -64,16 +70,16 @@ export const ReviewCard = ({
             </Button>
           )}
         </div>
-        <p className="text-sm text-gray-500 mb-2">{username}</p>
+        <p className="text-sm text-gray-500 mb-2">{safeUsername}</p>
         <Link 
-          to={`/patologia/${safeCondition}`}
+          to={`/patologia/${safeCondition.toLowerCase()}`}
           className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
         >
-          {condition.toUpperCase()}
+          {safeCondition.toUpperCase()}
         </Link>
-        <p className="text-gray-600 line-clamp-2 mb-4">{preview}</p>
+        <p className="text-gray-600 line-clamp-2 mb-4">{safePreview}</p>
         
-        {/* Likes and Comments counts - Now clickable */}
+        {/* Likes and Comments counts */}
         <div className="flex items-center gap-6 mb-4 text-gray-500">
           <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
             <Heart className="h-5 w-5 text-red-400" />

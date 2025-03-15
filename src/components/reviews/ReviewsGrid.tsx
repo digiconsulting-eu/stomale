@@ -40,7 +40,8 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
     );
   }
 
-  if (reviews.length === 0) {
+  if (!reviews || reviews.length === 0) {
+    console.log('No reviews found to display');
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
@@ -48,13 +49,27 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
     );
   }
 
-  // Filter out any potentially malformed reviews
-  const validReviews = reviews.filter(review => 
-    review.id && 
-    review.title && 
-    review.experience && 
-    (review.PATOLOGIE?.Patologia)
-  );
+  // Log raw data for debugging
+  console.log('First review raw data:', JSON.stringify(reviews[0]));
+
+  // Filter out any potentially malformed reviews and add detailed logging
+  const validReviews = reviews.filter(review => {
+    const isValid = 
+      review && 
+      review.id && 
+      review.title && 
+      review.experience && 
+      review.PATOLOGIE?.Patologia;
+    
+    if (!isValid) {
+      console.warn('Invalid review found:', review);
+      if (review && !review.PATOLOGIE?.Patologia) {
+        console.warn('Review is missing PATOLOGIE.Patologia:', review.id);
+      }
+    }
+    
+    return isValid;
+  });
   
   console.log('Valid reviews after filtering:', validReviews.length);
 
@@ -68,19 +83,24 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {validReviews.map((review) => (
-        <ReviewCard
-          key={review.id}
-          id={review.id}
-          title={review.title}
-          condition={review.PATOLOGIE?.Patologia || ''}
-          date={new Date(review.created_at).toLocaleDateString()}
-          preview={review.experience.slice(0, 200) + '...'}
-          username={review.username}
-          likesCount={review.likes_count || 0}
-          commentsCount={review.comments_count || 0}
-        />
-      ))}
+      {validReviews.map((review) => {
+        // Extra logging for each review
+        console.log(`Rendering review ${review.id} with title "${review.title}", patologia: "${review.PATOLOGIE?.Patologia}"`);
+        
+        return (
+          <ReviewCard
+            key={review.id}
+            id={review.id}
+            title={review.title}
+            condition={review.PATOLOGIE?.Patologia || ''}
+            date={new Date(review.created_at).toLocaleDateString()}
+            preview={review.experience.slice(0, 200) + '...'}
+            username={review.username || 'Anonimo'}
+            likesCount={typeof review.likes_count === 'number' ? review.likes_count : 0}
+            commentsCount={typeof review.comments_count === 'number' ? review.comments_count : 0}
+          />
+        );
+      })}
     </div>
   );
 };

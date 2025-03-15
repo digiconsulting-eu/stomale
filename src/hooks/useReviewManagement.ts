@@ -15,7 +15,7 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
   const { data: reviewsData, isLoading } = useQuery({
     queryKey: ['reviews', page, limit],
     queryFn: async () => {
-      console.log('Starting to fetch reviews...');
+      console.log('Starting to fetch reviews on page', page, 'with limit', limit);
       
       try {
         // First get total count
@@ -62,31 +62,42 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
           throw error;
         }
 
-        console.log('Successfully fetched reviews:', data);
+        console.log('Raw reviews data fetched:', data);
         
-        // Check for malformed reviews
-        const invalidReviews = data?.filter(review => 
-          !review.title || 
-          !review.experience || 
-          !review.PATOLOGIE?.Patologia
-        );
-        
-        if (invalidReviews && invalidReviews.length > 0) {
-          console.warn('Found invalid reviews:', invalidReviews.length);
-          console.warn('First invalid review:', invalidReviews[0]);
+        if (!data || data.length === 0) {
+          console.log('No reviews found from API');
+          return {
+            reviews: [],
+            totalCount: 0,
+            totalPages: 0
+          };
         }
         
-        // Transform the data to ensure username is properly handled
-        const transformedReviews = data?.map(review => ({
+        // Filter out reviews without proper data
+        const validReviews = data.filter(review => 
+          review && review.id && review.title && review.experience && review.PATOLOGIE?.Patologia
+        );
+        
+        console.log('Valid reviews after filtering:', validReviews.length);
+        
+        if (validReviews.length === 0) {
+          console.warn('No valid reviews found after filtering');
+        }
+        
+        // Transform the data to ensure we have valid values for all fields
+        const transformedReviews = validReviews.map(review => ({
           ...review,
+          // Ensure username is properly handled
           username: review.username || 'Anonimo',
           // Ensure comments_count is a number or 0
           comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
           // Ensure likes_count is a number or 0
-          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0
-        })) || [];
+          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
+          // Ensure PATOLOGIE exists
+          PATOLOGIE: review.PATOLOGIE || { id: 0, Patologia: 'Patologia non specificata' }
+        }));
 
-        console.log('Transformed reviews:', transformedReviews);
+        console.log('Sample transformed review:', transformedReviews.length > 0 ? transformedReviews[0] : 'No reviews available');
 
         return {
           reviews: transformedReviews,
@@ -108,8 +119,10 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
         console.error('Query error:', error);
       }
     },
-    retry: 1,
-    refetchOnWindowFocus: true
+    retry: 2, // Increase retry attempts
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 1000 * 60 * 5 // 5 minutes
   });
 
   const updateReviewStatus = useMutation({

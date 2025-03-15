@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,20 +51,39 @@ export default function Index() {
 
         console.log('Fetched reviews for homepage:', data);
         
+        if (!data || data.length === 0) {
+          console.log('No reviews returned from API');
+          return [];
+        }
+        
         // Validate that the reviews contain necessary data
-        const validReviews = data?.filter(review => 
+        const validReviews = data.filter(review => 
+          review && 
+          review.id && 
           review.title && 
           review.experience && 
           review.PATOLOGIE?.Patologia
-        ) || [];
+        );
         
         console.log('Valid reviews after filtering:', validReviews.length);
         
-        if (validReviews.length === 0 && data?.length > 0) {
+        if (validReviews.length === 0 && data.length > 0) {
           console.warn('Reviews were found but none contain all required fields');
+          // Log some example data to understand the structure
+          console.warn('First review from API:', data[0]);
         }
         
-        return validReviews;
+        // Transform and standardize the data
+        const normalizedReviews = validReviews.map(review => ({
+          ...review,
+          username: review.username || 'Anonimo',
+          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
+          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
+          // Ensure PATOLOGIE is present
+          PATOLOGIE: review.PATOLOGIE || { id: 0, Patologia: 'Patologia non specificata' }
+        }));
+        
+        return normalizedReviews;
       } catch (error) {
         console.error('Error in homepage reviews fetch:', error);
         toast.error("Errore nel caricamento delle recensioni");
@@ -181,19 +199,23 @@ export default function Index() {
             </div>
           ) : latestReviews && latestReviews.length > 0 ? (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {latestReviews.map((review) => (
-                <ReviewCard
-                  key={review.id}
-                  id={review.id}
-                  title={review.title}
-                  condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
-                  date={new Date(review.created_at).toLocaleDateString()}
-                  preview={review.experience.slice(0, 150) + '...'}
-                  username={review.username || 'Anonimo'}
-                  likesCount={review.likes_count || 0}
-                  commentsCount={review.comments_count || 0}
-                />
-              ))}
+              {latestReviews.map((review) => {
+                console.log(`Rendering review on homepage: ID ${review.id}, Title: ${review.title}, Condition: ${review.PATOLOGIE?.Patologia || 'Missing'}`);
+                
+                return (
+                  <ReviewCard
+                    key={review.id}
+                    id={review.id}
+                    title={review.title}
+                    condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
+                    date={new Date(review.created_at).toLocaleDateString()}
+                    preview={review.experience.slice(0, 150) + '...'}
+                    username={review.username || 'Anonimo'}
+                    likesCount={review.likes_count || 0}
+                    commentsCount={review.comments_count || 0}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12 bg-white rounded-lg shadow-sm">
