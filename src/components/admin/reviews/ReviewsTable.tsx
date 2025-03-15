@@ -32,6 +32,17 @@ export const ReviewsTable = ({ reviews }: ReviewsTableProps) => {
     );
   };
 
+  // Debugging output
+  console.log("Reviews data in ReviewsTable:", reviews);
+  
+  if (!reviews || reviews.length === 0) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-gray-500">Nessuna recensione trovata.</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Recensioni</h2>
@@ -62,7 +73,7 @@ export const ReviewsTable = ({ reviews }: ReviewsTableProps) => {
                     {review.title}
                   </div>
                 </TableCell>
-                <TableCell>{review.PATOLOGIE?.Patologia}</TableCell>
+                <TableCell>{review.PATOLOGIE?.Patologia || 'N/D'}</TableCell>
                 <TableCell>
                   {new Date(review.created_at).toLocaleDateString('it-IT')}
                 </TableCell>
