@@ -55,21 +55,31 @@ export const FeaturedReviews = () => {
           return [];
         }
         
-        // Process the data to ensure all fields are properly formatted
-        return data.map(review => ({
-          id: review.id,
-          title: review.title || 'Titolo non disponibile',
-          experience: review.experience || 'Contenuto non disponibile',
-          username: review.username || 'Anonimo',
-          created_at: review.created_at || new Date().toISOString(),
-          condition_id: review.condition_id || 0,
-          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
-          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
-          PATOLOGIE: review.PATOLOGIE ? {
-            id: review.PATOLOGIE.id || 0,
-            Patologia: review.PATOLOGIE.Patologia || 'Sconosciuta'
-          } : { id: 0, Patologia: 'Sconosciuta' }
-        }));
+        // Process the data to ensure all fields are properly formatted with explicit type checking
+        // for better cross-browser compatibility, especially on Safari/macOS
+        const safeData = data.map(review => {
+          // Log each review to help debug Safari issues
+          console.log('Processing review for display:', review?.id);
+          
+          return {
+            id: typeof review.id === 'number' && !isNaN(review.id) ? review.id : 0,
+            title: review.title && typeof review.title === 'string' ? review.title : 'Titolo non disponibile',
+            experience: review.experience && typeof review.experience === 'string' ? review.experience : 'Contenuto non disponibile',
+            username: review.username && typeof review.username === 'string' ? review.username : 'Anonimo',
+            created_at: review.created_at && typeof review.created_at === 'string' ? review.created_at : new Date().toISOString(),
+            condition_id: typeof review.condition_id === 'number' && !isNaN(review.condition_id) ? review.condition_id : 0,
+            comments_count: typeof review.comments_count === 'number' && !isNaN(review.comments_count) ? review.comments_count : 0,
+            likes_count: typeof review.likes_count === 'number' && !isNaN(review.likes_count) ? review.likes_count : 0,
+            PATOLOGIE: review.PATOLOGIE ? {
+              id: typeof review.PATOLOGIE.id === 'number' && !isNaN(review.PATOLOGIE.id) ? review.PATOLOGIE.id : 0,
+              Patologia: review.PATOLOGIE.Patologia && typeof review.PATOLOGIE.Patologia === 'string' ? 
+                review.PATOLOGIE.Patologia : 'Sconosciuta'
+            } : { id: 0, Patologia: 'Sconosciuta' }
+          };
+        });
+        
+        console.log('Processed data ready for Safari/macOS:', safeData);
+        return safeData;
       } catch (error) {
         console.error('Error in homepage reviews fetch:', error);
         toast.error("Errore nel caricamento delle recensioni");
@@ -155,21 +165,27 @@ export const FeaturedReviews = () => {
               </div>
             ))}
           </div>
-        ) : latestReviews && latestReviews.length > 0 ? (
+        ) : latestReviews && Array.isArray(latestReviews) && latestReviews.length > 0 ? (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {latestReviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                id={review.id}
-                title={review.title}
-                condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
-                date={new Date(review.created_at).toLocaleDateString()}
-                preview={review.experience ? (review.experience.slice(0, 150) + '...') : 'Nessun contenuto disponibile'}
-                username={review.username || 'Anonimo'}
-                likesCount={review.likes_count || 0}
-                commentsCount={review.comments_count || 0}
-              />
-            ))}
+            {latestReviews.map((review) => {
+              if (!review || typeof review !== 'object') {
+                console.error('Invalid review object:', review);
+                return null;
+              }
+              return (
+                <ReviewCard
+                  key={review.id}
+                  id={review.id}
+                  title={review.title}
+                  condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
+                  date={new Date(review.created_at).toLocaleDateString()}
+                  preview={review.experience ? (review.experience.slice(0, 150) + '...') : 'Nessun contenuto disponibile'}
+                  username={review.username || 'Anonimo'}
+                  likesCount={review.likes_count || 0}
+                  commentsCount={review.comments_count || 0}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12 bg-white rounded-lg shadow-sm">
