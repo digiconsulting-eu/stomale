@@ -7,7 +7,7 @@
 /sitemaps/sitemap-static.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-static 200! Content-Type=application/xml
 /sitemaps/* /sitemaps/:splat 200! Content-Type=application/xml
 # Reindirizzamento da URL con trattini a URL con spazi codificati per le patologie
-/patologia/:condition-* /patologia/:condition%20:splat 301!
+/patologia/:condition-* /patologia/:condition%20:splat 301
 # Reindirizzamento da vecchi articoli a nuove recensioni
 /news/nutella-e-colesterolo-sono-correlati /patologia/colesterolo%20alto/esperienza/1004-nutella-e-colesterolo,-sono-correlati 301
 
