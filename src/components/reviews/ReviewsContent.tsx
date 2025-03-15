@@ -5,6 +5,7 @@ import { ReviewsPagination } from "./ReviewsPagination";
 import { ReviewsDisclaimer } from "./ReviewsDisclaimer";
 import { ReviewsHeader } from "./ReviewsHeader";
 import { DatabaseReview, Review } from "@/types/review";
+import { useEffect } from "react";
 
 interface ReviewsContentProps {
   reviews: DatabaseReview[];
@@ -22,6 +23,10 @@ export const ReviewsContent = ({
   setCurrentPage
 }: ReviewsContentProps) => {
   console.log('Reviews in ReviewsContent:', reviews);
+
+  useEffect(() => {
+    console.log('ReviewsContent mounted/updated with reviews:', reviews?.length || 0);
+  }, [reviews]);
 
   // Transform DatabaseReview[] to Review[] with safety checks
   const transformedReviews: Review[] = reviews.map(review => {
@@ -59,11 +64,15 @@ export const ReviewsContent = ({
               <Skeleton key={i} className="h-[300px]" />
             ))}
           </div>
-        ) : (
+        ) : transformedReviews.length > 0 ? (
           <ReviewsGrid 
             reviews={transformedReviews}
             isLoading={isLoading} 
           />
+        ) : (
+          <div className="text-center py-10">
+            <p className="text-lg text-gray-600">Nessuna recensione disponibile al momento.</p>
+          </div>
         )}
 
         {totalPages > 1 && (
