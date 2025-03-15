@@ -23,6 +23,11 @@ export const useConditions = ({
     queryFn: async () => {
       console.log('Fetching conditions with pagination:', { page, limit, offset, searchTerm, letter });
       
+      // Add a small delay to prevent too many rapid requests
+      if (searchTerm) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+      
       let query = supabase
         .from('PATOLOGIE')
         .select('id, Patologia', { count: 'exact' });
@@ -36,36 +41,43 @@ export const useConditions = ({
         query = query.ilike('Patologia', `${letter}%`);
       }
 
-      const { data, count, error } = await query
-        .order('Patologia')
-        .range(offset, offset + limit - 1);
+      try {
+        const { data, count, error } = await query
+          .order('Patologia')
+          .range(offset, offset + limit - 1);
 
-      if (error) {
-        console.error('Error fetching conditions:', error);
-        if (error.code === 'PGRST116') {
-          // This is a rate limiting error
-          console.warn('Rate limit exceeded when fetching conditions');
-          toast.error("Troppe richieste. Riprova tra qualche secondo.", {
-            description: "Il server sta ricevendo troppe richieste."
-          });
-        } else {
-          toast.error("Errore nel caricamento delle patologie. Riprova tra qualche secondo.");
+        if (error) {
+          // This code handles specific supabase errors
+          if (error.code === 'PGRST116') {
+            console.warn('Rate limit exceeded when fetching conditions');
+            toast.error("Troppe richieste. Riprova tra qualche secondo.", {
+              description: "Il server sta ricevendo troppe richieste."
+            });
+          } else {
+            console.error('Error fetching conditions:', error);
+            toast.error("Errore nel caricamento delle patologie. Riprova tra qualche secondo.");
+          }
+          throw error;
         }
+
+        // Log the first few items for debugging
+        if (data && data.length > 0) {
+          console.log('First few conditions:', data.slice(0, 3));
+        } else if (data && data.length === 0) {
+          console.log('No conditions found with the provided filters');
+        }
+        
+        console.log('Total conditions count:', count);
+
+        return {
+          conditions: data || [],
+          totalCount: count || 0,
+          totalPages: Math.ceil((count || 0) / limit)
+        };
+      } catch (error) {
+        console.error('Error in fetch conditions function:', error);
         throw error;
       }
-
-      // Log the first few items for debugging
-      if (data && data.length > 0) {
-        console.log('First few conditions:', data.slice(0, 3));
-      }
-      
-      console.log('Total count:', count);
-
-      return {
-        conditions: data || [],
-        totalCount: count || 0,
-        totalPages: Math.ceil((count || 0) / limit)
-      };
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 3,
@@ -74,7 +86,7 @@ export const useConditions = ({
     refetchOnReconnect: true, // Refetch when reconnecting
     meta: {
       onError: (error: Error) => {
-        console.error('Query error:', error);
+        console.error('Query error in useConditions:', error);
       }
     }
   });

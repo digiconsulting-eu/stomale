@@ -1,5 +1,6 @@
 
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { useState, useEffect } from "react";
 import { StarRating } from "@/components/StarRating";
 import { UseFormReturn } from "react-hook-form";
 
@@ -10,10 +11,25 @@ interface StarRatingFieldProps {
 }
 
 export const StarRatingField = ({ form, name, label }: StarRatingFieldProps) => {
-  // Add explicit console logging to debug values
-  const value = form.watch(name);
-  console.log(`Star rating field "${name}" current value:`, value);
+  const [value, setValue] = useState<number>(form.getValues(name) || 0);
   
+  // Sync the internal state with form values
+  useEffect(() => {
+    const subscription = form.watch((value, { name: fieldName }) => {
+      if (fieldName === name) {
+        setValue(value[name] || 0);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form, name]);
+
+  const handleChange = (newValue: number) => {
+    console.log(`Changing ${name} value to:`, newValue);
+    setValue(newValue);
+    form.setValue(name, newValue, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+  };
+
   return (
     <FormField
       control={form.control}
@@ -22,13 +38,13 @@ export const StarRatingField = ({ form, name, label }: StarRatingFieldProps) => 
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <StarRating
-              value={field.value}
-              onChange={(newValue) => {
-                console.log(`Changing ${name} from ${field.value} to ${newValue}`);
-                field.onChange(newValue);
-              }}
-            />
+            <div>
+              <StarRating
+                value={value}
+                onChange={handleChange}
+                className="py-2"
+              />
+            </div>
           </FormControl>
           <FormMessage />
         </FormItem>

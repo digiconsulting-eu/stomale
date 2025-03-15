@@ -31,6 +31,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidatingCondition, setIsValidatingCondition] = useState(false);
   const [conditionValidated, setConditionValidated] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -55,8 +56,11 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       if (!currentCondition) return;
       
       setIsValidatingCondition(true);
+      setSubmissionError(null);
       
       try {
+        console.log('Validating condition:', currentCondition);
+        
         // Check if the condition exists in the database
         const { data, error } = await supabase
           .from('PATOLOGIE')
@@ -97,6 +101,9 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
   const onSubmit = async (data: FormValues) => {
     if (isSubmitting) return;
     
+    // Reset any previous submission errors
+    setSubmissionError(null);
+    
     // Double check condition validity before submission
     if (!conditionValidated) {
       toast.error("È necessario selezionare una patologia valida dall'elenco");
@@ -114,12 +121,17 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       // Check authentication
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (sessionError || !session?.user) {
+      if (sessionError) {
         console.error('Session error:', sessionError);
-        toast.error("Devi effettuare l'accesso per inviare una recensione");
-        navigate("/login");
-        return;
+        throw new Error("Errore di autenticazione");
       }
+      
+      if (!session?.user) {
+        console.error('No session found');
+        throw new Error("Devi effettuare l'accesso per inviare una recensione");
+      }
+
+      console.log('User authenticated, ID:', session.user.id);
 
       // Get user's username
       const { data: userData, error: userError } = await supabase
@@ -128,31 +140,43 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         .eq('id', session.user.id)
         .single();
 
-      if (userError || !userData?.username) {
+      if (userError) {
         console.error('Error fetching username:', userError);
-        toast.error("Errore nel recupero dei dati utente");
-        return;
+        throw new Error("Errore nel recupero dei dati utente");
+      }
+      
+      if (!userData?.username) {
+        console.error('Username not found');
+        throw new Error("Username dell'utente non trovato");
       }
 
       console.log('Found username:', userData.username);
 
-      // Get condition ID
+      // Get condition ID with error handling
       const { data: patologiaData, error: patologiaError } = await supabase
         .from('PATOLOGIE')
         .select('id')
         .eq('Patologia', data.condition)
         .single();
 
-      if (patologiaError || !patologiaData) {
+      if (patologiaError) {
         console.error('Error fetching condition:', patologiaError);
-        toast.error("Errore nel recupero della patologia. Riprova con una patologia dall'elenco.");
-        return;
+        throw new Error("Errore nel recupero della patologia");
+      }
+      
+      if (!patologiaData) {
+        console.error('Condition data not found');
+        throw new Error("Patologia non trovata nel database");
       }
 
       console.log('Found condition ID:', patologiaData.id);
 
-      // Insert review
-      const { error: reviewError } = await supabase
+      // Insert review with specific timeout handling
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Timeout durante l'invio della recensione")), 15000)
+      );
+      
+      const insertPromise = supabase
         .from('reviews')
         .insert([
           {
@@ -170,18 +194,26 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
             status: 'pending'
           }
         ]);
-
-      if (reviewError) {
-        console.error('Error inserting review:', reviewError);
-        throw reviewError;
+      
+      // Race the insert against a timeout
+      const result = await Promise.race([insertPromise, timeoutPromise]);
+      
+      if ('error' in result && result.error) {
+        console.error('Error inserting review:', result.error);
+        throw new Error(`Errore durante l'invio della recensione: ${result.error.message}`);
       }
 
       console.log('Review submitted successfully');
       navigate("/grazie");
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting review:', error);
-      toast.error("Si è verificato un errore durante l'invio della recensione. Riprova più tardi.");
+      
+      // Set a specific error message for display
+      setSubmissionError(error.message || "Si è verificato un errore durante l'invio della recensione");
+      
+      // Show toast with error message
+      toast.error(error.message || "Si è verificato un errore durante l'invio della recensione. Riprova più tardi.");
     } finally {
       setIsSubmitting(false);
     }
@@ -208,7 +240,25 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
             </div>
           </div>
         )}
+        
         <ReviewFormFields form={form} />
+        
+        {submissionError && (
+          <div className="rounded-md bg-red-50 p-3 border border-red-200">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Errore di invio</h3>
+                <div className="mt-1 text-sm text-red-700">{submissionError}</div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <Button 
           type="submit" 
           className="w-full"
