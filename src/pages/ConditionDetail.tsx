@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -126,6 +127,7 @@ export default function ConditionDetail() {
     id: review.id,
     title: review.title,
     condition: condition || '',
+    condition_id: review.condition_id,
     experience: review.experience,
     diagnosis_difficulty: review.diagnosis_difficulty,
     symptoms_severity: review.symptoms_severity,

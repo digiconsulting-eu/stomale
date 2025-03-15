@@ -32,6 +32,7 @@ export const ReviewsContent = ({
       id: review.id,
       title: review.title,
       condition: patologie.Patologia.toLowerCase() || '',
+      condition_id: review.condition_id,
       experience: review.experience,
       diagnosis_difficulty: review.diagnosis_difficulty,
       symptoms_severity: review.symptoms_severity,
