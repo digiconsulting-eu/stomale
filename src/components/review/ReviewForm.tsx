@@ -172,7 +172,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       console.log('Found condition ID:', patologiaData.id);
 
       // Insert review with specific timeout handling
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise<never>((_, reject) => 
         setTimeout(() => reject(new Error("Timeout durante l'invio della recensione")), 15000)
       );
       
@@ -195,9 +195,10 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           }
         ]);
       
-      // Race the insert against a timeout
+      // Race the insert against a timeout with proper typing
       const result = await Promise.race([insertPromise, timeoutPromise]);
       
+      // Type check for Supabase response error
       if ('error' in result && result.error) {
         console.error('Error inserting review:', result.error);
         throw new Error(`Errore durante l'invio della recensione: ${result.error.message}`);
@@ -206,14 +207,19 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       console.log('Review submitted successfully');
       navigate("/grazie");
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error submitting review:', error);
       
+      // Handle the error, ensuring we extract the message properly regardless of error type
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Si è verificato un errore durante l'invio della recensione";
+      
       // Set a specific error message for display
-      setSubmissionError(error.message || "Si è verificato un errore durante l'invio della recensione");
+      setSubmissionError(errorMessage);
       
       // Show toast with error message
-      toast.error(error.message || "Si è verificato un errore durante l'invio della recensione. Riprova più tardi.");
+      toast.error(errorMessage || "Si è verificato un errore durante l'invio della recensione. Riprova più tardi.");
     } finally {
       setIsSubmitting(false);
     }
