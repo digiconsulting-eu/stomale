@@ -53,7 +53,7 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
     review.id && 
     review.title && 
     review.experience && 
-    (review.PATOLOGIE?.Patologia || review.condition)
+    (review.PATOLOGIE?.Patologia)
   );
   
   console.log('Valid reviews after filtering:', validReviews.length);
@@ -73,7 +73,7 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
           key={review.id}
           id={review.id}
           title={review.title}
-          condition={review.PATOLOGIE?.Patologia || review.condition || ''}
+          condition={review.PATOLOGIE?.Patologia || ''}
           date={new Date(review.created_at).toLocaleDateString()}
           preview={review.experience.slice(0, 200) + '...'}
           username={review.username}
