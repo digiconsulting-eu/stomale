@@ -14,9 +14,8 @@ const supabaseOptions = {
     detectSessionInUrl: true
   },
   global: {
-    fetch: (...args) => fetch(...args)
+    fetch: (url: string, options: RequestInit) => fetch(url, options)
   }
 };
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, supabaseOptions);
-
