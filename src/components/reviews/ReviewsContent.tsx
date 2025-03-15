@@ -1,11 +1,9 @@
-
 import { Skeleton } from "@/components/ui/skeleton";
 import { ReviewsGrid } from "./ReviewsGrid";
 import { ReviewsPagination } from "./ReviewsPagination";
 import { ReviewsDisclaimer } from "./ReviewsDisclaimer";
 import { ReviewsHeader } from "./ReviewsHeader";
 import { DatabaseReview, Review } from "@/types/review";
-import { useEffect } from "react";
 
 interface ReviewsContentProps {
   reviews: DatabaseReview[];
@@ -24,34 +22,22 @@ export const ReviewsContent = ({
 }: ReviewsContentProps) => {
   console.log('Reviews in ReviewsContent:', reviews);
 
-  useEffect(() => {
-    console.log('ReviewsContent mounted/updated with reviews:', reviews?.length || 0);
-  }, [reviews]);
-
-  // Transform DatabaseReview[] to Review[] with safety checks
-  const transformedReviews: Review[] = reviews.map(review => {
-    // Ensure PATOLOGIE is never undefined
-    const patologie = review.PATOLOGIE || { id: 0, Patologia: 'Sconosciuta' };
-    
-    return {
-      id: review.id,
-      title: review.title,
-      condition: patologie.Patologia.toLowerCase() || '',
-      condition_id: review.condition_id,
-      experience: review.experience,
-      diagnosis_difficulty: review.diagnosis_difficulty,
-      symptoms_severity: review.symptoms_severity,
-      has_medication: review.has_medication,
-      medication_effectiveness: review.medication_effectiveness,
-      healing_possibility: review.healing_possibility,
-      social_discomfort: review.social_discomfort,
-      username: review.username || 'Anonimo',
-      created_at: review.created_at,
-      PATOLOGIE: patologie,
-      likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
-      comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0
-    };
-  });
+  // Transform DatabaseReview[] to Review[]
+  const transformedReviews: Review[] = reviews.map(review => ({
+    id: review.id,
+    title: review.title,
+    condition: review.PATOLOGIE?.Patologia.toLowerCase() || '',
+    experience: review.experience,
+    diagnosis_difficulty: review.diagnosis_difficulty,
+    symptoms_severity: review.symptoms_severity,
+    has_medication: review.has_medication,
+    medication_effectiveness: review.medication_effectiveness,
+    healing_possibility: review.healing_possibility,
+    social_discomfort: review.social_discomfort,
+    username: review.username || 'Anonimo',
+    created_at: review.created_at,
+    PATOLOGIE: review.PATOLOGIE
+  }));
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -64,15 +50,11 @@ export const ReviewsContent = ({
               <Skeleton key={i} className="h-[300px]" />
             ))}
           </div>
-        ) : transformedReviews.length > 0 ? (
+        ) : (
           <ReviewsGrid 
             reviews={transformedReviews}
             isLoading={isLoading} 
           />
-        ) : (
-          <div className="text-center py-10">
-            <p className="text-lg text-gray-600">Nessuna recensione disponibile al momento.</p>
-          </div>
         )}
 
         {totalPages > 1 && (

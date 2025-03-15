@@ -8,37 +8,32 @@ import { NavigationMenu } from "./header/NavigationMenu";
 import { AuthButtons } from "./header/AuthButtons";
 import { MobileMenu } from "./header/MobileMenu";
 import { toast } from "sonner";
-import { useAuthSession } from "@/hooks/useAuthSession";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const { data: session, isLoading: sessionLoading } = useAuthSession();
-  const isLoggedIn = !!session;
 
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  // Check admin status whenever session changes
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      setIsLoading(true);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const isAuthenticated = !!session;
+      setIsLoggedIn(isAuthenticated);
       
-      if (session?.user?.email) {
+      if (isAuthenticated && session?.user?.email) {
         try {
-          console.log("Checking admin status for:", session.user.email);
           const { data: adminData } = await supabase
             .from('admin')
             .select('email')
             .eq('email', session.user.email);
           
-          const adminStatus = Array.isArray(adminData) && adminData.length > 0;
-          console.log("Admin status:", adminStatus);
-          setIsAdmin(adminStatus);
+          setIsAdmin(Array.isArray(adminData) && adminData.length > 0);
         } catch (error) {
           console.error("Error checking admin status:", error);
           setIsAdmin(false);
@@ -46,19 +41,52 @@ export const Header = () => {
       } else {
         setIsAdmin(false);
       }
-      
-      setIsLoading(false);
     };
 
-    checkAdminStatus();
-  }, [session]);
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
+      const isAuthenticated = !!session;
+      setIsLoggedIn(isAuthenticated);
+      
+      if (isAuthenticated && session?.user?.email) {
+        try {
+          const { data: adminData } = await supabase
+            .from('admin')
+            .select('email')
+            .eq('email', session.user.email);
+          
+          setIsAdmin(Array.isArray(adminData) && adminData.length > 0);
+        } catch (error) {
+          console.error("Error checking admin status:", error);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+
+      // Handle logout completion
+      if (event === 'SIGNED_OUT') {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+        setIsMenuOpen(false);
+        navigate('/', { replace: true });
+        toast.success("Logout effettuato con successo");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const handleLogout = async () => {
     try {
-      setIsMenuOpen(false);
-      
       // First clear local state
+      setIsLoggedIn(false);
       setIsAdmin(false);
+      setIsMenuOpen(false);
       
       // Then attempt signOut
       const { error } = await supabase.auth.signOut();
@@ -69,11 +97,11 @@ export const Header = () => {
       }
       
       // Clear any remaining local storage
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('isAdmin');
+      localStorage.clear();
       
-      // Force navigation
+      // Force navigation regardless of signOut success
       navigate('/', { replace: true });
+      toast.success("Logout effettuato con successo");
     } catch (error) {
       console.error('Unexpected error during logout:', error);
       toast.error("Errore durante il logout");
@@ -97,12 +125,7 @@ export const Header = () => {
           </Link>
 
           <NavigationMenu />
-          <AuthButtons 
-            isLoggedIn={isLoggedIn} 
-            isAdmin={isAdmin} 
-            onLogout={handleLogout}
-            isLoading={isLoading || sessionLoading}
-          />
+          <AuthButtons isLoggedIn={isLoggedIn} isAdmin={isAdmin} onLogout={handleLogout} />
 
           <button
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -124,7 +147,6 @@ export const Header = () => {
         isAdmin={isAdmin}
         onLogout={handleLogout}
         onClose={() => setIsMenuOpen(false)}
-        isLoading={isLoading || sessionLoading}
       />
     </header>
   );

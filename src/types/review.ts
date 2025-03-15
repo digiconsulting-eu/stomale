@@ -28,7 +28,6 @@ export interface Review {
   id: number;
   title: string;
   condition: string;
-  condition_id: number;
   experience: string;
   diagnosis_difficulty?: number;
   symptoms_severity?: number;

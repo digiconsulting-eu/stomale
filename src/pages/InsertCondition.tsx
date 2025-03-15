@@ -18,7 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuthSession } from "@/hooks/useAuthSession";
-import { detectAppleDevice } from "@/utils/browserDetection";
 
 const formSchema = z.object({
   patologia: z.string().min(2, {
@@ -31,7 +30,6 @@ export default function InsertCondition() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { data: session, isLoading: isSessionLoading } = useAuthSession();
-  const isAppleDevice = detectAppleDevice();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -89,39 +87,12 @@ export default function InsertCondition() {
     try {
       setIsSubmitting(true);
       console.log("Submitting condition:", values);
-      
-      const formattedPatologia = values.patologia.toUpperCase();
-      
-      // Check if condition already exists
-      const { data: existingCondition, error: checkError } = await supabase
-        .from('PATOLOGIE')
-        .select('id, Patologia')
-        .ilike('Patologia', formattedPatologia)
-        .maybeSingle();
-        
-      if (checkError) {
-        console.error("Error checking existing condition:", checkError);
-        toast.error("Errore durante la verifica della patologia");
-        setIsSubmitting(false);
-        return;
-      }
-      
-      // If condition already exists, navigate to its page
-      if (existingCondition) {
-        console.log("Condition already exists:", existingCondition);
-        toast.info("Questa patologia esiste già");
-        
-        const conditionSlug = existingCondition.Patologia.trim().toLowerCase();
-        navigate(`/patologia/${conditionSlug}`);
-        return;
-      }
 
-      // Insert new condition
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .insert([
           {
-            Patologia: formattedPatologia,
+            Patologia: values.patologia.toUpperCase(),
           }
         ])
         .select()
@@ -130,7 +101,6 @@ export default function InsertCondition() {
       if (error) {
         console.error("Error inserting condition:", error);
         toast.error("Errore durante l'inserimento della patologia");
-        setIsSubmitting(false);
         return;
       }
 
@@ -138,22 +108,14 @@ export default function InsertCondition() {
       toast.success("Patologia inserita con successo");
       form.reset();
       
-      // Prepare for redirect
+      // Reindirizza alla pagina della patologia appena creata
       const conditionSlug = values.patologia.trim().toLowerCase();
-      console.log("Redirecting to:", `/patologia/${conditionSlug}`);
-      
-      // For Apple devices, add a small delay before redirect to help with rendering
-      if (isAppleDevice) {
-        setTimeout(() => {
-          navigate(`/patologia/${conditionSlug}`);
-        }, 200);
-      } else {
-        navigate(`/patologia/${conditionSlug}`);
-      }
+      navigate(`/patologia/${conditionSlug}`);
       
     } catch (error) {
       console.error("Error in submission:", error);
       toast.error("Si è verificato un errore durante l'inserimento");
+    } finally {
       setIsSubmitting(false);
     }
   };

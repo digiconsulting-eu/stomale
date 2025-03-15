@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle, setMetaDescription, getSearchMetaDescription } from "@/utils/pageTitle";
 import { useConditions } from "@/hooks/useConditions";
@@ -14,7 +13,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { supabase } from "@/integrations/supabase/client";
 
 const ITEMS_PER_PAGE = 30;
 
@@ -22,49 +20,17 @@ export default function SearchCondition() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLetter, setSelectedLetter] = useState("TUTTE");
   const [currentPage, setCurrentPage] = useState(1);
-  const [forceRefresh, setForceRefresh] = useState(0);
-
-  const handleManualRefresh = useCallback(() => {
-    console.log("Manually refreshing conditions");
-    setForceRefresh(prev => prev + 1);
-  }, []);
 
   const { 
     data,
     isLoading,
-    error,
-    refetch 
+    error 
   } = useConditions({
     page: currentPage,
     limit: ITEMS_PER_PAGE,
     searchTerm,
-    letter: searchTerm ? "" : selectedLetter,
-    forceRefresh
+    letter: searchTerm ? "" : selectedLetter
   });
-
-  // Force refetch on mount
-  useEffect(() => {
-    console.log('SearchCondition component mounted, forcing refetch');
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Listen for auth state changes and refetch when user logs in
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      console.log("Auth state changed in SearchCondition:", event);
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        console.log("Refreshing conditions after auth change");
-        setTimeout(() => {
-          refetch();
-        }, 500);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [refetch]);
 
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Cerca Patologia"));
@@ -82,20 +48,9 @@ export default function SearchCondition() {
     setCurrentPage(1);
   }, [searchTerm, selectedLetter]);
 
-  // Log data when it changes
-  useEffect(() => {
-    console.log('Data from useConditions:', data);
-  }, [data]);
-
   const handleLetterSelect = (letter: string) => {
-    console.log('Letter selected:', letter);
     setSelectedLetter(letter);
     setSearchTerm("");
-  };
-
-  const handleSearch = (term: string) => {
-    console.log('Search term:', term);
-    setSearchTerm(term);
   };
 
   return (
@@ -104,7 +59,7 @@ export default function SearchCondition() {
       
       <SearchInput 
         value={searchTerm}
-        onChange={handleSearch}
+        onChange={setSearchTerm}
       />
 
       <LetterFilter 
@@ -117,31 +72,7 @@ export default function SearchCondition() {
         isLoading={isLoading}
       />
 
-      {isLoading ? (
-        <div className="flex justify-center mt-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-        </div>
-      ) : error ? (
-        <div className="text-center mt-8">
-          <p className="text-red-500 mb-4">Errore nel caricamento delle patologie</p>
-          <button
-            onClick={handleManualRefresh}
-            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-          >
-            Riprova
-          </button>
-        </div>
-      ) : data?.conditions?.length === 0 ? (
-        <div className="text-center mt-8">
-          <p className="text-gray-500 mb-4">Nessuna patologia trovata</p>
-          <button
-            onClick={handleManualRefresh}
-            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-          >
-            Ricarica patologie
-          </button>
-        </div>
-      ) : data?.totalPages > 1 ? (
+      {data?.totalPages > 1 && (
         <div className="mt-8 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -190,7 +121,7 @@ export default function SearchCondition() {
             </PaginationContent>
           </Pagination>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

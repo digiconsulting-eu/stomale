@@ -62,7 +62,7 @@ export const ReviewLikeButton = ({ reviewId, initialLikesCount }: ReviewLikeButt
         return;
       }
       
-      toast.success("Grazie per il tuo like!");
+      toast.success("Grazie per il tuo apprezzamento!");
       
       try {
         localStorage.setItem(`review_liked_${reviewId}`, 'true');
@@ -84,7 +84,7 @@ export const ReviewLikeButton = ({ reviewId, initialLikesCount }: ReviewLikeButt
   return (
     <div className="mt-6 flex justify-between items-center">
       <div className="text-gray-600 flex items-center gap-2">
-        <Heart className="h-5 w-5 fill-red-500 text-red-500" stroke="red" />
+        <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
         <span>{likesCount} {likesCount === 1 ? 'like' : 'likes'}</span>
       </div>
       
@@ -94,7 +94,7 @@ export const ReviewLikeButton = ({ reviewId, initialLikesCount }: ReviewLikeButt
         onClick={handleLike}
         disabled={isLiking || hasLiked}
       >
-        <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} stroke={hasLiked ? "red" : "currentColor"} />
+        <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
       </Button>
     </div>
   );

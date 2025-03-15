@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -11,17 +11,10 @@ const REVIEWS_PER_PAGE = 20;
 
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [retryCounter, setRetryCounter] = useState(0);
-
-  // Create a callback function for retrying
-  const handleRetry = useCallback(() => {
-    console.log("Manually retrying reviews fetch");
-    setRetryCounter(prev => prev + 1);
-  }, []);
 
   // Add explicit refetch function
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['reviews', currentPage, REVIEWS_PER_PAGE, retryCounter],
+    queryKey: ['reviews', currentPage, REVIEWS_PER_PAGE],
     queryFn: async () => {
       console.log('Starting reviews fetch for page:', currentPage);
       try {
@@ -43,7 +36,7 @@ const Reviews = () => {
         // Log total count of approved reviews
         console.log('Numero totale di recensioni approvate:', totalCount);
 
-        if (!totalCount || totalCount === 0) {
+        if (totalCount === 0) {
           console.log('No reviews found in database');
           return {
             reviews: [],
@@ -56,8 +49,7 @@ const Reviews = () => {
         const from = (currentPage - 1) * REVIEWS_PER_PAGE;
         const to = from + REVIEWS_PER_PAGE - 1;
 
-        // Fetch reviews with explicit field selection to ensure consistent data structure
-        console.log(`Fetching reviews from ${from} to ${to}`);
+        // Add cache control headers to prevent Chrome from caching
         const { data: reviewsData, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
@@ -103,18 +95,12 @@ const Reviews = () => {
         }
 
         // Transform reviews without relying on additional DB calls
-        const transformedReviews = reviewsData.map(review => {
-          console.log('Processing review:', review.id, 'with condition:', review.PATOLOGIE);
-          return {
-            ...review,
-            username: review.username || 'Anonimo',
-            // Ensure numeric fields are always numbers
-            comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
-            likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
-            // Ensure PATOLOGIE is never undefined
-            PATOLOGIE: review.PATOLOGIE || { id: 0, Patologia: 'Sconosciuta' }
-          };
-        }) as DatabaseReview[];
+        const transformedReviews = reviewsData.map(review => ({
+          ...review,
+          username: review.username || 'Anonimo',
+          // Ensure comments_count is always a number
+          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0
+        })) as DatabaseReview[];
 
         console.log('Transformed reviews:', transformedReviews);
 
@@ -138,27 +124,9 @@ const Reviews = () => {
 
   // Attempt to refetch on mount to ensure fresh data
   useEffect(() => {
-    console.log('Refetching reviews on component mount');
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Add auth state change listener
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      console.log("Auth state changed on Reviews page:", event);
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        console.log("Refetching reviews after auth change");
-        setTimeout(() => {
-          refetch();
-        }, 500);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [refetch]);
 
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Ultime Recensioni"));
@@ -169,9 +137,9 @@ const Reviews = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center text-red-500">
-          <p>Si è verificato un errore nel caricamento delle recensioni.</p>
+          <p>Si è verificato un errore nel caricamento delle recensioni. Riprova tra qualche secondo.</p>
           <button 
-            onClick={handleRetry} 
+            onClick={() => refetch()} 
             className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
           >
             Riprova
@@ -188,12 +156,6 @@ const Reviews = () => {
         <div className="text-center text-gray-600">
           <p className="text-lg mb-4">Non ci sono ancora recensioni disponibili.</p>
           <p>Sii il primo a condividere la tua esperienza!</p>
-          <button 
-            onClick={handleRetry} 
-            className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
-          >
-            Riprova a caricare
-          </button>
         </div>
       </div>
     );
