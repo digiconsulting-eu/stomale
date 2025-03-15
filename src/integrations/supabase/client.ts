@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
@@ -11,9 +10,8 @@ const supabaseOptions = {
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce' as const,
+    // Keeping the redirect to window.location.origin for better compatibility
     redirectTo: window.location.origin + '/auth/callback',
-    // Add custom domain URL
-    url: 'https://auth.stomale.info'
   }
 };
 

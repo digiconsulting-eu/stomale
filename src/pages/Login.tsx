@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,16 +18,29 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (data: LoginFormValues) => {
+    if (isLoading) return;
+    
     setIsLoading(true);
     console.log("Starting login process for:", data.email);
     
     try {
+      // Set a timeout to handle stalled requests
+      const timeoutId = setTimeout(() => {
+        setIsLoading(false);
+        toast.error("La richiesta è scaduta", {
+          description: "Si è verificato un problema durante l'accesso. Riprova più tardi."
+        });
+      }, 15000); // 15 seconds timeout
+      
       // First attempt to sign in
       console.log("Attempting login for:", data.email);
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
+
+      // Clear timeout since we got a response
+      clearTimeout(timeoutId);
 
       if (signInError) {
         console.error("Login error:", signInError);
