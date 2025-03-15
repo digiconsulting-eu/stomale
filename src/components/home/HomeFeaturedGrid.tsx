@@ -30,8 +30,6 @@ export const HomeFeaturedGrid = ({ reviews, refreshKey }: HomeFeaturedGridProps)
             return null;
           }
           
-          const safeCondition = review.PATOLOGIE?.Patologia?.toLowerCase() || 'patologia non specificata';
-          const safeDate = new Date(review.created_at).toLocaleDateString();
           const safePreview = review.experience ? 
             (review.experience.slice(0, 150) + '...') : 
             'Nessun contenuto disponibile';
@@ -43,8 +41,8 @@ export const HomeFeaturedGrid = ({ reviews, refreshKey }: HomeFeaturedGridProps)
               key={`review-${reviewId}-${index}-${refreshKey}`}
               id={reviewId}
               title={review.title}
-              condition={safeCondition}
-              date={safeDate}
+              condition={review.condition}
+              date={new Date(review.created_at).toLocaleDateString()}
               preview={safePreview}
               username={review.username}
               likesCount={review.likes_count || 0}

@@ -18,19 +18,20 @@ export const transformReviewData = (reviewData: any[]): Review[] => {
       .filter(review => review && typeof review === 'object')
       .map(review => {
         try {
-          const safeReview = {
+          // Make sure PATOLOGIE exists and has valid data
+          const patologie = review.PATOLOGIE || { id: 0, Patologia: 'Sconosciuta' };
+          
+          const safeReview: Review = {
             id: typeof review.id === 'number' ? review.id : Number(review.id || 0),
             title: String(review.title || 'Titolo non disponibile'),
+            condition: patologie.Patologia ? patologie.Patologia.toLowerCase() : 'sconosciuta',
             experience: String(review.experience || 'Contenuto non disponibile'),
             username: String(review.username || 'Anonimo'),
             created_at: String(review.created_at || new Date().toISOString()),
             condition_id: typeof review.condition_id === 'number' ? review.condition_id : Number(review.condition_id || 0),
             likes_count: typeof review.likes_count === 'number' ? review.likes_count : Number(review.likes_count || 0),
             comments_count: typeof review.comments_count === 'number' ? review.comments_count : Number(review.comments_count || 0),
-            PATOLOGIE: review.PATOLOGIE ? {
-              id: typeof review.PATOLOGIE.id === 'number' ? review.PATOLOGIE.id : Number(review.PATOLOGIE.id || 0),
-              Patologia: String(review.PATOLOGIE.Patologia || 'Sconosciuta')
-            } : { id: 0, Patologia: 'Sconosciuta' }
+            PATOLOGIE: patologie
           };
           
           return safeReview;
