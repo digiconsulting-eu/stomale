@@ -64,8 +64,17 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
         return null;
       }
 
-      // Verify that the condition matches
-      if (data.PATOLOGIE?.Patologia.toLowerCase() !== decodeURIComponent(condition).toLowerCase()) {
+      // Verify that the condition matches - use case-insensitive comparison 
+      // and handle both encoded and decoded versions
+      const decodedCondition = decodeURIComponent(condition).toLowerCase();
+      const reviewCondition = data.PATOLOGIE?.Patologia.toLowerCase();
+      
+      console.log('Comparing conditions:', {
+        decodedCondition,
+        reviewCondition
+      });
+      
+      if (reviewCondition !== decodedCondition) {
         console.log('Condition mismatch');
         return null;
       }

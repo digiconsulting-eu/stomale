@@ -35,18 +35,22 @@ export const useComments = (reviewId: string, session: Session | null) => {
       // Further process the comments to ensure we have proper usernames
       const processedComments = await Promise.all((data || []).map(async (comment) => {
         if (!comment.users?.username && comment.user_id) {
-          // If we don't have a username in the join, try to fetch it directly
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('username')
-            .eq('id', comment.user_id)
-            .single();
-            
-          if (!userError && userData) {
-            return {
-              ...comment,
-              users: { username: userData.username }
-            };
+          try {
+            // If we don't have a username in the join, try to fetch it directly
+            const { data: userData, error: userError } = await supabase
+              .from('users')
+              .select('username')
+              .eq('id', comment.user_id)
+              .single();
+              
+            if (!userError && userData) {
+              return {
+                ...comment,
+                users: { username: userData.username }
+              };
+            }
+          } catch (err) {
+            console.error('Error fetching user data:', err);
           }
         }
         return comment;

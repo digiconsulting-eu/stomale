@@ -31,17 +31,12 @@ export const ConditionsGrid = ({ conditions, isLoading }: ConditionsGridProps) =
     );
   }
 
-  // Helper function to properly encode the pathname for URL - usando spazi codificati (%20) invece di trattini
-  const formatPathName = (name: string) => {
-    return name.toLowerCase();
-  };
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {conditions.map(condition => (
         <Link 
           key={condition.id}
-          to={`/patologia/${formatPathName(condition.Patologia)}`}
+          to={`/patologia/${encodeURIComponent(condition.Patologia.toLowerCase())}`}
           className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white group"
         >
           <h2 className="text-xl font-semibold text-[#0EA5E9] group-hover:text-[#0EA5E9]/80 transition-colors">

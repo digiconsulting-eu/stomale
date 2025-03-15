@@ -9,7 +9,8 @@ import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/ut
 
 const ReviewDetail = () => {
   const { condition, slug } = useParams();
-  // Ensure we use the condition as-is without replacing hyphens
+  
+  // Use condition as-is, without replacing hyphens or additional processing
   const decodedCondition = condition || '';
   const reviewId = slug?.split('-')[0];
 
