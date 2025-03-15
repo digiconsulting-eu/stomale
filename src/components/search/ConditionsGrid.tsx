@@ -26,7 +26,13 @@ export const ConditionsGrid = ({ conditions, isLoading }: ConditionsGridProps) =
   if (!conditions || conditions.length === 0) {
     return (
       <div className="col-span-full text-center py-8">
-        <p className="text-gray-500">Nessuna patologia trovata.</p>
+        <p className="text-gray-500">Nessuna patologia trovata. Prova a cambiare i criteri di ricerca.</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 text-blue-500 underline"
+        >
+          Ricarica la pagina
+        </button>
       </div>
     );
   }

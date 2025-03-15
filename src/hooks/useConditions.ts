@@ -23,75 +23,35 @@ export const useConditions = ({
     queryFn: async () => {
       console.log('Fetching conditions with pagination:', { page, limit, offset, searchTerm, letter });
       
-      // Add a small delay to prevent too many rapid requests when typing
-      if (searchTerm) {
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
-      
-      let query = supabase
-        .from('PATOLOGIE')
-        .select('id, Patologia', { count: 'exact' });
-
-      // Apply search filter if present - optimize to use unaccent function
-      if (searchTerm) {
-        const normalizedSearchTerm = searchTerm.toLowerCase().trim();
-        console.log('Searching for normalized term:', normalizedSearchTerm);
-        
-        // Use a more forgiving search with case insensitivity and better partial matching
-        query = query.or(`Patologia.ilike.%${normalizedSearchTerm}%,Patologia.ilike.${normalizedSearchTerm}%`);
-      } 
-      // Only apply letter filter if no search term and letter is not "TUTTE"
-      else if (letter && letter !== "TUTTE") {
-        query = query.ilike('Patologia', `${letter}%`);
-      }
-
       try {
+        let query = supabase
+          .from('PATOLOGIE')
+          .select('id, Patologia', { count: 'exact' });
+
+        // Apply search filter if present
+        if (searchTerm && searchTerm.trim() !== '') {
+          const normalizedSearchTerm = searchTerm.toLowerCase().trim();
+          console.log('Searching for normalized term:', normalizedSearchTerm);
+          
+          // Simple but effective search
+          query = query.ilike('Patologia', `%${normalizedSearchTerm}%`);
+        } 
+        // Only apply letter filter if no search term and letter is not "TUTTE"
+        else if (letter && letter !== "TUTTE") {
+          query = query.ilike('Patologia', `${letter}%`);
+        }
+
         const { data, count, error } = await query
           .order('Patologia')
           .range(offset, offset + limit - 1);
 
         if (error) {
-          // This code handles specific supabase errors
-          if (error.code === 'PGRST116') {
-            console.warn('Rate limit exceeded when fetching conditions');
-            toast.error("Troppe richieste. Riprova tra qualche secondo.", {
-              description: "Il server sta ricevendo troppe richieste."
-            });
-          } else {
-            console.error('Error fetching conditions:', error);
-            toast.error("Errore nel caricamento delle patologie. Riprova tra qualche secondo.");
-          }
+          console.error('Error fetching conditions:', error);
           throw error;
         }
 
-        // Log the first few items for debugging
-        if (data && data.length > 0) {
-          console.log('First few conditions:', data.slice(0, 3));
-        } else if (data && data.length === 0) {
-          console.log('No conditions found with the provided filters:', { searchTerm, letter });
-          
-          // If no exact match is found with the original query, try a more flexible search
-          if (searchTerm) {
-            console.log('Attempting more flexible search for:', searchTerm);
-            const { data: flexData, error: flexError } = await supabase
-              .from('PATOLOGIE')
-              .select('id, Patologia')
-              .or(`Patologia.ilike.${searchTerm}%,Patologia.ilike.%${searchTerm}%,Patologia.ilike.% ${searchTerm}%`)
-              .limit(10);
-              
-            if (!flexError && flexData && flexData.length > 0) {
-              console.log('Found similar conditions with flexible search:', flexData);
-              // Return the flexible search results if our main search found nothing
-              return {
-                conditions: flexData || [],
-                totalCount: flexData.length,
-                totalPages: 1
-              };
-            }
-          }
-        }
-        
         console.log('Total conditions count:', count);
+        console.log('First few items:', data?.slice(0, 3));
 
         return {
           conditions: data || [],
@@ -99,19 +59,15 @@ export const useConditions = ({
           totalPages: Math.ceil((count || 0) / limit)
         };
       } catch (error) {
-        console.error('Error in fetch conditions function:', error);
+        console.error('Error fetching conditions:', error);
+        toast.error("Errore nel caricamento delle patologie");
         throw error;
       }
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 1000 * 60, // Cache for 1 minute
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Cap retry delay at 30 seconds
-    refetchOnWindowFocus: false, // Don't refetch on window focus
-    refetchOnReconnect: true, // Refetch when reconnecting
-    meta: {
-      onError: (error: Error) => {
-        console.error('Query error in useConditions:', error);
-      }
-    }
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true
   });
 };
