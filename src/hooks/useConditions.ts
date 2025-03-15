@@ -37,9 +37,8 @@ export const useConditions = ({
         const normalizedSearchTerm = searchTerm.toLowerCase().trim();
         console.log('Searching for normalized term:', normalizedSearchTerm);
         
-        // Use a more forgiving search with case insensitivity
-        // This version doesn't rely on unaccent and is more permissive with partial matches
-        query = query.or(`Patologia.ilike.%${normalizedSearchTerm}%,Patologia.ilike.%${normalizedSearchTerm.replace(/\s+/g, '%')}%`);
+        // Use a more forgiving search with case insensitivity and better partial matching
+        query = query.or(`Patologia.ilike.%${normalizedSearchTerm}%,Patologia.ilike.${normalizedSearchTerm}%`);
       } 
       // Only apply letter filter if no search term and letter is not "TUTTE"
       else if (letter && letter !== "TUTTE") {
@@ -77,11 +76,17 @@ export const useConditions = ({
             const { data: flexData, error: flexError } = await supabase
               .from('PATOLOGIE')
               .select('id, Patologia')
-              .or(`Patologia.ilike.${searchTerm}%,Patologia.ilike.%${searchTerm}%`)
+              .or(`Patologia.ilike.${searchTerm}%,Patologia.ilike.%${searchTerm}%,Patologia.ilike.% ${searchTerm}%`)
               .limit(10);
               
             if (!flexError && flexData && flexData.length > 0) {
               console.log('Found similar conditions with flexible search:', flexData);
+              // Return the flexible search results if our main search found nothing
+              return {
+                conditions: flexData || [],
+                totalCount: flexData.length,
+                totalPages: 1
+              };
             }
           }
         }

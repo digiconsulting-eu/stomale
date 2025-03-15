@@ -9,7 +9,7 @@ import { ConditionSelect } from "@/components/form/ConditionSelect";
 import { ReviewFormFields } from "./ReviewFormFields";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Define a type for Supabase response
 interface SupabaseResponse {
@@ -40,6 +40,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
   const [isValidatingCondition, setIsValidatingCondition] = useState(false);
   const [conditionValidated, setConditionValidated] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const submissionTimeoutRef = useRef<number | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -56,6 +57,15 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       socialDiscomfort: 0,
     },
   });
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (submissionTimeoutRef.current) {
+        clearTimeout(submissionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Validate condition when it changes or on mount if defaultCondition is provided
   useEffect(() => {
@@ -150,6 +160,13 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       setIsSubmitting(true);
       console.log('Starting review submission with data:', data);
 
+      // Set a timeout to handle stalled submissions
+      submissionTimeoutRef.current = window.setTimeout(() => {
+        setIsSubmitting(false);
+        setSubmissionError("La richiesta ha impiegato troppo tempo. Riprova più tardi.");
+        toast.error("Timeout durante l'invio della recensione. Riprova più tardi.");
+      }, 20000);
+
       // Check authentication
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
@@ -203,13 +220,8 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
 
       console.log('Found condition ID:', patologiaData.id);
 
-      // Insert review with specific timeout handling
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error("Timeout durante l'invio della recensione")), 15000)
-      );
-      
-      // Race the insert against a timeout
-      const insertPromise = supabase
+      // Insert review
+      const { data: insertData, error: insertError } = await supabase
         .from('reviews')
         .insert([
           {
@@ -228,12 +240,15 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           }
         ]);
       
-      const result = await Promise.race([insertPromise, timeoutPromise]) as SupabaseResponse;
+      // Clear the timeout since we got a response
+      if (submissionTimeoutRef.current) {
+        clearTimeout(submissionTimeoutRef.current);
+        submissionTimeoutRef.current = null;
+      }
       
-      // Check for errors in the result
-      if (result && result.error) {
-        console.error('Error inserting review:', result.error);
-        throw new Error(`Errore durante l'invio della recensione: ${result.error.message}`);
+      if (insertError) {
+        console.error('Error inserting review:', insertError);
+        throw new Error(`Errore durante l'invio della recensione: ${insertError.message}`);
       }
 
       console.log('Review submitted successfully');
@@ -241,6 +256,12 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       
     } catch (error) {
       console.error('Error submitting review:', error);
+      
+      // Clear the timeout if it exists since we got an error response
+      if (submissionTimeoutRef.current) {
+        clearTimeout(submissionTimeoutRef.current);
+        submissionTimeoutRef.current = null;
+      }
       
       // Handle the error, ensuring we extract the message properly regardless of error type
       const errorMessage = error instanceof Error 
@@ -253,6 +274,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       // Show toast with error message
       toast.error(errorMessage || "Si è verificato un errore durante l'invio della recensione. Riprova più tardi.");
     } finally {
+      // Make sure to reset the submitting state 
       setIsSubmitting(false);
     }
   };
