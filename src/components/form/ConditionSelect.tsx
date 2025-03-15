@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Search, Check, ChevronsUpDown } from "lucide-react";
 import {
@@ -14,6 +15,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
+import { useConditions } from "@/hooks/useConditions";
 
 import {
   CONDITIONS_A, CONDITIONS_B, CONDITIONS_C, CONDITIONS_D,
@@ -23,6 +25,7 @@ import {
   CONDITIONS_T, CONDITIONS_U, CONDITIONS_V, CONDITIONS_Z
 } from "../conditions";
 
+// Use the built-in list of conditions as fallback
 const allConditions = [
   ...(CONDITIONS_A ?? []),
   ...(CONDITIONS_B ?? []),
@@ -70,6 +73,41 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
+  const [filteredConditions, setFilteredConditions] = useState<string[]>([]);
+  const { data: conditionsData, isLoading: isLoadingConditions, error } = useConditions();
+  
+  // Use database conditions if available, otherwise use static list
+  useEffect(() => {
+    if (conditionsData?.conditions) {
+      // Map database conditions to string array
+      const dbConditions = conditionsData.conditions.map(c => c.Patologia);
+      console.log(`Loaded ${dbConditions.length} conditions from database`);
+      
+      // Filter conditions based on search query
+      if (searchQuery) {
+        const filtered = dbConditions.filter(condition => 
+          condition.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredConditions(filtered);
+      } else {
+        setFilteredConditions(dbConditions);
+      }
+    } else {
+      // Use static backup list if database fails
+      if (error) {
+        console.warn('Using static conditions list due to API error:', error);
+      }
+      
+      if (searchQuery) {
+        const filtered = allConditions.filter(condition => 
+          condition.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredConditions(filtered);
+      } else {
+        setFilteredConditions(allConditions);
+      }
+    }
+  }, [conditionsData, searchQuery, error]);
 
   useEffect(() => {
     const value = form.getValues("condition");
@@ -112,35 +150,40 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
                   className="h-12 border-b border-gray-100 text-gray-900 placeholder:text-gray-500"
                 />
                 <CommandList className="max-h-[300px] overflow-y-auto p-2 bg-white">
+                  {isLoadingConditions && (
+                    <div className="py-6 text-center text-gray-500">
+                      <div className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-primary border-r-transparent"></div>
+                      <p className="mt-2">Caricamento patologie...</p>
+                    </div>
+                  )}
+                  
                   <CommandEmpty className="py-6 text-center text-gray-500">
-                    Nessuna patologia trovata.
+                    Nessuna patologia trovata con "{searchQuery}".
                   </CommandEmpty>
+                  
                   <CommandGroup>
-                    {allConditions
-                      .filter(condition => 
-                        condition.toLowerCase().includes(searchQuery.toLowerCase())
-                      )
-                      .map((condition) => (
-                        <CommandItem
-                          key={condition}
-                          value={condition}
-                          onSelect={() => {
-                            form.setValue("condition", condition);
-                            setSelectedValue(condition);
-                            setOpen(false);
-                          }}
-                          className="relative flex cursor-pointer select-none items-center rounded-md px-4 py-3 text-gray-900 text-[15px] outline-none hover:bg-gray-100 data-[selected=true]:bg-gray-100"
-                        >
-                          <Check
-                            className={cn(
-                              "mr-3 h-4 w-4 text-primary",
-                              condition === field.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          <HighlightMatch text={condition} query={searchQuery} />
-                        </CommandItem>
+                    {filteredConditions.map((condition) => (
+                      <CommandItem
+                        key={condition}
+                        value={condition}
+                        onSelect={() => {
+                          console.log('Selected condition:', condition);
+                          form.setValue("condition", condition);
+                          setSelectedValue(condition);
+                          setOpen(false);
+                        }}
+                        className="relative flex cursor-pointer select-none items-center rounded-md px-4 py-3 text-gray-900 text-[15px] outline-none hover:bg-gray-100 data-[selected=true]:bg-gray-100"
+                      >
+                        <Check
+                          className={cn(
+                            "mr-3 h-4 w-4 text-primary",
+                            condition === field.value
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        <HighlightMatch text={condition} query={searchQuery} />
+                      </CommandItem>
                     ))}
                   </CommandGroup>
                 </CommandList>

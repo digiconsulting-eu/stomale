@@ -42,11 +42,23 @@ export const useConditions = ({
 
       if (error) {
         console.error('Error fetching conditions:', error);
-        toast.error("Errore nel caricamento delle patologie. Riprova tra qualche secondo.");
+        if (error.code === 'PGRST116') {
+          // This is a rate limiting error
+          console.warn('Rate limit exceeded when fetching conditions');
+          toast.error("Troppe richieste. Riprova tra qualche secondo.", {
+            description: "Il server sta ricevendo troppe richieste."
+          });
+        } else {
+          toast.error("Errore nel caricamento delle patologie. Riprova tra qualche secondo.");
+        }
         throw error;
       }
 
-      console.log('Fetched conditions:', data);
+      // Log the first few items for debugging
+      if (data && data.length > 0) {
+        console.log('First few conditions:', data.slice(0, 3));
+      }
+      
       console.log('Total count:', count);
 
       return {
@@ -55,7 +67,7 @@ export const useConditions = ({
         totalPages: Math.ceil((count || 0) / limit)
       };
     },
-    staleTime: 0, // No caching, always fetch fresh data
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Cap retry delay at 30 seconds
     refetchOnWindowFocus: false, // Don't refetch on window focus
@@ -63,7 +75,6 @@ export const useConditions = ({
     meta: {
       onError: (error: Error) => {
         console.error('Query error:', error);
-        toast.error("Errore nel caricamento delle patologie. Riprova tra qualche secondo.");
       }
     }
   });
