@@ -8,6 +8,7 @@ interface MobileMenuProps {
   isAdmin: boolean;
   onLogout: () => void;
   onClose: () => void;
+  isLoading?: boolean;
 }
 
 export const MobileMenu = ({ 
@@ -15,7 +16,8 @@ export const MobileMenu = ({
   isLoggedIn, 
   isAdmin, 
   onLogout, 
-  onClose 
+  onClose,
+  isLoading = false
 }: MobileMenuProps) => {
   if (!isOpen) return null;
 
@@ -30,6 +32,7 @@ export const MobileMenu = ({
             onLogout={onLogout} 
             isMobile 
             onNavigate={onClose}
+            isLoading={isLoading}
           />
         </div>
       </div>

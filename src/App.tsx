@@ -14,13 +14,14 @@ import { AuthModal } from "./components/auth/AuthModal";
 import { useState, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { toast } from "sonner";
+import { Button } from "./components/ui/button";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 0,
-      refetchOnWindowFocus: false,
-      staleTime: 30000,
+      retry: 2,
+      refetchOnWindowFocus: true,
+      staleTime: 10000, // Ridotto a 10 secondi per dati più aggiornati
       gcTime: 5 * 60 * 1000,
     },
   },
@@ -29,6 +30,7 @@ const queryClient = new QueryClient({
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -37,24 +39,29 @@ const App = () => {
       try {
         console.log("Initializing app...");
         
-        // Get the current session first
+        // Force refresh the session to ensure we have the latest state
+        await supabase.auth.refreshSession();
+        
+        // Get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error("Session check failed:", sessionError);
           if (isMounted) {
             setIsError(true);
+            setErrorMessage("Impossibile verificare la sessione. " + sessionError.message);
             toast.error("Errore durante l'inizializzazione dell'applicazione");
           }
           return;
         }
 
-        console.log("Session check completed", session);
+        console.log("Session check completed", session ? "User is logged in" : "No active session");
 
         // Then initialize auth state listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
           console.log("Auth state changed:", event, session?.user?.email);
           if (event === 'SIGNED_IN' && isMounted) {
+            console.log("User signed in, invalidating queries");
             queryClient.invalidateQueries();
           }
         });
@@ -67,10 +74,11 @@ const App = () => {
           subscription.unsubscribe();
         };
 
-      } catch (error) {
+      } catch (error: any) {
         console.error("Critical initialization error:", error);
         if (isMounted) {
           setIsError(true);
+          setErrorMessage(error.message || "Errore sconosciuto");
           toast.error("Errore critico durante l'inizializzazione");
         }
       }
@@ -91,7 +99,7 @@ const App = () => {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [isLoading]); // Added isLoading to dependencies
+  }, []); // Rimosso isLoading dalle dipendenze per evitare cicli
 
   if (isLoading) {
     return (
@@ -107,13 +115,18 @@ const App = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-secondary to-white">
         <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
           <h1 className="text-xl font-semibold text-red-600 mb-4">Errore di caricamento</h1>
-          <p className="text-gray-600 mb-6">Si è verificato un errore durante il caricamento dell'applicazione.</p>
-          <button 
+          <p className="text-gray-600 mb-6">
+            Si è verificato un errore durante il caricamento dell'applicazione.
+            {errorMessage && (
+              <span className="block mt-2 text-sm text-red-500">{errorMessage}</span>
+            )}
+          </p>
+          <Button 
             onClick={() => window.location.reload()} 
             className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
           >
             Riprova
-          </button>
+          </Button>
         </div>
       </div>
     );

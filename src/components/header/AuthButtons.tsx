@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 interface AuthButtonsProps {
   isLoggedIn: boolean;
@@ -8,6 +9,7 @@ interface AuthButtonsProps {
   onLogout: () => void;
   isMobile?: boolean;
   onNavigate?: () => void;
+  isLoading?: boolean;
 }
 
 export const AuthButtons = ({ 
@@ -15,7 +17,8 @@ export const AuthButtons = ({
   isAdmin, 
   onLogout, 
   isMobile = false,
-  onNavigate
+  onNavigate,
+  isLoading = false
 }: AuthButtonsProps) => {
   const location = useLocation();
   const isDashboard = location.pathname === '/dashboard';
@@ -26,6 +29,17 @@ export const AuthButtons = ({
       onNavigate();
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className={`${isMobile ? 'flex flex-col space-y-2 mt-4' : 'hidden md:flex items-center space-x-4'}`}>
+        <Button variant="ghost" disabled className={buttonClass}>
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          Caricamento...
+        </Button>
+      </div>
+    );
+  }
 
   if (isLoggedIn) {
     return (

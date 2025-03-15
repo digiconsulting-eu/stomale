@@ -9,7 +9,8 @@ import { ConditionSelect } from "@/components/form/ConditionSelect";
 import { ReviewFormFields } from "./ReviewFormFields";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   condition: z.string().min(1, "Seleziona una patologia"),
@@ -29,6 +30,31 @@ type FormValues = z.infer<typeof formSchema>;
 export const ReviewForm = ({ defaultCondition = "" }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        setCheckingAuth(true);
+        console.log("Checking authentication status in ReviewForm...");
+        
+        // Force refresh the session to ensure we have the latest state
+        await supabase.auth.refreshSession();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        setIsAuthenticated(!!session);
+        console.log("User is authenticated:", !!session);
+      } catch (error) {
+        console.error("Error checking auth:", error);
+        setIsAuthenticated(false);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -53,13 +79,14 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       setIsSubmitting(true);
       console.log('Starting review submission with data:', data);
 
-      // Check authentication
+      // Force refresh the session to ensure we have the latest state
+      await supabase.auth.refreshSession();
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session?.user) {
         console.error('Session error:', sessionError);
         toast.error("Devi effettuare l'accesso per inviare una recensione");
-        navigate("/login");
+        navigate("/login", { state: { returnTo: "/nuova-recensione" } });
         return;
       }
 
@@ -68,11 +95,17 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         .from('users')
         .select('username')
         .eq('id', session.user.id)
-        .single();
+        .maybeSingle();
 
-      if (userError || !userData?.username) {
+      if (userError) {
         console.error('Error fetching username:', userError);
         toast.error("Errore nel recupero dei dati utente");
+        return;
+      }
+
+      if (!userData?.username) {
+        console.error('No username found for user:', session.user.id);
+        toast.error("Username non trovato per questo utente");
         return;
       }
 
@@ -83,11 +116,17 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         .from('PATOLOGIE')
         .select('id')
         .ilike('Patologia', data.condition)
-        .single();
+        .maybeSingle();
 
-      if (patologiaError || !patologiaData) {
+      if (patologiaError) {
         console.error('Error fetching condition:', patologiaError);
         toast.error("Errore nel recupero della patologia");
+        return;
+      }
+
+      if (!patologiaData) {
+        console.error('No condition found for:', data.condition);
+        toast.error(`Patologia "${data.condition}" non trovata`);
         return;
       }
 
@@ -119,6 +158,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       }
 
       console.log('Review submitted successfully');
+      toast.success("Recensione inviata con successo!");
       navigate("/grazie");
       
     } catch (error) {
@@ -128,6 +168,29 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       setIsSubmitting(false);
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <div className="flex justify-center items-center py-10">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Verifica autenticazione...</span>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="text-center py-10 space-y-4">
+        <p className="text-lg">Devi effettuare l'accesso per inviare una recensione.</p>
+        <Button 
+          onClick={() => navigate("/login", { state: { returnTo: "/nuova-recensione" } })} 
+          className="mx-auto"
+        >
+          Accedi
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -139,7 +202,12 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           className="w-full"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Invio in corso..." : "Invia la tua esperienza"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Invio in corso...
+            </>
+          ) : "Invia la tua esperienza"}
         </Button>
       </form>
     </Form>
