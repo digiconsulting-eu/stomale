@@ -55,30 +55,45 @@ export const FeaturedReviews = () => {
           return [];
         }
         
-        // Process the data to ensure all fields are properly formatted with explicit type checking
-        // for better cross-browser compatibility, especially on Safari/macOS
-        const safeData = data.map(review => {
-          // Log each review to help debug Safari issues
-          console.log('Processing review for display:', review?.id);
-          
-          return {
-            id: typeof review.id === 'number' && !isNaN(review.id) ? review.id : 0,
-            title: review.title && typeof review.title === 'string' ? review.title : 'Titolo non disponibile',
-            experience: review.experience && typeof review.experience === 'string' ? review.experience : 'Contenuto non disponibile',
-            username: review.username && typeof review.username === 'string' ? review.username : 'Anonimo',
-            created_at: review.created_at && typeof review.created_at === 'string' ? review.created_at : new Date().toISOString(),
-            condition_id: typeof review.condition_id === 'number' && !isNaN(review.condition_id) ? review.condition_id : 0,
-            comments_count: typeof review.comments_count === 'number' && !isNaN(review.comments_count) ? review.comments_count : 0,
-            likes_count: typeof review.likes_count === 'number' && !isNaN(review.likes_count) ? review.likes_count : 0,
-            PATOLOGIE: review.PATOLOGIE ? {
-              id: typeof review.PATOLOGIE.id === 'number' && !isNaN(review.PATOLOGIE.id) ? review.PATOLOGIE.id : 0,
-              Patologia: review.PATOLOGIE.Patologia && typeof review.PATOLOGIE.Patologia === 'string' ? 
-                review.PATOLOGIE.Patologia : 'Sconosciuta'
-            } : { id: 0, Patologia: 'Sconosciuta' }
-          };
-        });
+        // Enhanced data sanitization for Safari/macOS
+        // Convert all data to a serialized then parsed form to eliminate any non-serializable properties
+        const jsonString = JSON.stringify(data);
+        const parsedData = JSON.parse(jsonString);
         
-        console.log('Processed data ready for Safari/macOS:', safeData);
+        // Now sanitize each field individually 
+        const safeData = parsedData.map((review) => {
+          if (!review || typeof review !== 'object') {
+            console.warn('Skipping invalid review object', review);
+            return null;
+          }
+          
+          try {
+            // Log each review to help debug Safari issues
+            console.log('Processing review for Safari compatibility:', review?.id);
+            
+            const sanitizedReview = {
+              id: Number(review.id) || 0,
+              title: String(review.title || 'Titolo non disponibile'),
+              experience: String(review.experience || 'Contenuto non disponibile'),
+              username: String(review.username || 'Anonimo'),
+              created_at: String(review.created_at || new Date().toISOString()),
+              condition_id: Number(review.condition_id) || 0,
+              comments_count: Number(review.comments_count) || 0,
+              likes_count: Number(review.likes_count) || 0,
+              PATOLOGIE: review.PATOLOGIE ? {
+                id: Number(review.PATOLOGIE.id) || 0,
+                Patologia: String(review.PATOLOGIE.Patologia || 'Sconosciuta')
+              } : { id: 0, Patologia: 'Sconosciuta' }
+            };
+            
+            return sanitizedReview;
+          } catch (sanitizeError) {
+            console.error('Error sanitizing review data:', sanitizeError, review);
+            return null;
+          }
+        }).filter(Boolean); // Remove any null entries
+        
+        console.log('Sanitized data ready for Safari/macOS:', safeData);
         return safeData;
       } catch (error) {
         console.error('Error in homepage reviews fetch:', error);
@@ -93,11 +108,18 @@ export const FeaturedReviews = () => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000)
   });
 
-  // Force a refetch on mount
+  // Force a refetch on mount with browser detection
   useEffect(() => {
     console.log('FeaturedReviews component mounted - forcing refetch');
     
-    // Clear any stale query cache that might be causing issues
+    // Detect Safari browser (also works for detecting macOS Chrome)
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || 
+                     (navigator.userAgent.includes('Mac') && navigator.userAgent.includes('Chrome'));
+    
+    if (isSafari) {
+      console.log('Safari/macOS detected - using enhanced compatibility mode');
+    }
+    
     const fetchData = async () => {
       try {
         await refetch();
@@ -109,10 +131,10 @@ export const FeaturedReviews = () => {
 
     fetchData();
 
-    // Add a redundant fetch after a small delay
+    // Add additional fetch attempts for Safari
     const timer = setTimeout(() => {
-      if (!hasAttemptedFetch) {
-        console.log('Backup fetch after timeout');
+      if (!hasAttemptedFetch || isSafari) {
+        console.log('Backup fetch after timeout, Safari compatibility mode:', isSafari);
         fetchData();
       }
     }, 1000);
@@ -134,6 +156,10 @@ export const FeaturedReviews = () => {
       </div>
     );
   }
+
+  // Additional validation before rendering to handle Safari/macOS edge cases
+  const hasValidReviews = Array.isArray(latestReviews) && latestReviews.length > 0 && 
+    latestReviews.every(review => review && typeof review === 'object' && typeof review.id === 'number');
 
   return (
     <section className="py-16 bg-gray-50">
@@ -165,24 +191,35 @@ export const FeaturedReviews = () => {
               </div>
             ))}
           </div>
-        ) : latestReviews && Array.isArray(latestReviews) && latestReviews.length > 0 ? (
+        ) : hasValidReviews ? (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {latestReviews.map((review) => {
-              if (!review || typeof review !== 'object') {
-                console.error('Invalid review object:', review);
+              // Extra validation before rendering each card
+              if (!review || typeof review !== 'object' || typeof review.id !== 'number') {
+                console.error('Invalid review object skipped:', review);
                 return null;
               }
+              
+              // Ensure all required props are valid
+              const safeTitle = typeof review.title === 'string' ? review.title : 'Titolo non disponibile';
+              const safeExperience = typeof review.experience === 'string' ? review.experience : 'Contenuto non disponibile';
+              const safeUsername = typeof review.username === 'string' ? review.username : 'Anonimo';
+              const safeDate = typeof review.created_at === 'string' ? review.created_at : new Date().toISOString();
+              const safeCondition = review.PATOLOGIE && typeof review.PATOLOGIE.Patologia === 'string' 
+                ? review.PATOLOGIE.Patologia 
+                : 'Patologia non specificata';
+              
               return (
                 <ReviewCard
                   key={review.id}
                   id={review.id}
-                  title={review.title}
-                  condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
-                  date={new Date(review.created_at).toLocaleDateString()}
-                  preview={review.experience ? (review.experience.slice(0, 150) + '...') : 'Nessun contenuto disponibile'}
-                  username={review.username || 'Anonimo'}
-                  likesCount={review.likes_count || 0}
-                  commentsCount={review.comments_count || 0}
+                  title={safeTitle}
+                  condition={safeCondition}
+                  date={new Date(safeDate).toLocaleDateString()}
+                  preview={safeExperience ? (safeExperience.slice(0, 150) + '...') : 'Nessun contenuto disponibile'}
+                  username={safeUsername}
+                  likesCount={typeof review.likes_count === 'number' ? review.likes_count : 0}
+                  commentsCount={typeof review.comments_count === 'number' ? review.comments_count : 0}
                 />
               );
             })}
