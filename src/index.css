@@ -84,7 +84,7 @@
 
   /* Improved scroll behavior on iOS */
   .ios-scroll-fix {
-    @apply -webkit-overflow-scrolling-touch;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Prevent content from being hidden under floating elements */
