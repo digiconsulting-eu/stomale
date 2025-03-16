@@ -7,7 +7,7 @@
 
 @layer base {
   body {
-    @apply bg-white text-text font-sans antialiased min-h-screen;
+    @apply bg-white text-text font-sans antialiased min-h-screen overscroll-none;
   }
   
   /* Add better tap targets for mobile */
@@ -16,28 +16,51 @@
       @apply min-h-[44px];
     }
   }
+
+  /* iOS-specific fixes */
+  @supports (-webkit-touch-callout: none) {
+    .h-screen {
+      height: -webkit-fill-available;
+    }
+    .min-h-screen {
+      min-height: -webkit-fill-available;
+    }
+  }
 }
 
-.card {
-  @apply bg-white backdrop-blur-sm rounded-xl shadow-lg p-6 transition-all hover:shadow-xl border border-gray-100;
-}
+/* Add focused component styles */
+@layer components {
+  .card {
+    @apply bg-white backdrop-blur-sm rounded-xl shadow-lg p-6 transition-all hover:shadow-xl border border-gray-100;
+  }
 
-.input {
-  @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white;
-}
+  .input {
+    @apply w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white;
+  }
 
-.button-primary {
-  @apply px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors shadow-md hover:shadow-lg;
-}
+  .button-primary {
+    @apply px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors shadow-md hover:shadow-lg;
+  }
 
-.button-secondary {
-  @apply px-6 py-2 bg-secondary text-text rounded-lg hover:bg-secondary-hover transition-colors shadow-sm hover:shadow-md;
+  .button-secondary {
+    @apply px-6 py-2 bg-secondary text-text rounded-lg hover:bg-secondary-hover transition-colors shadow-sm hover:shadow-md;
+  }
+
+  /* Mobile optimized cards */
+  .mobile-card {
+    @apply rounded-lg shadow-sm p-4 sm:p-6;
+  }
+
+  /* Fixed height cards for grid layouts on mobile */
+  .fixed-height-card {
+    @apply h-auto sm:h-[280px] md:h-[320px];
+  }
 }
 
 /* Enhance mobile tab styles */
 @media (max-width: 640px) {
   [role="tab"] {
-    @apply touch-manipulation py-2.5 px-4;
+    @apply touch-manipulation py-3 px-4;
   }
   
   [role="tab"][data-state="active"] {
@@ -57,6 +80,31 @@
   
   .dashboard-container {
     @apply mb-48;
+  }
+
+  /* Improved scroll behavior on iOS */
+  .ios-scroll-fix {
+    @apply -webkit-overflow-scrolling-touch;
+  }
+
+  /* Prevent content from being hidden under floating elements */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 1.5rem);
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  .review-card {
+    @apply h-auto max-h-none;
+  }
+  
+  .condition-header {
+    @apply text-2xl pb-2;
+  }
+  
+  .mobile-menu {
+    @apply fixed inset-0 z-50 bg-white/95;
   }
 }
 
@@ -91,5 +139,16 @@
 
 /* Card hover effects */
 .review-card {
-  @apply transition-all duration-300 hover:-translate-y-1;
+  @apply transition-all duration-300;
+}
+
+@media (min-width: 768px) {
+  .review-card:hover {
+    @apply -translate-y-1;
+  }
+}
+
+/* Fix for sticky headers on iOS */
+.sticky-header {
+  @apply sticky top-0 z-10 bg-white/90 backdrop-blur-sm;
 }

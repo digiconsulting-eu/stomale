@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 
 interface NavigationMenuProps {
@@ -14,11 +15,12 @@ export const NavigationMenu = ({ isMobile = false, onItemClick }: NavigationMenu
     { to: "/cerca-sintomi", label: "Cerca Sintomi" },
   ];
 
-  const baseClasses = "text-gray-600 hover:text-primary transition-colors";
-  const mobileClasses = "block py-2";
+  const baseClasses = "text-gray-700 hover:text-primary transition-colors duration-300";
+  const mobileClasses = "block py-4 text-xl font-medium text-center";
+  const desktopClasses = "hidden md:block";
 
   return (
-    <nav className={`${isMobile ? 'flex flex-col space-y-2' : 'hidden md:flex space-x-6'}`}>
+    <nav className={`${isMobile ? 'flex flex-col space-y-5' : 'hidden md:flex space-x-6'}`}>
       {menuItems.map((item) => (
         <Link
           key={item.to}
