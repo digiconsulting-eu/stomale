@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -139,9 +140,32 @@ export default function ConditionDetail() {
   })) || [];
 
   const stats = calculateStats(reviews);
+  
+  const ratingValue = (stats.medicationEffectiveness + (5 - stats.symptomsDiscomfort) + stats.healingPossibility) / 3;
 
   return (
     <div className="container py-8">
+      {/* Schema.org markup per la condizione medica */}
+      <div 
+        itemScope 
+        itemType="https://schema.org/MedicalCondition"
+        className="hidden"
+      >
+        <meta itemProp="name" content={capitalizeFirstLetter(condition || '')} />
+        <meta itemProp="alternateName" content={condition?.toUpperCase() || ''} />
+        
+        {/* Aggregated Rating schema */}
+        {reviews.length > 0 && (
+          <div itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
+            <meta itemProp="ratingValue" content={ratingValue.toFixed(1)} />
+            <meta itemProp="bestRating" content="5" />
+            <meta itemProp="worstRating" content="1" />
+            <meta itemProp="ratingCount" content={String(reviews.length)} />
+            <meta itemProp="reviewCount" content={String(reviews.length)} />
+          </div>
+        )}
+      </div>
+      
       <ConditionHeader 
         condition={condition || ''} 
         conditionId={patologiaData?.id || 0}

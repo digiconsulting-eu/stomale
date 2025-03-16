@@ -37,8 +37,30 @@ export const ReviewMainContent = ({
   username,
   likesCount
 }: ReviewMainContentProps) => {
+  // Calcolo di un rating generale basato su metriche della recensione
+  const overallRating = Math.round((
+    (5 - diagnosisDifficulty) + 
+    (5 - symptomSeverity) + 
+    (hasMedication ? medicationEffectiveness : 3) + 
+    healingPossibility + 
+    (5 - socialDiscomfort)
+  ) / 5);
+
   return (
-    <div className="bg-white rounded-xl p-8 shadow-sm">
+    <div className="bg-white rounded-xl p-8 shadow-sm" itemScope itemType="https://schema.org/Review">
+      <meta itemProp="author" content={username || "Utente Anonimo"} />
+      <meta itemProp="datePublished" content={date} />
+      
+      <div itemProp="itemReviewed" itemScope itemType="https://schema.org/MedicalCondition">
+        <meta itemProp="name" content={condition} />
+      </div>
+      
+      <div itemProp="reviewRating" itemScope itemType="https://schema.org/Rating">
+        <meta itemProp="ratingValue" content={String(overallRating)} />
+        <meta itemProp="bestRating" content="5" />
+        <meta itemProp="worstRating" content="1" />
+      </div>
+      
       <ReviewHeader 
         title={title}
         condition={condition}
@@ -58,7 +80,7 @@ export const ReviewMainContent = ({
         />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8" itemProp="reviewBody">
         <ReviewBody 
           symptoms={symptoms}
           experience={experience}

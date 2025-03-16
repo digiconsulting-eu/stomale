@@ -54,6 +54,33 @@ export const ReviewContent = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="col-span-1 lg:col-span-8 space-y-6">
+            {/* Schema.org markup per l'intera recensione */}
+            <div 
+              itemScope 
+              itemType="https://schema.org/Review"
+              className="hidden"
+            >
+              <meta itemProp="datePublished" content={date} />
+              <span itemProp="name">{title}</span>
+              
+              <div itemProp="reviewBody">{experience}</div>
+              
+              <div itemProp="author" itemScope itemType="https://schema.org/Person">
+                <span itemProp="name">{username || "Utente Anonimo"}</span>
+              </div>
+              
+              <div itemProp="reviewRating" itemScope itemType="https://schema.org/Rating">
+                <meta itemProp="worstRating" content="1" />
+                <meta itemProp="bestRating" content="5" />
+                <meta itemProp="ratingValue" content={String(Math.round((medicationEffectiveness + (5 - symptomSeverity) + (5 - socialDiscomfort)) / 3))} />
+              </div>
+              
+              <div itemProp="itemReviewed" itemScope itemType="https://schema.org/MedicalCondition">
+                <span itemProp="name">{capitalizeFirstLetter(condition)}</span>
+                <meta itemProp="code" content={String(reviewId)} />
+              </div>
+            </div>
+            
             <ReviewMainContent 
               title={title}
               condition={condition}

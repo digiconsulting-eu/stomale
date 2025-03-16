@@ -36,23 +36,57 @@ const ReviewDetail = () => {
     return <ReviewError message="La recensione richiesta non è stata trovata." />;
   }
 
+  // Breadcrumb schema per migliorare l'indicizzazione
+  const jsonLdBreadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://stomale.info/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": review.PATOLOGIE?.Patologia?.toUpperCase() || 'Patologia',
+        "item": `https://stomale.info/patologia/${decodedCondition.toLowerCase()}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": review.title,
+        "item": window.location.href
+      }
+    ]
+  };
+
   return (
-    <ReviewContent
-      username={review.username}
-      title={review.title}
-      condition={review.PATOLOGIE?.Patologia?.toLowerCase()}
-      symptoms={review.symptoms}
-      experience={review.experience}
-      diagnosisDifficulty={review.diagnosis_difficulty}
-      symptomSeverity={review.symptoms_severity}
-      hasMedication={review.has_medication}
-      medicationEffectiveness={review.medication_effectiveness}
-      healingPossibility={review.healing_possibility}
-      socialDiscomfort={review.social_discomfort}
-      reviewId={review.id.toString()}
-      date={new Date(review.created_at).toLocaleDateString('it-IT')}
-      likesCount={review.likes_count || 0}
-    />
+    <>
+      {/* Schema.org BreadcrumbList markup */}
+      <script 
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumb) }}
+      />
+      
+      <ReviewContent
+        username={review.username}
+        title={review.title}
+        condition={review.PATOLOGIE?.Patologia?.toLowerCase()}
+        symptoms={review.symptoms}
+        experience={review.experience}
+        diagnosisDifficulty={review.diagnosis_difficulty}
+        symptomSeverity={review.symptoms_severity}
+        hasMedication={review.has_medication}
+        medicationEffectiveness={review.medication_effectiveness}
+        healingPossibility={review.healing_possibility}
+        socialDiscomfort={review.social_discomfort}
+        reviewId={review.id.toString()}
+        date={new Date(review.created_at).toLocaleDateString('it-IT')}
+        likesCount={review.likes_count || 0}
+      />
+    </>
   );
 };
 

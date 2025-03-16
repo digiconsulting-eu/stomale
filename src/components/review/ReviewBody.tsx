@@ -19,6 +19,7 @@ export const ReviewBody = ({ symptoms, experience }: ReviewBodyProps) => {
       <div>
         <h2 className="text-xl font-semibold mb-4">Esperienza</h2>
         <article itemScope itemType="http://schema.org/Article">
+          <meta itemProp="headline" content="Esperienza con la patologia" />
           <div 
             itemProp="articleBody" 
             className="bg-gray-50 rounded-lg p-6"

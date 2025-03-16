@@ -12,10 +12,16 @@ export const ConditionHeader = ({ condition, conditionId }: ConditionHeaderProps
   return (
     <div className="flex justify-between items-center mb-8">
       <div>
-        <h1 className="text-3xl font-bold text-primary mb-2">
+        <h1 
+          className="text-3xl font-bold text-primary mb-2"
+          itemProp="name"
+        >
           {capitalizeFirstLetter(condition)}
         </h1>
-        <p className="text-gray-600">
+        <p 
+          className="text-gray-600"
+          itemProp="description"
+        >
           Esperienze e recensioni sulla patologia
         </p>
       </div>
