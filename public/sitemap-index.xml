@@ -1,336 +1,71 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-static.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-a.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-b.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-c.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-d.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-e-l.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-m-r.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemaps/sitemap-conditions-s-z.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemap-reviews-1.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemap-reviews-2.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemap-reviews-3.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemap-reviews-4.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemap-reviews-5.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemap-reviews-6.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemap-reviews-7.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemap-reviews-8.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
   <sitemap>
     <loc>https://stomale.info/sitemap-reviews-9.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-10.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-11.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-15.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-81.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-82.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-83.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-84.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-85.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-86.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-87.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-89.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-90.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-91.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-92.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-93.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-94.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-95.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-96.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-97.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-98.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-99.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-100.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-101.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-102.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-103.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-104.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-105.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-106.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-107.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-108.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-109.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-110.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-111.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-114.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-115.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-116.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-117.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-118.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-119.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-120.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-121.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-123.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-124.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-125.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-126.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-127.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-128.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-129.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-130.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-131.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-132.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-133.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-134.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-135.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-136.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-137.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-140.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-143.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-144.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-147.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-148.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-149.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-150.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-151.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-152.xml</loc>
-    <lastmod>2025-03-09</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>https://stomale.info/sitemap-reviews-153.xml</loc>
-    <lastmod>2025-03-09</lastmod>
+    <lastmod>2025-03-16</lastmod>
   </sitemap>
 </sitemapindex>

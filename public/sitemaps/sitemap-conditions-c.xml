@@ -311,6 +311,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/colesterolo%20alto</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/colica%20renale</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
