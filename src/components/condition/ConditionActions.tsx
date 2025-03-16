@@ -9,23 +9,23 @@ interface ConditionActionsProps {
 
 export const ConditionActions = ({ condition, onNavigate, onNewReview }: ConditionActionsProps) => {
   return (
-    <div className="grid gap-3 sm:gap-4">
+    <div className="grid gap-4">
       <Button 
-        className="w-full text-base sm:text-lg py-4 sm:py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl"
+        className="w-full text-lg py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
         onClick={() => onNavigate('overview')}
       >
         Panoramica
       </Button>
       
       <Button 
-        className="w-full text-base sm:text-lg py-4 sm:py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl"
+        className="w-full text-lg py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
         onClick={() => onNavigate('experiences')}
       >
         Leggi Esperienze
       </Button>
       
       <Button 
-        className="w-full text-base sm:text-lg py-4 sm:py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl"
+        className="w-full text-lg py-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
         onClick={onNewReview}
       >
         Racconta la tua Esperienza
