@@ -18,7 +18,9 @@ const ReviewDetail = () => {
 
   useEffect(() => {
     if (review?.title && review?.PATOLOGIE?.Patologia) {
-      setPageTitle(`${review.PATOLOGIE.Patologia.toUpperCase()} | ${review.title}`);
+      // Titolo ottimizzato con patologia in evidenza e keywords
+      const formattedCondition = review.PATOLOGIE.Patologia.toUpperCase();
+      setPageTitle(`${formattedCondition}: Recensione ed Esperienza | ${review.title} | StoMale.info`);
       setMetaDescription(getReviewMetaDescription(review.PATOLOGIE.Patologia, review.title));
     }
   }, [review?.title, review?.PATOLOGIE?.Patologia]);
@@ -35,6 +37,32 @@ const ReviewDetail = () => {
   if (!review) {
     return <ReviewError message="La recensione richiesta non è stata trovata." />;
   }
+
+  // Schema.org markup migliorato per recensioni mediche
+  const jsonLdReview = {
+    "@context": "https://schema.org",
+    "@type": "Review",
+    "reviewRating": {
+      "@type": "Rating",
+      "ratingValue": Math.round((5 - review.diagnosis_difficulty + 5 - review.symptoms_severity + 
+                                (review.has_medication ? review.medication_effectiveness : 3) + 
+                                review.healing_possibility + (5 - review.social_discomfort)) / 5),
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "author": {
+      "@type": "Person",
+      "name": review.username || "Utente Anonimo"
+    },
+    "datePublished": new Date(review.created_at).toISOString(),
+    "name": review.title,
+    "reviewBody": review.experience,
+    "itemReviewed": {
+      "@type": "MedicalCondition",
+      "name": review.PATOLOGIE?.Patologia,
+      "description": review.symptoms
+    }
+  };
 
   // Breadcrumb schema per migliorare l'indicizzazione
   const jsonLdBreadcrumb = {
@@ -64,7 +92,11 @@ const ReviewDetail = () => {
 
   return (
     <>
-      {/* Schema.org BreadcrumbList markup */}
+      {/* Schema.org markup multiplo */}
+      <script 
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdReview) }}
+      />
       <script 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumb) }}
