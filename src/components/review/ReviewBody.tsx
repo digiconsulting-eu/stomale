@@ -5,6 +5,14 @@ interface ReviewBodyProps {
 }
 
 export const ReviewBody = ({ symptoms, experience }: ReviewBodyProps) => {
+  // Add console logs to debug content being rendered
+  console.log('ReviewBody rendering with:', {
+    symptomsLength: symptoms?.length,
+    experienceLength: experience?.length,
+    symptomsStart: symptoms?.substring(0, 50),
+    experienceStart: experience?.substring(0, 50)
+  });
+
   return (
     <div className="prose prose-lg max-w-none space-y-8">
       <div>
@@ -16,7 +24,7 @@ export const ReviewBody = ({ symptoms, experience }: ReviewBodyProps) => {
             itemScope 
             itemType="https://schema.org/MedicalSymptom"
           >
-            <span itemProp="name">{symptoms}</span>
+            <span itemProp="name">{symptoms || 'Nessun sintomo descritto'}</span>
           </p>
         </div>
       </div>
@@ -31,7 +39,7 @@ export const ReviewBody = ({ symptoms, experience }: ReviewBodyProps) => {
           <meta itemProp="headline" content="Esperienza con la patologia" />
           <div itemProp="articleBody">
             <p className="whitespace-pre-wrap text-gray-700 break-words">
-              {experience}
+              {experience || 'Nessuna esperienza descritta'}
             </p>
           </div>
           <meta itemProp="datePublished" content={new Date().toISOString()} />

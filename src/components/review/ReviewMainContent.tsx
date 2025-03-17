@@ -37,6 +37,13 @@ export const ReviewMainContent = ({
   username,
   likesCount
 }: ReviewMainContentProps) => {
+  // Add console log to debug content rendering
+  console.log('ReviewMainContent rendering:', {
+    title, hasSymptoms: !!symptoms, 
+    symptomsLength: symptoms?.length, 
+    experienceLength: experience?.length
+  });
+  
   // Calcolo di un rating generale basato su metriche della recensione
   const overallRating = Math.round((
     (5 - diagnosisDifficulty) + 
@@ -82,8 +89,8 @@ export const ReviewMainContent = ({
 
       <div className="mt-8" itemProp="reviewBody">
         <ReviewBody 
-          symptoms={symptoms}
-          experience={experience}
+          symptoms={symptoms || ''} // Ensure symptoms is never undefined
+          experience={experience || ''} // Ensure experience is never undefined
         />
       </div>
 

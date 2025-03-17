@@ -14,7 +14,20 @@ const ReviewDetail = () => {
   const decodedCondition = condition || '';
   const reviewId = slug?.split('-')[0];
 
+  // Add console log to debug params
+  console.log('ReviewDetail rendering with params:', { condition, slug, reviewId, decodedCondition });
+
   const { data: review, isLoading, error } = useReviewQuery(reviewId, decodedCondition);
+
+  // Add console log to track review data
+  console.log('Review data loaded:', review ? 
+    { 
+      id: review.id, 
+      title: review.title, 
+      hasSymptoms: !!review.symptoms,
+      symptomsLength: review.symptoms?.length,
+      experienceLength: review.experience?.length 
+    } : 'No review data');
 
   useEffect(() => {
     if (review?.title && review?.PATOLOGIE?.Patologia) {
@@ -106,8 +119,8 @@ const ReviewDetail = () => {
         username={review.username}
         title={review.title}
         condition={review.PATOLOGIE?.Patologia?.toLowerCase()}
-        symptoms={review.symptoms}
-        experience={review.experience}
+        symptoms={review.symptoms || ''}
+        experience={review.experience || ''}
         diagnosisDifficulty={review.diagnosis_difficulty}
         symptomSeverity={review.symptoms_severity}
         hasMedication={review.has_medication}

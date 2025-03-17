@@ -34,6 +34,12 @@ export const ReviewContent = ({
   date,
   likesCount
 }: ReviewContentProps) => {
+  // Add console log to track component rendering and props
+  console.log('ReviewContent rendering with props:', {
+    title, condition, symptoms: symptoms?.length, 
+    experience: experience?.length, reviewId
+  });
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto bg-white">
