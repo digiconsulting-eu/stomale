@@ -6,10 +6,10 @@ interface ReviewBodyProps {
 
 export const ReviewBody = ({ symptoms, experience }: ReviewBodyProps) => {
   return (
-    <div className="prose prose-lg max-w-none space-y-8 overflow-hidden">
+    <div className="prose prose-lg max-w-none space-y-8">
       <div>
         <h2 className="text-xl font-semibold mb-4">Sintomi</h2>
-        <div className="bg-gray-50 rounded-lg p-4 md:p-6 overflow-hidden">
+        <div className="bg-gray-50 rounded-lg p-4 md:p-6">
           <p 
             className="whitespace-pre-wrap text-gray-700 break-words" 
             itemProp="description"
@@ -26,7 +26,7 @@ export const ReviewBody = ({ symptoms, experience }: ReviewBodyProps) => {
         <article 
           itemScope 
           itemType="http://schema.org/Article"
-          className="bg-gray-50 rounded-lg p-4 md:p-6 overflow-hidden"
+          className="bg-gray-50 rounded-lg p-4 md:p-6"
         >
           <meta itemProp="headline" content="Esperienza con la patologia" />
           <div itemProp="articleBody">

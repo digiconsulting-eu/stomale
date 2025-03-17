@@ -47,7 +47,7 @@ export const ReviewMainContent = ({
   ) / 5);
 
   return (
-    <div className="bg-white rounded-xl p-4 md:p-8 shadow-sm w-full max-w-full overflow-hidden" itemScope itemType="https://schema.org/Review">
+    <div className="bg-white rounded-xl p-4 md:p-8 shadow-sm w-full max-w-full" itemScope itemType="https://schema.org/Review">
       <meta itemProp="author" content={username || "Utente Anonimo"} />
       <meta itemProp="datePublished" content={date} />
       
@@ -68,7 +68,7 @@ export const ReviewMainContent = ({
         username={username}
       />
 
-      <div className="mt-8 overflow-x-hidden">
+      <div className="mt-8">
         <h3 className="text-xl font-semibold mb-6">Statistiche della Recensione</h3>
         <ReviewStats
           diagnosisDifficulty={diagnosisDifficulty}
@@ -80,7 +80,7 @@ export const ReviewMainContent = ({
         />
       </div>
 
-      <div className="mt-8 overflow-x-hidden" itemProp="reviewBody">
+      <div className="mt-8" itemProp="reviewBody">
         <ReviewBody 
           symptoms={symptoms}
           experience={experience}

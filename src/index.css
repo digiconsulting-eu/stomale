@@ -58,28 +58,38 @@
   .dashboard-container {
     @apply mb-48;
   }
-  
-  /* Fix review content overflow on mobile */
-  .whitespace-pre-wrap {
-    @apply break-words;
-    word-wrap: break-word;
-    max-width: 100%;
-  }
-  
-  /* Ensure images don't overflow container on mobile */
-  img {
-    @apply max-w-full h-auto;
-  }
-  
-  /* Improve review card display on mobile */
-  .review-card {
-    @apply w-full;
-  }
-  
-  /* Adjust container padding on mobile */
-  .container {
-    @apply px-3;
-  }
+}
+
+/* Fix review content overflow issues on both mobile and desktop */
+.whitespace-pre-wrap {
+  @apply break-words;
+  word-wrap: break-word;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* Ensure images don't overflow container */
+img {
+  @apply max-w-full h-auto;
+}
+
+/* Improve review card display */
+.review-card {
+  @apply w-full;
+}
+
+/* Adjust container padding */
+.container {
+  @apply px-3 md:px-4;
+}
+
+/* Fix overflow issues in various containers */
+.prose, .prose-lg, .prose p, article, .bg-gray-50 {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 /* Animations */
