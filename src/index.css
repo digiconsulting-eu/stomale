@@ -58,6 +58,28 @@
   .dashboard-container {
     @apply mb-48;
   }
+  
+  /* Fix review content overflow on mobile */
+  .whitespace-pre-wrap {
+    @apply break-words;
+    word-wrap: break-word;
+    max-width: 100%;
+  }
+  
+  /* Ensure images don't overflow container on mobile */
+  img {
+    @apply max-w-full h-auto;
+  }
+  
+  /* Improve review card display on mobile */
+  .review-card {
+    @apply w-full;
+  }
+  
+  /* Adjust container padding on mobile */
+  .container {
+    @apply px-3;
+  }
 }
 
 /* Animations */
