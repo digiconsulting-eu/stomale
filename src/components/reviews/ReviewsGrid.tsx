@@ -32,7 +32,7 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
   
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" aria-busy="true" aria-label="Caricamento recensioni in corso">
         {[...Array(6)].map((_, i) => (
           <Skeleton key={i} className="h-[300px]" />
         ))}
@@ -42,11 +42,12 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
 
   if (!reviews || reviews.length === 0) {
     return (
-      <div className="text-center py-8">
+      <div className="text-center py-8" role="status" aria-label="Nessuna recensione trovata">
         <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
         <button 
           onClick={() => window.location.reload()}
           className="mt-4 text-blue-500 underline"
+          aria-label="Ricarica la pagina"
         >
           Ricarica la pagina
         </button>
@@ -66,11 +67,12 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
   
   if (validReviews.length === 0) {
     return (
-      <div className="text-center py-8">
+      <div className="text-center py-8" role="status" aria-label="Nessuna recensione valida trovata">
         <p className="text-gray-500">Non ci sono recensioni valide da mostrare.</p>
         <button 
           onClick={() => window.location.reload()}
           className="mt-4 text-blue-500 underline"
+          aria-label="Ricarica la pagina"
         >
           Ricarica la pagina
         </button>
@@ -79,21 +81,36 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {validReviews.map((review) => {
+    <div 
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-visible"
+      role="feed"
+      aria-label={`Lista di ${validReviews.length} recensioni`}
+      itemScope
+      itemType="https://schema.org/ItemList"
+    >
+      {validReviews.map((review, index) => {
         console.log(`Rendering review in grid: ID ${review.id}, Title: ${review.title}`);
         return (
-          <ReviewCard
-            key={review.id}
-            id={review.id}
-            title={review.title}
-            condition={review.PATOLOGIE?.Patologia || ''}
-            date={new Date(review.created_at).toLocaleDateString()}
-            preview={review.experience?.slice(0, 200) + '...' || 'Nessuna esperienza descritta'}
-            username={review.username || 'Anonimo'}
-            likesCount={typeof review.likes_count === 'number' ? review.likes_count : 0}
-            commentsCount={typeof review.comments_count === 'number' ? review.comments_count : 0}
-          />
+          <div 
+            key={review.id} 
+            itemProp="itemListElement" 
+            itemScope 
+            itemType="https://schema.org/ListItem"
+          >
+            <meta itemProp="position" content={String(index + 1)} />
+            <div itemProp="item" itemScope itemType="https://schema.org/Review">
+              <ReviewCard
+                id={review.id}
+                title={review.title}
+                condition={review.PATOLOGIE?.Patologia || ''}
+                date={new Date(review.created_at).toLocaleDateString()}
+                preview={review.experience?.slice(0, 200) + '...' || 'Nessuna esperienza descritta'}
+                username={review.username || 'Anonimo'}
+                likesCount={typeof review.likes_count === 'number' ? review.likes_count : 0}
+                commentsCount={typeof review.comments_count === 'number' ? review.comments_count : 0}
+              />
+            </div>
+          </div>
         );
       })}
     </div>

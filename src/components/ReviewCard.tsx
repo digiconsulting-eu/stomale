@@ -53,10 +53,11 @@ export const ReviewCard = ({
   const reviewPath = generateReviewPath(safeCondition.toLowerCase(), id, title);
 
   return (
-    <Card className="w-full bg-white rounded-3xl border border-[#1EAEDB] shadow-sm overflow-visible">
-      <div className="p-6">
+    <Card className="w-full bg-white rounded-3xl border border-[#1EAEDB] shadow-sm overflow-visible h-full flex flex-col" 
+          itemScope itemType="https://schema.org/Review">
+      <div className="p-6 flex flex-col h-full">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary">
+          <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary" itemProp="name">
             <Link to={reviewPath}>{title}</Link>
           </h3>
           {onDelete && (
@@ -65,27 +66,35 @@ export const ReviewCard = ({
               size="icon"
               className="text-red-600 hover:text-red-700 hover:bg-red-50"
               onClick={onDelete}
+              aria-label="Elimina recensione"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
-        <p className="text-sm text-gray-500 mb-2">{safeUsername}</p>
+        <p className="text-sm text-gray-500 mb-2" itemProp="author" itemScope itemType="https://schema.org/Person">
+          <span itemProp="name">{safeUsername}</span>
+        </p>
         <Link 
           to={`/patologia/${safeCondition.toLowerCase()}`}
           className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
+          itemProp="about"
+          itemScope
+          itemType="https://schema.org/MedicalCondition"
         >
-          {safeCondition.toUpperCase()}
+          <span itemProp="name">{safeCondition.toUpperCase()}</span>
         </Link>
-        <p className="text-gray-600 line-clamp-3 mb-4 break-words">{safePreview}</p>
+        <p className="text-gray-600 line-clamp-3 mb-4 break-words flex-grow" itemProp="reviewBody">{safePreview}</p>
+        
+        <meta itemProp="datePublished" content={new Date(date).toISOString()} />
         
         {/* Likes and Comments counts */}
         <div className="flex items-center gap-6 mb-4 text-gray-500">
-          <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
+          <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors" aria-label={`${displayLikesCount} mi piace`}>
             <Heart className="h-5 w-5 text-red-400" />
             <span className="text-gray-600">{displayLikesCount}</span>
           </Link>
-          <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors">
+          <Link to={reviewPath} className="flex items-center gap-2 hover:text-primary transition-colors" aria-label={`${displayCommentsCount} commenti`}>
             <MessageCircle className="h-5 w-5 text-green-500" />
             <span className="text-gray-600">{displayCommentsCount}</span>
           </Link>
@@ -93,9 +102,9 @@ export const ReviewCard = ({
         
         <Button 
           asChild 
-          className="w-full bg-primary text-white hover:bg-primary-hover justify-center rounded-xl py-2 md:py-6"
+          className="w-full bg-primary text-white hover:bg-primary-hover justify-center rounded-xl py-2 md:py-6 mt-auto"
         >
-          <Link to={reviewPath} className="text-white">
+          <Link to={reviewPath} className="text-white" aria-label={`Leggi l'esperienza completa su ${title}`}>
             Leggi l'esperienza completa
             <ArrowRight className="h-4 w-4 ml-2" />
           </Link>
