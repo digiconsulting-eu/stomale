@@ -7,7 +7,7 @@
 
 @layer base {
   body {
-    @apply bg-white text-text font-sans antialiased min-h-screen;
+    @apply bg-white text-text font-sans antialiased min-h-screen overflow-x-hidden;
   }
   
   /* Add better tap targets for mobile */
@@ -62,11 +62,11 @@
 
 /* Fix review content overflow issues on both mobile and desktop */
 .whitespace-pre-wrap {
-  @apply break-words;
   word-wrap: break-word;
   max-width: 100%;
   white-space: pre-wrap;
   overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Ensure images don't overflow container */
@@ -81,7 +81,7 @@ img {
 
 /* Adjust container padding */
 .container {
-  @apply px-3 md:px-4;
+  @apply px-3 md:px-4 overflow-visible;
 }
 
 /* Fix overflow issues in various containers */
@@ -124,4 +124,14 @@ img {
 /* Card hover effects */
 .review-card {
   @apply transition-all duration-300 hover:-translate-y-1;
+}
+
+/* Fix for card grids */
+.grid {
+  @apply overflow-visible;
+}
+
+/* Ensure the main page containers don't hide content */
+#root, main, .container, section {
+  @apply overflow-visible;
 }

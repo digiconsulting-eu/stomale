@@ -28,7 +28,7 @@ interface ReviewsGridProps {
 }
 
 export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
-  console.log('Reviews in grid:', reviews?.length || 0);
+  console.log('Reviews in grid:', reviews?.length || 0, reviews);
   
   if (isLoading) {
     return (
@@ -59,9 +59,10 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
     review && 
     review.id && 
     review.title && 
-    review.experience && 
     review.PATOLOGIE?.Patologia
   );
+  
+  console.log('Valid reviews after filtering:', validReviews.length);
   
   if (validReviews.length === 0) {
     return (
@@ -79,19 +80,22 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {validReviews.map((review) => (
-        <ReviewCard
-          key={review.id}
-          id={review.id}
-          title={review.title}
-          condition={review.PATOLOGIE?.Patologia || ''}
-          date={new Date(review.created_at).toLocaleDateString()}
-          preview={review.experience.slice(0, 200) + '...'}
-          username={review.username || 'Anonimo'}
-          likesCount={typeof review.likes_count === 'number' ? review.likes_count : 0}
-          commentsCount={typeof review.comments_count === 'number' ? review.comments_count : 0}
-        />
-      ))}
+      {validReviews.map((review) => {
+        console.log(`Rendering review in grid: ID ${review.id}, Title: ${review.title}`);
+        return (
+          <ReviewCard
+            key={review.id}
+            id={review.id}
+            title={review.title}
+            condition={review.PATOLOGIE?.Patologia || ''}
+            date={new Date(review.created_at).toLocaleDateString()}
+            preview={review.experience?.slice(0, 200) + '...' || 'Nessuna esperienza descritta'}
+            username={review.username || 'Anonimo'}
+            likesCount={typeof review.likes_count === 'number' ? review.likes_count : 0}
+            commentsCount={typeof review.comments_count === 'number' ? review.comments_count : 0}
+          />
+        );
+      })}
     </div>
   );
 };

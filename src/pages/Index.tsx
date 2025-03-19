@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,7 +62,6 @@ export default function Index() {
           review && 
           review.id && 
           review.title && 
-          review.experience && 
           review.PATOLOGIE?.Patologia
         );
         
@@ -79,6 +79,7 @@ export default function Index() {
           username: review.username || 'Anonimo',
           likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
           comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
+          experience: review.experience || 'Nessuna esperienza descritta',
           // Ensure PATOLOGIE is present
           PATOLOGIE: review.PATOLOGIE || { id: 0, Patologia: 'Patologia non specificata' }
         }));
@@ -98,6 +99,7 @@ export default function Index() {
 
   // Force a refetch on mount
   useEffect(() => {
+    console.log('Index component mounted, forcing refetch of reviews');
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -120,9 +122,9 @@ export default function Index() {
   }
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full overflow-visible">
       {/* Hero Section with gradient */}
-      <div className="relative py-20 overflow-hidden bg-gradient-to-br from-blue-50 to-white">
+      <div className="relative py-20 overflow-visible bg-gradient-to-br from-blue-50 to-white">
         <div className="absolute inset-0 z-0 opacity-10 bg-repeat">
           <div className="absolute w-full h-full bg-[url('/hero-bg-pills.png')] bg-repeat opacity-50"></div>
         </div>
@@ -168,8 +170,8 @@ export default function Index() {
       </div>
       
       {/* Reviews Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
+      <section className="py-16 bg-gray-50 overflow-visible">
+        <div className="container mx-auto px-4 overflow-visible">
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-primary relative">
               <span className="relative z-10">Recensioni in evidenza</span>
@@ -198,7 +200,7 @@ export default function Index() {
               ))}
             </div>
           ) : latestReviews && latestReviews.length > 0 ? (
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-visible">
               {latestReviews.map((review) => {
                 console.log(`Rendering review on homepage: ID ${review.id}, Title: ${review.title}, Condition: ${review.PATOLOGIE?.Patologia || 'Missing'}`);
                 
@@ -209,7 +211,7 @@ export default function Index() {
                     title={review.title}
                     condition={review.PATOLOGIE?.Patologia || 'Patologia non specificata'}
                     date={new Date(review.created_at).toLocaleDateString()}
-                    preview={review.experience.slice(0, 150) + '...'}
+                    preview={review.experience?.slice(0, 150) + '...' || 'Nessuna esperienza descritta'}
                     username={review.username || 'Anonimo'}
                     likesCount={review.likes_count || 0}
                     commentsCount={review.comments_count || 0}
