@@ -1,67 +1,24 @@
 
 import { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { Disclaimer } from "@/components/Disclaimer";
-import { ConditionOverview } from "@/components/condition/ConditionOverview";
-import { supabase } from "@/integrations/supabase/client";
 import { ConditionHeader } from "@/components/condition/ConditionHeader";
 import { ConditionActions } from "@/components/condition/ConditionActions";
-import { ConditionReviews } from "@/components/condition/ConditionReviews";
 import { ConditionStats } from "@/components/condition/ConditionStats";
-import { capitalizeFirstLetter } from "@/utils/textUtils";
+import { ConditionSEO } from "@/components/condition/ConditionSEO";
+import { ConditionSchema } from "@/components/condition/ConditionSchema";
+import { ConditionContent } from "@/components/condition/ConditionContent";
 import { setPageTitle, setMetaDescription, getConditionMetaDescription } from "@/utils/pageTitle";
-import { DatabaseReview, Review } from "@/types/review";
-import { Helmet } from "react-helmet";
-
-interface Stats {
-  diagnosisDifficulty: number;
-  symptomsDiscomfort: number;
-  medicationEffectiveness: number;
-  healingPossibility: number;
-  socialDiscomfort: number;
-}
-
-const calculateStats = (reviews: Review[]): Stats => {
-  if (!reviews.length) {
-    return {
-      diagnosisDifficulty: 0,
-      symptomsDiscomfort: 0,
-      medicationEffectiveness: 0,
-      healingPossibility: 0,
-      socialDiscomfort: 0
-    };
-  }
-
-  const sum = reviews.reduce((acc, review) => ({
-    diagnosisDifficulty: acc.diagnosisDifficulty + review.diagnosis_difficulty,
-    symptomsDiscomfort: acc.symptomsDiscomfort + review.symptoms_severity,
-    medicationEffectiveness: acc.medicationEffectiveness + (review.has_medication ? review.medication_effectiveness : 0),
-    healingPossibility: acc.healingPossibility + review.healing_possibility,
-    socialDiscomfort: acc.socialDiscomfort + review.social_discomfort
-  }), {
-    diagnosisDifficulty: 0,
-    symptomsDiscomfort: 0,
-    medicationEffectiveness: 0,
-    healingPossibility: 0,
-    socialDiscomfort: 0
-  });
-
-  const medicatedReviews = reviews.filter(r => r.has_medication).length;
-
-  return {
-    diagnosisDifficulty: sum.diagnosisDifficulty / reviews.length,
-    symptomsDiscomfort: sum.symptomsDiscomfort / reviews.length,
-    medicationEffectiveness: medicatedReviews ? sum.medicationEffectiveness / medicatedReviews : 0,
-    healingPossibility: sum.healingPossibility / reviews.length,
-    socialDiscomfort: sum.socialDiscomfort / reviews.length
-  };
-};
+import { capitalizeFirstLetter } from "@/utils/textUtils";
+import { useConditionData } from "@/hooks/useConditionData";
+import { calculateStats, calculateRating } from "@/utils/conditionUtils";
 
 export default function ConditionDetail() {
-  const { condition } = useParams();
   const navigate = useNavigate();
   const isAdmin = localStorage.getItem("isAdmin") === "true";
+  
+  const { condition, patologiaData, reviews, isLoading } = useConditionData();
+  
   const conditionTitle = condition ? capitalizeFirstLetter(condition) : '';
   const pageTitle = `${condition?.toUpperCase()} | Recensioni ed Esperienze`;
   const metaDescription = getConditionMetaDescription(condition || '');
@@ -73,50 +30,8 @@ export default function ConditionDetail() {
     }
   }, [condition, pageTitle, metaDescription]);
 
-  const { data: patologiaData } = useQuery({
-    queryKey: ["patologia", condition],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('PATOLOGIE')
-        .select('id, Patologia')
-        .eq('Patologia', condition?.toUpperCase())
-        .single();
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: reviewsData, isLoading } = useQuery({
-    queryKey: ["reviews", patologiaData?.id],
-    enabled: !!patologiaData?.id,
-    queryFn: async () => {
-      console.log('Fetching reviews for condition:', patologiaData?.id);
-      
-      try {
-        const { data, error } = await supabase
-          .from('reviews')
-          .select(`
-            *,
-            PATOLOGIE (
-              id,
-              Patologia
-            )
-          `)
-          .eq('condition_id', patologiaData.id);
-        
-        if (error) {
-          console.error('Error fetching reviews:', error);
-          throw error;
-        }
-        console.log('Fetched reviews:', data);
-        return data as DatabaseReview[];
-      } catch (error) {
-        console.error('Error in review fetch:', error);
-        throw error;
-      }
-    }
-  });
+  const stats = calculateStats(reviews);
+  const ratingValue = calculateRating(stats);
 
   const handleNavigate = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
@@ -126,88 +41,15 @@ export default function ConditionDetail() {
     navigate(`/nuova-recensione?patologia=${condition}`);
   };
 
-  const reviews: Review[] = reviewsData?.map(review => ({
-    id: review.id,
-    title: review.title,
-    condition: condition || '',
-    experience: review.experience,
-    diagnosis_difficulty: review.diagnosis_difficulty,
-    symptoms_severity: review.symptoms_severity,
-    has_medication: review.has_medication,
-    medication_effectiveness: review.medication_effectiveness,
-    healing_possibility: review.healing_possibility,
-    social_discomfort: review.social_discomfort,
-    username: review.username || 'Anonimo',
-    created_at: review.created_at,
-    PATOLOGIE: review.PATOLOGIE
-  })) || [];
-
-  const stats = calculateStats(reviews);
-  
-  const ratingValue = (stats.medicationEffectiveness + (5 - stats.symptomsDiscomfort) + stats.healingPossibility) / 3;
-
-  // Create structured data for the condition
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "MedicalCondition",
-    "name": conditionTitle,
-    "alternateName": condition?.toUpperCase(),
-    "url": `https://stomale.info/patologia/${condition?.toLowerCase()}`,
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `https://stomale.info/patologia/${condition?.toLowerCase()}`
-    }
-  };
-
   return (
     <div className="container py-8">
-      <Helmet>
-        <title>{pageTitle}</title>
-        <meta name="description" content={metaDescription} />
-        
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={`https://stomale.info/patologia/${condition?.toLowerCase()}`} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:image" content="https://stomale.info/og-image.svg" />
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:url" content={`https://stomale.info/patologia/${condition?.toLowerCase()}`} />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={metaDescription} />
-        <meta name="twitter:image" content="https://stomale.info/og-image.svg" />
-        
-        {/* Canonical URL */}
-        <link rel="canonical" href={`https://stomale.info/patologia/${condition?.toLowerCase()}`} />
-        
-        {/* Structured data */}
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
-      </Helmet>
+      <ConditionSEO condition={condition || ''} />
       
-      {/* Schema.org markup per la condizione medica */}
-      <div 
-        itemScope 
-        itemType="https://schema.org/MedicalCondition"
-        className="hidden"
-      >
-        <meta itemProp="name" content={capitalizeFirstLetter(condition || '')} />
-        <meta itemProp="alternateName" content={condition?.toUpperCase() || ''} />
-        
-        {/* Aggregated Rating schema */}
-        {reviews.length > 0 && (
-          <div itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
-            <meta itemProp="ratingValue" content={ratingValue.toFixed(1)} />
-            <meta itemProp="bestRating" content="5" />
-            <meta itemProp="worstRating" content="1" />
-            <meta itemProp="ratingCount" content={String(reviews.length)} />
-            <meta itemProp="reviewCount" content={String(reviews.length)} />
-          </div>
-        )}
-      </div>
+      <ConditionSchema 
+        condition={condition || ''} 
+        reviews={reviews} 
+        ratingValue={ratingValue} 
+      />
       
       <ConditionHeader 
         condition={condition || ''} 
@@ -226,23 +68,13 @@ export default function ConditionDetail() {
             onNewReview={handleNewReview}
           />
 
-          <div id="overview" className="mt-8">
-            <ConditionOverview 
-              condition={condition || ''} 
-              isAdmin={isAdmin}
-            />
-          </div>
-
-          <div id="experiences" className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">
-              Esperienze ({reviews?.length || 0})
-            </h2>
-            <ConditionReviews
-              reviews={reviews}
-              isLoading={isLoading}
-              condition={condition || ''}
-            />
-          </div>
+          <ConditionContent 
+            condition={condition || ''} 
+            isAdmin={isAdmin}
+            reviewsCount={reviews?.length || 0}
+            reviews={reviews}
+            isLoading={isLoading}
+          />
         </div>
       </div>
 
