@@ -12,6 +12,7 @@ import { ConditionStats } from "@/components/condition/ConditionStats";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { setPageTitle, setMetaDescription, getConditionMetaDescription } from "@/utils/pageTitle";
 import { DatabaseReview, Review } from "@/types/review";
+import { Helmet } from "react-helmet";
 
 interface Stats {
   diagnosisDifficulty: number;
@@ -61,14 +62,16 @@ export default function ConditionDetail() {
   const { condition } = useParams();
   const navigate = useNavigate();
   const isAdmin = localStorage.getItem("isAdmin") === "true";
+  const conditionTitle = condition ? capitalizeFirstLetter(condition) : '';
+  const pageTitle = `${condition?.toUpperCase()} | Recensioni ed Esperienze`;
+  const metaDescription = getConditionMetaDescription(condition || '');
 
   useEffect(() => {
     if (condition) {
-      const title = `${condition.toUpperCase()} | Recensioni ed Esperienze`;
-      setPageTitle(title);
-      setMetaDescription(getConditionMetaDescription(condition));
+      setPageTitle(pageTitle);
+      setMetaDescription(metaDescription);
     }
-  }, [condition]);
+  }, [condition, pageTitle, metaDescription]);
 
   const { data: patologiaData } = useQuery({
     queryKey: ["patologia", condition],
@@ -143,8 +146,48 @@ export default function ConditionDetail() {
   
   const ratingValue = (stats.medicationEffectiveness + (5 - stats.symptomsDiscomfort) + stats.healingPossibility) / 3;
 
+  // Create structured data for the condition
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "MedicalCondition",
+    "name": conditionTitle,
+    "alternateName": condition?.toUpperCase(),
+    "url": `https://stomale.info/patologia/${condition?.toLowerCase()}`,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://stomale.info/patologia/${condition?.toLowerCase()}`
+    }
+  };
+
   return (
     <div className="container py-8">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={metaDescription} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`https://stomale.info/patologia/${condition?.toLowerCase()}`} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content="https://stomale.info/og-image.svg" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={`https://stomale.info/patologia/${condition?.toLowerCase()}`} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content="https://stomale.info/og-image.svg" />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={`https://stomale.info/patologia/${condition?.toLowerCase()}`} />
+        
+        {/* Structured data */}
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Helmet>
+      
       {/* Schema.org markup per la condizione medica */}
       <div 
         itemScope 

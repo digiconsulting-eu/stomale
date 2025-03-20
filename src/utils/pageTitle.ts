@@ -26,4 +26,3 @@ export const getReviewMetaDescription = (condition: string, title: string) => {
 export const getConditionMetaDescription = (condition: string) => {
   return `Scopri esperienze, sintomi e trattamenti per ${condition} su StoMale.info. Leggi recensioni e testimonianze di chi convive con questa patologia.`;
 };
-
