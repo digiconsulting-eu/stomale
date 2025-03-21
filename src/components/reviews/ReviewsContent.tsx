@@ -1,3 +1,4 @@
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { ReviewsGrid } from "./ReviewsGrid";
 import { ReviewsPagination } from "./ReviewsPagination";
@@ -27,6 +28,7 @@ export const ReviewsContent = ({
     id: review.id,
     title: review.title,
     condition: review.PATOLOGIE?.Patologia.toLowerCase() || '',
+    symptoms: review.symptoms || '', // Include symptoms in the transformation
     experience: review.experience,
     diagnosis_difficulty: review.diagnosis_difficulty,
     symptoms_severity: review.symptoms_severity,
