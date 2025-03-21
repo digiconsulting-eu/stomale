@@ -55,12 +55,12 @@ const ReviewDetail = () => {
   let metaDescription = "";
   
   // Try symptoms first as they're usually more descriptive
-  if (review.symptoms && review.symptoms.length > 30) {
+  if (review.symptoms && review.symptoms.length > 50) {
     // Use symptoms and truncate to a reasonable length
     metaDescription = `${review.PATOLOGIE.Patologia.toUpperCase()}: ${review.title}. ${review.symptoms.substring(0, 130).trim()}... Leggi l'esperienza completa su StoMale.info.`;
   } 
   // Fall back to experience if symptoms aren't available or too short
-  else if (review.experience && review.experience.length > 40) {
+  else if (review.experience && review.experience.length > 60) {
     // Use experience and truncate to a reasonable length
     metaDescription = `${review.PATOLOGIE.Patologia.toUpperCase()}: ${review.title}. ${review.experience.substring(0, 130).trim()}... Leggi l'esperienza completa su StoMale.info.`;
   } 
@@ -75,8 +75,14 @@ const ReviewDetail = () => {
     metaDescription = getReviewMetaDescription(review.PATOLOGIE.Patologia, review.title);
   }
 
+  // Ensure the meta description is truncated to a reasonable length for SEO
+  if (metaDescription.length > 160) {
+    metaDescription = metaDescription.substring(0, 157) + "...";
+  }
+
   const pageTitle = `${review.PATOLOGIE.Patologia.toUpperCase()}: Recensione ed Esperienza | ${review.title} | StoMale.info`;
   const canonicalUrl = `https://stomale.info/patologia/${decodedCondition.toLowerCase()}/esperienza/${review.id}-${encodeURIComponent(review.title.toLowerCase().replace(/\s+/g, '-'))}`;
+  const ogImageUrl = "https://stomale.info/og-image.svg"; // Explicitly provide og:image URL
 
   // Schema.org markup migliorato per recensioni mediche
   const jsonLdReview = {
@@ -142,7 +148,9 @@ const ReviewDetail = () => {
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={metaDescription} />
-        <meta property="og:image" content="https://stomale.info/og-image.svg" />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:site_name" content="StoMale.info" />
         
         {/* Twitter */}
@@ -150,13 +158,13 @@ const ReviewDetail = () => {
         <meta name="twitter:url" content={canonicalUrl} />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={metaDescription} />
-        <meta name="twitter:image" content="https://stomale.info/og-image.svg" />
+        <meta name="twitter:image" content={ogImageUrl} />
         
         {/* Canonical URL */}
         <link rel="canonical" href={canonicalUrl} />
       </Helmet>
       
-      {/* Schema.org markup multiplo */}
+      {/* Schema.org markup */}
       <script 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdReview) }}

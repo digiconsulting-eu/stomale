@@ -28,6 +28,7 @@ export interface Review {
   id: number;
   title: string;
   condition: string;
+  symptoms: string; // Added the symptoms property
   experience: string;
   diagnosis_difficulty?: number;
   symptoms_severity?: number;

@@ -66,6 +66,7 @@ export const useConditionData = () => {
     id: review.id,
     title: review.title,
     condition: condition || '',
+    symptoms: review.symptoms || '', // Include symptoms in the mapping
     experience: review.experience,
     diagnosis_difficulty: review.diagnosis_difficulty,
     symptoms_severity: review.symptoms_severity,

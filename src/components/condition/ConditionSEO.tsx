@@ -17,18 +17,22 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
   let metaDescription = "";
   
   if (reviews && reviews.length > 0) {
-    // Try to create a meta description from the first review's content
+    console.log(`Generating meta description for condition: ${condition} with ${reviews.length} reviews`);
+    
+    // Try to create a meta description from the reviews' content
     // Check multiple reviews to find good content
-    for (let i = 0; i < Math.min(3, reviews.length); i++) {
+    for (let i = 0; i < Math.min(5, reviews.length); i++) {
       const review = reviews[i];
       
       // Use symptoms from the review as they're often more descriptive
-      if (review.symptoms && review.symptoms.length > 30) {
+      if (review.symptoms && review.symptoms.length > 50) {
+        console.log(`Using symptoms from review #${i+1}: ${review.symptoms.substring(0, 30)}...`);
         metaDescription = `${formattedCondition}: ${review.symptoms.substring(0, 150).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
         break;
       } 
       // Fall back to experience if symptoms aren't available or too short
-      else if (review.experience && review.experience.length > 40) {
+      else if (review.experience && review.experience.length > 60) {
+        console.log(`Using experience from review #${i+1}: ${review.experience.substring(0, 30)}...`);
         metaDescription = `${formattedCondition}: ${review.experience.substring(0, 150).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
         break;
       }
@@ -36,12 +40,15 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
     
     // If we still don't have a description and there are more reviews, try to combine a couple
     if (!metaDescription && reviews.length >= 2) {
+      console.log('Attempting to combine content from multiple reviews');
+      
       const symptomsTexts = reviews.slice(0, 3)
-        .filter(r => r.symptoms && r.symptoms.length > 20)
+        .filter(r => r.symptoms && r.symptoms.length > 30)
         .map(r => r.symptoms.trim());
       
       if (symptomsTexts.length > 0) {
-        metaDescription = `${formattedCondition}: Sintomi comuni includono ${symptomsTexts[0].substring(0, 100).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
+        metaDescription = `${formattedCondition}: Sintomi comuni includono ${symptomsTexts[0].substring(0, 120).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
+        console.log(`Created combined meta description: ${metaDescription.substring(0, 50)}...`);
       }
     }
   }
@@ -49,9 +56,16 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
   // Fallback to generic description if no content could be extracted
   if (!metaDescription) {
     metaDescription = getConditionMetaDescription(condition);
+    console.log(`Using fallback generic description: ${metaDescription.substring(0, 50)}...`);
+  }
+  
+  // Ensure the meta description is truncated to a reasonable length for SEO
+  if (metaDescription.length > 160) {
+    metaDescription = metaDescription.substring(0, 157) + "...";
   }
   
   const canonicalUrl = `https://stomale.info/patologia/${condition.toLowerCase()}`;
+  const ogImageUrl = "https://stomale.info/og-image.svg"; // Explicitly provide og:image URL
   
   // Create structured data for the condition
   const structuredData = {
@@ -76,7 +90,9 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={metaDescription} />
-      <meta property="og:image" content="https://stomale.info/og-image.svg" />
+      <meta property="og:image" content={ogImageUrl} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
       <meta property="og:site_name" content="StoMale.info" />
       
       {/* Twitter */}
@@ -84,7 +100,7 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
       <meta name="twitter:url" content={canonicalUrl} />
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={metaDescription} />
-      <meta name="twitter:image" content="https://stomale.info/og-image.svg" />
+      <meta name="twitter:image" content={ogImageUrl} />
       
       {/* Canonical URL */}
       <link rel="canonical" href={canonicalUrl} />
