@@ -51,8 +51,21 @@ const ReviewDetail = () => {
     return <ReviewError message="La recensione richiesta non è stata trovata." />;
   }
 
+  // Create a more specific meta description from the actual review content
+  let metaDescription = "";
+  
+  if (review.symptoms && review.symptoms.length > 10) {
+    // Use symptoms as they're often more descriptive
+    metaDescription = `${review.PATOLOGIE.Patologia.toUpperCase()}: ${review.title}. ${review.symptoms.substring(0, 120)}... Leggi l'esperienza completa su StoMale.info.`;
+  } else if (review.experience && review.experience.length > 10) {
+    // Fall back to experience if symptoms aren't available
+    metaDescription = `${review.PATOLOGIE.Patologia.toUpperCase()}: ${review.title}. ${review.experience.substring(0, 120)}... Leggi l'esperienza completa su StoMale.info.`;
+  } else {
+    // Fallback to generic description
+    metaDescription = getReviewMetaDescription(review.PATOLOGIE.Patologia, review.title);
+  }
+
   const pageTitle = `${review.PATOLOGIE.Patologia.toUpperCase()}: Recensione ed Esperienza | ${review.title} | StoMale.info`;
-  const metaDescription = getReviewMetaDescription(review.PATOLOGIE.Patologia, review.title);
   const canonicalUrl = `https://stomale.info/patologia/${decodedCondition.toLowerCase()}/esperienza/${review.id}-${encodeURIComponent(review.title.toLowerCase().replace(/\s+/g, '-'))}`;
 
   // Schema.org markup migliorato per recensioni mediche

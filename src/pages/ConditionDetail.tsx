@@ -53,8 +53,8 @@ export default function ConditionDetail() {
 
   return (
     <div className="container py-8">
-      {/* Add SEO component with prioritizeSeoTags to ensure these tags override any default ones */}
-      <ConditionSEO condition={condition} />
+      {/* Pass reviews to ConditionSEO to create better meta descriptions */}
+      <ConditionSEO condition={condition} reviews={reviews} />
       
       <ConditionSchema 
         condition={condition} 

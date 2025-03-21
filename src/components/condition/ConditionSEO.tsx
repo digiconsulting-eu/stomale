@@ -5,13 +5,34 @@ import { getConditionMetaDescription } from "@/utils/pageTitle";
 
 interface ConditionSEOProps {
   condition: string;
+  reviews?: any[];  // Optional reviews array to extract actual content for meta description
 }
 
-export const ConditionSEO = ({ condition }: ConditionSEOProps) => {
+export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
   const conditionTitle = capitalizeFirstLetter(condition);
   const formattedCondition = condition.toUpperCase();
   const pageTitle = `${formattedCondition} | Recensioni ed Esperienze | StoMale.info`;
-  const metaDescription = getConditionMetaDescription(condition);
+  
+  // Generate a more specific meta description if reviews are available
+  let metaDescription = "";
+  
+  if (reviews && reviews.length > 0) {
+    // Try to create a meta description from the first review's content
+    const firstReview = reviews[0];
+    if (firstReview.symptoms && firstReview.symptoms.length > 10) {
+      // Use symptoms from the first review as they're often more descriptive
+      metaDescription = `${formattedCondition}: ${firstReview.symptoms.substring(0, 150)}... Leggi esperienze e recensioni su StoMale.info.`;
+    } else if (firstReview.experience && firstReview.experience.length > 10) {
+      // Fall back to experience if symptoms aren't available
+      metaDescription = `${formattedCondition}: ${firstReview.experience.substring(0, 150)}... Leggi esperienze e recensioni su StoMale.info.`;
+    }
+  }
+  
+  // Fallback to generic description if no content could be extracted
+  if (!metaDescription) {
+    metaDescription = getConditionMetaDescription(condition);
+  }
+  
   const canonicalUrl = `https://stomale.info/patologia/${condition.toLowerCase()}`;
   
   // Create structured data for the condition
