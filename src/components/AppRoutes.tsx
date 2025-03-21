@@ -100,6 +100,11 @@ export const AppRoutes = () => {
         path="/news/nutella-e-colesterolo-sono-correlati" 
         element={<Navigate to="/patologia/colesterolo%20alto/esperienza/1004-nutella-e-colesterolo-sono-correlati?-la-nutella-fa-male-al-colesterolo?" replace />} 
       />
+      {/* Redirect for the specific incorrectly indexed allergia al nichel URL */}
+      <Route 
+        path="/patologia/allergia-al-nichel/esperienza/151-ho-appena-scoperto-di-essere-allergica-al-nichel" 
+        element={<Navigate to="/patologia/allergia%20al%20nichel/esperienza/155-non-posso-più-mangiare-tanti-alimenti-" replace />} 
+      />
       <Route path="/news/*" element={<Navigate to="/recensioni" replace />} />
     </Routes>
   );

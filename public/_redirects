@@ -10,5 +10,7 @@
 /patologia/:condition-* /patologia/:condition%20:splat 301
 # Reindirizzamento da vecchi articoli a nuove recensioni - specifico per Nutella
 /news/nutella-e-colesterolo-sono-correlati /patologia/colesterolo%20alto/esperienza/1004-nutella-e-colesterolo-sono-correlati?-la-nutella-fa-male-al-colesterolo? 301!
+# Reindirizzamento specifico per l'URL indicizzato ma errato di allergia al nichel
+/patologia/allergia-al-nichel/esperienza/151-ho-appena-scoperto-di-essere-allergica-al-nichel /patologia/allergia%20al%20nichel/esperienza/155-non-posso-più-mangiare-tanti-alimenti- 301!
 # Rotta catch-all che deve venire DOPO gli specifici reindirizzamenti
 /news/* /recensioni 301!
