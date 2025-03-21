@@ -18,13 +18,31 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
   
   if (reviews && reviews.length > 0) {
     // Try to create a meta description from the first review's content
-    const firstReview = reviews[0];
-    if (firstReview.symptoms && firstReview.symptoms.length > 10) {
-      // Use symptoms from the first review as they're often more descriptive
-      metaDescription = `${formattedCondition}: ${firstReview.symptoms.substring(0, 150)}... Leggi esperienze e recensioni su StoMale.info.`;
-    } else if (firstReview.experience && firstReview.experience.length > 10) {
-      // Fall back to experience if symptoms aren't available
-      metaDescription = `${formattedCondition}: ${firstReview.experience.substring(0, 150)}... Leggi esperienze e recensioni su StoMale.info.`;
+    // Check multiple reviews to find good content
+    for (let i = 0; i < Math.min(3, reviews.length); i++) {
+      const review = reviews[i];
+      
+      // Use symptoms from the review as they're often more descriptive
+      if (review.symptoms && review.symptoms.length > 30) {
+        metaDescription = `${formattedCondition}: ${review.symptoms.substring(0, 150).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
+        break;
+      } 
+      // Fall back to experience if symptoms aren't available or too short
+      else if (review.experience && review.experience.length > 40) {
+        metaDescription = `${formattedCondition}: ${review.experience.substring(0, 150).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
+        break;
+      }
+    }
+    
+    // If we still don't have a description and there are more reviews, try to combine a couple
+    if (!metaDescription && reviews.length >= 2) {
+      const symptomsTexts = reviews.slice(0, 3)
+        .filter(r => r.symptoms && r.symptoms.length > 20)
+        .map(r => r.symptoms.trim());
+      
+      if (symptomsTexts.length > 0) {
+        metaDescription = `${formattedCondition}: Sintomi comuni includono ${symptomsTexts[0].substring(0, 100).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
+      }
     }
   }
   

@@ -36,6 +36,17 @@ export default function ConditionDetail() {
     }
   }, [condition, pageTitle, metaDescription]);
 
+  // Log reviews content to help debug meta description generation
+  useEffect(() => {
+    if (reviews && reviews.length > 0) {
+      console.log(`Found ${reviews.length} reviews for condition '${condition}'`);
+      console.log('First review symptoms:', reviews[0].symptoms ? reviews[0].symptoms.substring(0, 50) + '...' : 'None');
+      console.log('First review experience:', reviews[0].experience ? reviews[0].experience.substring(0, 50) + '...' : 'None');
+    } else {
+      console.log(`No reviews found for condition '${condition}'`);
+    }
+  }, [reviews, condition]);
+
   const stats = calculateStats(reviews);
   const ratingValue = calculateRating(stats);
 
