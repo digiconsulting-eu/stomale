@@ -20,13 +20,19 @@ export default function ConditionDetail() {
   const { condition, patologiaData, reviews, isLoading } = useConditionData();
   
   const conditionTitle = condition ? capitalizeFirstLetter(condition) : '';
-  const pageTitle = `${condition?.toUpperCase()} | Recensioni ed Esperienze`;
+  const pageTitle = condition ? `${condition.toUpperCase()} | Recensioni ed Esperienze | StoMale.info` : '';
   const metaDescription = getConditionMetaDescription(condition || '');
 
   useEffect(() => {
     if (condition) {
-      setPageTitle(pageTitle);
-      setMetaDescription(metaDescription);
+      // Set the document title through useEffect for client-side rendering
+      document.title = pageTitle;
+      
+      // This helps when a page is loaded directly, not just for search engines
+      const metaDescriptionTag = document.querySelector('meta[name="description"]');
+      if (metaDescriptionTag) {
+        metaDescriptionTag.setAttribute('content', metaDescription);
+      }
     }
   }, [condition, pageTitle, metaDescription]);
 
@@ -41,18 +47,23 @@ export default function ConditionDetail() {
     navigate(`/nuova-recensione?patologia=${condition}`);
   };
 
+  if (!condition) {
+    return <div className="container py-8">Caricamento in corso...</div>;
+  }
+
   return (
     <div className="container py-8">
-      <ConditionSEO condition={condition || ''} />
+      {/* Add SEO component with prioritizeSeoTags to ensure these tags override any default ones */}
+      <ConditionSEO condition={condition} />
       
       <ConditionSchema 
-        condition={condition || ''} 
+        condition={condition} 
         reviews={reviews} 
         ratingValue={ratingValue} 
       />
       
       <ConditionHeader 
-        condition={condition || ''} 
+        condition={condition} 
         conditionId={patologiaData?.id || 0}
       />
 
@@ -63,13 +74,13 @@ export default function ConditionDetail() {
 
         <div className="md:col-span-8">
           <ConditionActions
-            condition={condition || ''}
+            condition={condition}
             onNavigate={handleNavigate}
             onNewReview={handleNewReview}
           />
 
           <ConditionContent 
-            condition={condition || ''} 
+            condition={condition} 
             isAdmin={isAdmin}
             reviewsCount={reviews?.length || 0}
             reviews={reviews}
@@ -79,7 +90,7 @@ export default function ConditionDetail() {
       </div>
 
       <div className="mt-8">
-        <Disclaimer condition={capitalizeFirstLetter(condition || '')} />
+        <Disclaimer condition={capitalizeFirstLetter(condition)} />
       </div>
     </div>
   );

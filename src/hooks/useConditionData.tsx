@@ -11,15 +11,22 @@ export const useConditionData = () => {
   const { data: patologiaData } = useQuery({
     queryKey: ["patologia", condition],
     queryFn: async () => {
+      if (!condition) return null;
+      
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('id, Patologia')
-        .eq('Patologia', condition?.toUpperCase())
+        .eq('Patologia', condition.toUpperCase())
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching condition data:', error);
+        throw error;
+      }
+      
       return data;
-    }
+    },
+    enabled: !!condition
   });
 
   // Fetch reviews for the condition

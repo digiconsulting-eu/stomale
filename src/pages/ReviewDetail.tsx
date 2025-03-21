@@ -1,11 +1,12 @@
 
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { ReviewContent } from "@/components/review/ReviewContent";
 import { ReviewLoader } from "@/components/review/ReviewLoader";
 import { ReviewError } from "@/components/review/ReviewError";
 import { useReviewQuery } from "@/hooks/useReviewQuery";
-import { setPageTitle, setMetaDescription, getReviewMetaDescription } from "@/utils/pageTitle";
+import { getReviewMetaDescription } from "@/utils/pageTitle";
 
 const ReviewDetail = () => {
   const { condition, slug } = useParams();
@@ -31,10 +32,9 @@ const ReviewDetail = () => {
 
   useEffect(() => {
     if (review?.title && review?.PATOLOGIE?.Patologia) {
-      // Titolo ottimizzato con patologia in evidenza e keywords
+      // Update document title for client-side rendering
       const formattedCondition = review.PATOLOGIE.Patologia.toUpperCase();
-      setPageTitle(`${formattedCondition}: Recensione ed Esperienza | ${review.title} | StoMale.info`);
-      setMetaDescription(getReviewMetaDescription(review.PATOLOGIE.Patologia, review.title));
+      document.title = `${formattedCondition}: Recensione ed Esperienza | ${review.title} | StoMale.info`;
     }
   }, [review?.title, review?.PATOLOGIE?.Patologia]);
 
@@ -50,6 +50,10 @@ const ReviewDetail = () => {
   if (!review) {
     return <ReviewError message="La recensione richiesta non è stata trovata." />;
   }
+
+  const pageTitle = `${review.PATOLOGIE.Patologia.toUpperCase()}: Recensione ed Esperienza | ${review.title} | StoMale.info`;
+  const metaDescription = getReviewMetaDescription(review.PATOLOGIE.Patologia, review.title);
+  const canonicalUrl = `https://stomale.info/patologia/${decodedCondition.toLowerCase()}/esperienza/${review.id}-${encodeURIComponent(review.title.toLowerCase().replace(/\s+/g, '-'))}`;
 
   // Schema.org markup migliorato per recensioni mediche
   const jsonLdReview = {
@@ -98,13 +102,37 @@ const ReviewDetail = () => {
         "@type": "ListItem",
         "position": 3,
         "name": review.title,
-        "item": window.location.href
+        "item": canonicalUrl
       }
     ]
   };
 
   return (
     <>
+      {/* Use Helmet with prioritizeSeoTags for better SEO control */}
+      <Helmet prioritizeSeoTags>
+        <title>{pageTitle}</title>
+        <meta name="description" content={metaDescription} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content="https://stomale.info/og-image.svg" />
+        <meta property="og:site_name" content="StoMale.info" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={canonicalUrl} />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content="https://stomale.info/og-image.svg" />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={canonicalUrl} />
+      </Helmet>
+      
       {/* Schema.org markup multiplo */}
       <script 
         type="application/ld+json"
