@@ -109,8 +109,8 @@ const ReviewDetail = () => {
 
   return (
     <>
-      {/* Use Helmet with prioritizeSeoTags for better SEO control */}
-      <Helmet prioritizeSeoTags>
+      {/* Use Helmet for SEO control */}
+      <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={metaDescription} />
         

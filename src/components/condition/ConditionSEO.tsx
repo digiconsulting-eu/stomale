@@ -28,7 +28,7 @@ export const ConditionSEO = ({ condition }: ConditionSEOProps) => {
   };
   
   return (
-    <Helmet prioritizeSeoTags>
+    <Helmet>
       <title>{pageTitle}</title>
       <meta name="description" content={metaDescription} />
       
