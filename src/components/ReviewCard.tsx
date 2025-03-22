@@ -53,11 +53,10 @@ export const ReviewCard = ({
   const reviewPath = generateReviewPath(safeCondition.toLowerCase(), id, title);
 
   return (
-    <Card className="w-full bg-white rounded-3xl border border-[#1EAEDB] shadow-sm overflow-visible h-full flex flex-col" 
-          itemScope itemType="https://schema.org/Review">
+    <Card className="w-full bg-white rounded-3xl border border-[#1EAEDB] shadow-sm overflow-visible h-full flex flex-col">
       <div className="p-6 flex flex-col h-full">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary" itemProp="name">
+          <h3 className="text-xl font-semibold text-[#2C3E50] hover:text-primary">
             <Link to={reviewPath}>{title}</Link>
           </h3>
           {onDelete && (
@@ -72,21 +71,16 @@ export const ReviewCard = ({
             </Button>
           )}
         </div>
-        <p className="text-sm text-gray-500 mb-2" itemProp="author" itemScope itemType="https://schema.org/Person">
-          <span itemProp="name">{safeUsername}</span>
+        <p className="text-sm text-gray-500 mb-2">
+          <span>{safeUsername}</span>
         </p>
         <Link 
           to={`/patologia/${safeCondition.toLowerCase()}`}
           className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
-          itemProp="about"
-          itemScope
-          itemType="https://schema.org/MedicalCondition"
         >
-          <span itemProp="name">{safeCondition.toUpperCase()}</span>
+          <span>{safeCondition.toUpperCase()}</span>
         </Link>
-        <p className="text-gray-600 line-clamp-3 mb-4 break-words flex-grow" itemProp="reviewBody">{safePreview}</p>
-        
-        <meta itemProp="datePublished" content={new Date(date).toISOString()} />
+        <p className="text-gray-600 line-clamp-3 mb-4 break-words flex-grow">{safePreview}</p>
         
         {/* Likes and Comments counts */}
         <div className="flex items-center gap-6 mb-4 text-gray-500">

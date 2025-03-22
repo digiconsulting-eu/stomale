@@ -2,10 +2,11 @@
 import { Helmet } from "react-helmet";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { getConditionMetaDescription } from "@/utils/pageTitle";
+import { Review } from "@/types/review";
 
 interface ConditionSEOProps {
   condition: string;
-  reviews?: any[];  // Optional reviews array to extract actual content for meta description
+  reviews?: Review[];  // Optional reviews array to extract actual content for meta description
 }
 
 export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
@@ -67,17 +68,25 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
   const canonicalUrl = `https://stomale.info/patologia/${condition.toLowerCase()}`;
   const ogImageUrl = "https://stomale.info/og-image.svg"; // Explicitly provide og:image URL
   
-  // Create structured data for the condition
+  // Create structured data for the condition - Using WebPage instead of MedicalCondition + review
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "MedicalCondition",
+    "@type": "WebPage",
     "name": conditionTitle,
-    "alternateName": formattedCondition,
+    "description": metaDescription,
     "url": canonicalUrl,
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": canonicalUrl
-    }
+    "primaryImageOfPage": {
+      "@type": "ImageObject",
+      "url": ogImageUrl
+    },
+    // Add a standard AggregateRating if reviews exist
+    ...(reviews && reviews.length > 0 ? {
+      "mainEntity": {
+        "@type": "MedicalCondition",
+        "name": conditionTitle,
+        "alternateName": formattedCondition
+      }
+    } : {})
   };
   
   return (

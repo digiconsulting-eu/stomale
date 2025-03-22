@@ -9,25 +9,46 @@ interface ConditionSchemaProps {
 }
 
 export const ConditionSchema = ({ condition, reviews, ratingValue }: ConditionSchemaProps) => {
+  // Create proper schema for condition page
+  const conditionSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": capitalizeFirstLetter(condition),
+    "description": `Informazioni, esperienze e recensioni su ${condition.toUpperCase()} condivise da pazienti.`,
+    "mainEntity": {
+      "@type": "MedicalCondition",
+      "name": capitalizeFirstLetter(condition),
+      "alternateName": condition.toUpperCase()
+    }
+  };
+
+  // Create separate schema for aggregate rating if there are reviews
+  const aggregateRatingSchema = reviews.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": `Esperienze con ${capitalizeFirstLetter(condition)}`,
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": ratingValue.toFixed(1),
+      "bestRating": "5",
+      "worstRating": "1",
+      "ratingCount": reviews.length,
+      "reviewCount": reviews.length
+    }
+  } : null;
+
   return (
-    <div 
-      itemScope 
-      itemType="https://schema.org/MedicalCondition"
-      className="hidden"
-    >
-      <meta itemProp="name" content={capitalizeFirstLetter(condition)} />
-      <meta itemProp="alternateName" content={condition.toUpperCase()} />
-      
-      {/* Aggregated Rating schema */}
+    <>
+      <script 
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(conditionSchema) }}
+      />
       {reviews.length > 0 && (
-        <div itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
-          <meta itemProp="ratingValue" content={ratingValue.toFixed(1)} />
-          <meta itemProp="bestRating" content="5" />
-          <meta itemProp="worstRating" content="1" />
-          <meta itemProp="ratingCount" content={String(reviews.length)} />
-          <meta itemProp="reviewCount" content={String(reviews.length)} />
-        </div>
+        <script 
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(aggregateRatingSchema) }}
+        />
       )}
-    </div>
+    </>
   );
 };

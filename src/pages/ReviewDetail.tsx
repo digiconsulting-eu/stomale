@@ -84,15 +84,15 @@ const ReviewDetail = () => {
   const canonicalUrl = `https://stomale.info/patologia/${decodedCondition.toLowerCase()}/esperienza/${review.id}-${encodeURIComponent(review.title.toLowerCase().replace(/\s+/g, '-'))}`;
   const ogImageUrl = "https://stomale.info/og-image.svg"; // Explicitly provide og:image URL
 
-  // Schema.org markup migliorato per recensioni mediche
-  const jsonLdReview = {
+  // Fix the schema.org markup for reviews - correct type for author and proper itemReviewed
+  const reviewSchema = {
     "@context": "https://schema.org",
     "@type": "Review",
     "reviewRating": {
       "@type": "Rating",
       "ratingValue": Math.round((5 - review.diagnosis_difficulty + 5 - review.symptoms_severity + 
-                                (review.has_medication ? review.medication_effectiveness : 3) + 
-                                review.healing_possibility + (5 - review.social_discomfort)) / 5),
+                              (review.has_medication ? review.medication_effectiveness : 3) + 
+                              review.healing_possibility + (5 - review.social_discomfort)) / 5),
       "bestRating": "5",
       "worstRating": "1"
     },
@@ -105,13 +105,12 @@ const ReviewDetail = () => {
     "reviewBody": review.experience,
     "itemReviewed": {
       "@type": "MedicalCondition",
-      "name": review.PATOLOGIE?.Patologia,
-      "description": review.symptoms
+      "name": review.PATOLOGIE?.Patologia
     }
   };
 
-  // Breadcrumb schema per migliorare l'indicizzazione
-  const jsonLdBreadcrumb = {
+  // Breadcrumb schema for improving indexing
+  const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
@@ -134,6 +133,21 @@ const ReviewDetail = () => {
         "item": canonicalUrl
       }
     ]
+  };
+  
+  // Separate WebPage schema since the review shouldn't be directly on the WebPage
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": pageTitle,
+    "description": metaDescription,
+    "url": canonicalUrl,
+    "primaryImageOfPage": {
+      "@type": "ImageObject",
+      "url": ogImageUrl,
+      "width": "1200",
+      "height": "630"
+    }
   };
 
   return (
@@ -162,17 +176,18 @@ const ReviewDetail = () => {
         
         {/* Canonical URL */}
         <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Schema.org markup */}
+        <script type="application/ld+json">
+          {JSON.stringify(webPageSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(reviewSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
       </Helmet>
-      
-      {/* Schema.org markup */}
-      <script 
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdReview) }}
-      />
-      <script 
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumb) }}
-      />
       
       <ReviewContent
         username={review.username}

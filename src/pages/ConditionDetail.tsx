@@ -40,7 +40,12 @@ export default function ConditionDetail() {
   useEffect(() => {
     if (reviews && reviews.length > 0) {
       console.log(`Found ${reviews.length} reviews for condition '${condition}'`);
-      console.log('First review symptoms:', reviews[0].symptoms ? reviews[0].symptoms.substring(0, 50) + '...' : 'None');
+      // These logs might cause TypeScript errors if symptoms property isn't in the Review interface
+      if (reviews[0].symptoms) {
+        console.log('First review symptoms:', reviews[0].symptoms.substring(0, 50) + '...');
+      } else {
+        console.log('No symptoms found in the first review');
+      }
       console.log('First review experience:', reviews[0].experience ? reviews[0].experience.substring(0, 50) + '...' : 'None');
     } else {
       console.log(`No reviews found for condition '${condition}'`);
