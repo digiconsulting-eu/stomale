@@ -79,7 +79,7 @@ export default function ConditionDetail() {
       
       <ConditionHeader 
         condition={condition} 
-        conditionId={patologiaData?.id || a0} 
+        conditionId={patologiaData?.id || 0} 
       />
 
       <div className="grid md:grid-cols-12 gap-6">

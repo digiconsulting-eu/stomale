@@ -28,7 +28,7 @@ export interface Review {
   id: number;
   title: string;
   condition: string;
-  symptoms: string; // Adding this property to match usage in the code
+  symptoms: string;
   experience: string;
   diagnosis_difficulty?: number;
   symptoms_severity?: number;
@@ -44,4 +44,5 @@ export interface Review {
     id: number;
     Patologia: string;
   };
+  rating?: number; // Added this property to fix the error
 }
