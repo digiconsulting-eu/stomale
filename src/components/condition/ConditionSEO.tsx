@@ -43,12 +43,12 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
     if (!metaDescription && reviews.length >= 2) {
       console.log('Attempting to combine content from multiple reviews');
       
-      const symptomsTexts = reviews.slice(0, 3)
-        .filter(r => r.symptoms && r.symptoms.length > 30)
-        .map(r => r.symptoms.trim());
+      const experienceTexts = reviews.slice(0, 3)
+        .filter(r => r.experience && r.experience.length > 30)
+        .map(r => r.experience.trim());
       
-      if (symptomsTexts.length > 0) {
-        metaDescription = `${formattedCondition}: Sintomi comuni includono ${symptomsTexts[0].substring(0, 120).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
+      if (experienceTexts.length > 0) {
+        metaDescription = `${formattedCondition}: ${experienceTexts[0].substring(0, 120).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
         console.log(`Created combined meta description: ${metaDescription.substring(0, 50)}...`);
       }
     }
@@ -67,27 +67,6 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
   
   const canonicalUrl = `https://stomale.info/patologia/${condition.toLowerCase()}`;
   const ogImageUrl = "https://stomale.info/og-image.svg"; // Explicitly provide og:image URL
-  
-  // Create structured data for the condition - Using WebPage instead of MedicalCondition + review
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": conditionTitle,
-    "description": metaDescription,
-    "url": canonicalUrl,
-    "primaryImageOfPage": {
-      "@type": "ImageObject",
-      "url": ogImageUrl
-    },
-    // Add a standard AggregateRating if reviews exist
-    ...(reviews && reviews.length > 0 ? {
-      "mainEntity": {
-        "@type": "MedicalCondition",
-        "name": conditionTitle,
-        "alternateName": formattedCondition
-      }
-    } : {})
-  };
   
   return (
     <Helmet>
@@ -114,10 +93,8 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
       {/* Canonical URL */}
       <link rel="canonical" href={canonicalUrl} />
       
-      {/* Structured data */}
-      <script type="application/ld+json">
-        {JSON.stringify(structuredData)}
-      </script>
+      {/* Add additional meta tags for health-related content */}
+      <meta name="keywords" content={`${condition}, sintomi ${condition}, cure ${condition}, malattia, patologia, recensioni ${condition}, esperienze pazienti, testimonianze ${condition}`} />
     </Helmet>
   );
 };

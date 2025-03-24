@@ -19,10 +19,10 @@ export const getSearchMetaDescription = () => {
 };
 
 export const getReviewMetaDescription = (condition: string, title: string) => {
-  // Migliorata con CTA, parole chiave rilevanti e lunghezza ottimale
+  // Improved with CTA, relevant keywords, and optimal length
   return `Testimonianza: "${title}" sul vivere con ${condition}. Scopri sintomi reali, difficoltà diagnostiche e trattamenti efficaci raccontati da chi affronta questa condizione ogni giorno. Leggi ora.`;
 };
 
 export const getConditionMetaDescription = (condition: string) => {
-  return `Scopri esperienze, sintomi e trattamenti per ${condition} su StoMale.info. Leggi recensioni e testimonianze di chi convive con questa patologia.`;
+  return `Scopri esperienze, sintomi, cure e trattamenti per ${condition.toUpperCase()} su StoMale.info. Leggi recensioni e testimonianze di chi convive con questa patologia e condividi la tua esperienza.`;
 };
