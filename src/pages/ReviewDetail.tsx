@@ -33,7 +33,7 @@ const ReviewDetail = () => {
       <ReviewContent
         username={review.username}
         title={review.title}
-        condition={review.PATOLOGIE?.Patologia?.toLowerCase()}
+        condition={review.condition}
         symptoms={review.symptoms || ''}
         experience={review.experience || ''}
         diagnosisDifficulty={review.diagnosis_difficulty}
