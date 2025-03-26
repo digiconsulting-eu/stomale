@@ -58,9 +58,9 @@ export const useReviewData = () => {
 
   useEffect(() => {
     if (review?.title && review?.PATOLOGIE?.Patologia) {
-      // Update document title for client-side rendering, mettendo in risalto il titolo dell'esperienza
+      // Update document title for client-side rendering
       const formattedCondition = review.PATOLOGIE.Patologia.toUpperCase();
-      document.title = `${review.title} | Esperienza su ${formattedCondition} | StoMale.info`;
+      document.title = `Esperienza su ${formattedCondition} | ${review.title} | StoMale.info`;
     }
   }, [review?.title, review?.PATOLOGIE?.Patologia]);
 
@@ -72,7 +72,7 @@ export const useReviewData = () => {
       review.id, 
       review.title
     ),
-    pageTitle: `${review.title} | Esperienza su ${review.PATOLOGIE.Patologia.toUpperCase()} | StoMale.info`
+    pageTitle: `Esperienza su ${review.PATOLOGIE.Patologia.toUpperCase()} | ${review.title} | StoMale.info`
   } : null;
 
   return {
