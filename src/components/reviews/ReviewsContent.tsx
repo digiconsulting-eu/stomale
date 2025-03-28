@@ -27,8 +27,8 @@ export const ReviewsContent = ({
   const transformedReviews: Review[] = reviews.map(review => ({
     id: review.id,
     title: review.title,
-    condition: review.PATOLOGIE?.Patologia.toLowerCase() || '',
-    symptoms: review.symptoms || '', // Include symptoms in the transformation
+    condition: review.PATOLOGIE?.Patologia?.toLowerCase() || '',
+    symptoms: review.symptoms || '',
     experience: review.experience,
     diagnosis_difficulty: review.diagnosis_difficulty,
     symptoms_severity: review.symptoms_severity,
@@ -38,6 +38,8 @@ export const ReviewsContent = ({
     social_discomfort: review.social_discomfort,
     username: review.username || 'Anonimo',
     created_at: review.created_at,
+    likes_count: review.likes_count || 0,
+    comments_count: review.comments_count || 0,
     PATOLOGIE: review.PATOLOGIE
   }));
 
