@@ -24,6 +24,9 @@ export const useConditions = ({
       console.log('Fetching conditions with pagination:', { page, limit, offset, searchTerm, letter });
       
       try {
+        // Clear any stale Supabase client state
+        await supabase.auth.refreshSession();
+        
         let query = supabase
           .from('PATOLOGIE')
           .select('id, Patologia', { count: 'exact' });
@@ -64,7 +67,7 @@ export const useConditions = ({
         throw error;
       }
     },
-    staleTime: 1000 * 60, // Cache for 1 minute
+    staleTime: 0, // Disabilitiamo la cache per ottenere sempre dati freschi
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Cap retry delay at 30 seconds
     refetchOnWindowFocus: false,

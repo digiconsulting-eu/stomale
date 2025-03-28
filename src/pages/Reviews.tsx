@@ -99,7 +99,8 @@ const Reviews = () => {
           ...review,
           username: review.username || 'Anonimo',
           // Ensure comments_count is always a number
-          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0
+          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
+          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0
         })) as DatabaseReview[];
 
         console.log('Transformed reviews:', transformedReviews);
@@ -156,6 +157,12 @@ const Reviews = () => {
         <div className="text-center text-gray-600">
           <p className="text-lg mb-4">Non ci sono ancora recensioni disponibili.</p>
           <p>Sii il primo a condividere la tua esperienza!</p>
+          <button 
+            onClick={() => refetch()} 
+            className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+          >
+            Riprova
+          </button>
         </div>
       </div>
     );
