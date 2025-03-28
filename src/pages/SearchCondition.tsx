@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle, setMetaDescription, getSearchMetaDescription } from "@/utils/pageTitle";
@@ -24,7 +25,8 @@ export default function SearchCondition() {
   const { 
     data,
     isLoading,
-    error 
+    error,
+    refetch
   } = useConditions({
     page: currentPage,
     limit: ITEMS_PER_PAGE,
@@ -35,7 +37,10 @@ export default function SearchCondition() {
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Cerca Patologia"));
     setMetaDescription(getSearchMetaDescription());
-  }, []);
+    
+    // Fetch conditions on mount
+    refetch();
+  }, [refetch]);
 
   useEffect(() => {
     if (error) {
@@ -124,4 +129,4 @@ export default function SearchCondition() {
       )}
     </div>
   );
-}
+};

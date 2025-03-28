@@ -51,7 +51,7 @@ export const useConditions = ({
         }
 
         console.log('Total conditions count:', count);
-        console.log('First few items:', data?.slice(0, 3));
+        console.log('Fetched conditions:', data);
 
         return {
           conditions: data || [],
