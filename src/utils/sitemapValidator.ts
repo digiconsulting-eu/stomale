@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 interface SitemapFile {
@@ -48,8 +47,13 @@ export const validateReviewUrl = async (url: string): Promise<boolean> => {
   
   const { data, error } = await supabase
     .from('reviews')
-    .select('id, PATOLOGIE!inner(Patologia)')
-    .eq('id', reviewId)
+    .select(`
+      id, 
+      PATOLOGIE!inner(
+        Patologia
+      )
+    `)
+    .eq('id', parseInt(reviewId, 10))
     .single();
 
   if (error || !data) {
