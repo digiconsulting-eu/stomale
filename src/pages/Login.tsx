@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoginForm, type LoginFormValues } from "@/components/auth/LoginForm";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
+import { loginWithEmailPassword, checkIsAdmin } from "@/utils/auth";
 
 export default function Login() {
   useEffect(() => {
@@ -24,53 +25,23 @@ export default function Login() {
     setIsLoading(true);
     console.log("Starting login process for:", data.email);
     
-    // Create an AbortController to handle timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-      setIsLoading(false);
-      toast.error("La richiesta è scaduta", {
-        description: "Si è verificato un problema durante l'accesso. Riprova più tardi."
-      });
-    }, 10000); // Reduced to 10 seconds for faster feedback
-    
     try {
-      // First attempt to sign in
-      console.log("Attempting login for:", data.email);
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
-
-      // Clear timeout since we got a response
-      clearTimeout(timeoutId);
+      // Use the improved login function
+      const { data: authData, error: signInError } = await loginWithEmailPassword(data.email, data.password);
 
       if (signInError) {
-        console.error("Login error:", signInError);
         throw signInError;
       }
 
-      if (!authData.user) {
-        console.error("No user data received after successful login");
+      if (!authData?.user) {
         throw new Error("Non è stato possibile recuperare i dati utente");
       }
 
       console.log("User authenticated successfully:", authData.user.email);
 
-      // Check if user is admin after successful login
-      let isAdmin = false;
-      try {
-        const { data: adminData } = await supabase
-          .from('admin')
-          .select('email')
-          .eq('email', data.email);
-        
-        isAdmin = Array.isArray(adminData) && adminData.length > 0;
-        console.log("Admin check result:", { isAdmin, adminData });
-      } catch (adminError) {
-        console.error("Error checking admin status:", adminError);
-        // Continue with non-admin login if admin check fails
-      }
+      // Check if user is admin
+      const isAdmin = await checkIsAdmin(data.email);
+      console.log("Admin check result:", { isAdmin });
       
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
@@ -79,11 +50,10 @@ export default function Login() {
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
 
-      // Redirect to dashboard instead of home
+      // Redirect to dashboard
       navigate('/dashboard');
       
     } catch (error: any) {
-      clearTimeout(timeoutId);
       console.error('Error during login process:', error);
       
       if (error.message?.includes('Invalid login credentials')) {
@@ -93,10 +63,6 @@ export default function Login() {
       } else if (error.message?.includes('Email not confirmed')) {
         toast.error("Email non confermata", {
           description: "Per favore controlla la tua casella email e clicca sul link di conferma"
-        });
-      } else if (error.name === 'AbortError') {
-        toast.error("Richiesta interrotta", {
-          description: "La connessione ha impiegato troppo tempo. Controlla la tua connessione e riprova."
         });
       } else {
         toast.error("Errore durante il login", {
