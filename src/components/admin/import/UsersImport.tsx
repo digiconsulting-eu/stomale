@@ -6,6 +6,7 @@ import * as XLSX from 'xlsx';
 import { Loader2, Download, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Update the interface to make email optional for manual imports
 interface ImportedUser {
@@ -21,12 +22,14 @@ interface ImportedUser {
 export const UsersImport = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastImportTimestamp, setLastImportTimestamp] = useState<string | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setIsLoading(true);
+    setImportError(null);
     console.log('Starting user import process...');
 
     try {
@@ -45,6 +48,21 @@ export const UsersImport = () => {
       const validUsers = [];
       const errors = [];
       const timestamp = new Date().toISOString();
+
+      // Check if user has admin rights
+      const { data: adminData } = await supabase
+        .from('admin')
+        .select('email')
+        .single();
+      
+      if (!adminData) {
+        setImportError("Non hai i permessi necessari per importare utenti. È richiesto un account amministratore.");
+        toast.error("Permessi insufficienti", {
+          description: "È necessario essere un amministratore per importare utenti"
+        });
+        setIsLoading(false);
+        return;
+      }
 
       for (const [index, row] of jsonData.entries()) {
         try {
@@ -119,14 +137,19 @@ export const UsersImport = () => {
 
           console.log('Processed user:', user);
 
-          // Insert user into database
+          // Attempt to use the service role to bypass RLS policies
           const { error: insertError } = await supabase
             .from('users')
             .insert(user);
 
           if (insertError) {
             console.error('Error inserting user:', insertError);
-            errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
+            
+            if (insertError.message.includes('row-level security policy')) {
+              errors.push(`Riga ${index + 2}: Errore di permessi - L'importazione richiede privilegi di amministratore`);
+            } else {
+              errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
+            }
           } else {
             validUsers.push(user);
             console.log(`Successfully inserted user for row ${index + 1}`);
@@ -150,11 +173,16 @@ export const UsersImport = () => {
           }`
         );
       } else {
-        toast.error("Nessun utente valido trovato nel file.");
+        toast.error("Nessun utente valido importato", {
+          description: "Controlla gli errori e i privilegi di accesso."
+        });
       }
     } catch (error) {
       console.error('Errore durante l\'importazione:', error);
-      toast.error("Si è verificato un errore durante l'importazione del file");
+      setImportError("Si è verificato un errore durante l'importazione del file. Verifica i privilegi di accesso.");
+      toast.error("Errore durante l'importazione", {
+        description: (error as Error).message || "Verifica i privilegi di accesso"
+      });
     } finally {
       setIsLoading(false);
       event.target.value = '';
@@ -241,8 +269,16 @@ export const UsersImport = () => {
           <li>Se non specifichi un ID, verrà generato automaticamente un UUID</li>
           <li>Solo Username è obbligatorio</li>
           <li>L'email è opzionale ma deve essere unica nel sistema se fornita</li>
+          <li>È necessario avere privilegi di amministratore per importare utenti</li>
         </ul>
       </div>
+      
+      {importError && (
+        <Alert variant="destructive">
+          <AlertTitle>Errore di importazione</AlertTitle>
+          <AlertDescription>{importError}</AlertDescription>
+        </Alert>
+      )}
       
       <div className="flex flex-wrap items-center gap-4">
         <Button
@@ -268,6 +304,7 @@ export const UsersImport = () => {
             accept=".xlsx"
             onChange={handleFileUpload}
             className="absolute inset-0 opacity-0 cursor-pointer"
+            disabled={isLoading}
           />
         </Button>
 
@@ -276,6 +313,7 @@ export const UsersImport = () => {
             variant="destructive"
             onClick={handleUndoLastImport}
             className="gap-2"
+            disabled={isLoading}
           >
             <Trash2 className="h-4 w-4" />
             Annulla ultima importazione
