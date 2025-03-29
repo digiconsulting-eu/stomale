@@ -7,8 +7,9 @@ import { Loader2, Download, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 
+// Update the interface to make it clear which fields are required by Supabase
 interface ImportedUser {
-  id?: string;
+  id: string; // Making id required to match Supabase schema
   username: string;
   email: string;
   birth_year?: string;
@@ -101,8 +102,9 @@ export const UsersImport = () => {
             createdAt = new Date().toISOString();
           }
 
+          // Ensure all required fields are present and have the correct types
           const user: ImportedUser = {
-            id: userId,
+            id: userId.toString(), // Ensure id is a string and is always present
             username: username,
             email: email,
             birth_year: birthYear,
