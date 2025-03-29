@@ -7,11 +7,11 @@ import { Loader2, Download, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 
-// Update the interface to make it clear which fields are required by Supabase
+// Update the interface to make email optional for manual imports
 interface ImportedUser {
-  id: string; // Making id required to match Supabase schema
-  username: string;
-  email: string;
+  id: string; // ID is required
+  username: string; // Username is still required
+  email?: string; // Make email optional
   birth_year?: string;
   gender?: string;
   created_at?: string;
@@ -54,26 +54,28 @@ export const UsersImport = () => {
           const email = row['email'] || row['Email'];
           const username = row['username'] || row['Username'];
           
-          if (!email || !username) {
-            errors.push(`Riga ${index + 2}: Email e Username sono campi obbligatori`);
+          if (!username) {
+            errors.push(`Riga ${index + 2}: Username è un campo obbligatorio`);
             continue;
           }
 
-          // Controlla se l'email è già in uso
-          const { data: existingUsers, error: searchError } = await supabase
-            .from('users')
-            .select('email')
-            .eq('email', email);
+          // Controlla se l'email è già in uso, solo se un'email è stata fornita
+          if (email) {
+            const { data: existingUsers, error: searchError } = await supabase
+              .from('users')
+              .select('email')
+              .eq('email', email);
 
-          if (searchError) {
-            console.error('Error searching for user:', searchError);
-            errors.push(`Riga ${index + 2}: Errore durante la verifica dell'email: ${searchError.message}`);
-            continue;
-          }
+            if (searchError) {
+              console.error('Error searching for user:', searchError);
+              errors.push(`Riga ${index + 2}: Errore durante la verifica dell'email: ${searchError.message}`);
+              continue;
+            }
 
-          if (existingUsers && existingUsers.length > 0) {
-            errors.push(`Riga ${index + 2}: L'email ${email} è già in uso`);
-            continue;
+            if (existingUsers && existingUsers.length > 0) {
+              errors.push(`Riga ${index + 2}: L'email ${email} è già in uso`);
+              continue;
+            }
           }
 
           // Crea un oggetto utente con ID generato automaticamente se non presente
@@ -102,16 +104,18 @@ export const UsersImport = () => {
             createdAt = new Date().toISOString();
           }
 
-          // Ensure all required fields are present and have the correct types
+          // Create user object with required fields and optional email
           const user: ImportedUser = {
             id: userId.toString(), // Ensure id is a string and is always present
             username: username,
-            email: email,
-            birth_year: birthYear,
-            gender: gender,
-            created_at: createdAt,
-            gdpr_consent: Boolean(gdprConsent)
+            created_at: createdAt
           };
+          
+          // Add optional fields only if they have values
+          if (email) user.email = email;
+          if (birthYear) user.birth_year = birthYear;
+          if (gender) user.gender = gender;
+          if (gdprConsent !== undefined) user.gdpr_consent = Boolean(gdprConsent);
 
           console.log('Processed user:', user);
 
@@ -194,8 +198,8 @@ export const UsersImport = () => {
     // Definizione dei dati di esempio
     const data = [
       {
-        "Username": "NuovoUtente",
-        "Email": "esempio@email.com",
+        "Username": "NuovoUtente", // Campo obbligatorio
+        "Email": "esempio@email.com", // Campo opzionale
         "Anno di Nascita": "1990",
         "Genere": "M",
         "Data Registrazione": new Date().toISOString().split('T')[0],
@@ -223,7 +227,7 @@ export const UsersImport = () => {
         </p>
         <ul className="list-disc pl-6 space-y-2 text-gray-600">
           <li><strong>Username</strong> (obbligatorio) - Nome utente</li>
-          <li><strong>Email</strong> (obbligatorio) - Email dell'utente</li>
+          <li><strong>Email</strong> (opzionale) - Email dell'utente</li>
           <li><strong>Anno di Nascita</strong> - Anno di nascita</li>
           <li><strong>Genere</strong> - Genere (es. M, F)</li>
           <li><strong>Data Registrazione</strong> - Data di registrazione (opzionale)</li>
@@ -235,8 +239,8 @@ export const UsersImport = () => {
         </p>
         <ul className="list-disc pl-6 space-y-2 text-gray-600">
           <li>Se non specifichi un ID, verrà generato automaticamente un UUID</li>
-          <li>L'email deve essere unica nel sistema</li>
-          <li>Username e Email sono campi obbligatori</li>
+          <li>Solo Username è obbligatorio</li>
+          <li>L'email è opzionale ma deve essere unica nel sistema se fornita</li>
         </ul>
       </div>
       
