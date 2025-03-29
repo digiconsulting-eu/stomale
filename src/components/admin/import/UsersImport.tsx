@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
@@ -7,6 +7,8 @@ import { Loader2, Download, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuthSession } from "@/hooks/useAuthSession";
+import { getAdminEmails } from "@/utils/auth";
 
 // Update the interface to make email optional for manual imports
 interface ImportedUser {
@@ -23,6 +25,18 @@ export const UsersImport = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastImportTimestamp, setLastImportTimestamp] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [adminEmails, setAdminEmails] = useState<string[]>([]);
+  const { data: session } = useAuthSession();
+  
+  // Fetch admin emails on component mount
+  useEffect(() => {
+    const loadAdminEmails = async () => {
+      const emails = await getAdminEmails();
+      setAdminEmails(emails);
+    };
+    
+    loadAdminEmails();
+  }, []);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -33,6 +47,18 @@ export const UsersImport = () => {
     console.log('Starting user import process...');
 
     try {
+      // Check if current user is admin
+      const userEmail = session?.user?.email;
+      
+      if (!userEmail || !adminEmails.includes(userEmail)) {
+        setImportError("Non hai i permessi necessari per importare utenti. È richiesto un account amministratore.");
+        toast.error("Permessi insufficienti", {
+          description: "È necessario essere un amministratore per importare utenti"
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -48,21 +74,6 @@ export const UsersImport = () => {
       const validUsers = [];
       const errors = [];
       const timestamp = new Date().toISOString();
-
-      // Check if user has admin rights
-      const { data: adminData } = await supabase
-        .from('admin')
-        .select('email')
-        .single();
-      
-      if (!adminData) {
-        setImportError("Non hai i permessi necessari per importare utenti. È richiesto un account amministratore.");
-        toast.error("Permessi insufficienti", {
-          description: "È necessario essere un amministratore per importare utenti"
-        });
-        setIsLoading(false);
-        return;
-      }
 
       for (const [index, row] of jsonData.entries()) {
         try {
@@ -137,7 +148,7 @@ export const UsersImport = () => {
 
           console.log('Processed user:', user);
 
-          // Attempt to use the service role to bypass RLS policies
+          // Try inserting directly first (for non-RLS protected tables)
           const { error: insertError } = await supabase
             .from('users')
             .insert(user);
@@ -145,15 +156,25 @@ export const UsersImport = () => {
           if (insertError) {
             console.error('Error inserting user:', insertError);
             
+            // Se è un errore di RLS, prova con una funzione REST personalizzata
             if (insertError.message.includes('row-level security policy')) {
-              errors.push(`Riga ${index + 2}: Errore di permessi - L'importazione richiede privilegi di amministratore`);
+              // Chiamata a una funzione che agisce come amministratore
+              const { error: adminInsertError } = await supabase.functions.invoke('admin-import-user', {
+                body: { user }
+              });
+              
+              if (adminInsertError) {
+                errors.push(`Riga ${index + 2}: Errore durante l'inserimento con privilegi elevati: ${adminInsertError.message || 'Errore sconosciuto'}`);
+                continue;
+              }
             } else {
               errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
+              continue;
             }
-          } else {
-            validUsers.push(user);
-            console.log(`Successfully inserted user for row ${index + 1}`);
           }
+          
+          validUsers.push(user);
+          console.log(`Successfully inserted user for row ${index + 1}`);
         } catch (error) {
           console.error(`Error processing row ${index + 1}:`, error);
           errors.push(`Riga ${index + 2}: ${(error as Error).message}`);

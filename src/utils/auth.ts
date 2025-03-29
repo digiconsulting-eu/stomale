@@ -55,3 +55,22 @@ export const checkIsAdmin = async (email: string) => {
     return false;
   }
 };
+
+// Get admin emails list for verification
+export const getAdminEmails = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('admin')
+      .select('email');
+      
+    if (error) {
+      console.error('Error fetching admin emails:', error);
+      return [];
+    }
+    
+    return data?.map(admin => admin.email) || [];
+  } catch (error) {
+    console.error('Error in admin emails fetch:', error);
+    return [];
+  }
+};
