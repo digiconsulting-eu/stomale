@@ -78,7 +78,7 @@ const UserManagement = () => {
     },
     refetchOnMount: 'always', // Always refetch on mount
     staleTime: 0, // Don't cache
-    cacheTime: 0, // Don't cache
+    gcTime: 0, // Changed from cacheTime to gcTime
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
