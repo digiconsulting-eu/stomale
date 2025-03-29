@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 interface ImportedUser {
   id: string; // ID is required
   username: string; // Username is still required
-  email?: string; // Make email optional
+  email?: string; // Email is optional
   birth_year?: string;
   gender?: string;
   created_at?: string;
@@ -50,7 +50,7 @@ export const UsersImport = () => {
         try {
           console.log(`Validating user row ${index + 1}:`, row);
           
-          // Estrai i dati dell'utente
+          // Extract user data
           const email = row['email'] || row['Email'];
           const username = row['username'] || row['Username'];
           
@@ -59,7 +59,7 @@ export const UsersImport = () => {
             continue;
           }
 
-          // Controlla se l'email è già in uso, solo se un'email è stata fornita
+          // Check if email is already in use, only if an email is provided
           if (email) {
             const { data: existingUsers, error: searchError } = await supabase
               .from('users')
@@ -78,19 +78,19 @@ export const UsersImport = () => {
             }
           }
 
-          // Crea un oggetto utente con ID generato automaticamente se non presente
+          // Create user object with automatically generated ID if not present
           const userId = row['id'] || row['ID'] || uuidv4();
           const birthYear = row['birth_year'] || row['Birth Year'] || row['Anno di Nascita'] || null;
           const gender = row['gender'] || row['Gender'] || row['Genere'] || null;
           const gdprConsent = row['gdpr_consent'] || row['GDPR Consent'] || true;
           
-          // Formatta la data
+          // Format date
           let createdAt;
           try {
             const dateInput = row['created_at'] || row['Created At'] || row['Data Registrazione'];
             if (dateInput) {
               if (typeof dateInput === 'number') {
-                // Gestisci date in formato Excel (giorni dal 1900-01-01)
+                // Handle Excel date format (days since 1900-01-01)
                 const excelEpoch = new Date(1899, 11, 30);
                 createdAt = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000).toISOString();
               } else {
@@ -119,7 +119,7 @@ export const UsersImport = () => {
 
           console.log('Processed user:', user);
 
-          // Inserisci l'utente nel database
+          // Insert user into database
           const { error: insertError } = await supabase
             .from('users')
             .insert(user);
@@ -168,9 +168,9 @@ export const UsersImport = () => {
     }
 
     try {
-      // Per annullare l'ultima importazione, dobbiamo trovare gli utenti con il
-      // timestamp specificato e rimuoverli manualmente, poiché non abbiamo un campo
-      // import_timestamp nella tabella users
+      // To undo the last import, we need to find users with the
+      // specified timestamp and remove them manually, since we don't have an
+      // import_timestamp field in the users table
       const { error } = await supabase
         .from('users')
         .delete()
@@ -192,29 +192,29 @@ export const UsersImport = () => {
   };
 
   const downloadTemplate = () => {
-    // Creazione di un nuovo foglio Excel
+    // Create a new Excel sheet
     const wb = XLSX.utils.book_new();
     
-    // Definizione dei dati di esempio
+    // Define example data
     const data = [
       {
-        "Username": "NuovoUtente", // Campo obbligatorio
-        "Email": "esempio@email.com", // Campo opzionale
+        "Username": "NuovoUtente", // Required field
+        "Email": "esempio@email.com", // Optional field
         "Anno di Nascita": "1990",
         "Genere": "M",
         "Data Registrazione": new Date().toISOString().split('T')[0],
         "GDPR Consent": true,
-        // ID è opzionale, verrà generato automaticamente se non presente
+        // ID is optional, will be generated automatically if not present
       }
     ];
     
-    // Conversione in foglio di lavoro
+    // Convert to worksheet
     const ws = XLSX.utils.json_to_sheet(data);
     
-    // Aggiunta del foglio al libro
+    // Add worksheet to workbook
     XLSX.utils.book_append_sheet(wb, ws, "Template Utenti");
     
-    // Download del file
+    // Download file
     XLSX.writeFile(wb, "template_utenti.xlsx");
   };
 
