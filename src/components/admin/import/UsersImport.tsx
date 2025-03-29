@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { getAdminEmails } from "@/utils/auth";
+import { Progress } from "@/components/ui/progress";
 
 // Update the interface to make email optional for manual imports
 interface ImportedUser {
@@ -26,6 +27,9 @@ export const UsersImport = () => {
   const [lastImportTimestamp, setLastImportTimestamp] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [adminEmails, setAdminEmails] = useState<string[]>([]);
+  const [importProgress, setImportProgress] = useState(0);
+  const [totalRows, setTotalRows] = useState(0);
+  const [processedRows, setProcessedRows] = useState(0);
   const { data: session } = useAuthSession();
   
   // Fetch admin emails on component mount
@@ -38,12 +42,19 @@ export const UsersImport = () => {
     loadAdminEmails();
   }, []);
 
+  const resetImportState = () => {
+    setImportError(null);
+    setImportProgress(0);
+    setTotalRows(0);
+    setProcessedRows(0);
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    resetImportState();
     setIsLoading(true);
-    setImportError(null);
     console.log('Starting user import process...');
 
     try {
@@ -74,9 +85,14 @@ export const UsersImport = () => {
       const validUsers = [];
       const errors = [];
       const timestamp = new Date().toISOString();
+      
+      setTotalRows(jsonData.length);
 
       for (const [index, row] of jsonData.entries()) {
         try {
+          setProcessedRows(index + 1);
+          setImportProgress(Math.round(((index + 1) / jsonData.length) * 100));
+          
           console.log(`Validating user row ${index + 1}:`, row);
           
           // Extract user data
@@ -136,45 +152,53 @@ export const UsersImport = () => {
           // Create user object with required fields and optional email
           const user: ImportedUser = {
             id: userId.toString(), // Ensure id is a string and is always present
-            username: username,
+            username: username.toString(),
             created_at: createdAt
           };
           
           // Add optional fields only if they have values
-          if (email) user.email = email;
-          if (birthYear) user.birth_year = birthYear;
-          if (gender) user.gender = gender;
+          if (email) user.email = email.toString();
+          if (birthYear) user.birth_year = birthYear.toString();
+          if (gender) user.gender = gender.toString();
           if (gdprConsent !== undefined) user.gdpr_consent = Boolean(gdprConsent);
 
           console.log('Processed user:', user);
 
-          // Try inserting directly first (for non-RLS protected tables)
-          const { error: insertError } = await supabase
-            .from('users')
-            .insert(user);
+          try {
+            // First try inserting directly (for non-RLS protected tables)
+            const { error: insertError } = await supabase
+              .from('users')
+              .insert(user);
 
-          if (insertError) {
-            console.error('Error inserting user:', insertError);
-            
-            // Se è un errore di RLS, prova con una funzione REST personalizzata
-            if (insertError.message.includes('row-level security policy')) {
-              // Chiamata a una funzione che agisce come amministratore
-              const { error: adminInsertError } = await supabase.functions.invoke('admin-import-user', {
-                body: { user }
-              });
+            if (insertError) {
+              console.error('Error inserting user directly:', insertError);
               
-              if (adminInsertError) {
-                errors.push(`Riga ${index + 2}: Errore durante l'inserimento con privilegi elevati: ${adminInsertError.message || 'Errore sconosciuto'}`);
+              // If it's an RLS error, try with the admin function
+              if (insertError.message.includes('row-level security policy')) {
+                console.log('Using admin function to bypass RLS...');
+                
+                // Call the admin import function
+                const { error: adminInsertError } = await supabase.functions.invoke('admin-import-user', {
+                  body: { user }
+                });
+                
+                if (adminInsertError) {
+                  console.error('Admin import error:', adminInsertError);
+                  errors.push(`Riga ${index + 2}: Errore durante l'inserimento con privilegi elevati: ${adminInsertError.message || 'Errore sconosciuto'}`);
+                  continue;
+                }
+              } else {
+                errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
                 continue;
               }
-            } else {
-              errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
-              continue;
             }
+            
+            validUsers.push(user);
+            console.log(`Successfully inserted user for row ${index + 1}`);
+          } catch (error) {
+            console.error(`Error during user insertion:`, error);
+            errors.push(`Riga ${index + 2}: ${(error as Error).message}`);
           }
-          
-          validUsers.push(user);
-          console.log(`Successfully inserted user for row ${index + 1}`);
         } catch (error) {
           console.error(`Error processing row ${index + 1}:`, error);
           errors.push(`Riga ${index + 2}: ${(error as Error).message}`);
@@ -182,8 +206,16 @@ export const UsersImport = () => {
       }
 
       if (errors.length > 0) {
-        console.error('Validation errors:', errors);
-        errors.forEach(error => toast.error(error));
+        console.error('Import errors:', errors);
+        if (errors.length <= 5) {
+          // Show individual errors if there are just a few
+          errors.forEach(error => toast.error(error));
+        } else {
+          // Show a summary if there are many errors
+          toast.error(`${errors.length} errori durante l'importazione`, {
+            description: "Controlla la console per i dettagli"
+          });
+        }
       }
 
       if (validUsers.length > 0) {
@@ -200,7 +232,7 @@ export const UsersImport = () => {
       }
     } catch (error) {
       console.error('Errore durante l\'importazione:', error);
-      setImportError("Si è verificato un errore durante l'importazione del file. Verifica i privilegi di accesso.");
+      setImportError(`Si è verificato un errore durante l'importazione del file: ${(error as Error).message}`);
       toast.error("Errore durante l'importazione", {
         description: (error as Error).message || "Verifica i privilegi di accesso"
       });
@@ -301,11 +333,22 @@ export const UsersImport = () => {
         </Alert>
       )}
       
+      {isLoading && totalRows > 0 && (
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-gray-500">
+            <span>Importazione in corso...</span>
+            <span>{processedRows} di {totalRows} righe ({importProgress}%)</span>
+          </div>
+          <Progress value={importProgress} className="h-2" />
+        </div>
+      )}
+      
       <div className="flex flex-wrap items-center gap-4">
         <Button
           onClick={downloadTemplate}
           variant="outline"
           className="flex items-center gap-2"
+          disabled={isLoading}
         >
           <Download className="h-4 w-4" />
           Scarica Template Excel
@@ -316,10 +359,10 @@ export const UsersImport = () => {
           className="relative"
           disabled={isLoading}
         >
-          {isLoading && (
+          {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          )}
-          Seleziona File Excel
+          ) : null}
+          {isLoading ? "Importazione in corso..." : "Seleziona File Excel"}
           <input
             type="file"
             accept=".xlsx"

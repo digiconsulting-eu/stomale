@@ -12,35 +12,64 @@ interface ImportedUser {
   gdpr_consent?: boolean;
 }
 
+// Define CORS headers for the function
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 serve(async (req) => {
+  // Handle CORS preflight request
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders
+    });
+  }
+  
   try {
-    // Ottieni le credenziali dal file ENV della funzione
+    // Get credentials from ENV file
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
-    // Assicurati che le credenziali siano disponibili
+    // Make sure credentials are available
     if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("Missing Supabase credentials");
       return new Response(
         JSON.stringify({ error: "Missing Supabase credentials" }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
       );
     }
 
-    // Crea un client Supabase con il role key che può bypassare RLS
+    // Create Supabase client with service role key to bypass RLS
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Ottieni i dati utente dal corpo della richiesta
+    // Get user data from request body
     const { user } = await req.json() as { user: ImportedUser };
 
-    // Verifica che i dati utente siano presenti
+    // Verify that user data is present
     if (!user || !user.id || !user.username) {
+      console.error("Missing required user data:", user);
       return new Response(
         JSON.stringify({ error: "Missing required user data" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
       );
     }
 
-    // Inserisci l'utente usando il service role
+    console.log("Attempting to insert user with service role:", {
+      id: user.id,
+      username: user.username,
+      hasEmail: !!user.email
+    });
+
+    // Insert user with service role
     const { data, error } = await supabase
       .from("users")
       .insert(user);
@@ -49,20 +78,30 @@ serve(async (req) => {
       console.error("Admin import error:", error);
       return new Response(
         JSON.stringify({ error: error.message }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
       );
     }
 
-    // Restituisci una risposta di successo
+    // Return success response
+    console.log("User imported successfully");
     return new Response(
       JSON.stringify({ success: true, message: "User imported successfully", data }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { 
+        status: 200, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
     );
   } catch (error) {
     console.error("Function error:", error.message);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
     );
   }
 });
