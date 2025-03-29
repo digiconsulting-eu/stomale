@@ -116,10 +116,7 @@ export const UsersImport = () => {
           // Inserisci l'utente nel database
           const { error: insertError } = await supabase
             .from('users')
-            .insert({
-              ...user,
-              import_timestamp: timestamp
-            });
+            .insert(user);
 
           if (insertError) {
             console.error('Error inserting user:', insertError);
@@ -165,10 +162,14 @@ export const UsersImport = () => {
     }
 
     try {
+      // Per annullare l'ultima importazione, dobbiamo trovare gli utenti con il
+      // timestamp specificato e rimuoverli manualmente, poiché non abbiamo un campo
+      // import_timestamp nella tabella users
       const { error } = await supabase
         .from('users')
         .delete()
-        .eq('import_timestamp', lastImportTimestamp);
+        .gt('created_at', lastImportTimestamp)
+        .lt('created_at', new Date(new Date(lastImportTimestamp).getTime() + 60000).toISOString());
 
       if (error) {
         console.error('Error undoing import:', error);
