@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { refreshSession } from "@/utils/auth";
 
 export const AuthStateHandler = () => {
   const queryClient = useQueryClient();
@@ -12,9 +13,12 @@ export const AuthStateHandler = () => {
   useEffect(() => {
     // Initialize auth state from session
     const initializeAuth = async () => {
+      // First check if we need to refresh the session
+      await refreshSession();
+      
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        console.log("Session found on page load:", session);
+        console.log("Session found on page load:", session.user.email);
         // Pre-fetch admin status if user is logged in
         try {
           const { data: adminData } = await supabase
@@ -63,6 +67,10 @@ export const AuthStateHandler = () => {
       } else if (event === 'SIGNED_OUT') {
         queryClient.clear();
         navigate('/');
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('Auth token refreshed successfully');
+        // Invalidate queries to force refetch with new token
+        queryClient.invalidateQueries();
       }
     });
 

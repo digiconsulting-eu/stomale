@@ -14,12 +14,14 @@ import { AuthModal } from "./components/auth/AuthModal";
 import { useState, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { toast } from "sonner";
+import { checkSessionHealth } from "./utils/auth";
+import { SessionMonitor } from "./components/auth/SessionMonitor";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 0,
-      refetchOnWindowFocus: false,
+      retry: 1,
+      refetchOnWindowFocus: true, // Changed to true to help with stale sessions
       staleTime: 30000,
       gcTime: 5 * 60 * 1000,
     },
@@ -37,7 +39,10 @@ const App = () => {
       try {
         console.log("Initializing app...");
         
-        // Get the current session first
+        // First, check session health and refresh if needed
+        await checkSessionHealth();
+        
+        // Get the current session (potentially refreshed)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -49,9 +54,9 @@ const App = () => {
           return;
         }
 
-        console.log("Session check completed", session);
+        console.log("Session check completed", session ? session.user?.email : 'No active session');
 
-        // Then initialize auth state listener
+        // Initialize auth state listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
           console.log("Auth state changed:", event, session?.user?.email);
           if (event === 'SIGNED_IN' && isMounted) {
@@ -126,6 +131,7 @@ const App = () => {
           <ScrollToTop />
           <AuthStateHandler />
           <AuthModal />
+          <SessionMonitor />
           <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-1">
