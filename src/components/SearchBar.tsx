@@ -17,15 +17,10 @@ export const SearchBar = () => {
     queryKey: ['conditions'],
     queryFn: async () => {
       try {
-        // Make sure the API key is included in headers
         const { data, error } = await supabase
           .from('PATOLOGIE')
           .select('Patologia')
-          .order('Patologia')
-          .headers({
-            'apikey': supabase.supabaseKey,
-            'Authorization': `Bearer ${supabase.supabaseKey}`
-          });
+          .order('Patologia');
 
         if (error) {
           console.error('Error fetching conditions:', error);

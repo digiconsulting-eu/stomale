@@ -31,11 +31,7 @@ export const useConditions = ({
         
         let query = supabase
           .from('PATOLOGIE')
-          .select('id, Patologia', { count: 'exact' })
-          .headers({
-            'apikey': supabase.supabaseKey,
-            'Authorization': `Bearer ${supabase.supabaseKey}`
-          });
+          .select('id, Patologia', { count: 'exact' });
 
         // Apply search filter if present
         if (searchTerm && searchTerm.trim() !== '') {
