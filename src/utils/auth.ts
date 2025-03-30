@@ -20,17 +20,49 @@ export const checkUserExists = async (email: string) => {
   return !!data;
 };
 
-// Improved login function with better error handling and no timeout
+// Improved login function with better error handling, timeout and abort control
 export const loginWithEmailPassword = async (email: string, password: string) => {
+  // Create an AbortController to handle timeouts
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, 15000); // 15 second timeout
+  
   try {
+    console.log('Starting login process for:', email);
+    
+    // First clear any existing session to prevent conflicts
+    await supabase.auth.signOut({ scope: 'local' });
+    
+    // Then attempt the new login
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
     
-    if (error) throw error;
+    // Clear the timeout as the request completed
+    clearTimeout(timeoutId);
+    
+    if (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+    
+    console.log('Login successful:', data?.user?.email);
     return { data, error: null };
   } catch (error: any) {
+    // Clear the timeout
+    clearTimeout(timeoutId);
+    
+    // If aborted due to timeout
+    if (error.name === 'AbortError' || controller.signal.aborted) {
+      console.error('Login request timed out');
+      return { 
+        data: null, 
+        error: new Error('La richiesta di login è scaduta. Riprova.') 
+      };
+    }
+    
     console.error('Login error:', error);
     return { data: null, error };
   }
@@ -43,9 +75,9 @@ export const checkIsAdmin = async (email: string) => {
       .from('admin')
       .select('email')
       .eq('email', email)
-      .single();
+      .maybeSingle();
       
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       console.error('Error checking admin status:', error);
       return false;
     }
@@ -132,6 +164,26 @@ export const checkSessionHealth = async () => {
     return true;
   } catch (error) {
     console.error('Error in checkSessionHealth:', error);
+    return false;
+  }
+};
+
+// Force client reset - use this when the state gets corrupted
+export const resetAuthClient = async () => {
+  try {
+    // Force clear local storage auth data
+    localStorage.removeItem('stomale-auth');
+    localStorage.removeItem('supabase.auth.token');
+    
+    // Sign out to clear any session state
+    await supabase.auth.signOut({ scope: 'local' });
+    
+    // Force reload the page to get a fresh client
+    window.location.reload();
+    
+    return true;
+  } catch (error) {
+    console.error('Error in resetAuthClient:', error);
     return false;
   }
 };

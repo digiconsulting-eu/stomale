@@ -11,7 +11,9 @@ const supabaseOptions = {
     persistSession: true,
     storageKey: 'stomale-auth',
     autoRefreshToken: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    // Add flowType to help with token refresh
+    flowType: 'pkce'
   },
   global: {
     headers: {
