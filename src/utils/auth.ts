@@ -6,18 +6,23 @@ import { toast } from "sonner";
 type User = Database["public"]["Tables"]["users"]["Row"];
 
 export const checkUserExists = async (email: string) => {
-  const { data, error } = await supabase
-    .from('users')
-    .select('email')
-    .eq('email', email)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('email')
+      .eq('email', email)
+      .single();
+      
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error checking user existence:', error);
+      return false;
+    }
     
-  if (error && error.code !== 'PGRST116') {
-    console.error('Error checking user existence:', error);
+    return !!data;
+  } catch (error) {
+    console.error('Unexpected error in checkUserExists:', error);
     return false;
   }
-  
-  return !!data;
 };
 
 // Improved login function with better error handling, timeout and abort control
@@ -34,11 +39,21 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     // First clear any existing session to prevent conflicts
     await supabase.auth.signOut({ scope: 'local' });
     
-    // Then attempt the new login
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    // Then attempt the new login with timeout handling
+    const { data, error } = await Promise.race([
+      supabase.auth.signInWithPassword({
+        email,
+        password
+      }),
+      new Promise<{data: null, error: Error}>((_, reject) => {
+        setTimeout(() => {
+          reject({
+            data: null,
+            error: new Error('Login timeout - La richiesta ha impiegato troppo tempo.')
+          });
+        }, 12000); // Slightly shorter than the controller timeout
+      })
+    ]);
     
     // Clear the timeout as the request completed
     clearTimeout(timeoutId);
@@ -55,7 +70,8 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     clearTimeout(timeoutId);
     
     // If aborted due to timeout
-    if (error.name === 'AbortError' || controller.signal.aborted) {
+    if (error.name === 'AbortError' || controller.signal.aborted || 
+        error.message?.includes('timeout') || error.message?.includes('impiegato troppo tempo')) {
       console.error('Login request timed out');
       return { 
         data: null, 
@@ -171,9 +187,22 @@ export const checkSessionHealth = async () => {
 // Force client reset - use this when the state gets corrupted
 export const resetAuthClient = async () => {
   try {
+    console.log('Resetting auth client state...');
+    
     // Force clear local storage auth data
     localStorage.removeItem('stomale-auth');
     localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('last-login-attempt');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('isAdmin');
+    
+    // Clear any session cookies that might exist
+    document.cookie.split(";").forEach((c) => {
+      const cookieName = c.trim().split("=")[0];
+      if (cookieName.includes("sb-") || cookieName.includes("supabase")) {
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      }
+    });
     
     // Sign out to clear any session state
     await supabase.auth.signOut({ scope: 'local' });
@@ -187,3 +216,25 @@ export const resetAuthClient = async () => {
     return false;
   }
 };
+
+// Check if the login state is possibly corrupted
+export const checkForCorruptedState = async (): Promise<boolean> => {
+  const sessionResult = await supabase.auth.getSession();
+  const localStorageToken = localStorage.getItem('stomale-auth');
+  const localLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  
+  // If localStorage says we're logged in but we have no session, the state is corrupted
+  if (localLoggedIn && !sessionResult.data.session) {
+    console.warn('Detected corrupted auth state: localStorage says logged in but no session exists');
+    return true;
+  }
+  
+  // If we have local storage auth data but no session, the state might be corrupted
+  if (localStorageToken && !sessionResult.data.session) {
+    console.warn('Detected potential auth state corruption: token exists but no session');
+    return true;
+  }
+  
+  return false;
+};
+

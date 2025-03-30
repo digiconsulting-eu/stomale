@@ -4,54 +4,85 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, checkClientHealth } from "@/integrations/supabase/client";
 import { LoginForm, type LoginFormValues } from "@/components/auth/LoginForm";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
-import { loginWithEmailPassword, checkIsAdmin, resetAuthClient } from "@/utils/auth";
+import { 
+  loginWithEmailPassword, 
+  checkIsAdmin, 
+  resetAuthClient,
+  checkForCorruptedState
+} from "@/utils/auth";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Login() {
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Login"));
     
-    // When the component mounts, check if there was a previous login attempt
-    // that might have left the app in a broken state
-    const checkPreviousLogin = async () => {
+    // When the component mounts, check for corrupted state
+    const checkAndCleanupState = async () => {
+      // Check for corrupted state
+      const isCorrupted = await checkForCorruptedState();
+      if (isCorrupted) {
+        console.log('Detected corrupted auth state, resetting...');
+        toast.warning(
+          "Rilevato stato di autenticazione non valido, ripristino in corso...",
+          { duration: 3000 }
+        );
+        await resetAuthClient();
+        return;
+      }
+      
+      // Check if there was a previous login attempt that might have left 
+      // the app in a broken state
       const lastLoginAttempt = localStorage.getItem('last-login-attempt');
       if (lastLoginAttempt) {
         const lastAttemptTime = parseInt(lastLoginAttempt, 10);
         const now = Date.now();
         
-        // If the last attempt was more than 5 minutes ago, clear any stale state
-        if (now - lastAttemptTime > 5 * 60 * 1000) {
+        // If the last attempt was more than 3 minutes ago, clear any stale state
+        if (now - lastAttemptTime > 3 * 60 * 1000) {
           console.log('Found stale login attempt, resetting auth state');
-          await resetAuthClient();
+          localStorage.removeItem('last-login-attempt');
         }
+      }
+      
+      // Check if Supabase is reachable
+      const isClientHealthy = await checkClientHealth();
+      if (!isClientHealthy) {
+        setConnectionIssue(true);
       }
     };
     
-    checkPreviousLogin();
+    checkAndCleanupState();
   }, []);
 
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [loginProgress, setLoginProgress] = useState(0);
   const [loginTimedOut, setLoginTimedOut] = useState(false);
+  const [connectionIssue, setConnectionIssue] = useState(false);
 
   // Function to simulate login progress
   const startLoginProgress = () => {
     setLoginProgress(0);
     setLoginTimedOut(false);
+    setConnectionIssue(false);
     
     // Update progress every 300ms
     const interval = setInterval(() => {
       setLoginProgress(prev => {
         // Slow down progress as it gets higher to simulate waiting for response
-        if (prev < 70) {
+        if (prev < 60) {
           return prev + 5;
-        } else if (prev < 90) {
-          return prev + 1;
+        } else if (prev < 85) {
+          return prev + 2;
+        } else if (prev < 95) {
+          return prev + 0.5;
         }
         return prev;
       });
@@ -131,6 +162,7 @@ export default function Login() {
       // Complete the progress to show we're done
       setLoginProgress(100);
       
+      // Handle specific error cases
       if (error.message?.includes('Invalid login credentials')) {
         toast.error("Credenziali non valide", {
           description: "Email o password non corretti. Verifica le tue credenziali e riprova."
@@ -139,11 +171,21 @@ export default function Login() {
         toast.error("Email non confermata", {
           description: "Per favore controlla la tua casella email e clicca sul link di conferma"
         });
-      } else if (error.message?.includes('timed out') || error.message?.includes('scaduta')) {
+      } else if (error.message?.includes('timed out') || error.message?.includes('scaduta') || 
+                error.message?.includes('timeout') || error.message?.includes('impiegato troppo tempo')) {
+        setLoginTimedOut(true);
         toast.error("Timeout durante il login", {
           description: "La richiesta ha impiegato troppo tempo. Controlla la tua connessione e riprova.",
           action: {
             label: "Riprova",
+            onClick: () => handleReset(),
+          }
+        });
+      } else if (error.code === 'AUTH_INVALID_SESSION') {
+        toast.error("Sessione non valida", {
+          description: "La sessione precedente è scaduta o non valida. Effettua nuovamente il login.",
+          action: {
+            label: "Ripristina",
             onClick: () => resetAuthClient(),
           }
         });
@@ -151,7 +193,7 @@ export default function Login() {
         toast.error("Errore durante il login", {
           description: error.message || "Si è verificato un errore imprevisto. Riprova più tardi.",
           action: {
-            label: "Riprova",
+            label: "Ripristina",
             onClick: () => resetAuthClient(),
           }
         });
@@ -162,11 +204,12 @@ export default function Login() {
     }
   };
 
-  // If login timed out, show a message and reset button
+  // Reset handler for when login times out
   const handleReset = async () => {
     await resetAuthClient();
     setLoginTimedOut(false);
     setLoginProgress(0);
+    setConnectionIssue(false);
   };
 
   return (
@@ -175,17 +218,41 @@ export default function Login() {
         <div className="card">
           <h1 className="text-2xl font-bold text-center mb-6">Accedi</h1>
           
+          {connectionIssue && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Problema di connessione</AlertTitle>
+              <AlertDescription>
+                Impossibile contattare il server di autenticazione. Verifica la tua connessione internet e riprova.
+              </AlertDescription>
+              <Button 
+                onClick={handleReset}
+                variant="outline" 
+                size="sm"
+                className="mt-2 w-full"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Ripristina e riprova
+              </Button>
+            </Alert>
+          )}
+          
           {loginTimedOut ? (
             <div className="mb-6 text-center">
-              <p className="text-red-500 mb-4">
-                La richiesta di login ha impiegato troppo tempo. Ci potrebbe essere un problema con la connessione o con il server.
-              </p>
-              <button 
+              <Alert variant="destructive" className="mb-4">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Timeout di autenticazione</AlertTitle>
+                <AlertDescription>
+                  La richiesta di login ha impiegato troppo tempo. Ci potrebbe essere un problema con la connessione o con il server.
+                </AlertDescription>
+              </Alert>
+              <Button 
                 onClick={handleReset}
                 className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
               >
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Ripristina e riprova
-              </button>
+              </Button>
             </div>
           ) : (
             <LoginForm onSubmit={handleSubmit} isLoading={isLoading} />
@@ -195,7 +262,7 @@ export default function Login() {
             <div className="mt-4">
               <Progress value={loginProgress} className="h-2" />
               <p className="text-xs text-center mt-1 text-muted-foreground">
-                Autenticazione in corso...
+                Autenticazione in corso... {Math.round(loginProgress)}%
               </p>
             </div>
           )}
