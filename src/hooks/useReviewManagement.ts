@@ -12,12 +12,15 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
   const queryClient = useQueryClient();
   const offset = (page - 1) * limit;
 
-  const { data: reviewsData, isLoading } = useQuery({
+  const { data: reviewsData, isLoading, refetch, error } = useQuery({
     queryKey: ['reviews', page, limit],
     queryFn: async () => {
       console.log('Starting to fetch reviews on page', page, 'with limit', limit);
       
       try {
+        // First make sure we have a fresh session
+        await supabase.auth.refreshSession();
+        
         // First get total count
         const { count: totalCount, error: countError } = await supabase
           .from('reviews')
@@ -69,12 +72,14 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
         };
       } catch (error: any) {
         console.error('Error in review fetch:', error);
-        toast.error("Errore nel caricamento delle recensioni");
+        toast.error("Errore nel caricamento delle recensioni. Riprova tra qualche secondo.");
         throw error;
       }
     },
-    retry: 2,
-    refetchOnWindowFocus: false
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Cap retry delay at 30 seconds
+    refetchOnWindowFocus: false,
+    staleTime: 0 // Always refetch
   });
 
   const updateReviewStatus = useMutation({
@@ -101,6 +106,8 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
     totalCount: reviewsData?.totalCount || 0,
     totalPages: reviewsData?.totalPages || 0,
     isLoading,
+    error,
+    refetch,
     updateReviewStatus
   };
 };

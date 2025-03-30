@@ -20,6 +20,8 @@ const supabaseOptions = {
   global: {
     headers: {
       'x-client-info': `supabase-js/2.46.2`,
+      'cache-control': 'no-cache',
+      'pragma': 'no-cache'
     },
     fetch: (url: string, options: RequestInit) => {
       // Add a custom header to track requests
@@ -36,9 +38,19 @@ const supabaseOptions = {
       });
       
       // Include a retry mechanism for network errors
-      const fetchWithRetry = async (attemptsLeft: number = 2): Promise<Response> => {
+      const fetchWithRetry = async (attemptsLeft: number = 3): Promise<Response> => {
         try {
           const response = await fetch(url, { ...options, headers });
+          
+          // If we get a non-401 error status, we should retry
+          if (!response.ok && response.status !== 401) {
+            console.warn(`Got status ${response.status} from Supabase, retries left: ${attemptsLeft}`);
+            if (attemptsLeft > 0) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              return fetchWithRetry(attemptsLeft - 1);
+            }
+          }
+          
           return response;
         } catch (error) {
           console.error(`Fetch error in supabase client (${attemptsLeft} attempts left):`, error);
@@ -85,3 +97,24 @@ export const checkClientHealth = async (): Promise<boolean> => {
   }
 };
 
+// Reset the Supabase client - useful when client state gets corrupted
+export const resetSupabaseClient = async () => {
+  try {
+    console.log('Resetting Supabase client state...');
+    
+    // Sign out first to clear any existing session
+    await supabase.auth.signOut();
+    
+    // Clear local storage auth data
+    localStorage.removeItem('stomale-auth');
+    
+    // Wait a moment for everything to clear
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Return a new client instance
+    return createClient<Database>(supabaseUrl, supabaseKey, supabaseOptions);
+  } catch (error) {
+    console.error('Failed to reset Supabase client:', error);
+    throw error;
+  }
+};

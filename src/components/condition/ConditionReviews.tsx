@@ -1,6 +1,10 @@
 
 import { ReviewCard } from "@/components/ReviewCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 interface Review {
   id: number;
@@ -27,9 +31,15 @@ interface ConditionReviewsProps {
   reviews: Review[] | undefined;
   isLoading: boolean;
   condition: string;
+  onRetry?: () => void;
 }
 
-export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionReviewsProps) => {
+export const ConditionReviews = ({ 
+  reviews, 
+  isLoading, 
+  condition,
+  onRetry 
+}: ConditionReviewsProps) => {
   console.log('ConditionReviews rendering with:', { reviews, condition, isLoading });
 
   if (isLoading) {
@@ -41,7 +51,31 @@ export const ConditionReviews = ({ reviews, isLoading, condition }: ConditionRev
     );
   }
 
-  if (!reviews || reviews.length === 0) {
+  // If we have an error state or corrupt data
+  if (!reviews) {
+    return (
+      <div className="space-y-4">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Errore di caricamento</AlertTitle>
+          <AlertDescription>
+            Non è stato possibile caricare le recensioni per questa patologia.
+          </AlertDescription>
+        </Alert>
+        
+        {onRetry && (
+          <div className="text-center mt-4">
+            <Button onClick={onRetry} variant="outline" className="inline-flex items-center">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Riprova
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (reviews.length === 0) {
     console.log('No reviews found for condition:', condition);
     return (
       <div className="text-center py-8">

@@ -3,15 +3,20 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DatabaseReview, Review } from "@/types/review";
+import { useState } from "react";
 
 export const useConditionData = () => {
   const { condition } = useParams();
+  const [retryCount, setRetryCount] = useState(0);
 
   // Fetch condition data
   const { data: patologiaData } = useQuery({
-    queryKey: ["patologia", condition],
+    queryKey: ["patologia", condition, retryCount],
     queryFn: async () => {
       if (!condition) return null;
+      
+      // Refresh the session first
+      await supabase.auth.refreshSession();
       
       const { data, error } = await supabase
         .from('PATOLOGIE')
@@ -26,17 +31,22 @@ export const useConditionData = () => {
       
       return data;
     },
-    enabled: !!condition
+    enabled: !!condition,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   // Fetch reviews for the condition
-  const { data: reviewsData, isLoading: reviewsLoading } = useQuery({
-    queryKey: ["reviews", patologiaData?.id],
+  const { data: reviewsData, isLoading: reviewsLoading, refetch } = useQuery({
+    queryKey: ["reviews", patologiaData?.id, retryCount],
     enabled: !!patologiaData?.id,
     queryFn: async () => {
       console.log('Fetching reviews for condition:', patologiaData?.id);
       
       try {
+        // Refresh session first
+        await supabase.auth.refreshSession();
+        
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -46,7 +56,8 @@ export const useConditionData = () => {
               Patologia
             )
           `)
-          .eq('condition_id', patologiaData.id);
+          .eq('condition_id', patologiaData.id)
+          .eq('status', 'approved');
         
         if (error) {
           console.error('Error fetching reviews:', error);
@@ -58,8 +69,16 @@ export const useConditionData = () => {
         console.error('Error in review fetch:', error);
         throw error;
       }
-    }
+    },
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
+
+  // Function to retry fetching data
+  const retryFetch = () => {
+    setRetryCount(prev => prev + 1);
+    refetch();
+  };
 
   // Map database reviews to UI-friendly format
   const reviews: Review[] = reviewsData?.map(review => {
@@ -98,6 +117,7 @@ export const useConditionData = () => {
     condition,
     patologiaData,
     reviews,
-    isLoading: reviewsLoading
+    isLoading: reviewsLoading,
+    retryFetch
   };
 };

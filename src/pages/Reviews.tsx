@@ -6,19 +6,24 @@ import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 import { ReviewsContent } from "@/components/reviews/ReviewsContent";
 import { DatabaseReview } from "@/types/review";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const REVIEWS_PER_PAGE = 20;
 
 const Reviews = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [retryAttempts, setRetryAttempts] = useState(0);
 
   // Add explicit refetch function
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['reviews', currentPage, REVIEWS_PER_PAGE],
+    queryKey: ['reviews', currentPage, REVIEWS_PER_PAGE, retryAttempts],
     queryFn: async () => {
       console.log('Starting reviews fetch for page:', currentPage);
       try {
-        // Clear old data from the supabase client cache
+        // Make sure we have a fresh session
         await supabase.auth.refreshSession();
         
         // First get total count of approved reviews
@@ -133,18 +138,32 @@ const Reviews = () => {
     setPageTitle(getDefaultPageTitle("Ultime Recensioni"));
   }, []);
 
+  // Handle retry button click
+  const handleRetry = () => {
+    setRetryAttempts(prev => prev + 1);
+    refetch();
+  };
+
   if (error) {
     console.error('Error loading reviews:', error);
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-500">
-          <p>Si è verificato un errore nel caricamento delle recensioni. Riprova tra qualche secondo.</p>
-          <button 
-            onClick={() => refetch()} 
-            className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Errore nel caricamento delle recensioni</AlertTitle>
+          <AlertDescription>
+            Si è verificato un errore durante il caricamento delle recensioni. 
+            Il server potrebbe essere temporaneamente non raggiungibile o potrebbero esserci problemi di connessione.
+          </AlertDescription>
+        </Alert>
+        <div className="text-center mt-4">
+          <Button 
+            onClick={handleRetry}
+            className="inline-flex items-center"
           >
+            <RefreshCw className="h-4 w-4 mr-2" />
             Riprova
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -157,12 +176,13 @@ const Reviews = () => {
         <div className="text-center text-gray-600">
           <p className="text-lg mb-4">Non ci sono ancora recensioni disponibili.</p>
           <p>Sii il primo a condividere la tua esperienza!</p>
-          <button 
-            onClick={() => refetch()} 
-            className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+          <Button 
+            onClick={handleRetry}
+            className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 inline-flex items-center"
           >
+            <RefreshCw className="h-4 w-4 mr-2" />
             Riprova
-          </button>
+          </Button>
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
 
 import { ReviewCard } from "@/components/ReviewCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshCw } from "lucide-react";
 
 interface Review {
   id: number;
@@ -46,9 +47,10 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
         <p className="text-gray-500">Non ci sono ancora recensioni approvate.</p>
         <button 
           onClick={() => window.location.reload()}
-          className="mt-4 text-blue-500 underline"
+          className="mt-4 text-blue-500 underline flex items-center mx-auto"
           aria-label="Ricarica la pagina"
         >
+          <RefreshCw className="h-4 w-4 mr-2" />
           Ricarica la pagina
         </button>
       </div>
@@ -71,9 +73,10 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
         <p className="text-gray-500">Non ci sono recensioni valide da mostrare.</p>
         <button 
           onClick={() => window.location.reload()}
-          className="mt-4 text-blue-500 underline"
+          className="mt-4 text-blue-500 underline flex items-center mx-auto"
           aria-label="Ricarica la pagina"
         >
+          <RefreshCw className="h-4 w-4 mr-2" />
           Ricarica la pagina
         </button>
       </div>

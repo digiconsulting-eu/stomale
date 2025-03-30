@@ -8,6 +8,7 @@ interface ConditionContentProps {
   reviewsCount: number;
   reviews: any[];
   isLoading: boolean;
+  onRetry?: () => void;
 }
 
 export const ConditionContent = ({ 
@@ -15,7 +16,8 @@ export const ConditionContent = ({
   isAdmin, 
   reviewsCount, 
   reviews, 
-  isLoading 
+  isLoading,
+  onRetry 
 }: ConditionContentProps) => {
   return (
     <div className="md:col-span-8">
@@ -34,6 +36,7 @@ export const ConditionContent = ({
           reviews={reviews}
           isLoading={isLoading}
           condition={condition}
+          onRetry={onRetry}
         />
       </div>
     </div>

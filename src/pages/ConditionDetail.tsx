@@ -1,6 +1,6 @@
-
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useConditionData } from "@/hooks/useConditionData";
 import { Disclaimer } from "@/components/Disclaimer";
 import { ConditionHeader } from "@/components/condition/ConditionHeader";
 import { ConditionActions } from "@/components/condition/ConditionActions";
@@ -10,21 +10,26 @@ import { ConditionSchema } from "@/components/condition/ConditionSchema";
 import { ConditionContent } from "@/components/condition/ConditionContent";
 import { setPageTitle, setMetaDescription, getConditionMetaDescription } from "@/utils/pageTitle";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
-import { useConditionData } from "@/hooks/useConditionData";
 import { calculateStats, calculateRating } from "@/utils/conditionUtils";
 
 export default function ConditionDetail() {
+  const [forceRefresh, setForceRefresh] = useState(0);
   const navigate = useNavigate();
-  const isAdmin = localStorage.getItem("isAdmin") === "true";
+  const { conditionName } = useParams();
   
-  const { condition, patologiaData, reviews, isLoading } = useConditionData();
-  
-  const conditionTitle = condition ? capitalizeFirstLetter(condition) : '';
-  const pageTitle = condition ? `${condition.toUpperCase()} | Recensioni ed Esperienze | StoMale.info` : '';
-  const metaDescription = getConditionMetaDescription(condition || '');
+  const { 
+    patologiaData, 
+    reviews, 
+    isLoading,
+    retryFetch 
+  } = useConditionData();
+
+  const conditionTitle = conditionName ? capitalizeFirstLetter(conditionName) : '';
+  const pageTitle = conditionName ? `${conditionName.toUpperCase()} | Recensioni ed Esperienze | StoMale.info` : '';
+  const metaDescription = getConditionMetaDescription(conditionName || '');
 
   useEffect(() => {
-    if (condition) {
+    if (conditionName) {
       // Set the document title through useEffect for client-side rendering
       document.title = pageTitle;
       
@@ -34,12 +39,11 @@ export default function ConditionDetail() {
         metaDescriptionTag.setAttribute('content', metaDescription);
       }
     }
-  }, [condition, pageTitle, metaDescription]);
+  }, [conditionName, pageTitle, metaDescription]);
 
-  // Log reviews content to help debug meta description generation
   useEffect(() => {
     if (reviews && reviews.length > 0) {
-      console.log(`Found ${reviews.length} reviews for condition '${condition}'`);
+      console.log(`Found ${reviews.length} reviews for condition '${conditionName}'`);
       // Safely check for the symptoms property 
       if (reviews[0].experience) {
         console.log('First review experience:', reviews[0].experience.substring(0, 50) + '...');
@@ -47,9 +51,9 @@ export default function ConditionDetail() {
         console.log('No experience found in the first review');
       }
     } else {
-      console.log(`No reviews found for condition '${condition}'`);
+      console.log(`No reviews found for condition '${conditionName}'`);
     }
-  }, [reviews, condition]);
+  }, [reviews, conditionName]);
 
   const stats = calculateStats(reviews);
   const ratingValue = calculateRating(stats);
@@ -59,26 +63,32 @@ export default function ConditionDetail() {
   };
 
   const handleNewReview = () => {
-    navigate(`/nuova-recensione?patologia=${condition}`);
+    navigate(`/nuova-recensione?patologia=${conditionName}`);
   };
 
-  if (!condition) {
+  const handleRetryLoad = () => {
+    // Set force refresh to trigger a new render
+    setForceRefresh(prev => prev + 1);
+    // Call the retry function from useConditionData
+    retryFetch();
+  };
+
+  if (!conditionName) {
     return <div className="container py-8">Caricamento in corso...</div>;
   }
 
   return (
     <div className="container py-8">
-      {/* Pass reviews to ConditionSEO to create better meta descriptions */}
-      <ConditionSEO condition={condition} reviews={reviews} />
+      <ConditionSEO condition={conditionName} reviews={reviews} />
       
       <ConditionSchema 
-        condition={condition} 
+        condition={conditionName} 
         reviews={reviews} 
         ratingValue={ratingValue} 
       />
       
       <ConditionHeader 
-        condition={condition} 
+        condition={conditionName} 
         conditionId={patologiaData?.id || 0} 
       />
 
@@ -89,23 +99,24 @@ export default function ConditionDetail() {
 
         <div className="md:col-span-8">
           <ConditionActions
-            condition={condition}
+            condition={conditionName}
             onNavigate={handleNavigate}
             onNewReview={handleNewReview}
           />
 
           <ConditionContent 
-            condition={condition} 
+            condition={conditionName} 
             isAdmin={isAdmin}
             reviewsCount={reviews?.length || 0}
             reviews={reviews}
             isLoading={isLoading}
+            onRetry={handleRetryLoad}
           />
         </div>
       </div>
 
       <div className="mt-8">
-        <Disclaimer condition={capitalizeFirstLetter(condition)} />
+        <Disclaimer condition={capitalizeFirstLetter(conditionName)} />
       </div>
     </div>
   );
