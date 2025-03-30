@@ -65,6 +65,12 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
 
         console.log('Reviews data fetched:', data?.length || 0);
         
+        // Validate that the data structure is as expected
+        if (!data || !Array.isArray(data)) {
+          console.error('Invalid review data structure:', data);
+          throw new Error('Invalid review data structure');
+        }
+        
         return {
           reviews: data || [],
           totalCount: totalCount || 0,
@@ -84,6 +90,9 @@ export const useReviewManagement = ({ page = 1, limit = 10 }: UseReviewManagemen
 
   const updateReviewStatus = useMutation({
     mutationFn: async ({ reviewId, status }: { reviewId: number, status: string }) => {
+      // First refresh the session to ensure we have valid auth
+      await supabase.auth.refreshSession();
+      
       const { error } = await supabase
         .from('reviews')
         .update({ status })

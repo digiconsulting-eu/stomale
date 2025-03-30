@@ -9,6 +9,9 @@ export const useAuthSession = () => {
     queryKey: ['auth-session'],
     queryFn: async () => {
       try {
+        // First try to refresh session to ensure we have a valid token
+        await refreshSession();
+        
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -40,7 +43,6 @@ export const useAuthSession = () => {
         return session;
       } catch (error) {
         console.error('Error in useAuthSession:', error);
-        toast.error("Errore nel caricamento della sessione");
         throw error;
       }
     },

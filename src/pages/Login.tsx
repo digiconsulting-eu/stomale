@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { supabase, checkClientHealth } from "@/integrations/supabase/client";
+import { supabase, checkClientHealth, resetSupabaseClient } from "@/integrations/supabase/client";
 import { LoginForm, type LoginFormValues } from "@/components/auth/LoginForm";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
@@ -16,7 +16,7 @@ import {
 } from "@/utils/auth";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, Database } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Login() {
@@ -66,6 +66,7 @@ export default function Login() {
   const [loginProgress, setLoginProgress] = useState(0);
   const [loginTimedOut, setLoginTimedOut] = useState(false);
   const [connectionIssue, setConnectionIssue] = useState(false);
+  const [loginAttempt, setLoginAttempt] = useState(0);  // Add a counter to track retries
 
   // Function to simulate login progress
   const startLoginProgress = () => {
@@ -73,29 +74,43 @@ export default function Login() {
     setLoginTimedOut(false);
     setConnectionIssue(false);
     
-    // Update progress every 300ms
+    // Update progress every 200ms (faster updates)
     const interval = setInterval(() => {
       setLoginProgress(prev => {
         // Slow down progress as it gets higher to simulate waiting for response
         if (prev < 60) {
-          return prev + 5;
+          return prev + 7;
         } else if (prev < 85) {
-          return prev + 2;
+          return prev + 3;
         } else if (prev < 95) {
           return prev + 0.5;
+        } else {
+          return 95;  // Cap at 95% until complete
         }
-        return prev;
       });
-    }, 300);
+    }, 200);
     
-    // After 15 seconds, consider it timed out
+    // After 20 seconds, consider it timed out (increased from 15)
     const timeoutId = setTimeout(() => {
       clearInterval(interval);
       setLoginTimedOut(true);
       setLoginProgress(100);
-    }, 15000);
+    }, 20000);
     
     return { interval, timeoutId };
+  };
+
+  const checkSupabaseHealth = async () => {
+    try {
+      const { data, error } = await supabase.from('users')
+        .select('count(*)', { count: 'exact', head: true })
+        .limit(1);
+      
+      return !error;
+    } catch (error) {
+      console.error('Supabase health check failed:', error);
+      return false;
+    }
   };
 
   const handleSubmit = async (data: LoginFormValues) => {
@@ -103,15 +118,31 @@ export default function Login() {
     if (isLoading) return;
     
     setIsLoading(true);
-    console.log("Starting login process for:", data.email);
+    setLoginAttempt(prev => prev + 1);  // Increment retry counter
+    console.log("Starting login process for:", data.email, "Attempt:", loginAttempt + 1);
     
     // Record the attempt time
     localStorage.setItem('last-login-attempt', Date.now().toString());
+    
+    // Check Supabase health first
+    const isHealthy = await checkSupabaseHealth();
+    if (!isHealthy) {
+      setConnectionIssue(true);
+      setIsLoading(false);
+      toast.error("Impossibile contattare il server di autenticazione");
+      return;
+    }
     
     // Start the progress indicator
     const { interval, timeoutId } = startLoginProgress();
     
     try {
+      // Try to initialize a fresh client if this is a retry
+      if (loginAttempt > 0) {
+        const freshClient = await resetSupabaseClient();
+        console.log("Using fresh Supabase client for retry attempt");
+      }
+      
       // Use the improved login function with timeout
       const { data: authData, error: signInError } = await loginWithEmailPassword(data.email, data.password);
 
@@ -175,7 +206,7 @@ export default function Login() {
                 error.message?.includes('timeout') || error.message?.includes('impiegato troppo tempo')) {
         setLoginTimedOut(true);
         toast.error("Timeout durante il login", {
-          description: "La richiesta ha impiegato troppo tempo. Controlla la tua connessione e riprova.",
+          description: "Il server non risponde. Prova a ricaricare la pagina e riprova.",
           action: {
             label: "Riprova",
             onClick: () => handleReset(),
@@ -206,10 +237,35 @@ export default function Login() {
 
   // Reset handler for when login times out
   const handleReset = async () => {
-    await resetAuthClient();
-    setLoginTimedOut(false);
+    // Clear the progress
     setLoginProgress(0);
+    setLoginTimedOut(false);
     setConnectionIssue(false);
+    
+    // Reset the auth client
+    await resetAuthClient();
+    
+    // Reset login attempt counter
+    setLoginAttempt(0);
+    
+    toast.info("Sistema ripristinato, puoi riprovare il login");
+  };
+
+  // Complete force reset that clears all localStorage and cookies
+  const handleForceReset = async () => {
+    // Clear all local storage
+    localStorage.clear();
+    
+    // Clear cookies related to supabase
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    
+    // Reset auth client
+    await resetAuthClient();
+    
+    // Reload the page
+    window.location.reload();
   };
 
   return (
@@ -223,16 +279,16 @@ export default function Login() {
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Problema di connessione</AlertTitle>
               <AlertDescription>
-                Impossibile contattare il server di autenticazione. Verifica la tua connessione internet e riprova.
+                Impossibile contattare il server di autenticazione. Prova a ricaricare la pagina.
               </AlertDescription>
               <Button 
-                onClick={handleReset}
+                onClick={handleForceReset}
                 variant="outline" 
                 size="sm"
                 className="mt-2 w-full"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Ripristina e riprova
+                Ricarica la pagina
               </Button>
             </Alert>
           )}
@@ -243,16 +299,26 @@ export default function Login() {
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Timeout di autenticazione</AlertTitle>
                 <AlertDescription>
-                  La richiesta di login ha impiegato troppo tempo. Ci potrebbe essere un problema con la connessione o con il server.
+                  La richiesta di login ha impiegato troppo tempo. Il server potrebbe essere sovraccarico al momento.
                 </AlertDescription>
               </Alert>
-              <Button 
-                onClick={handleReset}
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Ripristina e riprova
-              </Button>
+              <div className="flex flex-col space-y-2">
+                <Button 
+                  onClick={handleReset}
+                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Ripristina e riprova
+                </Button>
+                <Button 
+                  onClick={handleForceReset}
+                  variant="outline" 
+                  className="px-4 py-2 rounded-md"
+                >
+                  <Database className="h-4 w-4 mr-2" />
+                  Ripristino forzato
+                </Button>
+              </div>
             </div>
           ) : (
             <LoginForm onSubmit={handleSubmit} isLoading={isLoading} />

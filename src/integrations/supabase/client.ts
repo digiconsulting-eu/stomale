@@ -30,11 +30,11 @@ const supabaseOptions = {
         'x-stomale-timestamp': Date.now().toString(),
       };
       
-      // Create a timeout promise that rejects after 15 seconds
+      // Create a timeout promise that rejects after 20 seconds (increased from 15)
       const timeoutPromise = new Promise<Response>((_, reject) => {
         setTimeout(() => {
           reject(new Error('Request timeout - La richiesta è scaduta. Riprova più tardi.'));
-        }, 15000); // 15 seconds timeout
+        }, 20000); // 20 seconds timeout
       });
       
       // Include a retry mechanism for network errors
