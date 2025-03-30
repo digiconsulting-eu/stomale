@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useConditionData } from "@/hooks/useConditionData";
@@ -11,9 +12,11 @@ import { ConditionContent } from "@/components/condition/ConditionContent";
 import { setPageTitle, setMetaDescription, getConditionMetaDescription } from "@/utils/pageTitle";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { calculateStats, calculateRating } from "@/utils/conditionUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ConditionDetail() {
   const [forceRefresh, setForceRefresh] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const { conditionName } = useParams();
   
@@ -27,6 +30,29 @@ export default function ConditionDetail() {
   const conditionTitle = conditionName ? capitalizeFirstLetter(conditionName) : '';
   const pageTitle = conditionName ? `${conditionName.toUpperCase()} | Recensioni ed Esperienze | StoMale.info` : '';
   const metaDescription = getConditionMetaDescription(conditionName || '');
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user?.email) {
+          const { data: adminData } = await supabase
+            .from('admin')
+            .select('email')
+            .eq('email', session.user.email);
+          
+          setIsAdmin(Array.isArray(adminData) && adminData.length > 0);
+        }
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        setIsAdmin(false);
+      }
+    };
+    
+    checkAdminStatus();
+  }, []);
 
   useEffect(() => {
     if (conditionName) {
