@@ -25,11 +25,17 @@ export const useConditions = ({
       
       try {
         // Clear any stale Supabase client state
-        await supabase.auth.refreshSession();
+        await supabase.auth.refreshSession().catch(err => {
+          console.log('Session refresh failed, continuing with request', err);
+        });
         
         let query = supabase
           .from('PATOLOGIE')
-          .select('id, Patologia', { count: 'exact' });
+          .select('id, Patologia', { count: 'exact' })
+          .headers({
+            'apikey': supabase.supabaseKey,
+            'Authorization': `Bearer ${supabase.supabaseKey}`
+          });
 
         // Apply search filter if present
         if (searchTerm && searchTerm.trim() !== '') {
@@ -54,7 +60,7 @@ export const useConditions = ({
         }
 
         console.log('Total conditions count:', count);
-        console.log('Fetched conditions:', data);
+        console.log('Fetched conditions:', data?.length || 0);
 
         return {
           conditions: data || [],

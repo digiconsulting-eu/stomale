@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -16,24 +17,33 @@ export const SearchBar = () => {
     queryKey: ['conditions'],
     queryFn: async () => {
       try {
+        // Make sure the API key is included in headers
         const { data, error } = await supabase
           .from('PATOLOGIE')
           .select('Patologia')
-          .order('Patologia');
+          .order('Patologia')
+          .headers({
+            'apikey': supabase.supabaseKey,
+            'Authorization': `Bearer ${supabase.supabaseKey}`
+          });
 
         if (error) {
           console.error('Error fetching conditions:', error);
           throw error;
         }
 
-        console.log('Fetched conditions:', data);
+        console.log('Fetched conditions count:', data?.length || 0);
         return data?.map(item => item.Patologia) || [];
       } catch (error) {
         console.error('Error in conditions query:', error);
-        toast.error("Errore durante il caricamento delle patologie");
-        throw error;
+        
+        // Don't show toast here as it can be annoying on initial load
+        // when users have just opened the site
+        return [];
       }
-    }
+    },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   const handleSearch = (term: string = searchTerm) => {

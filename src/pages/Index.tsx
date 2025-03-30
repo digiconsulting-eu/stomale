@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, verifyApiKeyWorks } from "@/integrations/supabase/client";
 import { ReviewCard } from "@/components/ReviewCard";
 import { SearchBar } from "@/components/SearchBar";
 import { toast } from "sonner";
@@ -9,21 +9,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { setPageTitle } from "@/utils/pageTitle";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, AlertTriangle, RefreshCw } from "lucide-react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Helmet } from "react-helmet";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Index() {
   useEffect(() => {
     setPageTitle("Stomale.info | Recensioni su malattie, sintomi e patologie");
   }, []);
 
-  const { data: latestReviews, isLoading, isError, refetch } = useQuery({
+  const { data: latestReviews, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['latestReviews'],
     queryFn: async () => {
       console.log('Starting reviews fetch for homepage...');
       
       try {
+        // Verify API key is working
+        const apiKeyWorks = await verifyApiKeyWorks();
+        if (!apiKeyWorks) {
+          throw new Error("Problema con l'autenticazione API. Riprova tra qualche istante.");
+        }
+        
         // Force a session refresh to clear any cached data
         await supabase.auth.refreshSession();
         
@@ -52,7 +59,7 @@ export default function Index() {
           throw error;
         }
 
-        console.log('Fetched reviews for homepage:', data);
+        console.log('Fetched reviews for homepage:', data?.length);
         
         if (!data || data.length === 0) {
           console.log('No reviews returned from API');
@@ -89,14 +96,14 @@ export default function Index() {
         return normalizedReviews;
       } catch (error) {
         console.error('Error in homepage reviews fetch:', error);
-        toast.error("Errore nel caricamento delle recensioni");
         throw error;
       }
     },
     staleTime: 0, 
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    retry: 3
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Force a refetch on mount
@@ -155,18 +162,45 @@ export default function Index() {
     }))
   } : null;
 
+  // Handle specific errors with helpful messages
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        return "Problema di autenticazione con il server. Riprova più tardi.";
+      } else if (error.message.includes('timeout') || error.message.includes('scaduta')) {
+        return "La richiesta è scaduta. Il server potrebbe essere momentaneamente sovraccarico.";
+      } else if (error.message.includes('network') || error.message.includes('connessione')) {
+        return "Problema di connessione. Verifica la tua connessione internet.";
+      }
+      return error.message;
+    }
+    return "Si è verificato un errore sconosciuto nel caricamento delle recensioni.";
+  };
+
   if (isError) {
-    console.error('Error loading reviews');
+    console.error('Error loading reviews:', error);
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-500">
-          <p>Si è verificato un errore nel caricamento delle recensioni.</p>
-          <button 
+        <Alert variant="destructive" className="mb-8">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle>Errore nel caricamento delle recensioni</AlertTitle>
+          <AlertDescription>
+            {getErrorMessage(error)}
+          </AlertDescription>
+        </Alert>
+        
+        <div className="text-center mt-8">
+          <Button 
             onClick={() => refetch()} 
-            className="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+            className="mb-4 bg-primary text-white px-6 py-3 rounded flex items-center gap-2 mx-auto"
           >
+            <RefreshCw className="h-5 w-5" />
             Riprova
-          </button>
+          </Button>
+          
+          <p className="text-sm text-gray-500 mt-4">
+            Se il problema persiste, prova a ricaricare la pagina o torna più tardi.
+          </p>
         </div>
       </div>
     );
