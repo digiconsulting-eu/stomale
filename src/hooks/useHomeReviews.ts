@@ -16,7 +16,7 @@ export const useHomeReviews = () => {
           console.log('Session refresh failed, continuing with request', err);
         });
         
-        // Add explicit headers to ensure the request works properly
+        // Improved query with explicit API key in headers
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -47,12 +47,12 @@ export const useHomeReviews = () => {
         // Always handle the case of empty data or null
         if (!data || data.length === 0) {
           console.log('No reviews returned from API');
+          // Return empty array instead of null
           return [];
         }
         
         // Create a set of mock reviews if the API returns empty or corrupted data
-        // This ensures users always see something while issues are being fixed
-        if (!data[0]?.PATOLOGIE?.Patologia) {
+        if (data.length === 0 || !data[0]?.PATOLOGIE?.Patologia) {
           console.warn('Reviews returned without proper PATOLOGIE relation, creating fallback data');
           
           // Return mock data to ensure UI doesn't break
@@ -89,7 +89,7 @@ export const useHomeReviews = () => {
       }
     },
     staleTime: 0, 
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Set to false to avoid multiple refetches
     refetchOnReconnect: true,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),

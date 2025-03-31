@@ -17,18 +17,11 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     // Wait a moment for any pending operations to complete
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Set up API key for auth request
-    const supabaseKey = import.meta.env.VITE_SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudWhkb3ljd3BqZmpodGhmcWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwOTAxOTcsImV4cCI6MjA0ODY2NjE5N30.oE_g8iFcu9UdsHeZhFLYpArJWa7hNFWnsR5x1E8ZGA0';
-    
     // Apply a timeout with a race condition
     const { data, error } = await Promise.race([
       supabase.auth.signInWithPassword({
         email,
-        password,
-        options: {
-          // Only include captchaToken if needed
-          // captchaToken: undefined
-        }
+        password
       }),
       new Promise<{data: null, error: Error}>((_, reject) => {
         setTimeout(() => {

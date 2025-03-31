@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ReviewCard } from "@/components/ReviewCard";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, RefreshCw } from "lucide-react";
 
 interface ReviewsSectionProps {
   latestReviews: any[] | null | undefined;
@@ -41,9 +41,34 @@ export const ReviewsSection = ({ latestReviews, isLoading }: ReviewsSectionProps
               </div>
             ))}
           </div>
-        ) : latestReviews && latestReviews.length > 0 ? (
+        ) : !latestReviews || latestReviews.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+            <p className="text-gray-500 mb-4">Non ci sono ancora recensioni approvate.</p>
+            <div className="flex flex-col gap-4 items-center">
+              <Link to="/nuova-recensione">
+                <Button className="bg-primary hover:bg-primary/90 text-white">
+                  Scrivi la prima recensione
+                </Button>
+              </Link>
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Ricarica la pagina
+              </Button>
+            </div>
+          </div>
+        ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-visible">
             {latestReviews.map((review) => {
+              // Verify all required data is present
+              if (!review || !review.id || !review.title) {
+                console.error('Invalid review data:', review);
+                return null;
+              }
+              
               const condition = review.PATOLOGIE?.Patologia || 'Patologia non specificata';
               const preview = (review.experience || 'Nessuna esperienza descritta').slice(0, 150) + '...';
               const username = review.username || 'Anonimo';
@@ -64,15 +89,6 @@ export const ReviewsSection = ({ latestReviews, isLoading }: ReviewsSectionProps
                 />
               );
             })}
-          </div>
-        ) : (
-          <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-            <p className="text-gray-500 mb-4">Non ci sono ancora recensioni approvate.</p>
-            <Link to="/nuova-recensione">
-              <Button className="bg-primary hover:bg-primary/90 text-white">
-                Scrivi la prima recensione
-              </Button>
-            </Link>
           </div>
         )}
       </div>

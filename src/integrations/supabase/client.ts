@@ -14,67 +14,13 @@ const supabaseOptions = {
     autoRefreshToken: true,
     detectSessionInUrl: true,
     flowType: 'pkce' as AuthFlowType, // Type cast to resolve TypeScript error
-    // Added timeout settings
-    sessionRefreshThrottleMs: 10000, // Wait 10s before initiating another refresh
   },
   global: {
     headers: {
       'x-client-info': `supabase-js/2.46.2`,
-      'cache-control': 'no-cache',
-      'pragma': 'no-cache'
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`
     },
-    fetch: (url: string, options: RequestInit) => {
-      // Create a timeout promise that rejects after 20 seconds
-      const timeoutPromise = new Promise<Response>((_, reject) => {
-        setTimeout(() => {
-          reject(new Error('Request timeout - La richiesta è scaduta. Riprova più tardi.'));
-        }, 20000); // 20 seconds timeout
-      });
-      
-      // Include a retry mechanism for network errors
-      const fetchWithRetry = async (attemptsLeft: number = 3): Promise<Response> => {
-        try {
-          // Ensure request has appropriate headers including API key
-          const headers = {
-            ...options.headers,
-            'apikey': supabaseKey,
-            'Authorization': `Bearer ${supabaseKey}`,
-          };
-
-          console.log(`Making Supabase request to ${url.split('?')[0]} with ${attemptsLeft} attempts left`);
-          const response = await fetch(url, { ...options, headers });
-          
-          // Log response status
-          console.log(`Supabase response status: ${response.status} for ${url.split('?')[0]}`);
-          
-          // If we get a non-401 error status, we should retry
-          if (!response.ok && response.status !== 401) {
-            console.warn(`Got status ${response.status} from Supabase, retries left: ${attemptsLeft}`);
-            if (attemptsLeft > 0) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              return fetchWithRetry(attemptsLeft - 1);
-            }
-          }
-          
-          return response;
-        } catch (error) {
-          console.error(`Fetch error in supabase client (${attemptsLeft} attempts left):`, error);
-          if (attemptsLeft > 0) {
-            console.log('Retrying request...');
-            // Wait 1 second before retrying
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return fetchWithRetry(attemptsLeft - 1);
-          }
-          throw error;
-        }
-      };
-      
-      // Return a promise that races between the fetch and the timeout
-      return Promise.race([
-        fetchWithRetry(),
-        timeoutPromise
-      ]);
-    }
   },
   realtime: {
     params: {
@@ -92,10 +38,10 @@ export const checkClientHealth = async (): Promise<boolean> => {
     console.log('Checking Supabase client health...');
     
     // Simple ping to check if client can reach Supabase
-    const { data, error } = await supabase.from('users')
+    const { data, error } = await supabase
+      .from('PATOLOGIE')
       .select('count(*)', { count: 'exact', head: true })
-      .limit(1)
-      .throwOnError();
+      .limit(1);
     
     if (error) {
       console.error('Supabase health check failed:', error);
@@ -154,7 +100,8 @@ export const verifyApiKeyWorks = async () => {
     // Fetch a simple public query to verify the API key works
     const { data, error } = await supabase
       .from('PATOLOGIE')
-      .select('count(*)', { count: 'exact', head: true });
+      .select('*')
+      .limit(1);
     
     if (error) {
       console.error('API key verification failed:', error);
