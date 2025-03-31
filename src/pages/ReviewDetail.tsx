@@ -4,6 +4,7 @@ import { ReviewContent } from "@/components/review/ReviewContent";
 import { ReviewLoader } from "@/components/review/ReviewLoader";
 import { ReviewError } from "@/components/review/ReviewError";
 import { useReviewData } from "@/hooks/useReviewData";
+import { Disclaimer } from "@/components/Disclaimer";
 
 const ReviewDetail = () => {
   const { review, isLoading, error, metadata } = useReviewData();
@@ -46,6 +47,12 @@ const ReviewDetail = () => {
         date={new Date(review.created_at).toLocaleDateString('it-IT')}
         likesCount={review.likes_count || 0}
       />
+      
+      <div className="container mx-auto px-4 pb-8">
+        <div className="max-w-4xl mx-auto">
+          <Disclaimer condition={review.condition} />
+        </div>
+      </div>
     </>
   );
 };
