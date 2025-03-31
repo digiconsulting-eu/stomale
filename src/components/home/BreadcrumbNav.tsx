@@ -7,7 +7,9 @@ export const BreadcrumbNav = () => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/" aria-current="page">Home</BreadcrumbLink>
+            <BreadcrumbLink href="/" aria-current="page">
+              {/* Home text removed as requested */}
+            </BreadcrumbLink>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
