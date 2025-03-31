@@ -20,20 +20,10 @@ const supabaseOptions = {
   global: {
     headers: {
       'x-client-info': `supabase-js/2.46.2`,
-      'apikey': supabaseKey, // Add the API key as a global header
-      'Authorization': `Bearer ${supabaseKey}`, // Add Authorization header with the API key
       'cache-control': 'no-cache',
       'pragma': 'no-cache'
     },
     fetch: (url: string, options: RequestInit) => {
-      // Ensure the API key is always included in the headers for every request
-      const headers = {
-        ...options.headers,
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
-        'x-stomale-timestamp': Date.now().toString(),
-      };
-      
       // Create a timeout promise that rejects after 20 seconds
       const timeoutPromise = new Promise<Response>((_, reject) => {
         setTimeout(() => {
@@ -45,7 +35,7 @@ const supabaseOptions = {
       const fetchWithRetry = async (attemptsLeft: number = 3): Promise<Response> => {
         try {
           console.log(`Making Supabase request to ${url.split('?')[0]} with ${attemptsLeft} attempts left`);
-          const response = await fetch(url, { ...options, headers });
+          const response = await fetch(url, options);
           
           // Log response status
           console.log(`Supabase response status: ${response.status} for ${url.split('?')[0]}`);
@@ -86,7 +76,7 @@ const supabaseOptions = {
   }
 };
 
-// Initialize client with improved error handling and API key always set
+// Initialize client with improved error handling
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, supabaseOptions);
 
 // Add client health check function
@@ -128,18 +118,8 @@ export const resetSupabaseClient = async () => {
     // Wait a moment for everything to clear
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Return a new client instance with the API key properly set
-    const newClient = createClient<Database>(supabaseUrl, supabaseKey, {
-      ...supabaseOptions,
-      global: {
-        ...supabaseOptions.global,
-        headers: {
-          ...supabaseOptions.global.headers,
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-        }
-      }
-    });
+    // Return a new client instance
+    const newClient = createClient<Database>(supabaseUrl, supabaseKey, supabaseOptions);
     
     console.log('Supabase client reset successfully');
     return newClient;
