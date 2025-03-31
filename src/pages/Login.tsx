@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { LoginForm } from "@/components/auth/LoginForm";
@@ -9,12 +9,25 @@ import { LoginTimeoutAlert } from "@/components/auth/LoginTimeoutAlert";
 import { LoginProgress } from "@/components/auth/LoginProgress";
 import { useLoginState } from "@/hooks/useLoginState";
 import { useLoginInitialization } from "@/hooks/useLoginInitialization";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
   const [connectionIssue, setConnectionIssue] = useState(false);
   
   // Initialize login page and check for issues
   useLoginInitialization(setConnectionIssue);
+  
+  // Check if already logged in
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        window.location.href = '/dashboard';
+      }
+    };
+    
+    checkExistingSession();
+  }, []);
   
   // Get login state and handlers
   const {

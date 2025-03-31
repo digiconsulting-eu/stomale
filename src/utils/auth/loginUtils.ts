@@ -14,6 +14,9 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     // Reset the client before login to ensure clean state
     await resetSupabaseClient();
     
+    // Add a small delay to ensure client is reset
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
     // Use straightforward login approach with proper error handling
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -26,6 +29,9 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
       console.error('Login error:', error);
       throw error;
     }
+    
+    // Add a small delay after successful login to ensure session is properly set
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     console.log('Login successful:', data?.user?.email);
     return { data, error: null };

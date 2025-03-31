@@ -107,12 +107,26 @@ export const useLoginState = () => {
       // Complete the progress bar
       setLoginProgress(100);
 
-      // Check if user is admin
-      const isAdmin = await checkIsAdmin(data.email);
-      console.log("Admin check result:", { isAdmin });
+      // Check if user is admin - with retry for better reliability
+      let isAdmin = false;
+      try {
+        isAdmin = await checkIsAdmin(data.email);
+        console.log("Admin check result:", { isAdmin });
+      } catch (adminCheckError) {
+        console.error("Error checking admin status:", adminCheckError);
+        // Retry once
+        try {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          isAdmin = await checkIsAdmin(data.email);
+        } catch (retryError) {
+          console.error("Retry admin check failed:", retryError);
+        }
+      }
       
+      // Update local storage session info
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+      localStorage.setItem('userEmail', data.email);
       
       // Clear the last login attempt marker
       localStorage.removeItem('last-login-attempt');

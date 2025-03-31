@@ -34,17 +34,41 @@ export const useLoginInitialization = (setConnectionIssue: (value: boolean) => v
         if (now - lastAttemptTime > 3 * 60 * 1000) {
           console.log('Found stale login attempt, resetting auth state');
           localStorage.removeItem('last-login-attempt');
+          await resetAuthClient();
         }
       }
       
-      // Check if Supabase is reachable - use GET request instead of HEAD
-      // Allow some time before marking as connection issue to handle temporary issues
-      setTimeout(async () => {
-        const isClientHealthy = await checkClientHealth();
-        if (!isClientHealthy) {
+      // Check if Supabase is reachable - use direct fetch for more reliability
+      const checkConnection = async () => {
+        try {
+          const isClientHealthy = await checkClientHealth();
+          if (!isClientHealthy) {
+            console.error('Supabase client health check failed');
+            setConnectionIssue(true);
+          } else {
+            console.log('Supabase client health check passed');
+            setConnectionIssue(false);
+          }
+        } catch (error) {
+          console.error('Error checking client health:', error);
           setConnectionIssue(true);
         }
-      }, 2000);
+      };
+      
+      // First quick check
+      await checkConnection();
+      
+      // If there's an issue, try resetting the client and check again after a short delay
+      if (setConnectionIssue) {
+        setTimeout(async () => {
+          try {
+            await resetSupabaseClient();
+            await checkConnection();
+          } catch (error) {
+            console.error('Error in delayed connection check:', error);
+          }
+        }, 2000);
+      }
     };
     
     checkAndCleanupState();

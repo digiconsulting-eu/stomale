@@ -6,7 +6,7 @@ import type { AuthFlowType } from '@supabase/supabase-js';
 const supabaseUrl = "https://hnuhdoycwpjfjhthfqbt.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudWhkb3ljd3BqZmpodGhmcWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwOTAxOTcsImV4cCI6MjA0ODY2NjE5N30.oE_g8iFcu9UdsHeZhFLYpArJWa7hNFWnsR5x1E8ZGA0";
 
-// Fixed initialization options for better stability
+// Enhanced initialization options for better stability
 const supabaseOptions = {
   auth: {
     persistSession: true,
@@ -14,6 +14,7 @@ const supabaseOptions = {
     autoRefreshToken: true,
     detectSessionInUrl: true,
     flowType: 'pkce' as AuthFlowType,
+    debug: true, // Enable debug mode to log auth events
   },
   global: {
     headers: {
@@ -36,13 +37,17 @@ export const checkClientHealth = async (): Promise<boolean> => {
     console.log('Checking Supabase client health...');
     
     // Use a simple GET request instead of HEAD to check if client can reach Supabase
-    const { data, error } = await supabase
-      .from('PATOLOGIE')
-      .select('id')
-      .limit(1);
+    const response = await fetch(`${supabaseUrl}/rest/v1/PATOLOGIE?select=id&limit=1`, {
+      method: 'GET',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+      }
+    });
     
-    if (error) {
-      console.error('Supabase health check failed:', error);
+    if (!response.ok) {
+      console.error('Supabase health check failed with HTTP status:', response.status);
       return false;
     }
     
@@ -60,7 +65,7 @@ export const resetSupabaseClient = async () => {
     console.log('Resetting Supabase client state...');
     
     // Sign out to clear session
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: 'local' });
     
     // Clear local storage auth data
     localStorage.removeItem('stomale-auth');
@@ -83,13 +88,17 @@ export const verifyApiKeyWorks = async () => {
   try {
     console.log('Verifying Supabase API key is working...');
     
-    const { data, error } = await supabase
-      .from('PATOLOGIE')
-      .select('id')
-      .limit(1);
+    const response = await fetch(`${supabaseUrl}/rest/v1/PATOLOGIE?select=id&limit=1`, {
+      method: 'GET',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+      }
+    });
     
-    if (error) {
-      console.error('API key verification failed:', error);
+    if (!response.ok) {
+      console.error('API key verification failed with HTTP status:', response.status);
       return false;
     }
     
@@ -102,4 +111,11 @@ export const verifyApiKeyWorks = async () => {
 };
 
 // Check the API key immediately
-verifyApiKeyWorks();
+verifyApiKeyWorks()
+  .then(isWorking => {
+    if (isWorking) {
+      console.log('Supabase API key is valid and working');
+    } else {
+      console.error('Supabase API key is not working correctly');
+    }
+  });
