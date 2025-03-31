@@ -35,10 +35,10 @@ export const checkClientHealth = async (): Promise<boolean> => {
   try {
     console.log('Checking Supabase client health...');
     
-    // Check if client can reach Supabase with a minimal query
-    const { error } = await supabase
+    // Use a simple GET request instead of HEAD to check if client can reach Supabase
+    const { data, error } = await supabase
       .from('PATOLOGIE')
-      .select('count(*)', { count: 'exact', head: true })
+      .select('id')
       .limit(1);
     
     if (error) {

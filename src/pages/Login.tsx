@@ -51,11 +51,14 @@ export default function Login() {
         }
       }
       
-      // Check if Supabase is reachable
-      const isClientHealthy = await checkClientHealth();
-      if (!isClientHealthy) {
-        setConnectionIssue(true);
-      }
+      // Check if Supabase is reachable - use GET request instead of HEAD
+      // Allow some time before marking as connection issue to handle temporary issues
+      setTimeout(async () => {
+        const isClientHealthy = await checkClientHealth();
+        if (!isClientHealthy) {
+          setConnectionIssue(true);
+        }
+      }, 2000);
     };
     
     checkAndCleanupState();
@@ -102,13 +105,9 @@ export default function Login() {
 
   const checkSupabaseHealth = async () => {
     try {
-      const { data, error } = await supabase.from('users')
-        .select('count(*)', { count: 'exact', head: true })
-        .limit(1);
-      
-      return !error;
+      return await checkClientHealth();
     } catch (error) {
-      console.error('Supabase health check failed:', error);
+      console.error('Error during Supabase health check:', error);
       return false;
     }
   };
@@ -117,6 +116,8 @@ export default function Login() {
     // Prevent multiple submissions
     if (isLoading) return;
     
+    // Clear connection issue state when attempting login
+    setConnectionIssue(false);
     setIsLoading(true);
     setLoginAttempt(prev => prev + 1);  // Increment retry counter
     console.log("Starting login process for:", data.email, "Attempt:", loginAttempt + 1);

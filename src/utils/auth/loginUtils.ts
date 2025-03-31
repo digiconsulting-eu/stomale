@@ -14,21 +14,11 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     // Reset the client before login to ensure clean state
     await resetSupabaseClient();
     
-    // Apply a reasonable timeout
-    const { data, error } = await Promise.race([
-      supabase.auth.signInWithPassword({
-        email,
-        password
-      }),
-      new Promise<{data: null, error: Error}>((_, reject) => {
-        setTimeout(() => {
-          reject({
-            data: null,
-            error: new Error('Login timeout - La richiesta ha impiegato troppo tempo.')
-          });
-        }, 12000);
-      })
-    ]);
+    // Use straightforward login approach with proper error handling
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
     
     clearTimeout(timeoutId);
     
