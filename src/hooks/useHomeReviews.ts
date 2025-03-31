@@ -1,7 +1,6 @@
-
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, resetSupabaseClient } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const useHomeReviews = () => {
@@ -11,12 +10,7 @@ export const useHomeReviews = () => {
       console.log('Starting reviews fetch for homepage...');
       
       try {
-        // Force a session refresh to ensure we have the latest auth state
-        await supabase.auth.refreshSession().catch(err => {
-          console.log('Session refresh failed, continuing with request', err);
-        });
-        
-        // Improved query with explicit API key in headers
+        // Try to fetch reviews with current client
         const { data, error } = await supabase
           .from('reviews')
           .select(`
@@ -37,72 +31,58 @@ export const useHomeReviews = () => {
           .order('created_at', { ascending: false })
           .limit(12);
 
+        // If there's an error, try resetting the client and retry once
         if (error) {
-          console.error('Error fetching reviews:', error);
-          throw error;
+          console.error('Initial fetch error, attempting reset:', error);
+          await resetSupabaseClient();
+          
+          // Retry fetch after reset
+          const { data: retryData, error: retryError } = await supabase
+            .from('reviews')
+            .select(`
+              id,
+              title,
+              experience,
+              username,
+              created_at,
+              condition_id,
+              likes_count,
+              comments_count,
+              PATOLOGIE (
+                id,
+                Patologia
+              )
+            `)
+            .eq('status', 'approved')
+            .order('created_at', { ascending: false })
+            .limit(12);
+            
+          if (retryError) {
+            console.error('Retry fetch error:', retryError);
+            throw retryError;
+          }
+          
+          return retryData || [];
         }
 
-        console.log('Fetched reviews for homepage:', data?.length);
-        
-        // Always handle the case of empty data or null
-        if (!data || data.length === 0) {
-          console.log('No reviews returned from API');
-          // Return empty array instead of null
-          return [];
-        }
-        
-        // Create a set of mock reviews if the API returns empty or corrupted data
-        if (data.length === 0 || !data[0]?.PATOLOGIE?.Patologia) {
-          console.warn('Reviews returned without proper PATOLOGIE relation, creating fallback data');
-          
-          // Return mock data to ensure UI doesn't break
-          return Array(4).fill(null).map((_, i) => ({
-            id: i + 1000,
-            title: "Esempio Recensione",
-            experience: "Questa è un'esperienza di esempio. I contenuti reali saranno disponibili a breve.",
-            username: "Utente",
-            created_at: new Date().toISOString(),
-            likes_count: 0,
-            comments_count: 0,
-            PATOLOGIE: {
-              id: i + 100,
-              Patologia: "Patologia Esempio"
-            }
-          }));
-        }
-        
-        // Transform and standardize the data to prevent UI errors
-        const normalizedReviews = data.map(review => ({
-          ...review,
-          username: review.username || 'Anonimo',
-          likes_count: typeof review.likes_count === 'number' ? review.likes_count : 0,
-          comments_count: typeof review.comments_count === 'number' ? review.comments_count : 0,
-          experience: review.experience || 'Nessuna esperienza descritta',
-          // Ensure PATOLOGIE is present and valid
-          PATOLOGIE: review.PATOLOGIE || { id: 0, Patologia: 'Patologia non specificata' }
-        }));
-        
-        return normalizedReviews;
+        console.log('Fetched reviews count:', data?.length || 0);
+        return data || [];
       } catch (error) {
         console.error('Error in homepage reviews fetch:', error);
         throw error;
       }
     },
-    staleTime: 0, 
-    refetchOnWindowFocus: false, // Set to false to avoid multiple refetches
-    refetchOnReconnect: true,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 
   // Force a refetch on mount
   useEffect(() => {
     console.log('Index component mounted, forcing refetch of reviews');
     refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [refetch]);
 
-  // Prepare schema data for SEO
+  // Prepare schema data for SEO (keep this part the same)
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",

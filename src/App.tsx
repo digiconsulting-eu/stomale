@@ -12,18 +12,18 @@ import { AuthStateHandler } from "./components/auth/AuthStateHandler";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { AuthModal } from "./components/auth/AuthModal";
 import { useState, useEffect } from "react";
-import { supabase } from "./integrations/supabase/client";
+import { supabase, checkClientHealth, resetSupabaseClient } from "./integrations/supabase/client";
 import { toast } from "sonner";
-import { checkSessionHealth } from "./utils/auth";
 import { SessionMonitor } from "./components/auth/SessionMonitor";
 
+// Configure the query client with more aggressive retry settings
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
-      refetchOnWindowFocus: true, // Changed to true to help with stale sessions
-      staleTime: 30000,
-      gcTime: 5 * 60 * 1000,
+      retry: 3,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      staleTime: 1000 * 60, // 1 minute
+      gcTime: 1000 * 60 * 5, // 5 minutes
     },
   },
 });
@@ -39,8 +39,13 @@ const App = () => {
       try {
         console.log("Initializing app...");
         
-        // First, check session health and refresh if needed
-        await checkSessionHealth();
+        // Initialize with a health check
+        const isHealthy = await checkClientHealth();
+        
+        if (!isHealthy) {
+          console.log("Client health check failed, attempting reset");
+          await resetSupabaseClient();
+        }
         
         // Get the current session (potentially refreshed)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -56,22 +61,9 @@ const App = () => {
 
         console.log("Session check completed", session ? session.user?.email : 'No active session');
 
-        // Initialize auth state listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-          console.log("Auth state changed:", event, session?.user?.email);
-          if (event === 'SIGNED_IN' && isMounted) {
-            queryClient.invalidateQueries();
-          }
-        });
-
         if (isMounted) {
           setIsLoading(false);
         }
-
-        return () => {
-          subscription.unsubscribe();
-        };
-
       } catch (error) {
         console.error("Critical initialization error:", error);
         if (isMounted) {
@@ -90,13 +82,13 @@ const App = () => {
         console.log("Initialization timeout reached");
         setIsLoading(false);
       }
-    }, 3000); // Reduced timeout to 3 seconds
+    }, 5000); // Reduced timeout to 5 seconds for better UX
 
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [isLoading]); // Added isLoading to dependencies
+  }, []); 
 
   if (isLoading) {
     return (

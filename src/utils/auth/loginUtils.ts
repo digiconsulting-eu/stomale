@@ -1,23 +1,20 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, resetSupabaseClient } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const loginWithEmailPassword = async (email: string, password: string) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
     controller.abort();
-  }, 20000);
+  }, 15000);
   
   try {
     console.log('Starting login process for:', email);
     
-    // Ensure we start with a clean state
-    await supabase.auth.signOut({ scope: 'local' });
+    // Reset the client before login to ensure clean state
+    await resetSupabaseClient();
     
-    // Wait a moment for any pending operations to complete
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Apply a timeout with a race condition
+    // Apply a reasonable timeout
     const { data, error } = await Promise.race([
       supabase.auth.signInWithPassword({
         email,
@@ -29,7 +26,7 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
             data: null,
             error: new Error('Login timeout - La richiesta ha impiegato troppo tempo.')
           });
-        }, 18000);
+        }, 12000);
       })
     ]);
     

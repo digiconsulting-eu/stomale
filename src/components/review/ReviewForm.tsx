@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -8,16 +7,8 @@ import { toast } from "sonner";
 import { ConditionSelect } from "@/components/form/ConditionSelect";
 import { ReviewFormFields } from "./ReviewFormFields";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, checkClientHealth, resetSupabaseClient } from "@/integrations/supabase/client";
 import { useState, useEffect, useRef } from "react";
-
-// Define a type for Supabase response
-interface SupabaseResponse {
-  error: { message: string } | null;
-  data: any;
-  status?: number;
-  statusText?: string;
-}
 
 const formSchema = z.object({
   condition: z.string().min(1, "Seleziona una patologia"),
@@ -79,6 +70,12 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       try {
         console.log('Validating condition:', currentCondition);
         
+        // Check if the client is healthy before validation
+        const isHealthy = await checkClientHealth();
+        if (!isHealthy) {
+          await resetSupabaseClient();
+        }
+        
         // Check if the condition exists in the database
         const { data, error } = await supabase
           .from('PATOLOGIE')
@@ -138,7 +135,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
     if (form.getValues("condition")) {
       validateCondition();
     }
-  }, [form.watch("condition"), defaultCondition, form]);
+  }, [form, defaultCondition]);
 
   const onSubmit = async (data: FormValues) => {
     if (isSubmitting) return;
@@ -166,6 +163,12 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         setSubmissionError("La richiesta ha impiegato troppo tempo. Riprova più tardi.");
         toast.error("Timeout durante l'invio della recensione. Riprova più tardi.");
       }, 20000);
+
+      // Check client health before proceeding
+      const isHealthy = await checkClientHealth();
+      if (!isHealthy) {
+        await resetSupabaseClient();
+      }
 
       // Check authentication
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();

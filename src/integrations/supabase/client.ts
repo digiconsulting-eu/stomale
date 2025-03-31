@@ -6,39 +6,37 @@ import type { AuthFlowType } from '@supabase/supabase-js';
 const supabaseUrl = "https://hnuhdoycwpjfjhthfqbt.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhudWhkb3ljd3BqZmpodGhmcWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMwOTAxOTcsImV4cCI6MjA0ODY2NjE5N30.oE_g8iFcu9UdsHeZhFLYpArJWa7hNFWnsR5x1E8ZGA0";
 
-// Enhanced options for better session handling
+// Fixed initialization options for better stability
 const supabaseOptions = {
   auth: {
     persistSession: true,
     storageKey: 'stomale-auth',
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    flowType: 'pkce' as AuthFlowType, // Type cast to resolve TypeScript error
+    flowType: 'pkce' as AuthFlowType,
   },
   global: {
     headers: {
       'x-client-info': `supabase-js/2.46.2`,
-      'apikey': supabaseKey,
-      'Authorization': `Bearer ${supabaseKey}`
     },
   },
   realtime: {
     params: {
-      eventsPerSecond: 2
+      eventsPerSecond: 1
     }
   }
 };
 
-// Initialize client with improved error handling
+// Initialize a single instance of the Supabase client to prevent multiple instances
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, supabaseOptions);
 
-// Add client health check function
+// Improved client health check function with better error handling
 export const checkClientHealth = async (): Promise<boolean> => {
   try {
     console.log('Checking Supabase client health...');
     
-    // Simple ping to check if client can reach Supabase
-    const { data, error } = await supabase
+    // Check if client can reach Supabase with a minimal query
+    const { error } = await supabase
       .from('PATOLOGIE')
       .select('count(*)', { count: 'exact', head: true })
       .limit(1);
@@ -51,56 +49,43 @@ export const checkClientHealth = async (): Promise<boolean> => {
     console.log('Supabase client health check passed');
     return true;
   } catch (error) {
-    console.error('Supabase client health check failed:', error);
+    console.error('Supabase client health check failed with exception:', error);
     return false;
   }
 };
 
-// Reset the Supabase client - useful when client state gets corrupted
+// Reset the Supabase client with cleaner approach
 export const resetSupabaseClient = async () => {
   try {
     console.log('Resetting Supabase client state...');
     
-    // Sign out first to clear any existing session
+    // Sign out to clear session
     await supabase.auth.signOut();
     
     // Clear local storage auth data
     localStorage.removeItem('stomale-auth');
-    localStorage.removeItem('supabase.auth.token');
     
-    // Wait a moment for everything to clear
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Return a new client instance with API key properly set
-    const newClient = createClient<Database>(supabaseUrl, supabaseKey, {
-      ...supabaseOptions,
-      global: {
-        ...supabaseOptions.global,
-        headers: {
-          ...supabaseOptions.global.headers,
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-        }
-      }
-    });
+    // Wait for cleanup
+    await new Promise(resolve => setTimeout(resolve, 300));
     
     console.log('Supabase client reset successfully');
-    return newClient;
+    
+    // Return the existing client after reset (no need to create a new one)
+    return supabase;
   } catch (error) {
     console.error('Failed to reset Supabase client:', error);
     throw error;
   }
 };
 
-// Function to verify API key is working
+// Verify API key is working
 export const verifyApiKeyWorks = async () => {
   try {
     console.log('Verifying Supabase API key is working...');
     
-    // Fetch a simple public query to verify the API key works
     const { data, error } = await supabase
       .from('PATOLOGIE')
-      .select('*')
+      .select('id')
       .limit(1);
     
     if (error) {
@@ -116,9 +101,5 @@ export const verifyApiKeyWorks = async () => {
   }
 };
 
-// Check the API key on load
-verifyApiKeyWorks().then(works => {
-  if (!works) {
-    console.error('WARNING: Supabase API key verification failed on load');
-  }
-});
+// Check the API key immediately
+verifyApiKeyWorks();
