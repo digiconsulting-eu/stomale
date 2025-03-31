@@ -34,8 +34,15 @@ const supabaseOptions = {
       // Include a retry mechanism for network errors
       const fetchWithRetry = async (attemptsLeft: number = 3): Promise<Response> => {
         try {
+          // Ensure request has appropriate headers including API key
+          const headers = {
+            ...options.headers,
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          };
+
           console.log(`Making Supabase request to ${url.split('?')[0]} with ${attemptsLeft} attempts left`);
-          const response = await fetch(url, options);
+          const response = await fetch(url, { ...options, headers });
           
           // Log response status
           console.log(`Supabase response status: ${response.status} for ${url.split('?')[0]}`);
@@ -118,8 +125,18 @@ export const resetSupabaseClient = async () => {
     // Wait a moment for everything to clear
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Return a new client instance
-    const newClient = createClient<Database>(supabaseUrl, supabaseKey, supabaseOptions);
+    // Return a new client instance with API key properly set
+    const newClient = createClient<Database>(supabaseUrl, supabaseKey, {
+      ...supabaseOptions,
+      global: {
+        ...supabaseOptions.global,
+        headers: {
+          ...supabaseOptions.global.headers,
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+        }
+      }
+    });
     
     console.log('Supabase client reset successfully');
     return newClient;
