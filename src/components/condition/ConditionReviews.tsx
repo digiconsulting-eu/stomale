@@ -2,9 +2,8 @@
 import { ReviewCard } from "@/components/ReviewCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
 
 interface Review {
   id: number;
@@ -40,7 +39,11 @@ export const ConditionReviews = ({
   condition,
   onRetry 
 }: ConditionReviewsProps) => {
-  console.log('ConditionReviews rendering with:', { reviews, condition, isLoading });
+  console.log('ConditionReviews rendering with:', { 
+    reviewsCount: reviews?.length, 
+    condition, 
+    isLoading 
+  });
 
   if (isLoading) {
     return (
@@ -87,8 +90,7 @@ export const ConditionReviews = ({
   return (
     <div className="space-y-4">
       {reviews.map((review) => {
-        console.log('Rendering review:', review);
-        // Assicuriamoci che commentsCount sia un numero
+        // Ensure commentsCount is a number
         const commentsCount = typeof review.comments_count === 'number' ? review.comments_count : 0;
         
         return (
@@ -98,7 +100,9 @@ export const ConditionReviews = ({
             title={review.title}
             condition={condition}
             date={new Date(review.created_at).toLocaleDateString()}
-            preview={review.experience.slice(0, 200) + '...'}
+            preview={review.experience && review.experience.length > 200 
+              ? review.experience.slice(0, 200) + '...' 
+              : review.experience || ''}
             username={review.username}
             likesCount={review.likes_count || 0}
             commentsCount={commentsCount}

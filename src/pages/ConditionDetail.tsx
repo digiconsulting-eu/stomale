@@ -18,7 +18,9 @@ export default function ConditionDetail() {
   const [forceRefresh, setForceRefresh] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
-  const { conditionName } = useParams();
+  const { condition } = useParams();
+  
+  console.log("ConditionDetail rendering with condition param:", condition);
   
   const { 
     patologiaData, 
@@ -27,9 +29,9 @@ export default function ConditionDetail() {
     retryFetch 
   } = useConditionData();
 
-  const conditionTitle = conditionName ? capitalizeFirstLetter(conditionName) : '';
-  const pageTitle = conditionName ? `${conditionName.toUpperCase()} | Recensioni ed Esperienze | StoMale.info` : '';
-  const metaDescription = getConditionMetaDescription(conditionName || '');
+  const conditionTitle = condition ? capitalizeFirstLetter(condition) : '';
+  const pageTitle = condition ? `${condition.toUpperCase()} | Recensioni ed Esperienze | StoMale.info` : '';
+  const metaDescription = getConditionMetaDescription(condition || '');
 
   // Check if user is admin
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function ConditionDetail() {
   }, []);
 
   useEffect(() => {
-    if (conditionName) {
+    if (condition) {
       // Set the document title through useEffect for client-side rendering
       document.title = pageTitle;
       
@@ -65,11 +67,11 @@ export default function ConditionDetail() {
         metaDescriptionTag.setAttribute('content', metaDescription);
       }
     }
-  }, [conditionName, pageTitle, metaDescription]);
+  }, [condition, pageTitle, metaDescription]);
 
   useEffect(() => {
     if (reviews && reviews.length > 0) {
-      console.log(`Found ${reviews.length} reviews for condition '${conditionName}'`);
+      console.log(`Found ${reviews.length} reviews for condition '${condition}'`);
       // Safely check for the symptoms property 
       if (reviews[0].experience) {
         console.log('First review experience:', reviews[0].experience.substring(0, 50) + '...');
@@ -77,9 +79,9 @@ export default function ConditionDetail() {
         console.log('No experience found in the first review');
       }
     } else {
-      console.log(`No reviews found for condition '${conditionName}'`);
+      console.log(`No reviews found for condition '${condition}'`);
     }
-  }, [reviews, conditionName]);
+  }, [reviews, condition]);
 
   const stats = calculateStats(reviews);
   const ratingValue = calculateRating(stats);
@@ -89,7 +91,7 @@ export default function ConditionDetail() {
   };
 
   const handleNewReview = () => {
-    navigate(`/nuova-recensione?patologia=${conditionName}`);
+    navigate(`/nuova-recensione?patologia=${condition}`);
   };
 
   const handleRetryLoad = () => {
@@ -99,22 +101,22 @@ export default function ConditionDetail() {
     retryFetch();
   };
 
-  if (!conditionName) {
+  if (!condition) {
     return <div className="container py-8">Caricamento in corso...</div>;
   }
 
   return (
     <div className="container py-8">
-      <ConditionSEO condition={conditionName} reviews={reviews} />
+      <ConditionSEO condition={condition} reviews={reviews} />
       
       <ConditionSchema 
-        condition={conditionName} 
+        condition={condition} 
         reviews={reviews} 
         ratingValue={ratingValue} 
       />
       
       <ConditionHeader 
-        condition={conditionName} 
+        condition={condition} 
         conditionId={patologiaData?.id || 0} 
       />
 
@@ -125,13 +127,13 @@ export default function ConditionDetail() {
 
         <div className="md:col-span-8">
           <ConditionActions
-            condition={conditionName}
+            condition={condition}
             onNavigate={handleNavigate}
             onNewReview={handleNewReview}
           />
 
           <ConditionContent 
-            condition={conditionName} 
+            condition={condition} 
             isAdmin={isAdmin}
             reviewsCount={reviews?.length || 0}
             reviews={reviews}
@@ -142,7 +144,7 @@ export default function ConditionDetail() {
       </div>
 
       <div className="mt-8">
-        <Disclaimer condition={capitalizeFirstLetter(conditionName)} />
+        <Disclaimer condition={capitalizeFirstLetter(condition)} />
       </div>
     </div>
   );

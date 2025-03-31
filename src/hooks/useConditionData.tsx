@@ -3,20 +3,32 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DatabaseReview, Review } from "@/types/review";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const useConditionData = () => {
   const { condition } = useParams();
   const [retryCount, setRetryCount] = useState(0);
+  
+  console.log("useConditionData hook called with condition:", condition);
 
   // Fetch condition data
-  const { data: patologiaData } = useQuery({
+  const { data: patologiaData, isLoading: patologiaLoading } = useQuery({
     queryKey: ["patologia", condition, retryCount],
     queryFn: async () => {
-      if (!condition) return null;
+      if (!condition) {
+        console.error("No condition provided to useConditionData");
+        return null;
+      }
+      
+      console.log("Fetching patologia data for:", condition);
       
       // Refresh the session first
-      await supabase.auth.refreshSession();
+      try {
+        await supabase.auth.refreshSession();
+      } catch (error) {
+        console.error("Failed to refresh session:", error);
+        // Continue anyway
+      }
       
       const { data, error } = await supabase
         .from('PATOLOGIE')
@@ -29,6 +41,7 @@ export const useConditionData = () => {
         throw error;
       }
       
+      console.log("Patologia data fetched:", data);
       return data;
     },
     enabled: !!condition,
@@ -45,7 +58,12 @@ export const useConditionData = () => {
       
       try {
         // Refresh session first
-        await supabase.auth.refreshSession();
+        try {
+          await supabase.auth.refreshSession();
+        } catch (error) {
+          console.error("Failed to refresh session:", error);
+          // Continue anyway
+        }
         
         const { data, error } = await supabase
           .from('reviews')
@@ -76,6 +94,7 @@ export const useConditionData = () => {
 
   // Function to retry fetching data
   const retryFetch = () => {
+    console.log("Retrying data fetch...");
     setRetryCount(prev => prev + 1);
     refetch();
   };
@@ -117,7 +136,7 @@ export const useConditionData = () => {
     condition,
     patologiaData,
     reviews,
-    isLoading: reviewsLoading,
+    isLoading: patologiaLoading || reviewsLoading,
     retryFetch
   };
 };
