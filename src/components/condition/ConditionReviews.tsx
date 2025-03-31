@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Disclaimer } from "@/components/Disclaimer";
 
 interface Review {
   id: number;
@@ -83,30 +84,35 @@ export const ConditionReviews = ({
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">Non ci sono ancora recensioni per questa patologia.</p>
+        <div className="mt-4">
+          <Disclaimer condition={condition} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       {reviews.map((review) => {
         // Ensure commentsCount is a number
         const commentsCount = typeof review.comments_count === 'number' ? review.comments_count : 0;
         
         return (
-          <ReviewCard 
-            key={review.id}
-            id={review.id}
-            title={review.title}
-            condition={condition}
-            date={new Date(review.created_at).toLocaleDateString()}
-            preview={review.experience && review.experience.length > 200 
-              ? review.experience.slice(0, 200) + '...' 
-              : review.experience || ''}
-            username={review.username}
-            likesCount={review.likes_count || 0}
-            commentsCount={commentsCount}
-          />
+          <div key={review.id} className="space-y-4">
+            <ReviewCard 
+              id={review.id}
+              title={review.title}
+              condition={condition}
+              date={new Date(review.created_at).toLocaleDateString()}
+              preview={review.experience && review.experience.length > 200 
+                ? review.experience.slice(0, 200) + '...' 
+                : review.experience || ''}
+              username={review.username}
+              likesCount={review.likes_count || 0}
+              commentsCount={commentsCount}
+            />
+            <Disclaimer condition={condition} />
+          </div>
         );
       })}
     </div>
