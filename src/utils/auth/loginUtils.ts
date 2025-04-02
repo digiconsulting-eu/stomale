@@ -27,6 +27,10 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('userEmail');
     
+    // CRITICAL FIX: Generate a unique login attempt ID to track this specific attempt
+    const loginAttemptId = `login-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    localStorage.setItem('currentLoginAttempt', loginAttemptId);
+    
     // Use straightforward login approach with proper error handling
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -40,14 +44,35 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
       throw error;
     }
     
+    // CRITICAL: Check if this is still the current login attempt
+    const currentAttemptId = localStorage.getItem('currentLoginAttempt');
+    if (currentAttemptId !== loginAttemptId) {
+      console.log('Another login attempt was initiated, discarding results of this one');
+      throw new Error('Login superseded by another attempt');
+    }
+    
     // Add a larger delay after successful login to ensure session is properly set
-    // CRITICAL FIX: Longer delay to ensure session establishment
     await new Promise(resolve => setTimeout(resolve, 1500));
     
+    // CRITICAL: Verify session was actually created
+    const { data: sessionCheck } = await supabase.auth.getSession();
+    
+    if (!sessionCheck.session) {
+      console.error('Session verification failed after login');
+      throw new Error('Non è stato possibile creare una sessione valida');
+    }
+    
     console.log('Login successful:', data?.user?.email);
+    
+    // Clear the login attempt tracker
+    localStorage.removeItem('currentLoginAttempt');
+    
     return { data, error: null };
   } catch (error: any) {
     clearTimeout(timeoutId);
+    
+    // Clear login attempt tracker on error too
+    localStorage.removeItem('currentLoginAttempt');
     
     if (error.name === 'AbortError' || controller.signal.aborted || 
         error.message?.includes('timeout') || error.message?.includes('impiegato troppo tempo')) {

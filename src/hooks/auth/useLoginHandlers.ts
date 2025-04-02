@@ -142,24 +142,24 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
       
-      // CRITICAL CHANGE: Wait much longer before redirecting and ensure we maintain the session
-      // Add a delay before removing redirect prevention flags
-      // This allows the auth state to fully propagate
+      // CRITICAL FIX: First immediately direct to correct page
+      const redirectTarget = isAdmin ? '/admin' : '/dashboard'; 
+      
+      // CRITICAL FIX: Force immediate navigation but carefully clean up flags
+      console.log(`Login successful: Immediately redirecting to ${redirectTarget}`);
+      
+      // Clear redirect prevention flags right before redirect
+      sessionStorage.removeItem('onLoginPage');
+      localStorage.removeItem('preventRedirects');
+      localStorage.removeItem('loginPageActive');
+      
+      // Immediate redirect after successful login
+      navigate(redirectTarget, { replace: true });
+      
+      // Clean up processing flag after navigation
       setTimeout(() => {
-        console.log("Login successful: Now removing redirect prevention flags");
-        sessionStorage.removeItem('onLoginPage');
-        localStorage.removeItem('preventRedirects');
-        localStorage.removeItem('loginPageActive');
-        
-        // Now that flags are removed, it's safe to redirect
-        setTimeout(() => {
-          console.log("Redirecting to dashboard after successful login");
-          if (isProcessing.current) {
-            navigate('/dashboard', { replace: true });
-            isProcessing.current = false;
-          }
-        }, 2000); // Increased delay before redirect
-      }, 3000); // Increased delay before removing flags
+        isProcessing.current = false;
+      }, 100);
       
     } catch (error: any) {
       console.error('Error during login process:', error);

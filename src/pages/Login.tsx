@@ -6,8 +6,11 @@ import { LoginTimeoutAlert } from "@/components/auth/LoginTimeoutAlert";
 import { LoginProgress } from "@/components/auth/LoginProgress";
 import { LoginCard } from "@/components/auth/LoginCard";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const navigate = useNavigate();
+  
   const {
     connectionIssue,
     isLoading,
@@ -19,7 +22,6 @@ export default function Login() {
   } = useLoginPageState();
 
   // Set strong redirect prevention flags that will persist
-  // CRITICAL FIX: Make prevention flags stronger and more reliable
   useEffect(() => {
     console.log("Login page mount: Setting redirect prevention flags");
     
@@ -27,6 +29,27 @@ export default function Login() {
     sessionStorage.setItem('onLoginPage', 'true');
     localStorage.setItem('preventRedirects', 'true');
     localStorage.setItem('loginPageActive', Date.now().toString());
+    
+    // CRITICAL FIX: Check for existing logged-in state on page load
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    
+    if (isLoggedIn) {
+      console.log("User already logged in, redirecting");
+      const redirectTarget = isAdmin ? '/admin' : '/dashboard';
+      
+      // Small delay to ensure all systems recognize the logged-in state
+      setTimeout(() => {
+        // Clear redirect prevention flags before navigating
+        sessionStorage.removeItem('onLoginPage');
+        localStorage.removeItem('preventRedirects');
+        localStorage.removeItem('loginPageActive');
+        
+        // Navigate to appropriate destination
+        navigate(redirectTarget, { replace: true });
+      }, 500);
+      return;
+    }
     
     return () => {
       // Only clear these flags if we're not in the middle of a login process
@@ -43,7 +66,7 @@ export default function Login() {
         console.log("Login page unmount: Keeping redirect prevention flags - auth in progress or login succeeded");
       }
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="container mx-auto px-4 py-8">
