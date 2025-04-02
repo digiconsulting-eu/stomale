@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -12,11 +11,10 @@ import { getAdminEmails } from "@/utils/auth";
 import { Progress } from "@/components/ui/progress";
 import { checkSessionHealth } from "@/utils/auth/sessionUtils";
 
-// Update the interface to make email optional for manual imports
 interface ImportedUser {
-  id: string; // ID is required
-  username: string; // Username is still required
-  email?: string; // Email is optional
+  id: string;
+  username: string;
+  email?: string;
   birth_year?: string;
   gender?: string;
   created_at?: string;
@@ -35,8 +33,7 @@ export const UsersImport = () => {
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const { data: session } = useAuthSession();
   const importInProgress = useRef(false);
-  
-  // Fetch admin emails on component mount
+
   useEffect(() => {
     const loadAdminEmails = async () => {
       const emails = await getAdminEmails();
@@ -54,10 +51,8 @@ export const UsersImport = () => {
     setDebugInfo(null);
   };
 
-  // Function to refresh the session before starting an import
   const prepareForImport = async () => {
     try {
-      // Refresh the session to prevent token expiration during the import
       const sessionValid = await checkSessionHealth();
       if (!sessionValid) {
         toast.error("Sessione scaduta", {
@@ -77,7 +72,6 @@ export const UsersImport = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Prevent duplicate imports
     if (importInProgress.current) {
       toast.warning("Importazione già in corso");
       return;
@@ -89,7 +83,6 @@ export const UsersImport = () => {
     console.log('Starting user import process...');
 
     try {
-      // Prepare session for import
       const sessionReady = await prepareForImport();
       if (!sessionReady) {
         importInProgress.current = false;
@@ -97,7 +90,6 @@ export const UsersImport = () => {
         return;
       }
 
-      // Check if current user is admin
       const userEmail = session?.user?.email;
       
       if (!userEmail || !adminEmails.includes(userEmail)) {
@@ -116,7 +108,7 @@ export const UsersImport = () => {
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
       console.log('Raw JSON data:', JSON.stringify(jsonData).substring(0, 200) + '...');
-
+      
       if (jsonData.length === 0) {
         toast.error("Il file è vuoto");
         setIsLoading(false);
@@ -131,13 +123,11 @@ export const UsersImport = () => {
       
       setTotalRows(jsonData.length);
 
-      // Process in smaller batches to prevent timeouts
       const batchSize = 5;
       for (let i = 0; i < jsonData.length; i += batchSize) {
         const batch = jsonData.slice(i, i + batchSize);
         await processBatch(batch, i, validUsers, errors, timestamp);
         
-        // Re-verify session health every few batches
         if (i % 20 === 0 && i > 0) {
           await checkSessionHealth();
         }
@@ -148,10 +138,8 @@ export const UsersImport = () => {
         setImportError(errors.slice(0, 5).join('\n') + (errors.length > 5 ? `\n... e altri ${errors.length - 5} errori` : ''));
         
         if (errors.length <= 5) {
-          // Show individual errors if there are just a few
           errors.forEach(error => toast.error(error));
         } else {
-          // Show a summary if there are many errors
           toast.error(`${errors.length} errori durante l'importazione`, {
             description: "Controlla il pannello degli errori per i dettagli"
           });
@@ -200,7 +188,6 @@ export const UsersImport = () => {
         console.log(`Validating user row ${currentIndex + 1}:`, row);
         setDebugInfo(`Validazione riga ${currentIndex + 1} di ${totalRows}`);
         
-        // Extract user data
         const email = row['email'] || row['Email'];
         const username = row['username'] || row['Username'];
         
@@ -209,7 +196,6 @@ export const UsersImport = () => {
           continue;
         }
 
-        // Check if email is already in use, only if an email is provided
         if (email) {
           const { data: existingUsers, error: searchError } = await supabase
             .from('users')
@@ -228,19 +214,16 @@ export const UsersImport = () => {
           }
         }
 
-        // Create user object with automatically generated ID if not present
         const userId = row['id'] || row['ID'] || uuidv4();
         const birthYear = row['birth_year'] || row['Birth Year'] || row['Anno di Nascita'] || null;
         const gender = row['gender'] || row['Gender'] || row['Genere'] || null;
         const gdprConsent = row['gdpr_consent'] || row['GDPR Consent'] || true;
         
-        // Format date
         let createdAt;
         try {
           const dateInput = row['created_at'] || row['Created At'] || row['Data Registrazione'];
           if (dateInput) {
             if (typeof dateInput === 'number') {
-              // Handle Excel date format (days since 1900-01-01)
               const excelEpoch = new Date(1899, 11, 30);
               createdAt = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000).toISOString();
             } else {
@@ -254,14 +237,12 @@ export const UsersImport = () => {
           createdAt = new Date().toISOString();
         }
 
-        // Create user object with required fields and optional email
         const user: ImportedUser = {
-          id: userId.toString(), // Ensure id is a string and is always present
+          id: userId.toString(),
           username: username.toString(),
           created_at: createdAt
         };
         
-        // Add optional fields only if they have values
         if (email) user.email = email.toString();
         if (birthYear) user.birth_year = birthYear.toString();
         if (gender) user.gender = gender.toString();
@@ -271,7 +252,6 @@ export const UsersImport = () => {
         setDebugInfo(`Inserimento utente: ${user.username}`);
 
         try {
-          // First try inserting directly (for non-RLS protected tables)
           const { error: insertError } = await supabase
             .from('users')
             .insert(user);
@@ -279,15 +259,12 @@ export const UsersImport = () => {
           if (insertError) {
             console.error('Error inserting user directly:', insertError);
             
-            // If it's an RLS error, try with the admin function
             if (insertError.message.includes('row-level security policy')) {
               console.log('Using admin function to bypass RLS...');
               setDebugInfo(`Utilizzo funzione admin per utente: ${user.username}`);
               
-              // Add a small delay before calling the function to prevent rate limiting
               await new Promise(resolve => setTimeout(resolve, 100));
               
-              // Call the admin import function with more robust error handling
               try {
                 const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-import-user`, {
                   method: 'POST',
@@ -344,7 +321,6 @@ export const UsersImport = () => {
     }
 
     try {
-      // First check if session is still valid
       const sessionValid = await checkSessionHealth();
       if (!sessionValid) {
         toast.error("Sessione scaduta", {
@@ -353,9 +329,6 @@ export const UsersImport = () => {
         return;
       }
 
-      // To undo the last import, we need to find users with the
-      // specified timestamp and remove them manually, since we don't have an
-      // import_timestamp field in the users table
       const { error } = await supabase
         .from('users')
         .delete()
@@ -377,29 +350,24 @@ export const UsersImport = () => {
   };
 
   const downloadTemplate = () => {
-    // Create a new Excel sheet
     const wb = XLSX.utils.book_new();
     
-    // Define example data
     const data = [
       {
-        "Username": "NuovoUtente", // Required field
-        "Email": "esempio@email.com", // Optional field
+        "Username": "NuovoUtente",
+        "Email": "esempio@email.com",
         "Anno di Nascita": "1990",
         "Genere": "M",
         "Data Registrazione": new Date().toISOString().split('T')[0],
         "GDPR Consent": true,
-        // ID is optional, will be generated automatically if not present
+        "ID": uuidv4()
       }
     ];
     
-    // Convert to worksheet
     const ws = XLSX.utils.json_to_sheet(data);
     
-    // Add worksheet to workbook
     XLSX.utils.book_append_sheet(wb, ws, "Template Utenti");
     
-    // Download file
     XLSX.writeFile(wb, "template_utenti.xlsx");
   };
 
