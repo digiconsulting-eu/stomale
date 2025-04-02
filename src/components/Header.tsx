@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -21,6 +20,14 @@ export const Header = () => {
   }, [location.pathname]);
 
   useEffect(() => {
+    const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true' || 
+                          location.pathname === '/login';
+                          
+    if (isOnLoginPage) {
+      console.log("Header: On login page, skipping automatic auth checks");
+      return;
+    }
+    
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const isAuthenticated = !!session;
@@ -48,6 +55,11 @@ export const Header = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event);
       
+      if (sessionStorage.getItem('onLoginPage') === 'true' || location.pathname === '/login') {
+        console.log("Header: On login page, ignoring auth state change");
+        return;
+      }
+      
       if (event === 'SIGNED_IN') {
         console.log("User signed in:", session?.user?.email);
         setIsLoggedIn(true);
@@ -70,7 +82,6 @@ export const Header = () => {
         setIsLoggedIn(false);
         setIsAdmin(false);
         setIsMenuOpen(false);
-        // Only show toast when actually logging out, not during initial load
         if (localStorage.getItem('wasLoggedIn') === 'true') {
           toast.success("Logout effettuato con successo");
           localStorage.removeItem('wasLoggedIn');
@@ -81,19 +92,16 @@ export const Header = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   const handleLogout = async () => {
     try {
-      // Set a flag that we were logged in (for the toast message)
       localStorage.setItem('wasLoggedIn', 'true');
       
-      // First clear local state
       setIsLoggedIn(false);
       setIsAdmin(false);
       setIsMenuOpen(false);
       
-      // Then attempt signOut
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error during logout:', error);
@@ -101,18 +109,15 @@ export const Header = () => {
         return;
       }
       
-      // Clear any remaining local storage
       localStorage.removeItem('isLoggedIn');
       localStorage.removeItem('isAdmin');
       localStorage.removeItem('userEmail');
       
-      // Force navigation regardless of signOut success
       navigate('/', { replace: true });
     } catch (error) {
       console.error('Unexpected error during logout:', error);
       toast.error("Errore durante il logout");
       
-      // Force navigation even on error
       navigate('/', { replace: true });
     }
   };

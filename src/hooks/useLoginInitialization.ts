@@ -19,6 +19,8 @@ export const useLoginInitialization = (setConnectionIssue: (value: boolean) => v
       try {
         // Mark that we're on the login page to prevent redirects
         sessionStorage.setItem('onLoginPage', 'true');
+        localStorage.setItem('preventRedirects', 'true');
+        console.log("Login initialization: Setting redirect prevention flags");
         
         // Check for corrupted state
         const isCorrupted = await checkForCorruptedState();
@@ -95,6 +97,8 @@ export const useLoginInitialization = (setConnectionIssue: (value: boolean) => v
     return () => {
       isMounted = false;
       sessionStorage.removeItem('onLoginPage');
+      localStorage.removeItem('preventRedirects');
+      console.log("Login initialization: Clearing redirect prevention flags on unmount");
     };
   }, [setConnectionIssue]);
 };

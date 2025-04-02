@@ -98,6 +98,8 @@ export const useLoginState = (noAutoRedirect: boolean = false) => {
     // Prevent multiple submissions
     if (isLoading) return;
     
+    console.log("Login form submitted, handling login process");
+    
     // Check if already logged in first - only perform this check on submit
     const hasSession = await checkExistingSession();
     if (hasSession) {
@@ -186,6 +188,7 @@ export const useLoginState = (noAutoRedirect: boolean = false) => {
       
       // Clear the login page flag to allow redirects again
       sessionStorage.removeItem('onLoginPage');
+      localStorage.removeItem('preventRedirects');
 
       toast.success(
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"

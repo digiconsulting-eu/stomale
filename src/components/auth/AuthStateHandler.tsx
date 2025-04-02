@@ -59,11 +59,18 @@ export const AuthStateHandler = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.email);
       
-      // Check if we're on the login page before processing redirects
+      // Check if we're on the login page
       const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
+      const isLoginUrl = location.pathname === '/login';
+      
+      // Double check to prevent redirects on login page
+      if (isOnLoginPage || isLoginUrl) {
+        console.log("On login page, preventing automatic redirects");
+        return;
+      }
       
       if (event === 'SIGNED_IN') {
-        if (session && !isOnLoginPage) {
+        if (session) {
           try {
             const { data: adminData, error } = await supabase
               .from('admin')
@@ -78,9 +85,8 @@ export const AuthStateHandler = () => {
             const isAdmin = Array.isArray(adminData) && adminData.length > 0;
             queryClient.setQueryData(['adminStatus'], isAdmin);
             
-            // Redirect to dashboard on successful sign in
-            // Only redirect if we're not already on the dashboard AND not on the login page
-            if (location.pathname !== '/dashboard' && !isOnLoginPage) {
+            // Only redirect if we're not on the login page
+            if (location.pathname !== '/dashboard' && !isOnLoginPage && !isLoginUrl) {
               console.log("Redirecting to dashboard after sign in");
               navigate('/dashboard', { replace: true });
             } else {

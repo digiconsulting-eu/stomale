@@ -23,10 +23,16 @@ export default function Login() {
     // Set a flag in session storage to indicate we're on the login page
     // This will be used to prevent automatic redirects from auth state changes
     sessionStorage.setItem('onLoginPage', 'true');
+    console.log("Login page: Setting onLoginPage flag");
+    
+    // Also disable any automatic redirects in local storage
+    localStorage.setItem('preventRedirects', 'true');
     
     return () => {
-      // Clear the flag when leaving the login page
+      // Clear the flags when leaving the login page
+      console.log("Login page: Clearing onLoginPage flag");
       sessionStorage.removeItem('onLoginPage');
+      localStorage.removeItem('preventRedirects');
     };
   }, []);
 
