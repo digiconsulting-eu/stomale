@@ -47,7 +47,7 @@ export default function Login() {
         
         // Navigate to appropriate destination
         navigate(redirectTarget, { replace: true });
-      }, 500);
+      }, 100);
       return;
     }
     

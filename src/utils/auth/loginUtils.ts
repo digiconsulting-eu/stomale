@@ -64,6 +64,33 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     
     console.log('Login successful:', data?.user?.email);
     
+    // Store authentication details IMMEDIATELY after successful login
+    localStorage.setItem('isLoggedIn', 'true');
+    
+    // CRITICAL FIX: Pre-check admin status right after login
+    try {
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin')
+        .select('email')
+        .eq('email', email)
+        .single();
+      
+      const isAdmin = !!adminData && !adminError;
+      console.log('Pre-checking admin status:', isAdmin);
+      
+      if (isAdmin) {
+        localStorage.setItem('isAdmin', 'true');
+      } else {
+        localStorage.setItem('isAdmin', 'false');
+      }
+      
+      localStorage.setItem('userEmail', email);
+    } catch (adminError) {
+      console.error('Error pre-checking admin status:', adminError);
+      // Default to non-admin if check fails
+      localStorage.setItem('isAdmin', 'false');
+    }
+    
     // Clear the login attempt tracker
     localStorage.removeItem('currentLoginAttempt');
     

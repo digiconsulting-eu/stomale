@@ -31,13 +31,11 @@ export const AuthStateHandler = () => {
         // If we're not actually on the login page but flags say we are, clean them up
         if (!isLoginPage && (isOnLoginPage || hasPreventRedirects || isInLoginProcess)) {
           console.log("Not actually on login page but prevention flags found, cleaning up stale flags");
-          setTimeout(() => {
-            if (location.pathname !== '/login') {
-              sessionStorage.removeItem('onLoginPage');
-              localStorage.removeItem('preventRedirects');
-              localStorage.removeItem('loginPageActive');
-            }
-          }, 500);
+          if (location.pathname !== '/login') {
+            sessionStorage.removeItem('onLoginPage');
+            localStorage.removeItem('preventRedirects');
+            localStorage.removeItem('loginPageActive');
+          }
         }
         
         // Skip auth handling if on login page or redirect prevention is active
@@ -166,23 +164,37 @@ export const AuthStateHandler = () => {
           console.log("SIGNED_IN event detected with valid session");
           
           try {
-            const { data: adminData, error } = await supabase
-              .from('admin')
-              .select('email')
-              .eq('email', session.user.email);
+            // Wait a moment to ensure admin status is saved in localStorage
+            await new Promise(resolve => setTimeout(resolve, 200));
             
-            if (error) {
-              console.error("Error checking admin status:", error);
-              isProcessingAuthChange.current = false;
-              return;
+            // Check if admin status already determined in loginUtils
+            let isAdmin = localStorage.getItem('isAdmin') === 'true';
+            
+            // If admin status not yet determined, check it
+            if (isAdmin !== true) {
+              const { data: adminData, error } = await supabase
+                .from('admin')
+                .select('email')
+                .eq('email', session.user.email);
+              
+              if (error) {
+                console.error("Error checking admin status:", error);
+                isProcessingAuthChange.current = false;
+                return;
+              }
+              
+              isAdmin = Array.isArray(adminData) && adminData.length > 0;
+              queryClient.setQueryData(['adminStatus'], isAdmin);
+              
+              localStorage.setItem('isLoggedIn', 'true');
+              localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+              localStorage.setItem('userEmail', session.user.email);
             }
             
-            const isAdmin = Array.isArray(adminData) && adminData.length > 0;
-            queryClient.setQueryData(['adminStatus'], isAdmin);
-            
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-            localStorage.setItem('userEmail', session.user.email);
+            // CRITICAL FIX: Clear prevention flags BEFORE redirecting
+            sessionStorage.removeItem('onLoginPage');
+            localStorage.removeItem('preventRedirects');
+            localStorage.removeItem('loginPageActive');
             
             // CRITICAL FIX: Admin users should go to admin page
             const redirectTarget = isAdmin ? '/admin' : '/dashboard';

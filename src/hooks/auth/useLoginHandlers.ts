@@ -47,7 +47,17 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
     const hasSession = await checkExistingSession(noAutoRedirect);
     if (hasSession) {
       console.log("User already has a valid session, redirecting to dashboard");
-      navigate('/dashboard', { replace: true });
+      
+      // First check if the user is an admin
+      const isAdmin = localStorage.getItem('isAdmin') === 'true';
+      const redirectTarget = isAdmin ? '/admin' : '/dashboard';
+      
+      // Clear redirect prevention flags before redirecting
+      sessionStorage.removeItem('onLoginPage');
+      localStorage.removeItem('preventRedirects');
+      localStorage.removeItem('loginPageActive');
+      
+      navigate(redirectTarget, { replace: true });
       isProcessing.current = false;
       return;
     }
@@ -111,19 +121,23 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
       // Complete the progress bar
       setLoginProgress(100);
 
-      // Check if user is admin - with retry for better reliability
-      let isAdmin = false;
-      try {
-        isAdmin = await checkIsAdmin(data.email);
-        console.log("Admin check result:", { isAdmin });
-      } catch (adminCheckError) {
-        console.error("Error checking admin status:", adminCheckError);
-        // Retry once
+      // Double check if user is admin - with retry for better reliability
+      let isAdmin = localStorage.getItem('isAdmin') === 'true'; // Use pre-checked value from loginUtils
+      
+      // If admin status not determined yet, check it now
+      if (isAdmin !== true && isAdmin !== false) {
         try {
-          await new Promise(resolve => setTimeout(resolve, 500));
           isAdmin = await checkIsAdmin(data.email);
-        } catch (retryError) {
-          console.error("Retry admin check failed:", retryError);
+          console.log("Admin check result:", { isAdmin });
+        } catch (adminCheckError) {
+          console.error("Error checking admin status:", adminCheckError);
+          // Retry once
+          try {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            isAdmin = await checkIsAdmin(data.email);
+          } catch (retryError) {
+            console.error("Retry admin check failed:", retryError);
+          }
         }
       }
       
@@ -148,18 +162,21 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
       // CRITICAL FIX: Force immediate navigation but carefully clean up flags
       console.log(`Login successful: Immediately redirecting to ${redirectTarget}`);
       
-      // Clear redirect prevention flags right before redirect
-      sessionStorage.removeItem('onLoginPage');
-      localStorage.removeItem('preventRedirects');
-      localStorage.removeItem('loginPageActive');
-      
-      // Immediate redirect after successful login
-      navigate(redirectTarget, { replace: true });
+      // CRITICAL: Wait a moment to ensure all login state is set before clearing prevention flags
+      setTimeout(() => {
+        // Clear redirect prevention flags right before redirect
+        sessionStorage.removeItem('onLoginPage');
+        localStorage.removeItem('preventRedirects');
+        localStorage.removeItem('loginPageActive');
+        
+        // Immediate redirect after successful login
+        navigate(redirectTarget, { replace: true });
+      }, 100);
       
       // Clean up processing flag after navigation
       setTimeout(() => {
         isProcessing.current = false;
-      }, 100);
+      }, 200);
       
     } catch (error: any) {
       console.error('Error during login process:', error);

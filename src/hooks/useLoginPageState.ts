@@ -20,16 +20,13 @@ export const useLoginPageState = () => {
       console.log("useLoginPageState: User already logged in, preparing redirect");
       const redirectTarget = isAdmin ? '/admin' : '/dashboard';
       
-      // Give time for any initial auth checks to complete
-      setTimeout(() => {
-        // Clear redirect prevention flags
-        sessionStorage.removeItem('onLoginPage');
-        localStorage.removeItem('preventRedirects');
-        localStorage.removeItem('loginPageActive');
-        
-        // Navigate to appropriate destination
-        navigate(redirectTarget, { replace: true });
-      }, 500);
+      // Clear redirect prevention flags
+      sessionStorage.removeItem('onLoginPage');
+      localStorage.removeItem('preventRedirects');
+      localStorage.removeItem('loginPageActive');
+      
+      // Navigate to appropriate destination immediately
+      navigate(redirectTarget, { replace: true });
     }
     
     // Clear the wasLoggedIn flag to prevent showing incorrect logout messages
