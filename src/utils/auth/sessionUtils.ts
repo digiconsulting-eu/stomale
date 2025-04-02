@@ -95,7 +95,7 @@ export const checkSessionHealth = async () => {
   }
 };
 
-// Add a new function to stabilize session before navigation
+// Improved version with more robust session management
 export const ensureSessionHealthBeforeNavigation = async () => {
   console.log('Ensuring session health before navigation');
   
@@ -108,19 +108,23 @@ export const ensureSessionHealthBeforeNavigation = async () => {
   }
   
   try {
-    // Check if we have a session and it's valid
-    const { data: { session } } = await supabase.auth.getSession();
+    // Improved session check with timeout safeguard
+    const sessionPromise = supabase.auth.getSession();
+    const timeoutPromise = new Promise<{data: {session: null}}>((resolve) => {
+      setTimeout(() => resolve({ data: { session: null } }), 2000);
+    });
     
-    if (!session) {
+    const { data } = await Promise.race([sessionPromise, timeoutPromise]);
+    
+    if (!data.session) {
       console.log('No session found despite localStorage indicating logged in');
       localStorage.removeItem('isLoggedIn');
       localStorage.removeItem('isAdmin');
-      toast.error("Sessione scaduta, effettua nuovamente l'accesso");
       return false;
     }
     
     // If session expires in less than 30 seconds, refresh it
-    const expiresAt = session.expires_at;
+    const expiresAt = data.session.expires_at;
     if (!expiresAt) return false;
     
     const expirationTime = expiresAt * 1000;
@@ -130,6 +134,13 @@ export const ensureSessionHealthBeforeNavigation = async () => {
     if (timeToExpiration < 30000) {
       console.log('Session expiring very soon, refreshing before navigation');
       return await refreshSession();
+    }
+    
+    // Session is healthy, do a light refresh in the background
+    if (timeToExpiration < 5 * 60 * 1000) {
+      // Only refresh if expiring in less than 5 minutes
+      console.log('Session will expire soon, refreshing in background');
+      refreshSession().catch(err => console.error('Background refresh failed:', err));
     }
     
     // Session is healthy

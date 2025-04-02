@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { checkIsAdmin } from "@/utils/auth/adminUtils";
+import { checkSessionHealth } from "@/utils/auth/sessionUtils";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -25,8 +26,15 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
         const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
         
-        // Then validate with actual session check
-        const { data: { session } } = await supabase.auth.getSession();
+        // Promise with a timeout to prevent blocking
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<{data: {session: null}}>((resolve) => {
+          setTimeout(() => resolve({ data: { session: null } }), 3000);
+        });
+        
+        // Use Promise.race to ensure we don't block for too long
+        const { data } = await Promise.race([sessionPromise, timeoutPromise]);
+        const session = data.session;
         
         if (!session) {
           console.log('ProtectedRoute: No session found, redirecting to login');
@@ -40,6 +48,20 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
           return;
         }
 
+        // Verify the session health
+        const isSessionHealthy = await checkSessionHealth();
+        if (!isSessionHealthy) {
+          console.log('ProtectedRoute: Session is not healthy, redirecting to login');
+          localStorage.removeItem('isLoggedIn');
+          localStorage.removeItem('isAdmin');
+          
+          toast.error("Sessione scaduta", {
+            description: "La tua sessione è scaduta. Effettua nuovamente l'accesso."
+          });
+          navigate('/login', { replace: true });
+          return;
+        }
+
         // User is authenticated, now check admin status if required
         if (adminOnly) {
           // First check localStorage for faster response
@@ -47,6 +69,7 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
             console.log('ProtectedRoute: User is admin according to localStorage');
             setIsAuthenticated(true);
             setIsLoading(false);
+            localStorage.setItem('isLoggedIn', 'true');
             return;
           }
           
