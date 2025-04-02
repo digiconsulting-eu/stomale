@@ -36,24 +36,30 @@ export default function Login() {
         // Get session with a proper timeout to prevent hanging
         const sessionPromise = supabase.auth.getSession();
         // Create a promise that resolves with a properly typed empty session after timeout
-        const timeoutPromise = new Promise<{data: {session: null}}>((resolve) => {
-          setTimeout(() => resolve({ data: { session: null } }), 2000);
+        const timeoutPromise = new Promise<{data: {session: null}}>(resolve => {
+          setTimeout(() => resolve({ data: { session: null } }), 3000);
         });
         
+        // Use Promise.race to avoid hanging on the session check
         const { data } = await Promise.race([sessionPromise, timeoutPromise]);
         
         console.log("Login session check result:", data?.session ? "Has session" : "No session");
         
-        // Only redirect if we have a valid session with a user
-        if (data.session && data.session.user && data.session.user.email) {
+        // Only redirect if we have a valid session with a user ID AND email
+        if (data.session && data.session.user && data.session.user.id && data.session.user.email) {
           console.log("User already has valid session:", data.session.user.email);
           setHasExistingSession(true);
-          navigate('/dashboard', { replace: true });
+          // Delay navigation slightly to prevent race conditions
+          setTimeout(() => {
+            navigate('/dashboard', { replace: true });
+          }, 100);
+        } else {
+          // Explicitly mark that we're done checking and NO valid session exists
+          setIsChecking(false);
         }
       } catch (error) {
         console.error("Error checking session:", error);
-        // Don't redirect on error
-      } finally {
+        // Don't redirect on error, just set checking to false
         setIsChecking(false);
       }
     };
