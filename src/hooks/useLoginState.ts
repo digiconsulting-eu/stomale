@@ -55,9 +55,49 @@ export const useLoginState = () => {
     }
   };
 
+  // Check if user is already logged in before logging in
+  const checkExistingSession = async () => {
+    try {
+      // Use a more robust session check with timeout
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise<{data: {session: null}}>((resolve) => {
+        setTimeout(() => resolve({ data: { session: null } }), 3000);
+      });
+      
+      // Use Promise.race with careful error handling
+      const result = await Promise.race([sessionPromise, timeoutPromise])
+        .catch(() => ({ data: { session: null } }));
+        
+      // Extract session data safely
+      const session = result?.data?.session;
+      
+      // Only consider fully valid sessions with both an ID and email
+      if (session && session.user && 
+          session.user.id && session.user.email && 
+          session.access_token) {
+        
+        console.log("Valid session found:", session.user.email);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error in session check:", error);
+      return false;
+    }
+  };
+
   const handleSubmit = async (data: LoginFormValues) => {
     // Prevent multiple submissions
     if (isLoading) return;
+    
+    // Check if already logged in first
+    const hasSession = await checkExistingSession();
+    if (hasSession) {
+      console.log("User already has a valid session, redirecting to dashboard");
+      navigate('/dashboard', { replace: true });
+      return;
+    }
     
     // Make sure we don't accidentally show the logout message
     localStorage.removeItem('wasLoggedIn');
