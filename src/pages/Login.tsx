@@ -32,7 +32,10 @@ export default function Login() {
         
         // Get session with a proper timeout to prevent hanging
         const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve({ data: { session: null } }), 2000));
+        // Create a promise that resolves with a properly typed empty session after timeout
+        const timeoutPromise = new Promise<{data: {session: null}}>((resolve) => {
+          setTimeout(() => resolve({ data: { session: null } }), 2000);
+        });
         
         const { data } = await Promise.race([sessionPromise, timeoutPromise]);
         
