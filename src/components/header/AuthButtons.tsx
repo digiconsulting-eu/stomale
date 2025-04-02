@@ -24,11 +24,12 @@ export const AuthButtons = ({
   const buttonClass = isMobile ? "w-full justify-center" : "";
   
   const handleClick = (e: React.MouseEvent, path: string) => {
+    // Call onNavigate callback if provided (used for mobile menu close)
     if (onNavigate) {
       onNavigate();
     }
     
-    // Prevent default only for admin navigation to handle specially
+    // Only handle admin navigation specially - remove the general interception of clicks
     if (isAdmin && path.startsWith('/admin')) {
       e.preventDefault();
       console.log('AdminButtons: Navigating to admin page:', path);
@@ -39,6 +40,7 @@ export const AuthButtons = ({
       
       navigate(path);
     }
+    // For all other navigation, let the Link component handle it naturally
   };
 
   if (isLoggedIn) {
@@ -69,7 +71,6 @@ export const AuthButtons = ({
             asChild 
             variant="default"
             className={`${buttonClass} bg-[#0EA5E9] hover:bg-[#0284C7] text-white`}
-            onClick={(e) => handleClick(e, '/dashboard')} 
           >
             <Link to="/dashboard">Dashboard</Link>
           </Button>
