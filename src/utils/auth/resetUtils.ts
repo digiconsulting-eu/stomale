@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export const resetAuthClient = async () => {
@@ -15,7 +16,8 @@ export const resetAuthClient = async () => {
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('userEmail');
     
-    // Keep these flags - they'll be managed by the login process
+    // IMPORTANT: Don't remove redirect prevention flags during reset
+    // Let the components that set them handle removal
     // localStorage.removeItem('preventRedirects');
     // sessionStorage.removeItem('onLoginPage');
     

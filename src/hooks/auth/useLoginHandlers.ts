@@ -56,6 +56,10 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
     // Record the attempt time
     localStorage.setItem('last-login-attempt', Date.now().toString());
     
+    // Ensure redirect prevention flags are set
+    sessionStorage.setItem('onLoginPage', 'true');
+    localStorage.setItem('preventRedirects', 'true');
+    
     // Check Supabase health first
     const isHealthy = await checkSupabaseHealth();
     if (!isHealthy) {
@@ -133,9 +137,9 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
         sessionStorage.removeItem('onLoginPage');
         localStorage.removeItem('preventRedirects');
         
-        // Short delay to ensure state is updated before redirecting
+        // Now that flags are removed, it's safe to redirect
         setTimeout(() => {
-          // Redirect to dashboard
+          console.log("Redirecting to dashboard after successful login");
           navigate('/dashboard', { replace: true });
         }, 300);
       }, 500);
@@ -182,7 +186,7 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
           description: error.message || "Si è verificato un errore imprevisto. Riprova più tardi.",
           action: {
             label: "Ripristina",
-            onClick: () => resetAuthClient(),
+            onClick: () => handleReset(),
           }
         });
       }

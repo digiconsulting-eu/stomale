@@ -1,3 +1,4 @@
+
 import { useLoginPageState } from "@/hooks/useLoginPageState";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { ConnectionErrorAlert } from "@/components/auth/ConnectionErrorAlert";
@@ -17,7 +18,7 @@ export default function Login() {
     handleForceReset
   } = useLoginPageState();
 
-  // Set stronger redirect prevention flags with longer persistence
+  // Set stronger redirect prevention flags and ensure they persist
   useEffect(() => {
     console.log("Login page mount: Setting redirect prevention flags");
     // Set explicit flags to prevent automatic redirects
@@ -25,8 +26,16 @@ export default function Login() {
     localStorage.setItem('preventRedirects', 'true');
     
     return () => {
-      // Keep flags during unmount - they'll be cleared by successful login handler
-      console.log("Login page unmount: Keeping redirect prevention flags for login process");
+      // Only clear these flags if we're not in the middle of a login process
+      // The login handlers will manage these flags on successful login
+      const isAuthInProgress = localStorage.getItem('last-login-attempt');
+      if (!isAuthInProgress) {
+        console.log("Login page unmount: Clearing redirect prevention flags");
+        sessionStorage.removeItem('onLoginPage');
+        localStorage.removeItem('preventRedirects');
+      } else {
+        console.log("Login page unmount: Keeping redirect prevention flags for login process");
+      }
     };
   }, []);
 

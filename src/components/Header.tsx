@@ -30,8 +30,22 @@ export const Header = () => {
       console.log("Header: On login page, skipping automatic auth checks", {
         isOnLoginPage,
         preventRedirects,
-        isOnLoginRoute
+        isOnLoginRoute,
+        path: location.pathname
       });
+      
+      // Even on login page, check local storage for UI state
+      const storedLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
+      
+      if (storedLoggedIn !== isLoggedIn) {
+        setIsLoggedIn(storedLoggedIn);
+      }
+      
+      if (storedIsAdmin !== isAdmin) {
+        setIsAdmin(storedIsAdmin);
+      }
+      
       return;
     }
     
@@ -44,6 +58,13 @@ export const Header = () => {
         
         setIsLoggedIn(isAuthenticated);
         
+        // Store in local storage for other components to use
+        if (isAuthenticated) {
+          localStorage.setItem('isLoggedIn', 'true');
+        } else {
+          localStorage.removeItem('isLoggedIn');
+        }
+        
         if (isAuthenticated && session?.user?.email) {
           try {
             const { data: adminData } = await supabase
@@ -53,13 +74,18 @@ export const Header = () => {
             
             const userIsAdmin = Array.isArray(adminData) && adminData.length > 0;
             setIsAdmin(userIsAdmin);
+            localStorage.setItem('isAdmin', userIsAdmin ? 'true' : 'false');
+            localStorage.setItem('userEmail', session.user.email);
             console.log("Header: User is admin:", userIsAdmin);
           } catch (error) {
             console.error("Error checking admin status:", error);
             setIsAdmin(false);
+            localStorage.removeItem('isAdmin');
           }
         } else {
           setIsAdmin(false);
+          localStorage.removeItem('isAdmin');
+          localStorage.removeItem('userEmail');
         }
       } catch (error) {
         console.error("Error checking session:", error);
@@ -77,17 +103,43 @@ export const Header = () => {
       const isOnLoginRoute = location.pathname === '/login';
       
       if (isOnLoginPage || preventRedirects || isOnLoginRoute) {
-        console.log("Header: On login page, ignoring auth state change", {
+        console.log("Header: On login page, listening for login events only", {
           isOnLoginPage,
           preventRedirects,
           isOnLoginRoute
         });
+        
+        // Even on login page, we should update the UI if user logs in
+        if (event === 'SIGNED_IN' && session) {
+          console.log("Header: Login detected on login page, updating UI state");
+          setIsLoggedIn(true);
+          localStorage.setItem('isLoggedIn', 'true');
+          
+          if (session.user?.email) {
+            try {
+              const { data: adminData } = await supabase
+                .from('admin')
+                .select('email')
+                .eq('email', session.user.email);
+              
+              const userIsAdmin = Array.isArray(adminData) && adminData.length > 0;
+              setIsAdmin(userIsAdmin);
+              localStorage.setItem('isAdmin', userIsAdmin ? 'true' : 'false');
+              localStorage.setItem('userEmail', session.user.email);
+            } catch (error) {
+              console.error("Error checking admin status:", error);
+              setIsAdmin(false);
+            }
+          }
+        }
+        
         return;
       }
       
       if (event === 'SIGNED_IN') {
         console.log("Header detected sign in:", session?.user?.email);
         setIsLoggedIn(true);
+        localStorage.setItem('isLoggedIn', 'true');
         
         if (session?.user?.email) {
           try {
@@ -96,7 +148,10 @@ export const Header = () => {
               .select('email')
               .eq('email', session.user.email);
             
-            setIsAdmin(Array.isArray(adminData) && adminData.length > 0);
+            const userIsAdmin = Array.isArray(adminData) && adminData.length > 0;
+            setIsAdmin(userIsAdmin);
+            localStorage.setItem('isAdmin', userIsAdmin ? 'true' : 'false');
+            localStorage.setItem('userEmail', session.user.email);
           } catch (error) {
             console.error("Error checking admin status:", error);
             setIsAdmin(false);
@@ -107,6 +162,10 @@ export const Header = () => {
         setIsLoggedIn(false);
         setIsAdmin(false);
         setIsMenuOpen(false);
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('userEmail');
+        
         if (localStorage.getItem('wasLoggedIn') === 'true') {
           toast.success("Logout effettuato con successo");
           localStorage.removeItem('wasLoggedIn');
@@ -121,7 +180,10 @@ export const Header = () => {
 
   const handleLogout = async () => {
     try {
-      localStorage.setItem('wasLoggedIn', 'true');
+      // Ensure we don't show logout message again on initial load
+      if (isLoggedIn) {
+        localStorage.setItem('wasLoggedIn', 'true');
+      }
       
       // Immediately update UI state - don't wait for the auth event
       setIsLoggedIn(false);
