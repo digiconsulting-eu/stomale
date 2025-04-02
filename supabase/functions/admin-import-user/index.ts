@@ -20,8 +20,11 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log("Admin import user function called");
+  
   // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
+    console.log("Handling OPTIONS request");
     return new Response(null, {
       status: 204,
       headers: corsHeaders
@@ -29,15 +32,17 @@ serve(async (req) => {
   }
   
   try {
+    console.log("Processing import request");
+    
     // Get credentials from ENV file
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     // Make sure credentials are available
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error("Missing Supabase credentials");
       return new Response(
-        JSON.stringify({ error: "Missing Supabase credentials" }),
+        JSON.stringify({ error: "Missing Supabase credentials", success: false }),
         { 
           status: 500, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -52,11 +57,12 @@ serve(async (req) => {
     let requestData;
     try {
       const text = await req.text();
+      console.log("Request payload:", text);
       requestData = text ? JSON.parse(text) : {};
     } catch (parseError) {
       console.error("Failed to parse request body:", parseError);
       return new Response(
-        JSON.stringify({ error: "Invalid request format" }),
+        JSON.stringify({ error: "Invalid request format", success: false }),
         { 
           status: 400, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -68,15 +74,34 @@ serve(async (req) => {
     const { user } = requestData as { user?: ImportedUser };
 
     // Verify that user data is present
-    if (!user || !user.id || !user.username) {
-      console.error("Missing required user data:", JSON.stringify(requestData));
+    if (!user) {
+      console.error("Missing user data:", JSON.stringify(requestData));
       return new Response(
-        JSON.stringify({ error: "Missing required user data", data: requestData }),
+        JSON.stringify({ error: "Missing user data", data: requestData, success: false }),
         { 
           status: 400, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
         }
       );
+    }
+
+    // Verify that required fields are present
+    if (!user.username) {
+      console.error("Missing required username:", JSON.stringify(user));
+      return new Response(
+        JSON.stringify({ error: "Username is required", success: false }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    // Generate ID if not provided
+    if (!user.id) {
+      console.log("No ID provided, generating one");
+      const uuid = crypto.randomUUID();
+      user.id = uuid;
     }
 
     console.log("Attempting to insert user with service role:", {
@@ -95,13 +120,13 @@ serve(async (req) => {
         birth_year: user.birth_year,
         gender: user.gender,
         created_at: user.created_at || new Date().toISOString(),
-        gdpr_consent: user.gdpr_consent
+        gdpr_consent: user.gdpr_consent === undefined ? true : user.gdpr_consent
       });
 
     if (error) {
       console.error("Admin import error:", error);
       return new Response(
-        JSON.stringify({ error: error.message }),
+        JSON.stringify({ error: error.message, success: false }),
         { 
           status: 400, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -121,7 +146,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Function error:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message, stack: error.stack }),
+      JSON.stringify({ error: error.message, stack: error.stack, success: false }),
       { 
         status: 500, 
         headers: { ...corsHeaders, "Content-Type": "application/json" } 

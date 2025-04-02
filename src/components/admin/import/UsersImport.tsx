@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -123,7 +124,8 @@ export const UsersImport = () => {
       
       setTotalRows(jsonData.length);
 
-      const batchSize = 5;
+      // Process in smaller batches to prevent timeouts
+      const batchSize = 1; // Process one at a time for better reliability
       for (let i = 0; i < jsonData.length; i += batchSize) {
         const batch = jsonData.slice(i, i + batchSize);
         await processBatch(batch, i, validUsers, errors, timestamp);
@@ -252,56 +254,71 @@ export const UsersImport = () => {
         setDebugInfo(`Inserimento utente: ${user.username}`);
 
         try {
-          const { error: insertError } = await supabase
-            .from('users')
-            .insert(user);
-
-          if (insertError) {
-            console.error('Error inserting user directly:', insertError);
+          // For username-only imports, use direct admin function as primary method
+          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+          
+          console.log("Calling admin import function");
+          setDebugInfo(`Chiamata funzione admin per utente: ${user.username}`);
+          
+          try {
+            // Get the full URL of the function
+            const functionUrl = `${supabaseUrl}/functions/v1/admin-import-user`;
+            console.log("Function URL:", functionUrl);
             
-            if (insertError.message.includes('row-level security policy')) {
-              console.log('Using admin function to bypass RLS...');
-              setDebugInfo(`Utilizzo funzione admin per utente: ${user.username}`);
-              
-              await new Promise(resolve => setTimeout(resolve, 100));
-              
-              try {
-                const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-import-user`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.access_token}`
-                  },
-                  body: JSON.stringify({ user })
-                });
-                
-                if (!response.ok) {
-                  const errorData = await response.json().catch(() => ({}));
-                  console.error('Admin import API error:', response.status, errorData);
-                  errors.push(`Riga ${currentIndex + 2}: Errore API (${response.status}): ${errorData.error || 'Errore sconosciuto'}`);
-                  continue;
-                }
-                
-                const data = await response.json();
-                if (!data.success) {
-                  console.error('Admin import failed:', data);
-                  errors.push(`Riga ${currentIndex + 2}: ${data.error || 'Errore durante l\'inserimento'}`);
-                  continue;
-                }
-                
-                console.log('Admin import response:', data);
-              } catch (fetchError) {
-                console.error('Error calling admin function:', fetchError);
-                errors.push(`Riga ${currentIndex + 2}: Errore di rete durante l'inserimento: ${(fetchError as Error).message}`);
-                continue;
-              }
-            } else {
-              errors.push(`Riga ${currentIndex + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
+            const response = await fetch(functionUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session?.access_token}`
+              },
+              body: JSON.stringify({ user })
+            });
+            
+            const responseText = await response.text();
+            console.log("Response status:", response.status);
+            console.log("Response text:", responseText);
+            
+            let data;
+            try {
+              data = JSON.parse(responseText);
+            } catch (parseError) {
+              console.error("Failed to parse response:", parseError);
+              errors.push(`Riga ${currentIndex + 2}: Risposta non valida dal server: ${responseText}`);
               continue;
             }
+            
+            if (!response.ok) {
+              console.error('Admin import API error:', response.status, data);
+              errors.push(`Riga ${currentIndex + 2}: Errore API (${response.status}): ${data.error || 'Errore sconosciuto'}`);
+              continue;
+            }
+            
+            if (!data.success) {
+              console.error('Admin import failed:', data);
+              errors.push(`Riga ${currentIndex + 2}: ${data.error || 'Errore durante l\'inserimento'}`);
+              continue;
+            }
+            
+            console.log('Admin import response:', data);
+            validUsers.push(user);
+            
+          } catch (fetchError) {
+            console.error('Error calling admin function:', fetchError);
+            
+            // Fallback to direct insert if function call failed
+            console.log('Fallback to direct insert');
+            const { error: insertError } = await supabase
+              .from('users')
+              .insert(user);
+
+            if (insertError) {
+              errors.push(`Riga ${currentIndex + 2}: Errore durante l'inserimento: ${insertError.message}`);
+              continue;
+            }
+            
+            validUsers.push(user);
           }
           
-          validUsers.push(user);
           console.log(`Successfully inserted user for row ${currentIndex + 1}`);
         } catch (error) {
           console.error(`Error during user insertion:`, error);
