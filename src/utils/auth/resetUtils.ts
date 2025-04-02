@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export const resetAuthClient = async () => {
@@ -15,6 +14,10 @@ export const resetAuthClient = async () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('userEmail');
+    
+    // Keep these flags - they'll be managed by the login process
+    // localStorage.removeItem('preventRedirects');
+    // sessionStorage.removeItem('onLoginPage');
     
     // Clear Supabase cookies
     document.cookie.split(";").forEach((c) => {
@@ -33,6 +36,8 @@ export const resetAuthClient = async () => {
     
     // Wait for cleanup to complete
     await new Promise(resolve => setTimeout(resolve, 500));
+    
+    console.log('Auth client reset complete');
     
     // Return success
     return true;
@@ -58,7 +63,10 @@ export const checkForCorruptedState = async (): Promise<boolean> => {
     
     // Check for state inconsistencies
     if (localLoggedIn && !sessionResult.session) {
-      console.warn('Detected corrupted auth state: localStorage says logged in but no session exists');
+      console.warn('Detected corrupted auth state: localStorage says logged in but no session exists', {
+        hasSession: !!sessionResult.session,
+        localLoggedIn
+      });
       return true;
     }
     

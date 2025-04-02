@@ -122,21 +122,23 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
       // Clear the last login attempt marker
       localStorage.removeItem('last-login-attempt');
       
-      // IMPORTANTE: Rimuoviamo i flag di prevenzione dei redirect SOLO DOPO il login completato con successo
-      // Clear the login page flag to allow redirects again
-      console.log("Login successful: Will now remove redirect prevention flags");
-      sessionStorage.removeItem('onLoginPage');
-      localStorage.removeItem('preventRedirects');
-
       toast.success(
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
-
-      // Short delay to allow the progress bar to complete and auth state to propagate
+      
+      // Add a delay before removing redirect prevention flags
+      // This allows the auth state to fully propagate
       setTimeout(() => {
-        // Redirect to dashboard
-        navigate('/dashboard', { replace: true });
-      }, 800);
+        console.log("Login successful: Now removing redirect prevention flags");
+        sessionStorage.removeItem('onLoginPage');
+        localStorage.removeItem('preventRedirects');
+        
+        // Short delay to ensure state is updated before redirecting
+        setTimeout(() => {
+          // Redirect to dashboard
+          navigate('/dashboard', { replace: true });
+        }, 300);
+      }, 500);
       
     } catch (error: any) {
       console.error('Error during login process:', error);

@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,6 +10,7 @@ export const AuthStateHandler = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     // Initialize auth state from session
@@ -27,6 +28,7 @@ export const AuthStateHandler = () => {
             hasPreventRedirects,
             isOnLoginPage
           });
+          setInitialized(true);
           return;
         }
         
@@ -37,6 +39,7 @@ export const AuthStateHandler = () => {
         
         if (error) {
           console.error("Error getting session:", error);
+          setInitialized(true);
           return;
         }
         
@@ -51,6 +54,7 @@ export const AuthStateHandler = () => {
             
             if (adminError) {
               console.error("Error checking admin status:", adminError);
+              setInitialized(true);
               return;
             }
             
@@ -63,8 +67,11 @@ export const AuthStateHandler = () => {
             console.error("Error checking admin status:", error);
           }
         }
+        
+        setInitialized(true);
       } catch (error) {
         console.error("Error in initializeAuth:", error);
+        setInitialized(true);
       }
     };
 
@@ -81,6 +88,7 @@ export const AuthStateHandler = () => {
         hasPreventRedirects,
         isOnLoginPage
       });
+      setInitialized(true);
     }
 
     // Listen for auth changes
@@ -88,53 +96,68 @@ export const AuthStateHandler = () => {
       console.log("Auth state changed:", event, session?.user?.email);
       
       // CRITICAL CHECK: Check for redirect prevention flags BEFORE handling any auth changes
-      const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
-      const hasPreventRedirects = localStorage.getItem('preventRedirects') === 'true';
+      const preventRedirects = localStorage.getItem('preventRedirects') === 'true';
+      const onLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
       const isLoginPage = location.pathname === '/login';
       
-      if (isLoginPage || isOnLoginPage || hasPreventRedirects) {
-        console.log("On login page or redirect prevention active, preventing automatic redirects", {
-          isLoginPage,
-          isOnLoginPage,
-          hasPreventRedirects
+      if (preventRedirects || onLoginPage || isLoginPage) {
+        console.log("Auth event blocked due to prevention flags:", event, {
+          preventRedirects,
+          onLoginPage,
+          isLoginPage
         });
         return;
       }
       
       if (event === 'SIGNED_IN') {
         if (session) {
-          try {
-            const { data: adminData, error } = await supabase
-              .from('admin')
-              .select('email')
-              .eq('email', session.user.email);
-            
-            if (error) {
+          console.log("SIGNED_IN event detected with valid session");
+          
+          // Use setTimeout to avoid potential deadlocks with Supabase client
+          setTimeout(async () => {
+            try {
+              const { data: adminData, error } = await supabase
+                .from('admin')
+                .select('email')
+                .eq('email', session.user.email);
+              
+              if (error) {
+                console.error("Error checking admin status:", error);
+                return;
+              }
+              
+              const isAdmin = Array.isArray(adminData) && adminData.length > 0;
+              queryClient.setQueryData(['adminStatus'], isAdmin);
+              
+              localStorage.setItem('isLoggedIn', 'true');
+              localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+              localStorage.setItem('userEmail', session.user.email);
+              
+              // Only redirect if we're not already on the dashboard
+              if (location.pathname !== '/dashboard') {
+                console.log("Redirecting to dashboard after sign in");
+                navigate('/dashboard', { replace: true });
+              } else {
+                console.log("Already at dashboard, no redirect needed");
+              }
+            } catch (error) {
               console.error("Error checking admin status:", error);
-              return;
             }
-            
-            const isAdmin = Array.isArray(adminData) && adminData.length > 0;
-            queryClient.setQueryData(['adminStatus'], isAdmin);
-            
-            // Only redirect if we're not already on the dashboard
-            if (location.pathname !== '/dashboard') {
-              console.log("Redirecting to dashboard after sign in");
-              navigate('/dashboard', { replace: true });
-            } else {
-              console.log("Already at dashboard, no redirect needed");
-            }
-          } catch (error) {
-            console.error("Error checking admin status:", error);
-          }
+          }, 0);
         }
       } else if (event === 'SIGNED_OUT') {
+        console.log("SIGNED_OUT event detected");
         queryClient.clear();
+        
+        // Make sure to clean up
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('userEmail');
         
         // Only redirect if we're not on the login page
         if (location.pathname !== '/login') {
-          console.log("User signed out, redirecting to home");
-          navigate('/');
+          console.log("User signed out, redirecting to login");
+          navigate('/login', { replace: true });
         }
       } else if (event === 'TOKEN_REFRESHED') {
         console.log('Auth token refreshed successfully');

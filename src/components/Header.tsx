@@ -36,24 +36,33 @@ export const Header = () => {
     }
     
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const isAuthenticated = !!session;
-      setIsLoggedIn(isAuthenticated);
-      
-      if (isAuthenticated && session?.user?.email) {
-        try {
-          const { data: adminData } = await supabase
-            .from('admin')
-            .select('email')
-            .eq('email', session.user.email);
-          
-          setIsAdmin(Array.isArray(adminData) && adminData.length > 0);
-        } catch (error) {
-          console.error("Error checking admin status:", error);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const isAuthenticated = !!session;
+        
+        console.log("Header: Checking auth status. User authenticated:", isAuthenticated);
+        
+        setIsLoggedIn(isAuthenticated);
+        
+        if (isAuthenticated && session?.user?.email) {
+          try {
+            const { data: adminData } = await supabase
+              .from('admin')
+              .select('email')
+              .eq('email', session.user.email);
+            
+            const userIsAdmin = Array.isArray(adminData) && adminData.length > 0;
+            setIsAdmin(userIsAdmin);
+            console.log("Header: User is admin:", userIsAdmin);
+          } catch (error) {
+            console.error("Error checking admin status:", error);
+            setIsAdmin(false);
+          }
+        } else {
           setIsAdmin(false);
         }
-      } else {
-        setIsAdmin(false);
+      } catch (error) {
+        console.error("Error checking session:", error);
       }
     };
 
@@ -114,6 +123,7 @@ export const Header = () => {
     try {
       localStorage.setItem('wasLoggedIn', 'true');
       
+      // Immediately update UI state - don't wait for the auth event
       setIsLoggedIn(false);
       setIsAdmin(false);
       setIsMenuOpen(false);

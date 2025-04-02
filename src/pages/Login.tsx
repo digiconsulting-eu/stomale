@@ -1,4 +1,3 @@
-
 import { useLoginPageState } from "@/hooks/useLoginPageState";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { ConnectionErrorAlert } from "@/components/auth/ConnectionErrorAlert";
@@ -26,17 +25,10 @@ export default function Login() {
     localStorage.setItem('preventRedirects', 'true');
     
     return () => {
-      // IMPORTANT: Only clear flags if we're not in the process of logging in
-      // This is critical to prevent premature flag clearing during login
-      if (!isLoading) {
-        console.log("Login page unmount (not loading): Clearing redirect prevention flags");
-        // We only clear sessionStorage here - localStorage.preventRedirects will be cleared after successful login
-        sessionStorage.removeItem('onLoginPage');
-      } else {
-        console.log("Login page unmount during loading: Keeping redirect prevention flags");
-      }
+      // Keep flags during unmount - they'll be cleared by successful login handler
+      console.log("Login page unmount: Keeping redirect prevention flags for login process");
     };
-  }, [isLoading]);
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">
