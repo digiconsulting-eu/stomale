@@ -53,18 +53,25 @@ export const AuthStateHandler = () => {
       }
     };
 
-    initializeAuth();
+    // Solo se non siamo sulla pagina di login
+    const isLoginPage = location.pathname === '/login';
+    const hasPreventRedirects = localStorage.getItem('preventRedirects') === 'true';
+    const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
+    
+    if (!isLoginPage && !hasPreventRedirects && !isOnLoginPage) {
+      initializeAuth();
+    } else {
+      console.log("Skipping auth initialization on login page");
+    }
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.email);
       
-      // Check if we're on the login page
-      const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
-      const isLoginUrl = location.pathname === '/login';
-      
       // Double check to prevent redirects on login page
-      if (isOnLoginPage || isLoginUrl) {
+      if (location.pathname === '/login' || 
+          sessionStorage.getItem('onLoginPage') === 'true' || 
+          localStorage.getItem('preventRedirects') === 'true') {
         console.log("On login page, preventing automatic redirects");
         return;
       }
@@ -85,12 +92,12 @@ export const AuthStateHandler = () => {
             const isAdmin = Array.isArray(adminData) && adminData.length > 0;
             queryClient.setQueryData(['adminStatus'], isAdmin);
             
-            // Only redirect if we're not on the login page
-            if (location.pathname !== '/dashboard' && !isOnLoginPage && !isLoginUrl) {
+            // Only redirect if we're not already on the dashboard
+            if (location.pathname !== '/dashboard') {
               console.log("Redirecting to dashboard after sign in");
               navigate('/dashboard', { replace: true });
             } else {
-              console.log("Not redirecting: on login page or already at dashboard");
+              console.log("Already at dashboard, no redirect needed");
             }
           } catch (error) {
             console.error("Error checking admin status:", error);
@@ -98,7 +105,12 @@ export const AuthStateHandler = () => {
         }
       } else if (event === 'SIGNED_OUT') {
         queryClient.clear();
-        navigate('/');
+        
+        // Solo se non siamo sulla login page
+        if (location.pathname !== '/login') {
+          console.log("User signed out, redirecting to home");
+          navigate('/');
+        }
       } else if (event === 'TOKEN_REFRESHED') {
         console.log('Auth token refreshed successfully');
         // Invalidate queries to force refetch with new token

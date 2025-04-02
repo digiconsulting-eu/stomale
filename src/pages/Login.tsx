@@ -20,21 +20,23 @@ export default function Login() {
 
   // Prevent any automatic redirects on this page
   useEffect(() => {
-    // Set a flag in session storage to indicate we're on the login page
-    // This will be used to prevent automatic redirects from auth state changes
+    console.log("Login page mount: Setting redirect prevention flags");
+    // Set flags to prevent automatic redirects
     sessionStorage.setItem('onLoginPage', 'true');
-    console.log("Login page: Setting onLoginPage flag");
-    
-    // Also disable any automatic redirects in local storage
     localStorage.setItem('preventRedirects', 'true');
     
     return () => {
-      // Clear the flags when leaving the login page
-      console.log("Login page: Clearing onLoginPage flag");
-      sessionStorage.removeItem('onLoginPage');
-      localStorage.removeItem('preventRedirects');
+      // Only clear flags if we're not in the process of logging in
+      // This allows the login handler to manage flag removal after successful login
+      if (!isLoading) {
+        console.log("Login page unmount: Clearing redirect prevention flags");
+        sessionStorage.removeItem('onLoginPage');
+        localStorage.removeItem('preventRedirects');
+      } else {
+        console.log("Login page unmount during loading: Keeping redirect prevention flags");
+      }
     };
-  }, []);
+  }, [isLoading]);
 
   return (
     <div className="container mx-auto px-4 py-8">

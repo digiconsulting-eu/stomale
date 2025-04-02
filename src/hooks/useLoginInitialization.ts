@@ -96,9 +96,9 @@ export const useLoginInitialization = (setConnectionIssue: (value: boolean) => v
     // Cleanup function to prevent state updates after unmount
     return () => {
       isMounted = false;
-      sessionStorage.removeItem('onLoginPage');
-      localStorage.removeItem('preventRedirects');
-      console.log("Login initialization: Clearing redirect prevention flags on unmount");
+      // NON rimuoviamo i flag qui per evitare di interferire con il processo di login
+      // Lasciamo che sia useLoginHandlers a gestire la rimozione dei flag dopo un login riuscito
+      console.log("Login initialization: Cleanup without clearing redirect flags");
     };
   }, [setConnectionIssue]);
 };
