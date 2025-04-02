@@ -1,6 +1,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { ensureSessionHealthBeforeNavigation } from "@/utils/auth/sessionUtils";
 
 interface AuthButtonsProps {
   isLoggedIn: boolean;
@@ -19,26 +21,59 @@ export const AuthButtons = ({
 }: AuthButtonsProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isNavigating, setIsNavigating] = useState(false);
   const isDashboard = location.pathname === '/dashboard';
   const isAdminPage = location.pathname.startsWith('/admin');
   const buttonClass = isMobile ? "w-full justify-center" : "";
   
-  const handleClick = (e: React.MouseEvent, path: string) => {
+  const handleClick = async (e: React.MouseEvent, path: string) => {
     // Call onNavigate callback if provided (used for mobile menu close)
     if (onNavigate) {
       onNavigate();
     }
     
-    // Only handle admin navigation specially - remove the general interception of clicks
+    // Prevent multiple clicks
+    if (isNavigating) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Check if we're already on this path
+    if (location.pathname === path) {
+      console.log(`Already on ${path}, skipping navigation`);
+      return;
+    }
+    
+    // Only intercept navigation for admin paths
     if (isAdmin && path.startsWith('/admin')) {
       e.preventDefault();
-      console.log('AdminButtons: Navigating to admin page:', path);
+      setIsNavigating(true);
       
-      // Force localStorage update before navigation
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('isAdmin', 'true');
-      
-      navigate(path);
+      try {
+        console.log('AdminButtons: Navigating to admin page:', path);
+        
+        // Ensure session is healthy before navigating to admin page
+        const isSessionHealthy = await ensureSessionHealthBeforeNavigation();
+        
+        if (isSessionHealthy) {
+          // Force localStorage update before navigation
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('isAdmin', 'true');
+          
+          console.log('Session is healthy, navigating to admin page');
+          navigate(path);
+        } else {
+          console.log('Session is not healthy, redirecting to login');
+          localStorage.setItem('wasLoggedIn', 'true');
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error('Error during admin navigation:', error);
+        // Fall back to standard navigation
+        navigate(path);
+      } finally {
+        setIsNavigating(false);
+      }
     }
     // For all other navigation, let the Link component handle it naturally
   };
@@ -82,6 +117,7 @@ export const AuthButtons = ({
             if (onNavigate) onNavigate();
           }}
           className={buttonClass}
+          disabled={isNavigating}
         >
           Esci
         </Button>
