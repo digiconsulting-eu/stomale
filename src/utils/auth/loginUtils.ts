@@ -17,6 +17,11 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     // Add a small delay to ensure client is reset
     await new Promise(resolve => setTimeout(resolve, 300));
     
+    // Clear any previous auth state
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('userEmail');
+    
     // Use straightforward login approach with proper error handling
     const { data, error } = await supabase.auth.signInWithPassword({
       email,

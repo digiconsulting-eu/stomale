@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
@@ -13,6 +13,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
   const [connectionIssue, setConnectionIssue] = useState(false);
+  const navigate = useNavigate();
+  
+  // Clear the wasLoggedIn flag to prevent showing incorrect logout messages
+  useEffect(() => {
+    localStorage.removeItem('wasLoggedIn');
+  }, []);
   
   // Initialize login page and check for issues
   useLoginInitialization(setConnectionIssue);
@@ -22,12 +28,13 @@ export default function Login() {
     const checkExistingSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
-        window.location.href = '/dashboard';
+        console.log("User already has valid session, redirecting to dashboard");
+        navigate('/dashboard', { replace: true });
       }
     };
     
     checkExistingSession();
-  }, []);
+  }, [navigate]);
   
   // Get login state and handlers
   const {

@@ -59,6 +59,9 @@ export const useLoginState = () => {
     // Prevent multiple submissions
     if (isLoading) return;
     
+    // Make sure we don't accidentally show the logout message
+    localStorage.removeItem('wasLoggedIn');
+    
     // Clear connection issue state when attempting login
     setConnectionIssue(false);
     setIsLoading(true);
@@ -122,6 +125,9 @@ export const useLoginState = () => {
           console.error("Retry admin check failed:", retryError);
         }
       }
+      
+      // Set a flag that user is now logged in (for proper logout message later)
+      localStorage.setItem('wasLoggedIn', 'true');
       
       // Update local storage session info
       localStorage.setItem('isLoggedIn', 'true');

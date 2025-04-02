@@ -5,6 +5,9 @@ export const resetAuthClient = async () => {
   try {
     console.log('Resetting auth client state...');
     
+    // Remove the wasLoggedIn flag to prevent incorrect logout messages
+    localStorage.removeItem('wasLoggedIn');
+    
     // Clear local storage items
     localStorage.removeItem('stomale-auth');
     localStorage.removeItem('supabase.auth.token');
@@ -52,6 +55,7 @@ export const checkForCorruptedState = async (): Promise<boolean> => {
     
     const localStorageToken = localStorage.getItem('stomale-auth');
     const localLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const wasLoggedIn = localStorage.getItem('wasLoggedIn') === 'true';
     
     // Check for state inconsistencies
     if (localLoggedIn && !sessionResult.session) {
@@ -61,6 +65,12 @@ export const checkForCorruptedState = async (): Promise<boolean> => {
     
     if (localStorageToken && !sessionResult.session) {
       console.warn('Detected potential auth state corruption: token exists but no session');
+      return true;
+    }
+    
+    // If wasLoggedIn is true but we don't have a session, this could also indicate corruption
+    if (wasLoggedIn && !sessionResult.session) {
+      console.warn('Detected potential auth state corruption: wasLoggedIn flag is set but no session exists');
       return true;
     }
     

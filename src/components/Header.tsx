@@ -47,32 +47,34 @@ export const Header = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event);
-      const isAuthenticated = !!session;
-      setIsLoggedIn(isAuthenticated);
       
-      if (isAuthenticated && session?.user?.email) {
-        try {
-          const { data: adminData } = await supabase
-            .from('admin')
-            .select('email')
-            .eq('email', session.user.email);
-          
-          setIsAdmin(Array.isArray(adminData) && adminData.length > 0);
-        } catch (error) {
-          console.error("Error checking admin status:", error);
-          setIsAdmin(false);
+      if (event === 'SIGNED_IN') {
+        console.log("User signed in:", session?.user?.email);
+        setIsLoggedIn(true);
+        
+        if (session?.user?.email) {
+          try {
+            const { data: adminData } = await supabase
+              .from('admin')
+              .select('email')
+              .eq('email', session.user.email);
+            
+            setIsAdmin(Array.isArray(adminData) && adminData.length > 0);
+          } catch (error) {
+            console.error("Error checking admin status:", error);
+            setIsAdmin(false);
+          }
         }
-      } else {
-        setIsAdmin(false);
-      }
-
-      // Handle logout completion
-      if (event === 'SIGNED_OUT') {
+      } else if (event === 'SIGNED_OUT') {
+        console.log("User signed out");
         setIsLoggedIn(false);
         setIsAdmin(false);
         setIsMenuOpen(false);
-        navigate('/', { replace: true });
-        toast.success("Logout effettuato con successo");
+        // Only show toast when actually logging out, not during initial load
+        if (localStorage.getItem('wasLoggedIn') === 'true') {
+          toast.success("Logout effettuato con successo");
+          localStorage.removeItem('wasLoggedIn');
+        }
       }
     });
 
@@ -83,6 +85,9 @@ export const Header = () => {
 
   const handleLogout = async () => {
     try {
+      // Set a flag that we were logged in (for the toast message)
+      localStorage.setItem('wasLoggedIn', 'true');
+      
       // First clear local state
       setIsLoggedIn(false);
       setIsAdmin(false);
@@ -97,11 +102,12 @@ export const Header = () => {
       }
       
       // Clear any remaining local storage
-      localStorage.clear();
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('isAdmin');
+      localStorage.removeItem('userEmail');
       
       // Force navigation regardless of signOut success
       navigate('/', { replace: true });
-      toast.success("Logout effettuato con successo");
     } catch (error) {
       console.error('Unexpected error during logout:', error);
       toast.error("Errore durante il logout");
