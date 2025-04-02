@@ -53,9 +53,9 @@ serve(async (req) => {
 
     // Verify that user data is present
     if (!user || !user.id || !user.username) {
-      console.error("Missing required user data:", user);
+      console.error("Missing required user data:", JSON.stringify(user));
       return new Response(
-        JSON.stringify({ error: "Missing required user data" }),
+        JSON.stringify({ error: "Missing required user data", data: user }),
         { 
           status: 400, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -72,7 +72,15 @@ serve(async (req) => {
     // Insert user with service role
     const { data, error } = await supabase
       .from("users")
-      .insert(user);
+      .insert({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        birth_year: user.birth_year,
+        gender: user.gender,
+        created_at: user.created_at || new Date().toISOString(),
+        gdpr_consent: user.gdpr_consent
+      });
 
     if (error) {
       console.error("Admin import error:", error);
@@ -97,7 +105,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Function error:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message, stack: error.stack }),
       { 
         status: 500, 
         headers: { ...corsHeaders, "Content-Type": "application/json" } 

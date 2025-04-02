@@ -30,6 +30,7 @@ export const UsersImport = () => {
   const [importProgress, setImportProgress] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const [processedRows, setProcessedRows] = useState(0);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const { data: session } = useAuthSession();
   
   // Fetch admin emails on component mount
@@ -47,6 +48,7 @@ export const UsersImport = () => {
     setImportProgress(0);
     setTotalRows(0);
     setProcessedRows(0);
+    setDebugInfo(null);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,6 +77,8 @@ export const UsersImport = () => {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
+      console.log('Raw JSON data:', JSON.stringify(jsonData).substring(0, 200) + '...');
+
       if (jsonData.length === 0) {
         toast.error("Il file è vuoto");
         setIsLoading(false);
@@ -94,6 +98,7 @@ export const UsersImport = () => {
           setImportProgress(Math.round(((index + 1) / jsonData.length) * 100));
           
           console.log(`Validating user row ${index + 1}:`, row);
+          setDebugInfo(`Validazione riga ${index + 1} di ${jsonData.length}`);
           
           // Extract user data
           const email = row['email'] || row['Email'];
@@ -163,6 +168,7 @@ export const UsersImport = () => {
           if (gdprConsent !== undefined) user.gdpr_consent = Boolean(gdprConsent);
 
           console.log('Processed user:', user);
+          setDebugInfo(`Inserimento utente: ${user.username}`);
 
           try {
             // First try inserting directly (for non-RLS protected tables)
@@ -176,9 +182,10 @@ export const UsersImport = () => {
               // If it's an RLS error, try with the admin function
               if (insertError.message.includes('row-level security policy')) {
                 console.log('Using admin function to bypass RLS...');
+                setDebugInfo(`Utilizzo funzione admin per utente: ${user.username}`);
                 
                 // Call the admin import function
-                const { error: adminInsertError } = await supabase.functions.invoke('admin-import-user', {
+                const { data, error: adminInsertError } = await supabase.functions.invoke('admin-import-user', {
                   body: { user }
                 });
                 
@@ -187,6 +194,8 @@ export const UsersImport = () => {
                   errors.push(`Riga ${index + 2}: Errore durante l'inserimento con privilegi elevati: ${adminInsertError.message || 'Errore sconosciuto'}`);
                   continue;
                 }
+                
+                console.log('Admin import response:', data);
               } else {
                 errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
                 continue;
@@ -207,13 +216,15 @@ export const UsersImport = () => {
 
       if (errors.length > 0) {
         console.error('Import errors:', errors);
+        setImportError(errors.slice(0, 5).join('\n') + (errors.length > 5 ? `\n... e altri ${errors.length - 5} errori` : ''));
+        
         if (errors.length <= 5) {
           // Show individual errors if there are just a few
           errors.forEach(error => toast.error(error));
         } else {
           // Show a summary if there are many errors
           toast.error(`${errors.length} errori durante l'importazione`, {
-            description: "Controlla la console per i dettagli"
+            description: "Controlla il pannello degli errori per i dettagli"
           });
         }
       }
@@ -238,6 +249,7 @@ export const UsersImport = () => {
       });
     } finally {
       setIsLoading(false);
+      setDebugInfo(null);
       event.target.value = '';
     }
   };
@@ -301,7 +313,7 @@ export const UsersImport = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
+      <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-4">
         <h2 className="text-xl font-semibold">Istruzioni per l'importazione utenti</h2>
         <p className="text-gray-600">
           Il file Excel deve contenere le seguenti colonne:
@@ -329,7 +341,14 @@ export const UsersImport = () => {
       {importError && (
         <Alert variant="destructive">
           <AlertTitle>Errore di importazione</AlertTitle>
-          <AlertDescription>{importError}</AlertDescription>
+          <AlertDescription className="whitespace-pre-line">{importError}</AlertDescription>
+        </Alert>
+      )}
+      
+      {debugInfo && (
+        <Alert>
+          <AlertTitle>Stato importazione</AlertTitle>
+          <AlertDescription>{debugInfo}</AlertDescription>
         </Alert>
       )}
       
