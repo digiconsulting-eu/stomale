@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -20,10 +21,12 @@ export const Header = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true' || 
-                          location.pathname === '/login';
+    // Check for login page or redirect prevention flags
+    const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
+    const preventRedirects = localStorage.getItem('preventRedirects') === 'true';
+    const isOnLoginRoute = location.pathname === '/login';
                           
-    if (isOnLoginPage) {
+    if (isOnLoginPage || preventRedirects || isOnLoginRoute) {
       console.log("Header: On login page, skipping automatic auth checks");
       return;
     }
@@ -53,15 +56,20 @@ export const Header = () => {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event);
+      console.log("Auth state changed in Header:", event);
       
-      if (sessionStorage.getItem('onLoginPage') === 'true' || location.pathname === '/login') {
+      // Re-check login page flags as they can change during auth events
+      const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
+      const preventRedirects = localStorage.getItem('preventRedirects') === 'true';
+      const isOnLoginRoute = location.pathname === '/login';
+      
+      if (isOnLoginPage || preventRedirects || isOnLoginRoute) {
         console.log("Header: On login page, ignoring auth state change");
         return;
       }
       
       if (event === 'SIGNED_IN') {
-        console.log("User signed in:", session?.user?.email);
+        console.log("Header detected sign in:", session?.user?.email);
         setIsLoggedIn(true);
         
         if (session?.user?.email) {
@@ -78,7 +86,7 @@ export const Header = () => {
           }
         }
       } else if (event === 'SIGNED_OUT') {
-        console.log("User signed out");
+        console.log("Header detected sign out");
         setIsLoggedIn(false);
         setIsAdmin(false);
         setIsMenuOpen(false);

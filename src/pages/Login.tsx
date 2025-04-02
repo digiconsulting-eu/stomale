@@ -18,18 +18,18 @@ export default function Login() {
     handleForceReset
   } = useLoginPageState();
 
-  // Prevent any automatic redirects on this page
+  // Set stronger redirect prevention flags with longer persistence
   useEffect(() => {
     console.log("Login page mount: Setting redirect prevention flags");
-    // Set flags to prevent automatic redirects
+    // Set explicit flags to prevent automatic redirects
     sessionStorage.setItem('onLoginPage', 'true');
     localStorage.setItem('preventRedirects', 'true');
     
     return () => {
       // Only clear flags if we're not in the process of logging in
-      // This allows the login handler to manage flag removal after successful login
+      // This is critical to prevent premature flag clearing during login
       if (!isLoading) {
-        console.log("Login page unmount: Clearing redirect prevention flags");
+        console.log("Login page unmount (not loading): Clearing redirect prevention flags");
         sessionStorage.removeItem('onLoginPage');
         localStorage.removeItem('preventRedirects');
       } else {

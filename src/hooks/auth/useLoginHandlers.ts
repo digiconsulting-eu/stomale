@@ -124,9 +124,9 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
       
       // IMPORTANTE: Rimuoviamo i flag di prevenzione dei redirect SOLO DOPO il login completato con successo
       // Clear the login page flag to allow redirects again
+      console.log("Login successful: Will now remove redirect prevention flags");
       sessionStorage.removeItem('onLoginPage');
       localStorage.removeItem('preventRedirects');
-      console.log("Login successful: Removed redirect prevention flags");
 
       toast.success(
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"

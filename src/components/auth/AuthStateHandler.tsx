@@ -15,6 +15,17 @@ export const AuthStateHandler = () => {
     // Initialize auth state from session
     const initializeAuth = async () => {
       try {
+        // Check for redirect prevention flags
+        const isLoginPage = location.pathname === '/login';
+        const hasPreventRedirects = localStorage.getItem('preventRedirects') === 'true';
+        const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
+        
+        // Skip auth handling if on login page or redirect prevention is active
+        if (isLoginPage || hasPreventRedirects || isOnLoginPage) {
+          console.log("AuthStateHandler: Skipping auth initialization due to login page or prevention flags");
+          return;
+        }
+        
         // First check if we need to refresh the session
         await refreshSession();
         
@@ -53,7 +64,7 @@ export const AuthStateHandler = () => {
       }
     };
 
-    // Solo se non siamo sulla pagina di login
+    // Only run if we're NOT on the login page or if redirect prevention flags are not set
     const isLoginPage = location.pathname === '/login';
     const hasPreventRedirects = localStorage.getItem('preventRedirects') === 'true';
     const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
@@ -61,18 +72,20 @@ export const AuthStateHandler = () => {
     if (!isLoginPage && !hasPreventRedirects && !isOnLoginPage) {
       initializeAuth();
     } else {
-      console.log("Skipping auth initialization on login page");
+      console.log("Skipping auth initialization due to login page or prevention flags");
     }
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.email);
       
-      // Double check to prevent redirects on login page
-      if (location.pathname === '/login' || 
-          sessionStorage.getItem('onLoginPage') === 'true' || 
-          localStorage.getItem('preventRedirects') === 'true') {
-        console.log("On login page, preventing automatic redirects");
+      // Double check for redirect prevention flags - CRITICAL CHECK
+      const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
+      const hasPreventRedirects = localStorage.getItem('preventRedirects') === 'true';
+      const isLoginPage = location.pathname === '/login';
+      
+      if (isLoginPage || isOnLoginPage || hasPreventRedirects) {
+        console.log("On login page or redirect prevention active, preventing automatic redirects");
         return;
       }
       
@@ -106,7 +119,7 @@ export const AuthStateHandler = () => {
       } else if (event === 'SIGNED_OUT') {
         queryClient.clear();
         
-        // Solo se non siamo sulla login page
+        // Only redirect if we're not on the login page
         if (location.pathname !== '/login') {
           console.log("User signed out, redirecting to home");
           navigate('/');
