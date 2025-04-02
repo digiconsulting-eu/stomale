@@ -11,6 +11,8 @@ export const useLoginInitialization = (setConnectionIssue: (value: boolean) => v
     
     // When the component mounts, check for corrupted state
     const checkAndCleanupState = async () => {
+      console.log('Login initialization: Starting checks...');
+      
       // Check for corrupted state
       const isCorrupted = await checkForCorruptedState();
       if (isCorrupted) {
@@ -29,6 +31,7 @@ export const useLoginInitialization = (setConnectionIssue: (value: boolean) => v
       if (lastLoginAttempt) {
         const lastAttemptTime = parseInt(lastLoginAttempt, 10);
         const now = Date.now();
+        console.log('Found previous login attempt from', new Date(lastAttemptTime).toLocaleString());
         
         // If the last attempt was more than 3 minutes ago, clear any stale state
         if (now - lastAttemptTime > 3 * 60 * 1000) {
@@ -41,6 +44,7 @@ export const useLoginInitialization = (setConnectionIssue: (value: boolean) => v
       // Check if Supabase is reachable - use direct fetch for more reliability
       const checkConnection = async () => {
         try {
+          console.log('Checking Supabase connection...');
           const isClientHealthy = await checkClientHealth();
           if (!isClientHealthy) {
             console.error('Supabase client health check failed');

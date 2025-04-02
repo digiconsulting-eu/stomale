@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function Login() {
   const [connectionIssue, setConnectionIssue] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [hasExistingSession, setHasExistingSession] = useState(false);
   const navigate = useNavigate();
   
   // Clear the wasLoggedIn flag to prevent showing incorrect logout messages
@@ -28,7 +29,9 @@ export default function Login() {
   useEffect(() => {
     const checkExistingSession = async () => {
       try {
+        console.log("Login page: Checking for existing session...");
         setIsChecking(true);
+        setHasExistingSession(false);
         
         // Get session with a proper timeout to prevent hanging
         const sessionPromise = supabase.auth.getSession();
@@ -39,9 +42,12 @@ export default function Login() {
         
         const { data } = await Promise.race([sessionPromise, timeoutPromise]);
         
+        console.log("Login session check result:", data?.session ? "Has session" : "No session");
+        
         // Only redirect if we have a valid session with a user
         if (data.session && data.session.user && data.session.user.email) {
-          console.log("User already has valid session, redirecting to dashboard");
+          console.log("User already has valid session:", data.session.user.email);
+          setHasExistingSession(true);
           navigate('/dashboard', { replace: true });
         }
       } catch (error) {
@@ -72,6 +78,18 @@ export default function Login() {
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-2"></div>
           <p className="text-sm text-muted-foreground">Verifica accesso in corso...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // If we've detected a valid session but haven't redirected yet, show a loading message
+  if (hasExistingSession) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[300px]">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-2"></div>
+          <p className="text-sm text-muted-foreground">Accesso effettuato. Reindirizzamento in corso...</p>
         </div>
       </div>
     );
