@@ -25,46 +25,85 @@ export default function Login() {
   // Initialize login page and check for issues
   useLoginInitialization(setConnectionIssue);
   
-  // Check if already logged in, with better handling to prevent automatic redirects
+  // Separate the session check to its own effect to prevent conflicts 
   useEffect(() => {
+    // Flag to track if the component is still mounted
+    let isMounted = true;
+    
     const checkExistingSession = async () => {
       try {
-        console.log("Login page: Checking for existing session...");
-        setIsChecking(true);
-        setHasExistingSession(false);
+        console.log("Login page: Starting session check...");
         
-        // Get session with a proper timeout to prevent hanging
+        // Set states at the beginning
+        if (isMounted) {
+          setIsChecking(true);
+          setHasExistingSession(false);
+        }
+
+        // For debugging purposes, check localStorage first
+        const localLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        console.log("LocalStorage isLoggedIn flag:", localLoggedIn);
+        
+        // Use a more robust session check with timeout
         const sessionPromise = supabase.auth.getSession();
-        // Create a promise that resolves with a properly typed empty session after timeout
-        const timeoutPromise = new Promise<{data: {session: null}}>(resolve => {
-          setTimeout(() => resolve({ data: { session: null } }), 3000);
+        const timeoutPromise = new Promise<{data: {session: null}}>((resolve) => {
+          setTimeout(() => resolve({ data: { session: null } }), 5000); // Increased timeout
         });
         
-        // Use Promise.race to avoid hanging on the session check
-        const { data } = await Promise.race([sessionPromise, timeoutPromise]);
+        // Use Promise.race with more careful error handling
+        const result = await Promise.race([sessionPromise, timeoutPromise])
+          .catch(error => {
+            console.error("Session check failed:", error);
+            return { data: { session: null } };
+          });
+          
+        // Extract session data safely
+        const session = result?.data?.session || null;
         
-        console.log("Login session check result:", data?.session ? "Has session" : "No session");
+        console.log("Login session check result:", 
+          session ? `Session found for: ${session.user?.email || 'unknown'}` : "No valid session");
         
-        // Only redirect if we have a valid session with a user ID AND email
-        if (data.session && data.session.user && data.session.user.id && data.session.user.email) {
-          console.log("User already has valid session:", data.session.user.email);
+        // Only redirect if the component is still mounted AND we have a fully valid session
+        // with both an ID and email to prevent partial session issues
+        if (isMounted && session && session.user && 
+            session.user.id && session.user.email && 
+            session.access_token) {
+          
+          console.log("Valid session found, preparing redirect:", session.user.email);
+          
+          // Set the flag first
           setHasExistingSession(true);
-          // Delay navigation slightly to prevent race conditions
+          
+          // Use a delayed redirect to ensure UI updates first and prevent race conditions
           setTimeout(() => {
-            navigate('/dashboard', { replace: true });
-          }, 100);
-        } else {
-          // Explicitly mark that we're done checking and NO valid session exists
+            if (isMounted) {
+              console.log("Redirecting to dashboard with valid session");
+              navigate('/dashboard', { replace: true });
+            }
+          }, 300);
+        } 
+        else if (isMounted) {
+          console.log("No valid session found, showing login form");
+          // Explicitly mark that we're done checking and no valid session exists
           setIsChecking(false);
         }
       } catch (error) {
-        console.error("Error checking session:", error);
-        // Don't redirect on error, just set checking to false
-        setIsChecking(false);
+        console.error("Error in session check:", error);
+        
+        // Only update state if still mounted
+        if (isMounted) {
+          setIsChecking(false);
+        }
       }
     };
     
+    // Execute the session check
     checkExistingSession();
+    
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
   }, [navigate]);
   
   // Get login state and handlers

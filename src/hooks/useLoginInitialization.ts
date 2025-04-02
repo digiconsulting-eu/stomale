@@ -9,72 +9,88 @@ export const useLoginInitialization = (setConnectionIssue: (value: boolean) => v
   useEffect(() => {
     setPageTitle(getDefaultPageTitle("Login"));
     
+    // Create a flag to track if component is still mounted
+    let isMounted = true;
+    
     // When the component mounts, check for corrupted state
     const checkAndCleanupState = async () => {
       console.log('Login initialization: Starting checks...');
       
-      // Check for corrupted state
-      const isCorrupted = await checkForCorruptedState();
-      if (isCorrupted) {
-        console.log('Detected corrupted auth state, resetting...');
-        toast.warning(
-          "Rilevato stato di autenticazione non valido, ripristino in corso...",
-          { duration: 3000 }
-        );
-        await resetAuthClient();
-        return;
-      }
-      
-      // Check if there was a previous login attempt that might have left 
-      // the app in a broken state
-      const lastLoginAttempt = localStorage.getItem('last-login-attempt');
-      if (lastLoginAttempt) {
-        const lastAttemptTime = parseInt(lastLoginAttempt, 10);
-        const now = Date.now();
-        console.log('Found previous login attempt from', new Date(lastAttemptTime).toLocaleString());
-        
-        // If the last attempt was more than 3 minutes ago, clear any stale state
-        if (now - lastAttemptTime > 3 * 60 * 1000) {
-          console.log('Found stale login attempt, resetting auth state');
-          localStorage.removeItem('last-login-attempt');
+      try {
+        // Check for corrupted state
+        const isCorrupted = await checkForCorruptedState();
+        if (isCorrupted && isMounted) {
+          console.log('Detected corrupted auth state, resetting...');
+          toast.warning(
+            "Rilevato stato di autenticazione non valido, ripristino in corso...",
+            { duration: 3000 }
+          );
           await resetAuthClient();
+          return;
         }
-      }
-      
-      // Check if Supabase is reachable - use direct fetch for more reliability
-      const checkConnection = async () => {
-        try {
-          console.log('Checking Supabase connection...');
-          const isClientHealthy = await checkClientHealth();
-          if (!isClientHealthy) {
-            console.error('Supabase client health check failed');
-            setConnectionIssue(true);
-          } else {
-            console.log('Supabase client health check passed');
-            setConnectionIssue(false);
+        
+        // Check if there was a previous login attempt that might have left 
+        // the app in a broken state
+        const lastLoginAttempt = localStorage.getItem('last-login-attempt');
+        if (lastLoginAttempt) {
+          const lastAttemptTime = parseInt(lastLoginAttempt, 10);
+          const now = Date.now();
+          console.log('Found previous login attempt from', new Date(lastAttemptTime).toLocaleString());
+          
+          // If the last attempt was more than 3 minutes ago, clear any stale state
+          if (now - lastAttemptTime > 3 * 60 * 1000) {
+            console.log('Found stale login attempt, resetting auth state');
+            localStorage.removeItem('last-login-attempt');
+            await resetAuthClient();
           }
-        } catch (error) {
-          console.error('Error checking client health:', error);
-          setConnectionIssue(true);
         }
-      };
-      
-      // First quick check
-      await checkConnection();
-      
-      // If there's an issue, try resetting the client and check again after a short delay
-      if (setConnectionIssue) {
-        setTimeout(async () => {
+        
+        if (!isMounted) return;
+        
+        // Check if Supabase is reachable
+        const checkConnection = async () => {
           try {
-            await resetSupabaseClient();
-            await checkConnection();
+            console.log('Checking Supabase connection...');
+            const isClientHealthy = await checkClientHealth();
+            if (!isClientHealthy && isMounted) {
+              console.error('Supabase client health check failed');
+              setConnectionIssue(true);
+            } else if (isMounted) {
+              console.log('Supabase client health check passed');
+              setConnectionIssue(false);
+            }
           } catch (error) {
-            console.error('Error in delayed connection check:', error);
+            console.error('Error checking client health:', error);
+            if (isMounted) setConnectionIssue(true);
           }
-        }, 2000);
+        };
+        
+        // First quick check
+        await checkConnection();
+        
+        // If there's an issue and component is still mounted, try resetting the client
+        if (isMounted) {
+          setTimeout(async () => {
+            try {
+              if (!isMounted) return;
+              
+              await resetSupabaseClient();
+              await checkConnection();
+            } catch (error) {
+              console.error('Error in delayed connection check:', error);
+            }
+          }, 2000);
+        }
+      } catch (error) {
+        console.error('Error in initialization:', error);
       }
     };
     
     checkAndCleanupState();
+    
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
   }, [setConnectionIssue]);
 };
