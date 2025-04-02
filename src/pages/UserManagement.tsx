@@ -19,11 +19,58 @@ import { ReviewsPagination } from "@/components/reviews/ReviewsPagination";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { toast } from "sonner";
 import { RefreshCcw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 50;
 
 const UserManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
+
+  // Check admin status immediately on component mount
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log('UserManagement: No session found, redirecting to login');
+          navigate('/login', { replace: true });
+          return;
+        }
+        
+        // First check localStorage for faster response
+        const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
+        if (!storedIsAdmin) {
+          console.log('UserManagement: User is not admin according to localStorage, verifying with server');
+          
+          // Double-check with the database
+          const { data } = await supabase
+            .from('admin')
+            .select('email')
+            .eq('email', session.user.email)
+            .single();
+            
+          const isAdmin = !!data;
+          
+          if (!isAdmin) {
+            console.log('UserManagement: User is not admin, redirecting to dashboard');
+            toast.error("Accesso negato", {
+              description: "Non hai i permessi necessari per accedere a questa pagina"
+            });
+            navigate('/dashboard', { replace: true });
+            return;
+          }
+          
+          // Update localStorage with verified admin status
+          localStorage.setItem('isAdmin', 'true');
+        }
+      } catch (error) {
+        console.error('Error checking admin status in UserManagement:', error);
+      }
+    };
+    
+    checkAdminStatus();
+  }, [navigate]);
 
   // Use refetchOnMount: always to ensure data is always fetched when the component mounts
   const { data, isLoading, error, refetch } = useQuery({
@@ -32,8 +79,11 @@ const UserManagement = () => {
       console.log('Fetching users for admin panel, page:', currentPage);
       
       try {
-        // Clear stale Supabase client state
-        await supabase.auth.refreshSession();
+        // Ensure we have a valid session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          throw new Error('No authenticated session');
+        }
         
         // First get total count
         const { count, error: countError } = await supabase

@@ -36,7 +36,7 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
           toast.error("Accesso negato", {
             description: "Devi effettuare l'accesso per visualizzare questa pagina"
           });
-          navigate('/login');
+          navigate('/login', { replace: true });
           return;
         }
 
@@ -50,16 +50,37 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
             return;
           }
           
-          // Double-check with the database
-          const isAdmin = await checkIsAdmin(session.user.email || '');
-          console.log('ProtectedRoute: Admin check result:', isAdmin);
+          // Double-check with the database - add retries for reliability
+          let retryCount = 0;
+          let isAdmin = false;
+          
+          while (retryCount < 3 && !isAdmin) {
+            try {
+              isAdmin = await checkIsAdmin(session.user.email || '');
+              console.log('ProtectedRoute: Admin check result (attempt ' + (retryCount + 1) + '):', isAdmin);
+              
+              if (isAdmin) break;
+              
+              // Only retry if we failed but didn't get an explicit "not admin"
+              retryCount++;
+              if (retryCount < 3) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+              }
+            } catch (e) {
+              console.error('Error checking admin status:', e);
+              retryCount++;
+              if (retryCount < 3) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+              }
+            }
+          }
 
           if (!isAdmin) {
             console.log('ProtectedRoute: User is not admin, redirecting to dashboard');
             toast.error("Accesso negato", {
               description: "Non hai i permessi necessari per accedere a questa pagina"
             });
-            navigate('/dashboard');
+            navigate('/dashboard', { replace: true });
             return;
           }
           
@@ -72,7 +93,7 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
         localStorage.setItem('userEmail', session.user.email || '');
       } catch (error) {
         console.error("Error checking auth:", error);
-        navigate('/login');
+        navigate('/login', { replace: true });
       } finally {
         setIsLoading(false);
       }
@@ -84,10 +105,13 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
       if (event === 'SIGNED_OUT') {
         console.log('ProtectedRoute: User signed out');
         setIsAuthenticated(false);
-        navigate('/login');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        navigate('/login', { replace: true });
       } else if (event === 'SIGNED_IN' && session) {
         console.log('ProtectedRoute: User signed in');
         setIsAuthenticated(true);
+        localStorage.setItem('isLoggedIn', 'true');
       }
     });
 
