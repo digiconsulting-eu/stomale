@@ -24,7 +24,7 @@ export const resetAuthClient = async () => {
       }
     });
     
-    // Sign out and explicitly clear session
+    // Sign out but don't refresh the page automatically
     try {
       await supabase.auth.signOut({ scope: 'local' });
     } catch (signOutError) {
@@ -38,8 +38,7 @@ export const resetAuthClient = async () => {
     return true;
   } catch (error) {
     console.error('Error in resetAuthClient:', error);
-    // Even if there's an error, attempt page reload as a last resort
-    window.location.reload();
+    // Don't reload automatically, just return the error status
     return false;
   }
 };

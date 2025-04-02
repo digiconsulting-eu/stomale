@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
   const [connectionIssue, setConnectionIssue] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
   
   // Clear the wasLoggedIn flag to prevent showing incorrect logout messages
@@ -23,13 +24,28 @@ export default function Login() {
   // Initialize login page and check for issues
   useLoginInitialization(setConnectionIssue);
   
-  // Check if already logged in
+  // Check if already logged in, with better handling to prevent automatic redirects
   useEffect(() => {
     const checkExistingSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        console.log("User already has valid session, redirecting to dashboard");
-        navigate('/dashboard', { replace: true });
+      try {
+        setIsChecking(true);
+        
+        // Get session with a proper timeout to prevent hanging
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve({ data: { session: null } }), 2000));
+        
+        const { data } = await Promise.race([sessionPromise, timeoutPromise]);
+        
+        // Only redirect if we have a valid session with a user
+        if (data.session && data.session.user && data.session.user.email) {
+          console.log("User already has valid session, redirecting to dashboard");
+          navigate('/dashboard', { replace: true });
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
+        // Don't redirect on error
+      } finally {
+        setIsChecking(false);
       }
     };
     
@@ -45,6 +61,18 @@ export default function Login() {
     handleReset,
     handleForceReset
   } = useLoginState();
+
+  // Don't render the login form until we've checked for an existing session
+  if (isChecking) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[300px]">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-2"></div>
+          <p className="text-sm text-muted-foreground">Verifica accesso in corso...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
