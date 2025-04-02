@@ -21,35 +21,34 @@ export default function Login() {
     handleForceReset
   } = useLoginPageState();
 
-  // Set strong redirect prevention flags that will persist
+  // CRITICAL FIX: More aggressive check for existing login state
   useEffect(() => {
     console.log("Login page mount: Setting redirect prevention flags");
     
-    // Set explicit flags to prevent automatic redirects
-    sessionStorage.setItem('onLoginPage', 'true');
-    localStorage.setItem('preventRedirects', 'true');
-    localStorage.setItem('loginPageActive', Date.now().toString());
-    
-    // CRITICAL FIX: Check for existing logged-in state on page load
+    // Check if already logged in immediately
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
     
+    // If already logged in, redirect immediately without setting flags
     if (isLoggedIn) {
-      console.log("User already logged in, redirecting");
+      console.log("User already logged in on Login page load, redirecting immediately");
       const redirectTarget = isAdmin ? '/admin' : '/dashboard';
       
-      // Small delay to ensure all systems recognize the logged-in state
-      setTimeout(() => {
-        // Clear redirect prevention flags before navigating
-        sessionStorage.removeItem('onLoginPage');
-        localStorage.removeItem('preventRedirects');
-        localStorage.removeItem('loginPageActive');
-        
-        // Navigate to appropriate destination
-        navigate(redirectTarget, { replace: true });
-      }, 100);
+      // Clear redirect prevention flags immediately
+      sessionStorage.removeItem('onLoginPage');
+      localStorage.removeItem('preventRedirects');
+      localStorage.removeItem('loginPageActive');
+      
+      // Use both navigation approaches for maximum reliability
+      navigate(redirectTarget, { replace: true });
+      window.location.href = redirectTarget;
       return;
     }
+    
+    // If not already logged in, set prevention flags
+    sessionStorage.setItem('onLoginPage', 'true');
+    localStorage.setItem('preventRedirects', 'true');
+    localStorage.setItem('loginPageActive', Date.now().toString());
     
     return () => {
       // Only clear these flags if we're not in the middle of a login process

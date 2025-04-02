@@ -121,33 +121,24 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
       // Complete the progress bar
       setLoginProgress(100);
 
-      // Double check if user is admin - with retry for better reliability
-      let isAdmin = localStorage.getItem('isAdmin') === 'true'; // Use pre-checked value from loginUtils
-      
-      // If admin status not determined yet, check it now
-      if (isAdmin !== true && isAdmin !== false) {
-        try {
-          isAdmin = await checkIsAdmin(data.email);
-          console.log("Admin check result:", { isAdmin });
-        } catch (adminCheckError) {
-          console.error("Error checking admin status:", adminCheckError);
-          // Retry once
-          try {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            isAdmin = await checkIsAdmin(data.email);
-          } catch (retryError) {
-            console.error("Retry admin check failed:", retryError);
-          }
-        }
+      // Check if user is admin immediately
+      let isAdmin = false;
+      try {
+        console.log("Checking admin status for:", data.email);
+        isAdmin = await checkIsAdmin(data.email);
+        console.log("Admin check result:", isAdmin);
+
+        // Store results immediately
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+        localStorage.setItem('userEmail', data.email);
+      } catch (adminCheckError) {
+        console.error("Error checking admin status:", adminCheckError);
+        isAdmin = false;
       }
       
       // Set a flag that user is now logged in (for proper logout message later)
       localStorage.setItem('wasLoggedIn', 'true');
-      
-      // Update local storage session info
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-      localStorage.setItem('userEmail', data.email);
       
       // Clear the last login attempt marker
       localStorage.removeItem('last-login-attempt');
@@ -156,27 +147,25 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
       
-      // CRITICAL FIX: First immediately direct to correct page
+      // CRITICAL FIX: Add logging to see exactly what's happening
+      console.log(`LOGIN SUCCESS - User is admin: ${isAdmin}, redirecting to: ${isAdmin ? '/admin' : '/dashboard'}`);
+      
+      // CRITICAL FIX: Add a forced approach to redirects
       const redirectTarget = isAdmin ? '/admin' : '/dashboard'; 
       
-      // CRITICAL FIX: Force immediate navigation but carefully clean up flags
-      console.log(`Login successful: Immediately redirecting to ${redirectTarget}`);
+      // Clear all prevention flags IMMEDIATELY before redirect
+      sessionStorage.removeItem('onLoginPage');
+      localStorage.removeItem('preventRedirects');
+      localStorage.removeItem('loginPageActive');
       
-      // CRITICAL: Wait a moment to ensure all login state is set before clearing prevention flags
-      setTimeout(() => {
-        // Clear redirect prevention flags right before redirect
-        sessionStorage.removeItem('onLoginPage');
-        localStorage.removeItem('preventRedirects');
-        localStorage.removeItem('loginPageActive');
-        
-        // Immediate redirect after successful login
-        navigate(redirectTarget, { replace: true });
-      }, 100);
+      // Force immediate navigation with direct window.location approach
+      console.log(`Forcing immediate redirect to ${redirectTarget}`);
       
+      // Use a direct navigation approach with replace
+      window.location.href = redirectTarget;
+
       // Clean up processing flag after navigation
-      setTimeout(() => {
-        isProcessing.current = false;
-      }, 200);
+      isProcessing.current = false;
       
     } catch (error: any) {
       console.error('Error during login process:', error);

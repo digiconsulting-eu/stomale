@@ -51,6 +51,34 @@ export const AuthStateHandler = () => {
           return;
         }
         
+        // CRITICAL FIX: Immediately check localStorage first for faster decisions
+        const storedLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
+        
+        if (storedLoggedIn) {
+          console.log("Found logged in state in localStorage, user is admin:", storedIsAdmin);
+          
+          // If we're already at the right location, don't redirect
+          if (storedIsAdmin && (location.pathname === '/admin' || location.pathname.startsWith('/admin/'))) {
+            console.log("Already on admin page, no redirect needed");
+            setInitialized(true);
+            return;
+          }
+          
+          if (!storedIsAdmin && location.pathname === '/dashboard') {
+            console.log("Already on dashboard page, no redirect needed");
+            setInitialized(true);
+            return;
+          }
+          
+          // Redirect to the appropriate page
+          const redirectTarget = storedIsAdmin ? '/admin' : '/dashboard';
+          console.log(`AuthStateHandler: Redirecting to ${redirectTarget} based on localStorage`);
+          navigate(redirectTarget, { replace: true });
+          setInitialized(true);
+          return;
+        }
+        
         // First check if we need to refresh the session
         await refreshSession();
         
@@ -164,32 +192,48 @@ export const AuthStateHandler = () => {
           console.log("SIGNED_IN event detected with valid session");
           
           try {
-            // Wait a moment to ensure admin status is saved in localStorage
-            await new Promise(resolve => setTimeout(resolve, 200));
+            // Check localStorage first for faster decision
+            const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
             
-            // Check if admin status already determined in loginUtils
-            let isAdmin = localStorage.getItem('isAdmin') === 'true';
-            
-            // If admin status not yet determined, check it
-            if (isAdmin !== true) {
-              const { data: adminData, error } = await supabase
-                .from('admin')
-                .select('email')
-                .eq('email', session.user.email);
+            if (storedIsAdmin !== undefined) {
+              console.log("Admin status from localStorage:", storedIsAdmin);
               
-              if (error) {
-                console.error("Error checking admin status:", error);
-                isProcessingAuthChange.current = false;
-                return;
+              // Clear prevention flags BEFORE redirecting
+              sessionStorage.removeItem('onLoginPage');
+              localStorage.removeItem('preventRedirects');
+              localStorage.removeItem('loginPageActive');
+              
+              const redirectTarget = storedIsAdmin ? '/admin' : '/dashboard';
+              
+              // Only redirect if not already there
+              if (location.pathname !== redirectTarget && 
+                  !(storedIsAdmin && location.pathname.startsWith('/admin/'))) {
+                console.log(`Redirecting to ${redirectTarget} after sign in (localStorage)`);
+                navigate(redirectTarget, { replace: true });
               }
               
-              isAdmin = Array.isArray(adminData) && adminData.length > 0;
-              queryClient.setQueryData(['adminStatus'], isAdmin);
-              
-              localStorage.setItem('isLoggedIn', 'true');
-              localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-              localStorage.setItem('userEmail', session.user.email);
+              isProcessingAuthChange.current = false;
+              return;
             }
+            
+            // If not in localStorage, check from the database
+            const { data: adminData, error } = await supabase
+              .from('admin')
+              .select('email')
+              .eq('email', session.user.email);
+            
+            if (error) {
+              console.error("Error checking admin status:", error);
+              isProcessingAuthChange.current = false;
+              return;
+            }
+            
+            const isAdmin = Array.isArray(adminData) && adminData.length > 0;
+            queryClient.setQueryData(['adminStatus'], isAdmin);
+            
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+            localStorage.setItem('userEmail', session.user.email);
             
             // CRITICAL FIX: Clear prevention flags BEFORE redirecting
             sessionStorage.removeItem('onLoginPage');

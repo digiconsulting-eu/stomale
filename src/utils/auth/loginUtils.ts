@@ -52,7 +52,7 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     }
     
     // Add a larger delay after successful login to ensure session is properly set
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     // CRITICAL: Verify session was actually created
     const { data: sessionCheck } = await supabase.auth.getSession();
@@ -78,10 +78,13 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
       const isAdmin = !!adminData && !adminError;
       console.log('Pre-checking admin status:', isAdmin);
       
+      // Set admin status explicitly to avoid ambiguity
       if (isAdmin) {
         localStorage.setItem('isAdmin', 'true');
+        console.log('SET isAdmin = true in localStorage');
       } else {
         localStorage.setItem('isAdmin', 'false');
+        console.log('SET isAdmin = false in localStorage');
       }
       
       localStorage.setItem('userEmail', email);
@@ -89,6 +92,7 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
       console.error('Error pre-checking admin status:', adminError);
       // Default to non-admin if check fails
       localStorage.setItem('isAdmin', 'false');
+      console.log('SET isAdmin = false in localStorage (after error)');
     }
     
     // Clear the login attempt tracker
