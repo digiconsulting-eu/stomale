@@ -6,7 +6,7 @@ import { useLoginInitialization } from "@/hooks/useLoginInitialization";
 export const useLoginPageState = () => {
   const [connectionIssue, setConnectionIssue] = useState(false);
   
-  // Initialize login page and check for issues
+  // Initialize login page and check for issues, but don't check session
   useLoginInitialization(setConnectionIssue);
   
   // Clear the wasLoggedIn flag to prevent showing incorrect logout messages
@@ -14,7 +14,7 @@ export const useLoginPageState = () => {
     localStorage.removeItem('wasLoggedIn');
   }, []);
   
-  // Get login state and handlers
+  // Get login state and handlers, pass noAutoRedirect flag
   const {
     isLoading,
     loginProgress,
@@ -22,7 +22,7 @@ export const useLoginPageState = () => {
     handleSubmit,
     handleReset,
     handleForceReset
-  } = useLoginState();
+  } = useLoginState(true); // Pass true to indicate we're on the login page
 
   return {
     connectionIssue,

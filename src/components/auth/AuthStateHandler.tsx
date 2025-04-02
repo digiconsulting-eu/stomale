@@ -59,8 +59,11 @@ export const AuthStateHandler = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.email);
       
+      // Check if we're on the login page before processing redirects
+      const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
+      
       if (event === 'SIGNED_IN') {
-        if (session) {
+        if (session && !isOnLoginPage) {
           try {
             const { data: adminData, error } = await supabase
               .from('admin')
@@ -76,10 +79,12 @@ export const AuthStateHandler = () => {
             queryClient.setQueryData(['adminStatus'], isAdmin);
             
             // Redirect to dashboard on successful sign in
-            // Only redirect if we're not already on the dashboard
-            if (location.pathname !== '/dashboard') {
+            // Only redirect if we're not already on the dashboard AND not on the login page
+            if (location.pathname !== '/dashboard' && !isOnLoginPage) {
               console.log("Redirecting to dashboard after sign in");
               navigate('/dashboard', { replace: true });
+            } else {
+              console.log("Not redirecting: on login page or already at dashboard");
             }
           } catch (error) {
             console.error("Error checking admin status:", error);

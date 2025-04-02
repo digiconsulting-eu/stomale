@@ -12,11 +12,14 @@ export const useLoginInitialization = (setConnectionIssue: (value: boolean) => v
     // Create a flag to track if component is still mounted
     let isMounted = true;
     
-    // When the component mounts, check for corrupted state
+    // When the component mounts, check for corrupted state but don't check session
     const checkAndCleanupState = async () => {
       console.log('Login initialization: Starting checks...');
       
       try {
+        // Mark that we're on the login page to prevent redirects
+        sessionStorage.setItem('onLoginPage', 'true');
+        
         // Check for corrupted state
         const isCorrupted = await checkForCorruptedState();
         if (isCorrupted && isMounted) {
@@ -91,6 +94,7 @@ export const useLoginInitialization = (setConnectionIssue: (value: boolean) => v
     // Cleanup function to prevent state updates after unmount
     return () => {
       isMounted = false;
+      sessionStorage.removeItem('onLoginPage');
     };
   }, [setConnectionIssue]);
 };

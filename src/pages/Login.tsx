@@ -5,6 +5,7 @@ import { ConnectionErrorAlert } from "@/components/auth/ConnectionErrorAlert";
 import { LoginTimeoutAlert } from "@/components/auth/LoginTimeoutAlert";
 import { LoginProgress } from "@/components/auth/LoginProgress";
 import { LoginCard } from "@/components/auth/LoginCard";
+import { useEffect } from "react";
 
 export default function Login() {
   const {
@@ -16,6 +17,18 @@ export default function Login() {
     handleReset,
     handleForceReset
   } = useLoginPageState();
+
+  // Prevent any automatic redirects on this page
+  useEffect(() => {
+    // Set a flag in session storage to indicate we're on the login page
+    // This will be used to prevent automatic redirects from auth state changes
+    sessionStorage.setItem('onLoginPage', 'true');
+    
+    return () => {
+      // Clear the flag when leaving the login page
+      sessionStorage.removeItem('onLoginPage');
+    };
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">

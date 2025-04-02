@@ -6,7 +6,7 @@ import { supabase, checkClientHealth, resetSupabaseClient } from "@/integrations
 import { loginWithEmailPassword, checkIsAdmin, resetAuthClient } from "@/utils/auth";
 import { LoginFormValues } from "@/components/auth/LoginForm";
 
-export const useLoginState = () => {
+export const useLoginState = (noAutoRedirect: boolean = false) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [loginProgress, setLoginProgress] = useState(0);
@@ -56,8 +56,15 @@ export const useLoginState = () => {
   };
 
   // Check if user is already logged in before logging in
+  // Only used when explicitly called, not automatically
   const checkExistingSession = async () => {
     try {
+      // Don't perform automatic session checks if noAutoRedirect is true
+      if (noAutoRedirect) {
+        console.log("Skipping automatic session check on login page");
+        return false;
+      }
+      
       // Use a more robust session check with timeout
       const sessionPromise = supabase.auth.getSession();
       const timeoutPromise = new Promise<{data: {session: null}}>((resolve) => {
@@ -91,7 +98,7 @@ export const useLoginState = () => {
     // Prevent multiple submissions
     if (isLoading) return;
     
-    // Check if already logged in first
+    // Check if already logged in first - only perform this check on submit
     const hasSession = await checkExistingSession();
     if (hasSession) {
       console.log("User already has a valid session, redirecting to dashboard");
@@ -176,6 +183,9 @@ export const useLoginState = () => {
       
       // Clear the last login attempt marker
       localStorage.removeItem('last-login-attempt');
+      
+      // Clear the login page flag to allow redirects again
+      sessionStorage.removeItem('onLoginPage');
 
       toast.success(
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
