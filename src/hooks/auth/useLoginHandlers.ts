@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useLoginProgress } from "./useLoginProgress";
@@ -15,6 +15,7 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [loginAttempt, setLoginAttempt] = useState(0);
+  const isProcessing = useRef(false);
   
   const { 
     loginProgress, 
@@ -33,16 +34,21 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
   const { checkExistingSession } = useSessionCheck();
 
   const handleSubmit = async (data: LoginFormValues) => {
-    // Prevent multiple submissions
-    if (isLoading) return;
+    // CRITICAL FIX: Prevent multiple submissions or concurrent login attempts
+    if (isLoading || isProcessing.current) {
+      console.log("Login already in progress, ignoring request");
+      return;
+    }
     
     console.log("Login form submitted, handling login process");
+    isProcessing.current = true;
     
     // Check if already logged in first - only perform this check on submit
     const hasSession = await checkExistingSession(noAutoRedirect);
     if (hasSession) {
       console.log("User already has a valid session, redirecting to dashboard");
       navigate('/dashboard', { replace: true });
+      isProcessing.current = false;
       return;
     }
     
@@ -61,12 +67,14 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
     // Ensure redirect prevention flags are set
     sessionStorage.setItem('onLoginPage', 'true');
     localStorage.setItem('preventRedirects', 'true');
+    localStorage.setItem('loginPageActive', Date.now().toString());
     
     // Check Supabase health first
     const isHealthy = await checkSupabaseHealth();
     if (!isHealthy) {
       setConnectionIssue(true);
       setIsLoading(false);
+      isProcessing.current = false;
       toast.error("Impossibile contattare il server di autenticazione");
       return;
     }
@@ -79,6 +87,8 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
       if (loginAttempt > 0) {
         await resetSupabaseClient();
         console.log("Using fresh Supabase client for retry attempt");
+        // Add a small delay before attempting login again
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
       
       // Use the improved login function with timeout
@@ -132,20 +142,24 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
       
-      // CRITICAL CHANGE: Wait longer before redirecting and ensure we maintain the session
+      // CRITICAL CHANGE: Wait much longer before redirecting and ensure we maintain the session
       // Add a delay before removing redirect prevention flags
       // This allows the auth state to fully propagate
       setTimeout(() => {
         console.log("Login successful: Now removing redirect prevention flags");
         sessionStorage.removeItem('onLoginPage');
         localStorage.removeItem('preventRedirects');
+        localStorage.removeItem('loginPageActive');
         
         // Now that flags are removed, it's safe to redirect
         setTimeout(() => {
           console.log("Redirecting to dashboard after successful login");
-          navigate('/dashboard', { replace: true });
-        }, 1000); // Increased delay before redirect
-      }, 1500); // Increased delay before removing flags
+          if (isProcessing.current) {
+            navigate('/dashboard', { replace: true });
+            isProcessing.current = false;
+          }
+        }, 2000); // Increased delay before redirect
+      }, 3000); // Increased delay before removing flags
       
     } catch (error: any) {
       console.error('Error during login process:', error);
@@ -193,9 +207,15 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
           }
         });
       }
+      
+      isProcessing.current = false;
     } finally {
       // Ensure isLoading is always reset to false when done
       setIsLoading(false);
+      // If not already cleared by successful flow
+      if (isProcessing.current) {
+        isProcessing.current = false;
+      }
     }
   };
 

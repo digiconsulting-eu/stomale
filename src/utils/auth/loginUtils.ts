@@ -6,7 +6,7 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
     controller.abort();
-  }, 20000); // Increased timeout
+  }, 30000); // Increased timeout to prevent rate limits
   
   try {
     console.log('Starting login process for:', email);
@@ -15,11 +15,12 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     await resetSupabaseClient();
     
     // Add a small delay to ensure client is reset
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     // Ensure redirect prevention flags are set
     sessionStorage.setItem('onLoginPage', 'true');
     localStorage.setItem('preventRedirects', 'true');
+    localStorage.setItem('loginPageActive', Date.now().toString());
     
     // Clear any previous auth state
     localStorage.removeItem('isLoggedIn');
@@ -39,8 +40,9 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
       throw error;
     }
     
-    // Add a small delay after successful login to ensure session is properly set
-    await new Promise(resolve => setTimeout(resolve, 700));
+    // Add a larger delay after successful login to ensure session is properly set
+    // CRITICAL FIX: Longer delay to ensure session establishment
+    await new Promise(resolve => setTimeout(resolve, 1500));
     
     console.log('Login successful:', data?.user?.email);
     return { data, error: null };

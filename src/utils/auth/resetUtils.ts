@@ -15,6 +15,7 @@ export const resetAuthClient = async () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('loginPageActive');
     
     // IMPORTANT: Don't remove redirect prevention flags during reset
     // Let the components that set them handle removal
@@ -35,7 +36,7 @@ export const resetAuthClient = async () => {
     }
     
     // Wait for cleanup to complete
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
     console.log('Auth client reset complete');
     

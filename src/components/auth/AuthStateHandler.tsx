@@ -21,13 +21,19 @@ export const AuthStateHandler = () => {
         const isLoginPage = location.pathname === '/login';
         const hasPreventRedirects = localStorage.getItem('preventRedirects') === 'true';
         const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
+        const loginPageActive = localStorage.getItem('loginPageActive');
+        
+        // CRITICAL FIX: More reliable prevention check with timestamp
+        const isInLoginProcess = loginPageActive && 
+          (Date.now() - parseInt(loginPageActive, 10)) < 60000; // within last minute
         
         // Skip auth handling if on login page or redirect prevention is active
-        if (isLoginPage || hasPreventRedirects || isOnLoginPage) {
+        if (isLoginPage || hasPreventRedirects || isOnLoginPage || isInLoginProcess) {
           console.log("AuthStateHandler: Skipping auth initialization due to prevention flags", {
             isLoginPage,
             hasPreventRedirects,
             isOnLoginPage,
+            isInLoginProcess,
             path: location.pathname
           });
           setInitialized(true);
@@ -49,27 +55,33 @@ export const AuthStateHandler = () => {
           console.log("Session found on page load:", session.user.email);
           // Pre-fetch admin status if user is logged in
           try {
-            const { data: adminData, error: adminError } = await supabase
-              .from('admin')
-              .select('email')
-              .eq('email', session.user.email);
-            
-            if (adminError) {
-              console.error("Error checking admin status:", adminError);
-              setInitialized(true);
-              return;
-            }
-            
-            const isAdmin = Array.isArray(adminData) && adminData.length > 0;
-            console.log("User admin status:", isAdmin);
-            
-            // Cache the admin status
-            queryClient.setQueryData(['adminStatus'], isAdmin);
-            
-            // Set local indicators of login state
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-            localStorage.setItem('userEmail', session.user.email);
+            // Use setTimeout to avoid potential deadlocks with Supabase client
+            setTimeout(async () => {
+              try {
+                const { data: adminData, error: adminError } = await supabase
+                  .from('admin')
+                  .select('email')
+                  .eq('email', session.user.email);
+                
+                if (adminError) {
+                  console.error("Error checking admin status:", adminError);
+                  return;
+                }
+                
+                const isAdmin = Array.isArray(adminData) && adminData.length > 0;
+                console.log("User admin status:", isAdmin);
+                
+                // Cache the admin status
+                queryClient.setQueryData(['adminStatus'], isAdmin);
+                
+                // Set local indicators of login state
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+                localStorage.setItem('userEmail', session.user.email);
+              } catch (error) {
+                console.error("Error checking admin status:", error);
+              }
+            }, 0);
           } catch (error) {
             console.error("Error checking admin status:", error);
           }
@@ -80,7 +92,8 @@ export const AuthStateHandler = () => {
           localStorage.removeItem('userEmail');
           
           // Only redirect to login if we're on a protected path and not already redirecting
-          if (!isLoginPage && !location.pathname.startsWith('/login') && !hasPreventRedirects && !isOnLoginPage) {
+          if (!isLoginPage && !location.pathname.startsWith('/login') && 
+              !hasPreventRedirects && !isOnLoginPage && !isInLoginProcess) {
             console.log("No session found, redirecting to login");
             navigate('/login', { replace: true });
             return;
@@ -98,14 +111,20 @@ export const AuthStateHandler = () => {
     const isLoginPage = location.pathname === '/login';
     const hasPreventRedirects = localStorage.getItem('preventRedirects') === 'true';
     const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
+    const loginPageActive = localStorage.getItem('loginPageActive');
     
-    if (!isLoginPage && !hasPreventRedirects && !isOnLoginPage) {
+    // CRITICAL FIX: More reliable prevention check with timestamp
+    const isInLoginProcess = loginPageActive && 
+      (Date.now() - parseInt(loginPageActive, 10)) < 60000; // within last minute
+    
+    if (!isLoginPage && !hasPreventRedirects && !isOnLoginPage && !isInLoginProcess) {
       initializeAuth();
     } else {
       console.log("Skipping auth initialization due to prevention flags", {
         isLoginPage,
         hasPreventRedirects,
         isOnLoginPage,
+        isInLoginProcess,
         path: location.pathname
       });
       setInitialized(true);
@@ -128,12 +147,16 @@ export const AuthStateHandler = () => {
         const preventRedirects = localStorage.getItem('preventRedirects') === 'true';
         const onLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
         const isLoginPage = location.pathname === '/login';
+        const loginPageActive = localStorage.getItem('loginPageActive');
+        const isInLoginProcess = loginPageActive && 
+          (Date.now() - parseInt(loginPageActive, 10)) < 60000; // within last minute
+          
         const isLogin = event === 'SIGNED_IN';
         const isDashboard = location.pathname === '/dashboard';
         
         // Special case: Allow SIGNED_IN events on login page to set login state
         // without triggering a redirect yet - the login handler will do that
-        if (isLogin && (isLoginPage || onLoginPage)) {
+        if (isLogin && (isLoginPage || onLoginPage || isInLoginProcess)) {
           console.log("Login detected on login page, updating state without redirect");
           if (session) {
             // Use setTimeout to avoid potential deadlocks with Supabase client
@@ -157,18 +180,20 @@ export const AuthStateHandler = () => {
                 localStorage.setItem('userEmail', session.user.email);
               } catch (error) {
                 console.error("Error checking admin status:", error);
+              } finally {
+                isProcessingAuthChange.current = false;
               }
             }, 0);
+            return;
           }
-          isProcessingAuthChange.current = false;
-          return;
         }
         
         // Block auth events if prevention flags are set
-        if (preventRedirects || onLoginPage) {
+        if (preventRedirects || onLoginPage || isInLoginProcess) {
           console.log("Auth event blocked due to prevention flags:", event, {
             preventRedirects,
             onLoginPage,
+            isInLoginProcess,
             isLoginPage,
             path: location.pathname
           });
@@ -190,6 +215,7 @@ export const AuthStateHandler = () => {
                 
                 if (error) {
                   console.error("Error checking admin status:", error);
+                  isProcessingAuthChange.current = false;
                   return;
                 }
                 
@@ -200,16 +226,20 @@ export const AuthStateHandler = () => {
                 localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
                 localStorage.setItem('userEmail', session.user.email);
                 
-                // Only redirect if we're not already on the dashboard
-                if (location.pathname !== '/dashboard') {
+                // Only redirect if we're not already on the dashboard and not in login process
+                if (location.pathname !== '/dashboard' && !isInLoginProcess) {
                   console.log("Redirecting to dashboard after sign in");
-                  navigate('/dashboard', { replace: true });
+                  // Add delay to ensure everything is set properly
+                  setTimeout(() => {
+                    navigate('/dashboard', { replace: true });
+                    isProcessingAuthChange.current = false;
+                  }, 500);
                 } else {
-                  console.log("Already at dashboard, no redirect needed");
+                  console.log("Already at dashboard or in login process, no redirect needed");
+                  isProcessingAuthChange.current = false;
                 }
               } catch (error) {
                 console.error("Error checking admin status:", error);
-              } finally {
                 isProcessingAuthChange.current = false;
               }
             }, 0);
@@ -225,10 +255,12 @@ export const AuthStateHandler = () => {
           localStorage.removeItem('isAdmin');
           localStorage.removeItem('userEmail');
           
-          // Only redirect if we're not on the login page
-          if (location.pathname !== '/login') {
+          // CRITICAL CHANGE: Only redirect if we're not on the login page AND not in a login process
+          if (location.pathname !== '/login' && !isInLoginProcess) {
             console.log("User signed out, redirecting to login");
             navigate('/login', { replace: true });
+          } else {
+            console.log("Already on login page or in login process, no redirect needed after sign out");
           }
           isProcessingAuthChange.current = false;
         } else if (event === 'TOKEN_REFRESHED') {
