@@ -19,6 +19,7 @@ export const AuthButtons = ({
 }: AuthButtonsProps) => {
   const location = useLocation();
   const isDashboard = location.pathname === '/dashboard';
+  const isAdminPage = location.pathname.startsWith('/admin');
   const buttonClass = isMobile ? "w-full justify-center" : "";
   
   const handleClick = () => {
@@ -30,19 +31,21 @@ export const AuthButtons = ({
   if (isLoggedIn) {
     return (
       <div className={`${isMobile ? 'flex flex-col space-y-2 mt-4' : 'hidden md:flex items-center space-x-4'}`}>
-        {isAdmin && (
+        {isAdmin && !isAdminPage && (
           <Button asChild variant="ghost" className={buttonClass} onClick={handleClick}>
             <Link to="/admin">Admin</Link>
           </Button>
         )}
-        <Button 
-          asChild 
-          variant="default"
-          className={`${buttonClass} bg-[#0EA5E9] hover:bg-[#0284C7] text-white`} 
-          onClick={handleClick}
-        >
-          <Link to="/dashboard">Dashboard</Link>
-        </Button>
+        {(!isDashboard || isAdminPage) && (
+          <Button 
+            asChild 
+            variant="default"
+            className={`${buttonClass} bg-[#0EA5E9] hover:bg-[#0284C7] text-white`} 
+            onClick={handleClick}
+          >
+            <Link to="/dashboard">Dashboard</Link>
+          </Button>
+        )}
         <Button 
           variant="outline" 
           onClick={() => {

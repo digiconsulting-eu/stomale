@@ -44,7 +44,7 @@ export const AppRoutes = () => {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adminOnly={false}>
             <UserDashboard />
           </ProtectedRoute>
         }
@@ -53,7 +53,7 @@ export const AppRoutes = () => {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adminOnly={true}>
             <Admin />
           </ProtectedRoute>
         }
@@ -62,7 +62,7 @@ export const AppRoutes = () => {
       <Route
         path="/admin/reviews"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adminOnly={true}>
             <ReviewManagement />
           </ProtectedRoute>
         }
@@ -71,7 +71,7 @@ export const AppRoutes = () => {
       <Route
         path="/admin/users"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adminOnly={true}>
             <UserManagement />
           </ProtectedRoute>
         }
@@ -80,7 +80,7 @@ export const AppRoutes = () => {
       <Route
         path="/admin/import"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adminOnly={true}>
             <ImportTab />
           </ProtectedRoute>
         }
