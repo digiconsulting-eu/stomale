@@ -48,14 +48,30 @@ serve(async (req) => {
     // Create Supabase client with service role key to bypass RLS
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get user data from request body
-    const { user } = await req.json() as { user: ImportedUser };
+    // Safely parse the request body with error handling
+    let requestData;
+    try {
+      const text = await req.text();
+      requestData = text ? JSON.parse(text) : {};
+    } catch (parseError) {
+      console.error("Failed to parse request body:", parseError);
+      return new Response(
+        JSON.stringify({ error: "Invalid request format" }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    // Get user data from request body with safety check
+    const { user } = requestData as { user?: ImportedUser };
 
     // Verify that user data is present
     if (!user || !user.id || !user.username) {
-      console.error("Missing required user data:", JSON.stringify(user));
+      console.error("Missing required user data:", JSON.stringify(requestData));
       return new Response(
-        JSON.stringify({ error: "Missing required user data", data: user }),
+        JSON.stringify({ error: "Missing required user data", data: requestData }),
         { 
           status: 400, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
