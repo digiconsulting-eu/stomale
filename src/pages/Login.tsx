@@ -26,12 +26,12 @@ export default function Login() {
     localStorage.setItem('preventRedirects', 'true');
     
     return () => {
-      // Only clear flags if we're not in the process of logging in
+      // IMPORTANT: Only clear flags if we're not in the process of logging in
       // This is critical to prevent premature flag clearing during login
       if (!isLoading) {
         console.log("Login page unmount (not loading): Clearing redirect prevention flags");
+        // We only clear sessionStorage here - localStorage.preventRedirects will be cleared after successful login
         sessionStorage.removeItem('onLoginPage');
-        localStorage.removeItem('preventRedirects');
       } else {
         console.log("Login page unmount during loading: Keeping redirect prevention flags");
       }

@@ -15,14 +15,18 @@ export const AuthStateHandler = () => {
     // Initialize auth state from session
     const initializeAuth = async () => {
       try {
-        // Check for redirect prevention flags
+        // Check for redirect prevention flags with more detailed logging
         const isLoginPage = location.pathname === '/login';
         const hasPreventRedirects = localStorage.getItem('preventRedirects') === 'true';
         const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
         
         // Skip auth handling if on login page or redirect prevention is active
         if (isLoginPage || hasPreventRedirects || isOnLoginPage) {
-          console.log("AuthStateHandler: Skipping auth initialization due to login page or prevention flags");
+          console.log("AuthStateHandler: Skipping auth initialization due to prevention flags", {
+            isLoginPage,
+            hasPreventRedirects,
+            isOnLoginPage
+          });
           return;
         }
         
@@ -72,20 +76,28 @@ export const AuthStateHandler = () => {
     if (!isLoginPage && !hasPreventRedirects && !isOnLoginPage) {
       initializeAuth();
     } else {
-      console.log("Skipping auth initialization due to login page or prevention flags");
+      console.log("Skipping auth initialization due to prevention flags", {
+        isLoginPage,
+        hasPreventRedirects,
+        isOnLoginPage
+      });
     }
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.email);
       
-      // Double check for redirect prevention flags - CRITICAL CHECK
+      // CRITICAL CHECK: Check for redirect prevention flags BEFORE handling any auth changes
       const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
       const hasPreventRedirects = localStorage.getItem('preventRedirects') === 'true';
       const isLoginPage = location.pathname === '/login';
       
       if (isLoginPage || isOnLoginPage || hasPreventRedirects) {
-        console.log("On login page or redirect prevention active, preventing automatic redirects");
+        console.log("On login page or redirect prevention active, preventing automatic redirects", {
+          isLoginPage,
+          isOnLoginPage,
+          hasPreventRedirects
+        });
         return;
       }
       

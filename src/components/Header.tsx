@@ -21,13 +21,17 @@ export const Header = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    // Check for login page or redirect prevention flags
+    // Check for login page or redirect prevention flags - improved logging
     const isOnLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
     const preventRedirects = localStorage.getItem('preventRedirects') === 'true';
     const isOnLoginRoute = location.pathname === '/login';
                           
     if (isOnLoginPage || preventRedirects || isOnLoginRoute) {
-      console.log("Header: On login page, skipping automatic auth checks");
+      console.log("Header: On login page, skipping automatic auth checks", {
+        isOnLoginPage,
+        preventRedirects,
+        isOnLoginRoute
+      });
       return;
     }
     
@@ -64,7 +68,11 @@ export const Header = () => {
       const isOnLoginRoute = location.pathname === '/login';
       
       if (isOnLoginPage || preventRedirects || isOnLoginRoute) {
-        console.log("Header: On login page, ignoring auth state change");
+        console.log("Header: On login page, ignoring auth state change", {
+          isOnLoginPage,
+          preventRedirects,
+          isOnLoginRoute
+        });
         return;
       }
       
