@@ -29,6 +29,7 @@ export default function InsertCondition() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentSession, setCurrentSession] = useState(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,8 +68,9 @@ export default function InsertCondition() {
           return;
         }
 
-        // User is authenticated, allow access
+        // User is authenticated, store session and allow access
         if (isMounted) {
+          setCurrentSession(session);
           setIsAuthenticated(true);
           setIsLoading(false);
         }
@@ -94,7 +96,7 @@ export default function InsertCondition() {
   }, [navigate]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!session) {
+    if (!currentSession) {
       toast.error("Devi effettuare l'accesso per inserire una patologia");
       return;
     }
