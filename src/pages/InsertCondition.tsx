@@ -17,7 +17,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useAuthSession } from "@/hooks/useAuthSession";
 
 const formSchema = z.object({
   patologia: z.string().min(2, {
@@ -29,7 +28,7 @@ export default function InsertCondition() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { data: session, isLoading: isSessionLoading } = useAuthSession();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,27 +46,43 @@ export default function InsertCondition() {
 
     const checkAuth = async () => {
       try {
-        // Wait for session loading to complete
-        if (isSessionLoading) {
+        setIsLoading(true);
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error checking session:", error);
+          if (isMounted) {
+            toast.error("Errore nel verificare l'autenticazione");
+            navigate("/login", { replace: true });
+          }
           return;
         }
 
         if (!session) {
           console.log("No session found, redirecting to login");
-          toast.error("Devi effettuare l'accesso per inserire una patologia");
-          navigate("/login");
+          if (isMounted) {
+            toast.error("Devi effettuare l'accesso per inserire una patologia");
+            navigate("/login", { replace: true });
+          }
           return;
         }
 
         // User is authenticated, allow access
         if (isMounted) {
+          setIsAuthenticated(true);
           setIsLoading(false);
         }
 
       } catch (error) {
         console.error("Error checking auth status:", error);
-        toast.error("Si è verificato un errore durante il controllo dell'autenticazione");
-        navigate("/");
+        if (isMounted) {
+          toast.error("Si è verificato un errore durante il controllo dell'autenticazione");
+          navigate("/login", { replace: true });
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -76,7 +91,7 @@ export default function InsertCondition() {
     return () => {
       isMounted = false;
     };
-  }, [navigate, session, isSessionLoading]);
+  }, [navigate]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!session) {
@@ -121,7 +136,7 @@ export default function InsertCondition() {
   };
 
   // Show loading state while checking session
-  if (isLoading || isSessionLoading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 flex justify-center items-center">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>

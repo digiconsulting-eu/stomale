@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { refreshSession } from "@/utils/auth/sessionUtils";
-import { toast } from "sonner";
 
 export const AuthStateHandler = () => {
   const queryClient = useQueryClient();
@@ -55,97 +54,57 @@ export const AuthStateHandler = () => {
         const storedLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
         const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
         
+        // Only certain paths require authentication
+        const requiresAuth = [
+          '/nuova-recensione',
+          '/inserisci-patologia',
+          '/dashboard',
+          '/admin'
+        ];
+        
+        const currentPathRequiresAuth = requiresAuth.some(path => 
+          location.pathname === path || 
+          (path === '/admin' && location.pathname.startsWith('/admin/'))
+        );
+        
+        // Only redirect to login if on a protected path and not logged in
+        if (currentPathRequiresAuth && !storedLoggedIn) {
+          console.log(`Path ${location.pathname} requires authentication and user is not logged in, redirecting to login`);
+          navigate('/login', { replace: true });
+          setInitialized(true);
+          return;
+        }
+        
+        // If logged in as admin, redirect to admin unless already there
+        if (storedLoggedIn && storedIsAdmin) {
+          if (location.pathname === '/dashboard') {
+            console.log('Admin user on dashboard, redirecting to admin page');
+            navigate('/admin', { replace: true });
+          }
+        }
+        
+        // If not logged in but localStorage says we are, check session
         if (storedLoggedIn) {
-          console.log("Found logged in state in localStorage, user is admin:", storedIsAdmin);
+          console.log('Stored login state found, checking session validity');
           
-          // If we're already at the right location, don't redirect
-          if (storedIsAdmin && (location.pathname === '/admin' || location.pathname.startsWith('/admin/'))) {
-            console.log("Already on admin page, no redirect needed");
-            setInitialized(true);
-            return;
-          }
+          const { data } = await supabase.auth.getSession();
           
-          if (!storedIsAdmin && location.pathname === '/dashboard') {
-            console.log("Already on dashboard page, no redirect needed");
-            setInitialized(true);
-            return;
-          }
-          
-          // Redirect to the appropriate page
-          const redirectTarget = storedIsAdmin ? '/admin' : '/dashboard';
-          console.log(`AuthStateHandler: Redirecting to ${redirectTarget} based on localStorage`);
-          navigate(redirectTarget, { replace: true });
-          setInitialized(true);
-          return;
-        }
-        
-        // First check if we need to refresh the session
-        await refreshSession();
-        
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error getting session:", error);
-          setInitialized(true);
-          return;
-        }
-        
-        if (session) {
-          console.log("Session found on page load:", session.user.email);
-          // Pre-fetch admin status if user is logged in
-          try {
-            // Use setTimeout to avoid potential deadlocks with Supabase client
-            setTimeout(async () => {
-              try {
-                const { data: adminData, error: adminError } = await supabase
-                  .from('admin')
-                  .select('email')
-                  .eq('email', session.user.email);
-                
-                if (adminError) {
-                  console.error("Error checking admin status:", adminError);
-                  return;
-                }
-                
-                const isAdmin = Array.isArray(adminData) && adminData.length > 0;
-                console.log("User admin status:", isAdmin);
-                
-                // Cache the admin status
-                queryClient.setQueryData(['adminStatus'], isAdmin);
-                
-                // Set local indicators of login state
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-                localStorage.setItem('userEmail', session.user.email);
-                
-                // CRITICAL FIX: Handle redirects for admins
-                if (isAdmin && location.pathname !== '/admin' && 
-                    !location.pathname.startsWith('/admin/')) {
-                  console.log("Detected admin user, redirecting to admin dashboard");
-                  navigate('/admin', { replace: true });
-                }
-              } catch (error) {
-                console.error("Error checking admin status:", error);
-              }
-            }, 0);
-          } catch (error) {
-            console.error("Error checking admin status:", error);
-          }
-        } else {
-          // If no session, ensure we clear any stale login state
-          localStorage.removeItem('isLoggedIn');
-          localStorage.removeItem('isAdmin');
-          localStorage.removeItem('userEmail');
-          
-          // CRITICAL FIX: Don't redirect to login if already on home page
-          if (!isLoginPage && !location.pathname.startsWith('/login') && 
-              !location.pathname.startsWith('/registrati') && 
-              !location.pathname.startsWith('/recupera-password') &&
-              location.pathname !== '/' && // Don't redirect from home page
-              !hasPreventRedirects && !isOnLoginPage && !isInLoginProcess) {
-            console.log("No session found, redirecting to login");
-            navigate('/login', { replace: true });
-            return;
+          // If no valid session but localStorage says logged in, clear local state
+          if (!data.session) {
+            console.log('Session mismatch: localStorage says logged in but no session found');
+            
+            // Only force redirect if on a protected path
+            if (currentPathRequiresAuth) {
+              localStorage.removeItem('isLoggedIn');
+              localStorage.removeItem('isAdmin');
+              navigate('/login', { replace: true });
+              setInitialized(true);
+              return;
+            } else {
+              // Just clear localStorage but allow navigation
+              localStorage.removeItem('isLoggedIn');
+              localStorage.removeItem('isAdmin');
+            }
           }
         }
         
@@ -159,154 +118,50 @@ export const AuthStateHandler = () => {
     initializeAuth();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event, session?.user?.email);
       
-      // CRITICAL FIX: Skip handling if we're on login page - let login component handle it
-      if (location.pathname === '/login') {
-        console.log("Auth state changed on login page, letting login page handle it");
-        return;
-      }
-      
-      // Avoid re-entrance issues with a processing flag
-      if (isProcessingAuthChange.current) {
-        console.log("Already processing an auth change, skipping");
-        return;
-      }
-      
-      isProcessingAuthChange.current = true;
-      
-      try {
-        // Check for redirect prevention flags BEFORE handling any auth changes
-        const preventRedirects = localStorage.getItem('preventRedirects') === 'true';
-        const onLoginPage = sessionStorage.getItem('onLoginPage') === 'true';
-        const isLoginPage = location.pathname === '/login';
-        const loginPageActive = localStorage.getItem('loginPageActive');
-        const isInLoginProcess = loginPageActive && 
-          (Date.now() - parseInt(loginPageActive, 10)) < 60000; // within last minute
-          
-        const isLogin = event === 'SIGNED_IN';
+      if (event === 'SIGNED_IN' && session) {
+        localStorage.setItem('isLoggedIn', 'true');
         
-        // CRITICAL FIX: For admin users, redirect to admin instead of dashboard
-        if (isLogin && session) {
-          console.log("SIGNED_IN event detected with valid session");
-          
+        // Check if this is an admin user
+        setTimeout(async () => {
           try {
-            // Check localStorage first for faster decision
-            const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
-            
-            if (storedIsAdmin !== undefined) {
-              console.log("Admin status from localStorage:", storedIsAdmin);
-              
-              // Clear prevention flags BEFORE redirecting
-              sessionStorage.removeItem('onLoginPage');
-              localStorage.removeItem('preventRedirects');
-              localStorage.removeItem('loginPageActive');
-              
-              const redirectTarget = storedIsAdmin ? '/admin' : '/dashboard';
-              
-              // Only redirect if not already there
-              if (location.pathname !== redirectTarget && 
-                  !(storedIsAdmin && location.pathname.startsWith('/admin/'))) {
-                console.log(`Redirecting to ${redirectTarget} after sign in (localStorage)`);
-                navigate(redirectTarget, { replace: true });
-              }
-              
-              isProcessingAuthChange.current = false;
-              return;
-            }
-            
-            // If not in localStorage, check from the database
-            const { data: adminData, error } = await supabase
+            const { data } = await supabase
               .from('admin')
               .select('email')
               .eq('email', session.user.email);
             
-            if (error) {
-              console.error("Error checking admin status:", error);
-              isProcessingAuthChange.current = false;
-              return;
-            }
-            
-            const isAdmin = Array.isArray(adminData) && adminData.length > 0;
-            queryClient.setQueryData(['adminStatus'], isAdmin);
-            
-            localStorage.setItem('isLoggedIn', 'true');
+            const isAdmin = Array.isArray(data) && data.length > 0;
             localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-            localStorage.setItem('userEmail', session.user.email);
             
-            // CRITICAL FIX: Clear prevention flags BEFORE redirecting
-            sessionStorage.removeItem('onLoginPage');
-            localStorage.removeItem('preventRedirects');
-            localStorage.removeItem('loginPageActive');
-            
-            // CRITICAL FIX: Admin users should go to admin page
-            const redirectTarget = isAdmin ? '/admin' : '/dashboard';
-            
-            // Only redirect if we're not already there
-            if (location.pathname !== redirectTarget && 
-                !(isAdmin && location.pathname.startsWith('/admin/'))) {
-              console.log(`Redirecting to ${redirectTarget} after sign in`);
-              navigate(redirectTarget, { replace: true });
-            } else {
-              console.log(`Already at ${redirectTarget}, no redirect needed`);
+            if (isAdmin && location.pathname === '/dashboard') {
+              navigate('/admin', { replace: true });
             }
           } catch (error) {
             console.error("Error checking admin status:", error);
-          } finally {
-            isProcessingAuthChange.current = false;
           }
-          return;
-        }
+        }, 0);
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
         
-        // Block auth events if prevention flags are set
-        if (preventRedirects || onLoginPage || isInLoginProcess) {
-          console.log("Auth event blocked due to prevention flags:", event, {
-            preventRedirects,
-            onLoginPage,
-            isInLoginProcess,
-            isLoginPage,
-            path: location.pathname
-          });
-          isProcessingAuthChange.current = false;
-          return;
-        }
+        // Only redirect to login if on a protected path
+        const currentPath = location.pathname;
+        const requiresAuth = [
+          '/nuova-recensione',
+          '/inserisci-patologia',
+          '/dashboard',
+          '/admin'
+        ];
         
-        if (event === 'SIGNED_IN') {
-          // Handled above
-          isProcessingAuthChange.current = false;
-        } else if (event === 'SIGNED_OUT') {
-          console.log("SIGNED_OUT event detected");
-          queryClient.clear();
-          
-          // Make sure to clean up
-          localStorage.removeItem('isLoggedIn');
-          localStorage.removeItem('isAdmin');
-          localStorage.removeItem('userEmail');
-          
-          // CRITICAL CHANGE: Only redirect if we're not on the login page AND not in a login process
-          if (location.pathname !== '/login' && !isInLoginProcess) {
-            console.log("User signed out, redirecting to login");
-            navigate('/login', { replace: true });
-          } else {
-            console.log("Already on login page or in login process, no redirect needed after sign out");
-          }
-          isProcessingAuthChange.current = false;
-        } else if (event === 'TOKEN_REFRESHED') {
-          console.log('Auth token refreshed successfully');
-          // Invalidate queries to force refetch with new token
-          queryClient.invalidateQueries();
-          isProcessingAuthChange.current = false;
-        } else if (event === 'USER_UPDATED') {
-          console.log('User profile updated');
-          queryClient.invalidateQueries();
-          isProcessingAuthChange.current = false;
-        } else {
-          isProcessingAuthChange.current = false;
+        if (requiresAuth.some(path => 
+            currentPath === path || 
+            (path === '/admin' && currentPath.startsWith('/admin/'))
+          )) {
+          console.log("User signed out from protected path, redirecting to login");
+          navigate('/login', { replace: true });
         }
-      } catch (error) {
-        console.error("Error handling auth state change:", error);
-        isProcessingAuthChange.current = false;
       }
     });
 

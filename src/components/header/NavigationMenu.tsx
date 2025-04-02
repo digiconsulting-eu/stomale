@@ -1,9 +1,8 @@
 
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { ensureSessionHealthBeforeNavigation } from "@/utils/auth/sessionUtils";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface NavigationMenuProps {
   isMobile?: boolean;
@@ -15,17 +14,17 @@ export const NavigationMenu = ({ isMobile = false, onItemClick }: NavigationMenu
   const [isNavigating, setIsNavigating] = useState(false);
   
   const menuItems = [
-    { to: "/recensioni", label: "Ultime Recensioni" },
-    { to: "/nuova-recensione", label: "Racconta la tua esperienza" },
-    { to: "/cerca-patologia", label: "Cerca Patologia" },
-    { to: "/inserisci-patologia", label: "Inserisci Patologia" },
-    { to: "/cerca-sintomi", label: "Cerca Sintomi" },
+    { to: "/recensioni", label: "Ultime Recensioni", requiresAuth: false },
+    { to: "/nuova-recensione", label: "Racconta la tua esperienza", requiresAuth: true },
+    { to: "/cerca-patologia", label: "Cerca Patologia", requiresAuth: false },
+    { to: "/inserisci-patologia", label: "Inserisci Patologia", requiresAuth: true },
+    { to: "/cerca-sintomi", label: "Cerca Sintomi", requiresAuth: false },
   ];
 
   const baseClasses = "text-gray-600 hover:text-primary transition-colors";
   const mobileClasses = "block py-2";
 
-  const handleNavigation = async (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+  const handleNavigation = async (e: React.MouseEvent<HTMLAnchorElement>, path: string, requiresAuth: boolean) => {
     e.preventDefault();
     
     // Prevent multiple clicks
@@ -50,64 +49,49 @@ export const NavigationMenu = ({ isMobile = false, onItemClick }: NavigationMenu
       // Check if user is logged in according to local storage
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       
-      if (!isLoggedIn) {
-        // Not logged in, just navigate
-        console.log('Not logged in, navigating to', path);
-        navigate(path);
+      // If this page requires auth and the user is not logged in, redirect to login
+      if (requiresAuth && !isLoggedIn) {
+        console.log(`Page ${path} requires authentication, redirecting to login`);
+        toast.error("Devi effettuare l'accesso per accedere a questa funzionalità");
+        navigate('/login');
+        setIsNavigating(false);
         return;
       }
       
-      // Get current session - using a timeout to prevent long operations
-      const sessionPromise = supabase.auth.getSession();
-      const timeoutPromise = new Promise<{data: {session: null}}>((resolve) => {
-        setTimeout(() => resolve({ data: { session: null } }), 2000);
-      });
+      // For pages that don't require auth or if user is already logged in, just navigate
+      if (!requiresAuth || !isLoggedIn) {
+        navigate(path);
+        setIsNavigating(false);
+        return;
+      }
       
-      const { data } = await Promise.race([sessionPromise, timeoutPromise]);
+      // If page requires auth and user is logged in, verify session before proceeding
+      const { data } = await supabase.auth.getSession();
       
       // If no session but localStorage says logged in, we have an inconsistency
       if (!data.session && isLoggedIn) {
         console.log('Session inconsistency detected: localStorage says logged in but no session found');
         
-        if (path === '/nuova-recensione') {
-          // For reviews, we need authentication
+        if (path === '/nuova-recensione' || path === '/inserisci-patologia') {
+          // For pages requiring authentication
           toast.error("Sessione scaduta, effettua nuovamente l'accesso");
           localStorage.removeItem('isLoggedIn');
           localStorage.removeItem('isAdmin');
           navigate('/login');
+          setIsNavigating(false);
           return;
         } else {
           // For other pages, we can navigate but will clear the inconsistency
           localStorage.removeItem('isLoggedIn');
           localStorage.removeItem('isAdmin');
           navigate(path);
+          setIsNavigating(false);
           return;
         }
       }
       
-      // We have a session, now check if it's healthy before proceeding
-      console.log('Session exists, checking health before navigating to', path);
-      const isSessionHealthy = await ensureSessionHealthBeforeNavigation();
-      
-      if (isSessionHealthy) {
-        console.log('Session is healthy, navigating to', path);
-        navigate(path);
-      } else {
-        console.log('Session not healthy, handling gracefully');
-        
-        // Special handling for different paths
-        if (path === '/nuova-recensione') {
-          // For sharing experiences, we need auth
-          toast.error("Sessione scaduta, effettua nuovamente l'accesso");
-          navigate('/login');
-        } else {
-          // For other paths, we can still try to navigate
-          navigate(path);
-          // But clear login state to be consistent
-          localStorage.removeItem('isLoggedIn');
-          localStorage.removeItem('isAdmin');
-        }
-      }
+      // Session exists, navigate to the requested page
+      navigate(path);
     } catch (error) {
       console.error('Navigation error:', error);
       // Fall back to standard navigation
@@ -124,7 +108,7 @@ export const NavigationMenu = ({ isMobile = false, onItemClick }: NavigationMenu
           key={item.to}
           to={item.to}
           className={`${baseClasses} ${isMobile ? mobileClasses : ''}`}
-          onClick={(e) => handleNavigation(e, item.to)}
+          onClick={(e) => handleNavigation(e, item.to, item.requiresAuth)}
         >
           {item.label}
         </Link>

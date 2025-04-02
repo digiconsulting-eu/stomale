@@ -30,11 +30,11 @@ export default function NewReview() {
         }
         
         if (!session) {
-          console.log("No active session found, redirecting to registration");
+          console.log("No active session found, redirecting to login");
           toast.error("Devi effettuare l'accesso per raccontare la tua esperienza", {
-            description: "Registrati o accedi per condividere la tua esperienza"
+            description: "Accedi per condividere la tua esperienza"
           });
-          navigate("/registrati");
+          navigate("/login", { replace: true });
           return;
         }
         
@@ -43,31 +43,13 @@ export default function NewReview() {
       } catch (err) {
         console.error("Authentication check failed:", err);
         toast.error("Si è verificato un errore nel controllo dell'autenticazione");
-        navigate("/registrati");
+        navigate("/login", { replace: true });
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
-      
-      if (event === 'SIGNED_OUT') {
-        console.log("User signed out, redirecting to registration");
-        toast.error("Devi effettuare l'accesso per raccontare la tua esperienza");
-        navigate("/registrati");
-        setIsAuthenticated(false);
-      } else if (event === 'SIGNED_IN' && session) {
-        console.log("User signed in:", session.user.id);
-        setIsAuthenticated(true);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [navigate]);
 
   if (isLoading) {

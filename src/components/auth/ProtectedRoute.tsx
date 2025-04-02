@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { checkIsAdmin } from "@/utils/auth/adminUtils";
@@ -13,6 +13,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -48,20 +49,6 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
           return;
         }
 
-        // Verify the session health
-        const isSessionHealthy = await checkSessionHealth();
-        if (!isSessionHealthy) {
-          console.log('ProtectedRoute: Session is not healthy, redirecting to login');
-          localStorage.removeItem('isLoggedIn');
-          localStorage.removeItem('isAdmin');
-          
-          toast.error("Sessione scaduta", {
-            description: "La tua sessione è scaduta. Effettua nuovamente l'accesso."
-          });
-          navigate('/login', { replace: true });
-          return;
-        }
-
         // User is authenticated, now check admin status if required
         if (adminOnly) {
           // First check localStorage for faster response
@@ -73,31 +60,9 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
             return;
           }
           
-          // Double-check with the database - add retries for reliability
-          let retryCount = 0;
-          let isAdmin = false;
+          // Double-check with the database
+          const isAdmin = await checkIsAdmin(session.user.email || '');
           
-          while (retryCount < 3 && !isAdmin) {
-            try {
-              isAdmin = await checkIsAdmin(session.user.email || '');
-              console.log('ProtectedRoute: Admin check result (attempt ' + (retryCount + 1) + '):', isAdmin);
-              
-              if (isAdmin) break;
-              
-              // Only retry if we failed but didn't get an explicit "not admin"
-              retryCount++;
-              if (retryCount < 3) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-              }
-            } catch (e) {
-              console.error('Error checking admin status:', e);
-              retryCount++;
-              if (retryCount < 3) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-              }
-            }
-          }
-
           if (!isAdmin) {
             console.log('ProtectedRoute: User is not admin, redirecting to dashboard');
             toast.error("Accesso negato", {
@@ -124,15 +89,14 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
 
     checkAuth();
 
+    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
-        console.log('ProtectedRoute: User signed out');
         setIsAuthenticated(false);
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('isAdmin');
         navigate('/login', { replace: true });
       } else if (event === 'SIGNED_IN' && session) {
-        console.log('ProtectedRoute: User signed in');
         setIsAuthenticated(true);
         localStorage.setItem('isLoggedIn', 'true');
       }
