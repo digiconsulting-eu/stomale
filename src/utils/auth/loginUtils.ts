@@ -58,5 +58,8 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
     
     console.error('Login error:', error);
     return { data: null, error };
+  } finally {
+    // Important: Don't remove prevention flags here - let the login handlers manage this
+    // based on success/failure
   }
 };

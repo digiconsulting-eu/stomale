@@ -5,7 +5,9 @@ import { toast } from "sonner";
 import { useLoginProgress } from "./useLoginProgress";
 import { useConnectionCheck } from "./useConnectionCheck";
 import { useSessionCheck } from "./useSessionCheck";
-import { resetAuthClient, loginWithEmailPassword, checkIsAdmin } from "@/utils/auth";
+import { resetAuthClient } from "@/utils/auth/resetUtils";
+import { loginWithEmailPassword } from "@/utils/auth/loginUtils";
+import { checkIsAdmin } from "@/utils/auth/adminUtils";
 import { resetSupabaseClient } from "@/integrations/supabase/client";
 import { LoginFormValues } from "@/components/auth/LoginForm";
 
@@ -130,6 +132,7 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
         isAdmin ? "Benvenuto nell'area amministrazione" : "Benvenuto nel tuo account"
       );
       
+      // CRITICAL CHANGE: Wait longer before redirecting and ensure we maintain the session
       // Add a delay before removing redirect prevention flags
       // This allows the auth state to fully propagate
       setTimeout(() => {
@@ -141,8 +144,8 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
         setTimeout(() => {
           console.log("Redirecting to dashboard after successful login");
           navigate('/dashboard', { replace: true });
-        }, 300);
-      }, 500);
+        }, 1000); // Increased delay before redirect
+      }, 1500); // Increased delay before removing flags
       
     } catch (error: any) {
       console.error('Error during login process:', error);

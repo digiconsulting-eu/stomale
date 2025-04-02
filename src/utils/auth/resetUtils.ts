@@ -18,8 +18,6 @@ export const resetAuthClient = async () => {
     
     // IMPORTANT: Don't remove redirect prevention flags during reset
     // Let the components that set them handle removal
-    // localStorage.removeItem('preventRedirects');
-    // sessionStorage.removeItem('onLoginPage');
     
     // Clear Supabase cookies
     document.cookie.split(";").forEach((c) => {
