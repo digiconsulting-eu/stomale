@@ -24,4 +24,5 @@ verify_jwt = false
 [functions.sitemap-static]
 verify_jwt = false
 [functions.admin-import-user]
-verify_jwt = true
+verify_jwt = false
+

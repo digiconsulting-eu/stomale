@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -68,6 +69,33 @@ export const UsersImport = () => {
     }
   };
 
+  const callEdgeFunction = async (user: ImportedUser) => {
+    try {
+      // Call the updated edge function with the user data
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-import-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ user }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Edge function error:', errorData);
+        throw new Error(errorData.error || 'Failed to import user through edge function');
+      }
+
+      const result = await response.json();
+      console.log('Edge function success:', result);
+      return result;
+    } catch (error) {
+      console.error('Error calling edge function:', error);
+      throw error;
+    }
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -127,13 +155,12 @@ export const UsersImport = () => {
       for (let i = 0; i < jsonData.length; i++) {
         try {
           setProcessedRows(i + 1);
-          setImportProgress(Math.round(((i + 1) / totalRows) * 100));
+          setImportProgress(Math.round(((i + 1) / jsonData.length) * 100));
           
           const row = jsonData[i];
           console.log(`Processing row ${i + 1}:`, row);
-          setDebugInfo(`Elaborazione utente ${i + 1} di ${totalRows}`);
+          setDebugInfo(`Elaborazione utente ${i + 1} di ${jsonData.length}`);
           
-          // Fallback to direct database insert to bypass edge function issues
           const username = row['username'] || row['Username'];
           
           if (!username) {
@@ -178,8 +205,8 @@ export const UsersImport = () => {
             }
           }
           
-          // Direct database insert (bypassing edge function)
-          const userData = {
+          // Prepare user data
+          const userData: ImportedUser = {
             id: userId.toString(),
             username: username.toString(),
             created_at: createdAt,
@@ -190,15 +217,10 @@ export const UsersImport = () => {
           if (birthYear) userData.birth_year = birthYear.toString();
           if (gender) userData.gender = gender.toString();
           
-          console.log(`Inserting user directly:`, userData);
+          console.log(`Importing user via edge function:`, userData);
           
-          const { error: insertError } = await supabase.from('users').insert(userData);
-          
-          if (insertError) {
-            console.error(`Error inserting user row ${i + 1}:`, insertError);
-            errors.push(`Riga ${i + 2}: ${insertError.message}`);
-            continue;
-          }
+          // Use the edge function to import the user
+          await callEdgeFunction(userData);
           
           validUsers.push(userData);
           console.log(`Successfully inserted user ${i + 1}`);

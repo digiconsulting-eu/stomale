@@ -110,19 +110,16 @@ serve(async (req) => {
       hasEmail: !!user.email
     });
 
-    // Insert user with service role
-    const { data, error } = await supabase
-      .from("users")
-      .insert({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        birth_year: user.birth_year,
-        gender: user.gender,
-        created_at: user.created_at || new Date().toISOString(),
-        gdpr_consent: user.gdpr_consent === undefined ? true : user.gdpr_consent
-      })
-      .select();
+    // Run a direct SQL insertion to ensure we bypass RLS policies entirely
+    const { data, error } = await supabase.rpc('admin_insert_user', {
+      p_id: user.id,
+      p_username: user.username,
+      p_email: user.email || null,
+      p_birth_year: user.birth_year || null,
+      p_gender: user.gender || null,
+      p_created_at: user.created_at || new Date().toISOString(),
+      p_gdpr_consent: user.gdpr_consent === undefined ? true : user.gdpr_consent
+    });
 
     if (error) {
       console.error("Admin import error:", error);
