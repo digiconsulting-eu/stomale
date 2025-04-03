@@ -4,4 +4,3 @@ generate_sourcemaps = true
 
 [deploy]
 allowed_imports = ["https://deno.land/std/*", "https://esm.sh/*", "npm:@supabase/supabase-js"]
-
