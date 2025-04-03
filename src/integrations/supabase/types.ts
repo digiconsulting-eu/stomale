@@ -432,6 +432,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_insert_user: {
+        Args: {
+          p_id: string
+          p_username: string
+          p_email: string
+          p_birth_year: string
+          p_gender: string
+          p_created_at: string
+          p_gdpr_consent: boolean
+        }
+        Returns: Json
+      }
       is_admin: {
         Args: {
           user_id: string

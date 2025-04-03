@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -71,7 +70,8 @@ export const UsersImport = () => {
 
   const callEdgeFunction = async (user: ImportedUser) => {
     try {
-      // Call the updated edge function with the user data
+      console.log(`Calling edge function for user ${user.username}`);
+      
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-import-user`, {
         method: 'POST',
         headers: {
@@ -81,13 +81,20 @@ export const UsersImport = () => {
         body: JSON.stringify({ user }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Edge function error:', errorData);
-        throw new Error(errorData.error || 'Failed to import user through edge function');
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await response.text();
+        console.error('Non-JSON response received:', textResponse.substring(0, 200) + '...');
+        throw new Error('Received HTML instead of JSON response. Check edge function logs.');
       }
 
       const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('Edge function error:', result);
+        throw new Error(result.error || 'Failed to import user through edge function');
+      }
+
       console.log('Edge function success:', result);
       return result;
     } catch (error) {
@@ -151,7 +158,6 @@ export const UsersImport = () => {
       
       setTotalRows(jsonData.length);
 
-      // Process one row at a time for better error handling
       for (let i = 0; i < jsonData.length; i++) {
         try {
           setProcessedRows(i + 1);
@@ -192,7 +198,6 @@ export const UsersImport = () => {
             createdAt = timestamp;
           }
 
-          // Check if email exists if provided
           if (email) {
             const { data: existingUsers } = await supabase
               .from('users')
@@ -205,7 +210,6 @@ export const UsersImport = () => {
             }
           }
           
-          // Prepare user data
           const userData: ImportedUser = {
             id: userId.toString(),
             username: username.toString(),
@@ -219,18 +223,19 @@ export const UsersImport = () => {
           
           console.log(`Importing user via edge function:`, userData);
           
-          // Use the edge function to import the user
-          await callEdgeFunction(userData);
-          
-          validUsers.push(userData);
-          console.log(`Successfully inserted user ${i + 1}`);
-          
+          try {
+            await callEdgeFunction(userData);
+            validUsers.push(userData);
+            console.log(`Successfully inserted user ${i + 1}`);
+          } catch (callError) {
+            console.error(`Error calling edge function for row ${i + 1}:`, callError);
+            errors.push(`Riga ${i + 2}: ${(callError as Error).message}`);
+          }
         } catch (error) {
           console.error(`Error processing row ${i + 1}:`, error);
           errors.push(`Riga ${i + 2}: ${(error as Error).message}`);
         }
         
-        // Check session health periodically
         if (i % 20 === 0 && i > 0) {
           await checkSessionHealth();
         }
