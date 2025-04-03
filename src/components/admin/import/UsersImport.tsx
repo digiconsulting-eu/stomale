@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -124,12 +123,92 @@ export const UsersImport = () => {
       
       setTotalRows(jsonData.length);
 
-      // Process in smaller batches to prevent timeouts
-      const batchSize = 1; // Process one at a time for better reliability
-      for (let i = 0; i < jsonData.length; i += batchSize) {
-        const batch = jsonData.slice(i, i + batchSize);
-        await processBatch(batch, i, validUsers, errors, timestamp);
+      // Process one row at a time for better error handling
+      for (let i = 0; i < jsonData.length; i++) {
+        try {
+          setProcessedRows(i + 1);
+          setImportProgress(Math.round(((i + 1) / totalRows) * 100));
+          
+          const row = jsonData[i];
+          console.log(`Processing row ${i + 1}:`, row);
+          setDebugInfo(`Elaborazione utente ${i + 1} di ${totalRows}`);
+          
+          // Fallback to direct database insert to bypass edge function issues
+          const username = row['username'] || row['Username'];
+          
+          if (!username) {
+            errors.push(`Riga ${i + 2}: Username è un campo obbligatorio`);
+            continue;
+          }
+
+          const userId = row['id'] || row['ID'] || uuidv4();
+          const email = row['email'] || row['Email'];
+          const birthYear = row['birth_year'] || row['Birth Year'] || row['Anno di Nascita'] || null;
+          const gender = row['gender'] || row['Gender'] || row['Genere'] || null;
+          const gdprConsent = row['gdpr_consent'] || row['GDPR Consent'] || true;
+          
+          let createdAt;
+          try {
+            const dateInput = row['created_at'] || row['Created At'] || row['Data Registrazione'];
+            if (dateInput) {
+              if (typeof dateInput === 'number') {
+                const excelEpoch = new Date(1899, 11, 30);
+                createdAt = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000).toISOString();
+              } else {
+                createdAt = new Date(dateInput).toISOString();
+              }
+            } else {
+              createdAt = timestamp;
+            }
+          } catch (error) {
+            console.error('Error formatting date:', error);
+            createdAt = timestamp;
+          }
+
+          // Check if email exists if provided
+          if (email) {
+            const { data: existingUsers } = await supabase
+              .from('users')
+              .select('email')
+              .eq('email', email);
+
+            if (existingUsers && existingUsers.length > 0) {
+              errors.push(`Riga ${i + 2}: L'email ${email} è già in uso`);
+              continue;
+            }
+          }
+          
+          // Direct database insert (bypassing edge function)
+          const userData = {
+            id: userId.toString(),
+            username: username.toString(),
+            created_at: createdAt,
+            gdpr_consent: Boolean(gdprConsent)
+          };
+          
+          if (email) userData.email = email.toString();
+          if (birthYear) userData.birth_year = birthYear.toString();
+          if (gender) userData.gender = gender.toString();
+          
+          console.log(`Inserting user directly:`, userData);
+          
+          const { error: insertError } = await supabase.from('users').insert(userData);
+          
+          if (insertError) {
+            console.error(`Error inserting user row ${i + 1}:`, insertError);
+            errors.push(`Riga ${i + 2}: ${insertError.message}`);
+            continue;
+          }
+          
+          validUsers.push(userData);
+          console.log(`Successfully inserted user ${i + 1}`);
+          
+        } catch (error) {
+          console.error(`Error processing row ${i + 1}:`, error);
+          errors.push(`Riga ${i + 2}: ${(error as Error).message}`);
+        }
         
+        // Check session health periodically
         if (i % 20 === 0 && i > 0) {
           await checkSessionHealth();
         }
@@ -171,163 +250,6 @@ export const UsersImport = () => {
       setDebugInfo(null);
       importInProgress.current = false;
       if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-
-  const processBatch = async (
-    batch: any[], 
-    startIndex: number, 
-    validUsers: ImportedUser[], 
-    errors: string[], 
-    timestamp: string
-  ) => {
-    for (const [index, row] of batch.entries()) {
-      const currentIndex = startIndex + index;
-      try {
-        setProcessedRows(currentIndex + 1);
-        setImportProgress(Math.round(((currentIndex + 1) / totalRows) * 100));
-        
-        console.log(`Validating user row ${currentIndex + 1}:`, row);
-        setDebugInfo(`Validazione riga ${currentIndex + 1} di ${totalRows}`);
-        
-        const email = row['email'] || row['Email'];
-        const username = row['username'] || row['Username'];
-        
-        if (!username) {
-          errors.push(`Riga ${currentIndex + 2}: Username è un campo obbligatorio`);
-          continue;
-        }
-
-        if (email) {
-          const { data: existingUsers, error: searchError } = await supabase
-            .from('users')
-            .select('email')
-            .eq('email', email);
-
-          if (searchError) {
-            console.error('Error searching for user:', searchError);
-            errors.push(`Riga ${currentIndex + 2}: Errore durante la verifica dell'email: ${searchError.message}`);
-            continue;
-          }
-
-          if (existingUsers && existingUsers.length > 0) {
-            errors.push(`Riga ${currentIndex + 2}: L'email ${email} è già in uso`);
-            continue;
-          }
-        }
-
-        const userId = row['id'] || row['ID'] || uuidv4();
-        const birthYear = row['birth_year'] || row['Birth Year'] || row['Anno di Nascita'] || null;
-        const gender = row['gender'] || row['Gender'] || row['Genere'] || null;
-        const gdprConsent = row['gdpr_consent'] || row['GDPR Consent'] || true;
-        
-        let createdAt;
-        try {
-          const dateInput = row['created_at'] || row['Created At'] || row['Data Registrazione'];
-          if (dateInput) {
-            if (typeof dateInput === 'number') {
-              const excelEpoch = new Date(1899, 11, 30);
-              createdAt = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000).toISOString();
-            } else {
-              createdAt = new Date(dateInput).toISOString();
-            }
-          } else {
-            createdAt = new Date().toISOString();
-          }
-        } catch (error) {
-          console.error('Error formatting date:', error);
-          createdAt = new Date().toISOString();
-        }
-
-        const user: ImportedUser = {
-          id: userId.toString(),
-          username: username.toString(),
-          created_at: createdAt
-        };
-        
-        if (email) user.email = email.toString();
-        if (birthYear) user.birth_year = birthYear.toString();
-        if (gender) user.gender = gender.toString();
-        if (gdprConsent !== undefined) user.gdpr_consent = Boolean(gdprConsent);
-
-        console.log('Processed user:', user);
-        setDebugInfo(`Inserimento utente: ${user.username}`);
-
-        try {
-          // For username-only imports, use direct admin function as primary method
-          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-          
-          console.log("Calling admin import function");
-          setDebugInfo(`Chiamata funzione admin per utente: ${user.username}`);
-          
-          try {
-            // Get the full URL of the function
-            const functionUrl = `${supabaseUrl}/functions/v1/admin-import-user`;
-            console.log("Function URL:", functionUrl);
-            
-            const response = await fetch(functionUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${session?.access_token}`
-              },
-              body: JSON.stringify({ user })
-            });
-            
-            const responseText = await response.text();
-            console.log("Response status:", response.status);
-            console.log("Response text:", responseText);
-            
-            let data;
-            try {
-              data = JSON.parse(responseText);
-            } catch (parseError) {
-              console.error("Failed to parse response:", parseError);
-              errors.push(`Riga ${currentIndex + 2}: Risposta non valida dal server: ${responseText}`);
-              continue;
-            }
-            
-            if (!response.ok) {
-              console.error('Admin import API error:', response.status, data);
-              errors.push(`Riga ${currentIndex + 2}: Errore API (${response.status}): ${data.error || 'Errore sconosciuto'}`);
-              continue;
-            }
-            
-            if (!data.success) {
-              console.error('Admin import failed:', data);
-              errors.push(`Riga ${currentIndex + 2}: ${data.error || 'Errore durante l\'inserimento'}`);
-              continue;
-            }
-            
-            console.log('Admin import response:', data);
-            validUsers.push(user);
-            
-          } catch (fetchError) {
-            console.error('Error calling admin function:', fetchError);
-            
-            // Fallback to direct insert if function call failed
-            console.log('Fallback to direct insert');
-            const { error: insertError } = await supabase
-              .from('users')
-              .insert(user);
-
-            if (insertError) {
-              errors.push(`Riga ${currentIndex + 2}: Errore durante l'inserimento: ${insertError.message}`);
-              continue;
-            }
-            
-            validUsers.push(user);
-          }
-          
-          console.log(`Successfully inserted user for row ${currentIndex + 1}`);
-        } catch (error) {
-          console.error(`Error during user insertion:`, error);
-          errors.push(`Riga ${currentIndex + 2}: ${(error as Error).message}`);
-        }
-      } catch (error) {
-        console.error(`Error processing row ${currentIndex + 1}:`, error);
-        errors.push(`Riga ${currentIndex + 2}: ${(error as Error).message}`);
-      }
     }
   };
 

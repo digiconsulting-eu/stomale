@@ -121,7 +121,8 @@ serve(async (req) => {
         gender: user.gender,
         created_at: user.created_at || new Date().toISOString(),
         gdpr_consent: user.gdpr_consent === undefined ? true : user.gdpr_consent
-      });
+      })
+      .select();
 
     if (error) {
       console.error("Admin import error:", error);
@@ -135,7 +136,7 @@ serve(async (req) => {
     }
 
     // Return success response
-    console.log("User imported successfully");
+    console.log("User imported successfully:", data);
     return new Response(
       JSON.stringify({ success: true, message: "User imported successfully", data }),
       { 
