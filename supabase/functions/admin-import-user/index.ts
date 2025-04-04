@@ -17,6 +17,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json',
 };
 
 serve(async (req) => {
@@ -45,7 +46,7 @@ serve(async (req) => {
         JSON.stringify({ error: "Missing Supabase credentials", success: false }),
         { 
           status: 500, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          headers: corsHeaders
         }
       );
     }
@@ -57,7 +58,7 @@ serve(async (req) => {
     let requestData;
     try {
       const text = await req.text();
-      console.log("Request payload:", text);
+      console.log("Request payload:", text.substring(0, 200) + (text.length > 200 ? "..." : ""));
       requestData = text ? JSON.parse(text) : {};
     } catch (parseError) {
       console.error("Failed to parse request body:", parseError);
@@ -65,7 +66,7 @@ serve(async (req) => {
         JSON.stringify({ error: "Invalid request format", success: false }),
         { 
           status: 400, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          headers: corsHeaders
         }
       );
     }
@@ -80,7 +81,7 @@ serve(async (req) => {
         JSON.stringify({ error: "Missing user data", data: requestData, success: false }),
         { 
           status: 400, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          headers: corsHeaders
         }
       );
     }
@@ -92,7 +93,7 @@ serve(async (req) => {
         JSON.stringify({ error: "Username is required", success: false }),
         { 
           status: 400, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          headers: corsHeaders
         }
       );
     }
@@ -110,7 +111,7 @@ serve(async (req) => {
       hasEmail: !!user.email
     });
 
-    // Run a direct SQL insertion to ensure we bypass RLS policies entirely
+    // Run the admin_insert_user RPC function
     const { data, error } = await supabase.rpc('admin_insert_user', {
       p_id: user.id,
       p_username: user.username,
@@ -127,7 +128,7 @@ serve(async (req) => {
         JSON.stringify({ error: error.message, success: false }),
         { 
           status: 400, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          headers: corsHeaders
         }
       );
     }
@@ -138,7 +139,7 @@ serve(async (req) => {
       JSON.stringify({ success: true, message: "User imported successfully", data }),
       { 
         status: 200, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        headers: corsHeaders
       }
     );
   } catch (error) {
@@ -147,7 +148,7 @@ serve(async (req) => {
       JSON.stringify({ error: error.message, stack: error.stack, success: false }),
       { 
         status: 500, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        headers: corsHeaders
       }
     );
   }

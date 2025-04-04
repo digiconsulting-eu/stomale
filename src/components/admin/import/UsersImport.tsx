@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -33,6 +34,7 @@ export const UsersImport = () => {
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const { data: session } = useAuthSession();
   const importInProgress = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const loadAdminEmails = async () => {
@@ -41,6 +43,13 @@ export const UsersImport = () => {
     };
     
     loadAdminEmails();
+    
+    // Cleanup function to abort any pending requests when component unmounts
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
   const resetImportState = () => {
@@ -72,20 +81,28 @@ export const UsersImport = () => {
     try {
       console.log(`Calling edge function for user ${user.username}`);
       
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-import-user`, {
+      // Create a new AbortController for this request
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+      
+      // Use the full Supabase URL from the environment variable
+      const response = await fetch(`https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/admin-import-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.access_token}`,
         },
         body: JSON.stringify({ user }),
+        signal,
       });
 
+      // Check for HTML response (error indicator)
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const textResponse = await response.text();
-        console.error('Non-JSON response received:', textResponse.substring(0, 200) + '...');
-        throw new Error('Received HTML instead of JSON response. Check edge function logs.');
+        const responsePreview = textResponse.substring(0, 100) + (textResponse.length > 100 ? '...' : '');
+        console.error('Non-JSON response received:', responsePreview);
+        throw new Error(`Server returned non-JSON response. Received: ${contentType || 'unknown content type'}`);
       }
 
       const result = await response.json();
@@ -98,9 +115,49 @@ export const UsersImport = () => {
       console.log('Edge function success:', result);
       return result;
     } catch (error) {
+      // Don't report errors if the request was aborted
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.log("Request was aborted");
+        return null;
+      }
+      
       console.error('Error calling edge function:', error);
       throw error;
     }
+  };
+
+  // Process users in smaller batches to avoid overwhelming the server
+  const processBatch = async (users: ImportedUser[], startIndex: number, batchSize: number) => {
+    const endIndex = Math.min(startIndex + batchSize, users.length);
+    const errors = [];
+    const validUsers = [];
+    
+    for (let i = startIndex; i < endIndex; i++) {
+      try {
+        setProcessedRows(i + 1);
+        setImportProgress(Math.round(((i + 1) / users.length) * 100));
+        setDebugInfo(`Elaborazione utente ${i + 1} di ${users.length}`);
+        
+        const user = users[i];
+        console.log(`Processing user ${i + 1}:`, user);
+        
+        try {
+          const result = await callEdgeFunction(user);
+          if (result) {
+            validUsers.push(user);
+            console.log(`Successfully inserted user ${i + 1}`);
+          }
+        } catch (callError) {
+          console.error(`Error calling edge function for row ${i + 1}:`, callError);
+          errors.push(`Riga ${i + 2}: ${(callError as Error).message}`);
+        }
+      } catch (error) {
+        console.error(`Error processing row ${i + 1}:`, error);
+        errors.push(`Riga ${i + 2}: ${(error as Error).message}`);
+      }
+    }
+    
+    return { errors, validUsers, nextIndex: endIndex };
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,25 +209,24 @@ export const UsersImport = () => {
       }
 
       console.log(`Processing ${jsonData.length} user rows...`);
-      const validUsers = [];
-      const errors = [];
+      const allErrors = [];
+      const allValidUsers = [];
       const timestamp = new Date().toISOString();
       
       setTotalRows(jsonData.length);
 
+      // Prepare all users data first
+      const users: ImportedUser[] = [];
+      
       for (let i = 0; i < jsonData.length; i++) {
         try {
-          setProcessedRows(i + 1);
-          setImportProgress(Math.round(((i + 1) / jsonData.length) * 100));
-          
           const row = jsonData[i];
-          console.log(`Processing row ${i + 1}:`, row);
-          setDebugInfo(`Elaborazione utente ${i + 1} di ${jsonData.length}`);
+          console.log(`Preparing row ${i + 1}:`, row);
           
           const username = row['username'] || row['Username'];
           
           if (!username) {
-            errors.push(`Riga ${i + 2}: Username è un campo obbligatorio`);
+            allErrors.push(`Riga ${i + 2}: Username è un campo obbligatorio`);
             continue;
           }
 
@@ -205,7 +261,7 @@ export const UsersImport = () => {
               .eq('email', email);
 
             if (existingUsers && existingUsers.length > 0) {
-              errors.push(`Riga ${i + 2}: L'email ${email} è già in uso`);
+              allErrors.push(`Riga ${i + 2}: L'email ${email} è già in uso`);
               continue;
             }
           }
@@ -221,44 +277,47 @@ export const UsersImport = () => {
           if (birthYear) userData.birth_year = birthYear.toString();
           if (gender) userData.gender = gender.toString();
           
-          console.log(`Importing user via edge function:`, userData);
-          
-          try {
-            await callEdgeFunction(userData);
-            validUsers.push(userData);
-            console.log(`Successfully inserted user ${i + 1}`);
-          } catch (callError) {
-            console.error(`Error calling edge function for row ${i + 1}:`, callError);
-            errors.push(`Riga ${i + 2}: ${(callError as Error).message}`);
-          }
+          users.push(userData);
         } catch (error) {
-          console.error(`Error processing row ${i + 1}:`, error);
-          errors.push(`Riga ${i + 2}: ${(error as Error).message}`);
-        }
-        
-        if (i % 20 === 0 && i > 0) {
-          await checkSessionHealth();
+          console.error(`Error preparing row ${i + 1}:`, error);
+          allErrors.push(`Riga ${i + 2}: ${(error as Error).message}`);
         }
       }
-
-      if (errors.length > 0) {
-        console.error('Import errors:', errors);
-        setImportError(errors.slice(0, 5).join('\n') + (errors.length > 5 ? `\n... e altri ${errors.length - 5} errori` : ''));
+      
+      // Process users in batches of 20
+      const BATCH_SIZE = 20;
+      let nextIndex = 0;
+      
+      while (nextIndex < users.length) {
+        // Check session health before each batch
+        await checkSessionHealth();
         
-        if (errors.length <= 5) {
-          errors.forEach(error => toast.error(error));
+        const { errors, validUsers, nextIndex: newNextIndex } = 
+          await processBatch(users, nextIndex, BATCH_SIZE);
+        
+        allErrors.push(...errors);
+        allValidUsers.push(...validUsers);
+        nextIndex = newNextIndex;
+      }
+
+      if (allErrors.length > 0) {
+        console.error('Import errors:', allErrors);
+        setImportError(allErrors.slice(0, 5).join('\n') + (allErrors.length > 5 ? `\n... e altri ${allErrors.length - 5} errori` : ''));
+        
+        if (allErrors.length <= 5) {
+          allErrors.forEach(error => toast.error(error));
         } else {
-          toast.error(`${errors.length} errori durante l'importazione`, {
+          toast.error(`${allErrors.length} errori durante l'importazione`, {
             description: "Controlla il pannello degli errori per i dettagli"
           });
         }
       }
 
-      if (validUsers.length > 0) {
+      if (allValidUsers.length > 0) {
         setLastImportTimestamp(timestamp);
         toast.success(
-          `${validUsers.length} utenti importati con successo${
-            errors.length > 0 ? `. ${errors.length} utenti ignorati per errori.` : '.'
+          `${allValidUsers.length} utenti importati con successo${
+            allErrors.length > 0 ? `. ${allErrors.length} utenti ignorati per errori.` : '.'
           }`
         );
       } else {
