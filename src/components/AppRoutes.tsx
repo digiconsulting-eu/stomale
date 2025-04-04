@@ -105,6 +105,11 @@ export const AppRoutes = () => {
         path="/patologia/allergia-al-nichel/esperienza/151-ho-appena-scoperto-di-essere-allergica-al-nichel" 
         element={<Navigate to="/patologia/allergia%20al%20nichel/esperienza/155-non-posso-più-mangiare-tanti-alimenti-" replace />} 
       />
+      {/* Redirect from /azienda/algodistrofia to /patologia/algodistrofia */}
+      <Route 
+        path="/azienda/algodistrofia" 
+        element={<Navigate to="/patologia/algodistrofia" replace />} 
+      />
       <Route path="/news/*" element={<Navigate to="/recensioni" replace />} />
     </Routes>
   );
