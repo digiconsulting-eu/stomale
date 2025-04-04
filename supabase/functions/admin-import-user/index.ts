@@ -111,7 +111,47 @@ serve(async (req) => {
       hasEmail: !!user.email
     });
 
-    // Run the admin_insert_user RPC function
+    // First check if a profile for this user ID exists in the auth.users table
+    // If not, we need to create it to satisfy the foreign key constraint
+    const { data: existingAuthUser } = await supabase.auth.admin.getUserById(user.id);
+    
+    if (!existingAuthUser || !existingAuthUser.user) {
+      console.log("User ID not found in auth.users table, creating placeholder auth user");
+      
+      // Try to use the email from the imported user data, or generate a placeholder one
+      const email = user.email || `placeholder_${user.id}@example.com`;
+      
+      // Create a placeholder user in the auth.users table
+      const { error: createAuthUserError } = await supabase.auth.admin.createUser({
+        uuid: user.id,
+        email: email,
+        email_confirm: true,
+        user_metadata: {
+          birth_year: user.birth_year,
+          gender: user.gender,
+          gdprConsent: user.gdpr_consent === undefined ? true : user.gdpr_consent
+        },
+        created_at: user.created_at || new Date().toISOString()
+      });
+      
+      if (createAuthUserError) {
+        console.error("Failed to create auth user:", createAuthUserError);
+        return new Response(
+          JSON.stringify({ 
+            error: "Failed to create auth user: " + createAuthUserError.message,
+            success: false 
+          }),
+          { 
+            status: 400, 
+            headers: corsHeaders
+          }
+        );
+      }
+      
+      console.log("Created placeholder auth user successfully");
+    }
+
+    // Now run the admin_insert_user RPC function
     const { data, error } = await supabase.rpc('admin_insert_user', {
       p_id: user.id,
       p_username: user.username,

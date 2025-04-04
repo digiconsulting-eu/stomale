@@ -35,6 +35,7 @@ export const UsersImport = () => {
   const { data: session } = useAuthSession();
   const importInProgress = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const retryCountRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
     const loadAdminEmails = async () => {
@@ -58,6 +59,7 @@ export const UsersImport = () => {
     setTotalRows(0);
     setProcessedRows(0);
     setDebugInfo(null);
+    retryCountRef.current = {};
   };
 
   const prepareForImport = async () => {
@@ -77,9 +79,13 @@ export const UsersImport = () => {
     }
   };
 
-  const callEdgeFunction = async (user: ImportedUser) => {
+  const isJsonResponse = (contentType: string | null): boolean => {
+    return !!contentType && contentType.includes('application/json');
+  };
+
+  const callEdgeFunction = async (user: ImportedUser, retryCount = 0): Promise<any> => {
     try {
-      console.log(`Calling edge function for user ${user.username}`);
+      console.log(`Calling edge function for user ${user.username} (retry: ${retryCount})`);
       
       // Create a new AbortController for this request
       abortControllerRef.current = new AbortController();
@@ -98,10 +104,20 @@ export const UsersImport = () => {
 
       // Check for HTML response (error indicator)
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
+      
+      if (!isJsonResponse(contentType)) {
+        // We got HTML or other non-JSON response
         const textResponse = await response.text();
-        const responsePreview = textResponse.substring(0, 100) + (textResponse.length > 100 ? '...' : '');
-        console.error('Non-JSON response received:', responsePreview);
+        console.error('Non-JSON response received:', textResponse.substring(0, 100));
+        
+        // Retry up to 3 times for non-JSON responses
+        if (retryCount < 3) {
+          console.log(`Retrying user ${user.username} (attempt ${retryCount + 1})`);
+          // Wait a bit before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+          return callEdgeFunction(user, retryCount + 1);
+        }
+        
         throw new Error(`Server returned non-JSON response. Received: ${contentType || 'unknown content type'}`);
       }
 
@@ -109,6 +125,14 @@ export const UsersImport = () => {
       
       if (!response.ok) {
         console.error('Edge function error:', result);
+        
+        // If we get a foreign key error, retry up to 2 times
+        if (result.error && result.error.includes('foreign key constraint') && retryCount < 2) {
+          console.log(`Foreign key error for user ${user.username}, retrying (attempt ${retryCount + 1})`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+          return callEdgeFunction(user, retryCount + 1);
+        }
+        
         throw new Error(result.error || 'Failed to import user through edge function');
       }
 
@@ -141,16 +165,51 @@ export const UsersImport = () => {
         const user = users[i];
         console.log(`Processing user ${i + 1}:`, user);
         
+        // Get retry count for this user
+        const userId = user.id || 'unknown';
+        const retryCount = retryCountRef.current[userId] || 0;
+        
         try {
+          // Don't retry more than 3 times per user
+          if (retryCount >= 3) {
+            errors.push(`Riga ${i + 2}: Troppi tentativi falliti per l'utente ${user.username}`);
+            continue;
+          }
+          
+          // Increment retry counter
+          retryCountRef.current[userId] = retryCount + 1;
+          
           const result = await callEdgeFunction(user);
           if (result) {
             validUsers.push(user);
             console.log(`Successfully inserted user ${i + 1}`);
+            
+            // Clear retry count on success
+            delete retryCountRef.current[userId];
           }
         } catch (callError) {
           console.error(`Error calling edge function for row ${i + 1}:`, callError);
-          errors.push(`Riga ${i + 2}: ${(callError as Error).message}`);
+          
+          // Add more specific error information
+          const errorMessage = (callError as Error).message || 'Errore sconosciuto';
+          const isConstraintError = errorMessage.includes('constraint');
+          const isProfileError = errorMessage.includes('profiles_id_fkey');
+          
+          let humanReadableError = `Riga ${i + 2}: `;
+          
+          if (isProfileError) {
+            humanReadableError += `L'ID utente non esiste nel sistema di autenticazione. Potrebbe essere necessario importare prima l'utente nell'auth system.`;
+          } else if (isConstraintError) {
+            humanReadableError += `Violazione di un vincolo del database. L'utente potrebbe già esistere.`;
+          } else {
+            humanReadableError += errorMessage;
+          }
+          
+          errors.push(humanReadableError);
         }
+        
+        // Small delay between processing users
+        await new Promise(resolve => setTimeout(resolve, 200));
       } catch (error) {
         console.error(`Error processing row ${i + 1}:`, error);
         errors.push(`Riga ${i + 2}: ${(error as Error).message}`);
@@ -284,13 +343,19 @@ export const UsersImport = () => {
         }
       }
       
-      // Process users in batches of 20
-      const BATCH_SIZE = 20;
+      // Process users in batches of a smaller size to avoid overwhelming the server
+      const BATCH_SIZE = 10; // Reduced batch size
       let nextIndex = 0;
       
-      while (nextIndex < users.length) {
+      while (nextIndex < users.length && !abortControllerRef.current?.signal.aborted) {
         // Check session health before each batch
-        await checkSessionHealth();
+        const sessionHealth = await checkSessionHealth();
+        if (!sessionHealth) {
+          toast.error("Sessione scaduta durante l'importazione", {
+            description: "Effettua nuovamente il login e riprova."
+          });
+          break;
+        }
         
         const { errors, validUsers, nextIndex: newNextIndex } = 
           await processBatch(users, nextIndex, BATCH_SIZE);
@@ -298,6 +363,9 @@ export const UsersImport = () => {
         allErrors.push(...errors);
         allValidUsers.push(...validUsers);
         nextIndex = newNextIndex;
+        
+        // Add a small delay between batches
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       if (allErrors.length > 0) {
