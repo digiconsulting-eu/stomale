@@ -17,9 +17,9 @@ interface Comment {
   review_id: number;
   reviews: {
     title: string;
-    condition: {
+    PATOLOGIE: {
       Patologia: string;
-    };
+    } | null;
   } | null;
 }
 
@@ -43,7 +43,7 @@ export const CommentsTab = () => {
           review_id,
           reviews (
             title,
-            condition:condition_id (
+            PATOLOGIE (
               Patologia
             )
           )
@@ -145,9 +145,9 @@ export const CommentsTab = () => {
                 </div>
               </div>
               <p className="text-gray-700 text-xs md:text-sm line-clamp-3">{comment.content}</p>
-              {comment.reviews?.condition?.Patologia && comment.reviews?.title && (
+              {comment.reviews?.PATOLOGIE?.Patologia && comment.reviews?.title && (
                 <Button asChild variant="link" className="p-0 h-auto text-xs md:text-sm">
-                  <Link to={`/patologia/${formatUrlPath(comment.reviews.condition.Patologia)}/esperienza/${comment.review_id}-${formatUrlPath(comment.reviews.title)}`}>
+                  <Link to={`/patologia/${formatUrlPath(comment.reviews.PATOLOGIE.Patologia)}/esperienza/${comment.review_id}-${formatUrlPath(comment.reviews.title)}`}>
                     Vai alla recensione
                   </Link>
                 </Button>
