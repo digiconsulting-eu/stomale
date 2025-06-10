@@ -11,18 +11,16 @@ export const ImportTemplate = () => {
     // Definizione dei dati di esempio
     const data = [
       {
-        "Patologia": "Nome Patologia",
-        "Titolo": "Titolo della recensione",
-        "Esperienza": "Descrizione dettagliata dell'esperienza",
-        "Sintomi": "Descrizione dei sintomi",
-        "Difficoltà diagnosi": 3,
-        "Fastidio sintomi": 4,
-        "Cura Farmacologica": "Y",
-        "Efficacia farmaci": 4,
-        "Possibilità guarigione": 2,
-        "Disagio sociale": 3,
-        "Data": new Date().toISOString().split('T')[0],
-        "User ID": "id-utente-specifico" // Campo aggiunto per specificare l'utente
+        "Patologia": "Diabete",
+        "Titolo": "La mia esperienza con il diabete",
+        "Esperienza": "Descrizione dettagliata dell'esperienza con la patologia...",
+        "Sintomi": "Sete eccessiva, minzione frequente, affaticamento",
+        "Difficoltà Diagnosi": 3,
+        "Gravità Sintomi": 4,
+        "Ha Farmaco": "Y",
+        "Efficacia Farmaco": 4,
+        "Possibilità Guarigione": 2,
+        "Disagio Sociale": 3
       }
     ];
     

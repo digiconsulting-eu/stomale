@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 
@@ -6,6 +5,7 @@ export interface ReviewRow {
   Titolo?: string;
   Sintomi?: string;
   Esperienza?: string;
+  'Patologia'?: string;
   'Patologia ID'?: number | string;
   'Difficoltà Diagnosi'?: number | string;
   'Gravità Sintomi'?: number | string;
@@ -85,6 +85,47 @@ const createUser = async (username: string): Promise<string> => {
   return username;
 };
 
+// Funzione per trovare o creare una patologia per nome
+const findOrCreateCondition = async (conditionName: string): Promise<number> => {
+  console.log('Looking for condition:', conditionName);
+  
+  // Prima cerca la patologia esistente (case-insensitive)
+  const { data: existingCondition, error: searchError } = await supabase
+    .from('PATOLOGIE')
+    .select('id, Patologia')
+    .ilike('Patologia', conditionName.trim())
+    .single();
+  
+  if (searchError && searchError.code !== 'PGRST116') {
+    console.error('Error searching for condition:', searchError);
+    throw new Error(`Errore nella ricerca della patologia: ${searchError.message}`);
+  }
+  
+  if (existingCondition) {
+    console.log(`Found existing condition: ${existingCondition.Patologia} with ID ${existingCondition.id}`);
+    return existingCondition.id;
+  }
+  
+  // Se non esiste, la crea
+  console.log(`Creating new condition: ${conditionName}`);
+  const { data: newCondition, error: createError } = await supabase
+    .from('PATOLOGIE')
+    .insert({
+      Patologia: conditionName.trim(),
+      Descrizione: ''
+    })
+    .select('id')
+    .single();
+  
+  if (createError) {
+    console.error('Error creating condition:', createError);
+    throw new Error(`Errore nella creazione della patologia: ${createError.message}`);
+  }
+  
+  console.log(`Created new condition with ID: ${newCondition.id}`);
+  return newCondition.id;
+};
+
 export const validateRow = async (row: any): Promise<any> => {
   console.log('Validating row:', row);
   
@@ -92,6 +133,9 @@ export const validateRow = async (row: any): Promise<any> => {
   const title = row['Titolo'] || row['Title'] || '';
   const symptoms = row['Sintomi'] || row['Symptoms'] || '';
   const experience = row['Esperienza'] || row['Experience'] || '';
+  
+  // Cerca prima per nome della patologia, poi per ID
+  const conditionName = row['Patologia'] || row['Condition'] || row['condition'];
   const conditionId = row['Patologia ID'] || row['Condition ID'] || row['condition_id'];
   
   // Valida i campi obbligatori
@@ -107,19 +151,28 @@ export const validateRow = async (row: any): Promise<any> => {
     throw new Error('L\'esperienza è obbligatoria');
   }
   
-  if (!conditionId) {
-    throw new Error('L\'ID della patologia è obbligatorio');
+  if (!conditionName && !conditionId) {
+    throw new Error('È necessario specificare il nome della patologia o l\'ID della patologia');
   }
   
-  // Verifica che la patologia esista
-  const { data: condition, error: conditionError } = await supabase
-    .from('PATOLOGIE')
-    .select('id')
-    .eq('id', conditionId)
-    .single();
+  let finalConditionId: number;
   
-  if (conditionError || !condition) {
-    throw new Error(`Patologia con ID ${conditionId} non trovata`);
+  // Se è specificato il nome della patologia, lo usa (ha priorità sull'ID)
+  if (conditionName) {
+    finalConditionId = await findOrCreateCondition(conditionName);
+  } else {
+    // Altrimenti usa l'ID specificato e verifica che esista
+    const { data: condition, error: conditionError } = await supabase
+      .from('PATOLOGIE')
+      .select('id')
+      .eq('id', conditionId)
+      .single();
+    
+    if (conditionError || !condition) {
+      throw new Error(`Patologia con ID ${conditionId} non trovata`);
+    }
+    
+    finalConditionId = parseInt(conditionId.toString());
   }
   
   // Crea un nuovo utente con username progressivo
@@ -131,7 +184,7 @@ export const validateRow = async (row: any): Promise<any> => {
     title: title.trim(),
     symptoms: symptoms.trim(),
     experience: experience.trim(),
-    condition_id: parseInt(conditionId.toString()),
+    condition_id: finalConditionId,
     username: username,
     created_at: generateRandomDate(),
     status: 'approved',
