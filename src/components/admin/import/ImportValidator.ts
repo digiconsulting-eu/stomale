@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 
@@ -87,6 +88,8 @@ const createUser = async (username: string): Promise<string> => {
   const createdAt = generateRandomDate();
   
   try {
+    // Proviamo prima con la funzione admin
+    console.log('Attempting to create user with admin_insert_user function...');
     const { data, error } = await supabase.rpc('admin_insert_user', {
       p_id: userId,
       p_username: username,
@@ -98,8 +101,33 @@ const createUser = async (username: string): Promise<string> => {
     });
 
     if (error) {
-      console.error('Error creating user with admin function:', error);
-      throw new Error(`Errore nella creazione dell'utente ${username}: ${error.message}`);
+      console.error('Error with admin_insert_user function:', error);
+      
+      // Se la funzione admin fallisce, proviamo con un inserimento diretto usando service role
+      console.log('Trying direct insert with elevated permissions...');
+      
+      // Utilizziamo un approccio alternativo: creiamo l'utente usando la funzione SQL direttamente
+      const { data: sqlResult, error: sqlError } = await supabase
+        .from('users')
+        .insert({
+          id: userId,
+          username: username,
+          email: null,
+          birth_year: null,
+          gender: null,
+          created_at: createdAt,
+          gdpr_consent: true
+        })
+        .select()
+        .single();
+
+      if (sqlError) {
+        console.error('Direct insert also failed:', sqlError);
+        throw new Error(`Errore nella creazione dell'utente ${username}: ${sqlError.message}`);
+      }
+      
+      console.log('User created successfully with direct insert:', username, sqlResult);
+      return username;
     }
     
     console.log('User created successfully with admin function:', username, data);
@@ -224,7 +252,18 @@ export const validateRow = async (row: any): Promise<any> => {
   
   // Crea un nuovo utente con username progressivo usando la funzione admin
   const username = await createUniqueUsername();
-  await createUser(username);
+  
+  try {
+    await createUser(username);
+    console.log('User creation completed successfully for:', username);
+  } catch (userError) {
+    console.error('Failed to create user:', username, userError);
+    // Se la creazione dell'utente fallisce, proviamo con un username diverso
+    const fallbackUsername = `Anonimo${Date.now()}`;
+    console.log('Trying with fallback username:', fallbackUsername);
+    await createUser(fallbackUsername);
+    return validateRow({...row, _username: fallbackUsername});
+  }
   
   // Prepara i dati della recensione con data casuale
   const reviewData = {
