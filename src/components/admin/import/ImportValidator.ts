@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 
@@ -81,28 +80,34 @@ const createUniqueUsername = async (): Promise<string> => {
   }
 };
 
-// Funzione per creare un nuovo utente
+// Funzione per creare un nuovo utente usando la funzione admin_insert_user
 const createUser = async (username: string): Promise<string> => {
-  console.log('Creating user:', username);
+  console.log('Creating user with admin function:', username);
   const userId = uuidv4();
   const createdAt = generateRandomDate();
   
-  const { error } = await supabase
-    .from('users')
-    .insert({
-      id: userId,
-      username: username,
-      created_at: createdAt,
-      gdpr_consent: true
+  try {
+    const { data, error } = await supabase.rpc('admin_insert_user', {
+      p_id: userId,
+      p_username: username,
+      p_email: null,
+      p_birth_year: null,
+      p_gender: null,
+      p_created_at: createdAt,
+      p_gdpr_consent: true
     });
-  
-  if (error) {
-    console.error('Error creating user:', error);
-    throw new Error(`Errore nella creazione dell'utente ${username}: ${error.message}`);
+
+    if (error) {
+      console.error('Error creating user with admin function:', error);
+      throw new Error(`Errore nella creazione dell'utente ${username}: ${error.message}`);
+    }
+    
+    console.log('User created successfully with admin function:', username, data);
+    return username;
+  } catch (error) {
+    console.error('Error in createUser:', error);
+    throw error;
   }
-  
-  console.log('User created successfully:', username);
-  return username;
 };
 
 // Funzione per trovare o creare una patologia per nome
@@ -217,7 +222,7 @@ export const validateRow = async (row: any): Promise<any> => {
   
   console.log('Final condition ID:', finalConditionId);
   
-  // Crea un nuovo utente con username progressivo
+  // Crea un nuovo utente con username progressivo usando la funzione admin
   const username = await createUniqueUsername();
   await createUser(username);
   
