@@ -1,167 +1,136 @@
-import { supabase } from "@/integrations/supabase/client";
 
-interface ImportedReview {
-  condition_id: number;
-  title: string;
-  symptoms: string;
-  experience: string;
-  diagnosis_difficulty?: number;
-  symptoms_severity?: number;
-  has_medication?: boolean;
-  medication_effectiveness?: number;
-  healing_possibility?: number;
-  social_discomfort?: number;
-  created_at?: string;
-  status?: string;
-  user_id: string;
+import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from "uuid";
+
+export interface ReviewRow {
+  Titolo?: string;
+  Sintomi?: string;
+  Esperienza?: string;
+  'Patologia ID'?: number | string;
+  'Difficoltà Diagnosi'?: number | string;
+  'Gravità Sintomi'?: number | string;
+  'Ha Farmaco'?: boolean | string;
+  'Efficacia Farmaco'?: number | string;
+  'Possibilità Guarigione'?: number | string;
+  'Disagio Sociale'?: number | string;
 }
 
-const formatDate = (dateInput: any): string => {
-  if (!dateInput) {
-    return new Date().toISOString();
-  }
-
-  try {
-    if (typeof dateInput === 'number') {
-      const excelEpoch = new Date(1899, 11, 30);
-      const date = new Date(excelEpoch.getTime() + dateInput * 24 * 60 * 60 * 1000);
-      return date.toISOString();
-    }
-
-    const date = new Date(dateInput);
-    if (isNaN(date.getTime())) {
-      throw new Error('Invalid date');
-    }
-    return date.toISOString();
-  } catch {
-    return new Date().toISOString();
-  }
+// Funzione per generare una data casuale tra 1/1/2020 e 10/6/2025
+const generateRandomDate = (): string => {
+  const start = new Date('2020-01-01').getTime();
+  const end = new Date('2025-06-10').getTime();
+  const randomTime = start + Math.random() * (end - start);
+  return new Date(randomTime).toISOString();
 };
 
-const validateNumericField = (value: any, fieldName: string, required: boolean = false): number | null => {
-  if (value === undefined || value === null || value === '') {
-    if (required) {
-      throw new Error(`Il campo "${fieldName}" è obbligatorio e deve essere un numero da 1 a 5`);
-    }
-    return null;
-  }
+// Funzione per creare un username univoco
+const createUniqueUsername = async (): Promise<string> => {
+  let attempts = 0;
+  const maxAttempts = 100;
   
-  const numValue = Number(value);
-  if (isNaN(numValue) || numValue < 1 || numValue > 5) {
-    throw new Error(`Il campo "${fieldName}" deve essere un numero da 1 a 5`);
-  }
-  return numValue;
-};
-
-export const validateRow = async (row: any): Promise<ImportedReview | null> => {
-  console.log('Validating row:', row);
-
-  const condition = row['patologia'] || row['Patologia'];
-  const experience = row['experience'] || row['Esperienza'];
-  const userId = row['user_id'] || row['User ID'];
-  
-  if (!condition || !experience) {
-    console.error('Missing required fields:', { condition, experience });
-    throw new Error('Campi obbligatori mancanti: Patologia e Esperienza sono richiesti');
-  }
-
-  const normalizedCondition = condition
-    .toUpperCase()
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-
-  console.log('Normalized condition:', normalizedCondition);
-
-  try {
-    let finalUserId: string;
-    if (!userId) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-      finalUserId = user.id;
-    } else {
-      finalUserId = userId;
-    }
-
-    const { data: existingConditions, error: searchError } = await supabase
-      .from('PATOLOGIE')
-      .select('id')
-      .eq('Patologia', normalizedCondition);
-
-    if (searchError) {
-      console.error('Error searching for condition:', searchError);
-      throw searchError;
-    }
-
-    console.log('Existing conditions:', existingConditions);
-
-    let patologiaId: number;
-
-    if (!existingConditions || existingConditions.length === 0) {
-      console.log('Condition not found, creating new one:', normalizedCondition);
-      
-      const { data: newCondition, error: insertError } = await supabase
-        .from('PATOLOGIE')
-        .insert([{ 
-          Patologia: normalizedCondition,
-          Descrizione: '' 
-        }])
-        .select()
-        .single();
-
-      if (insertError || !newCondition) {
-        console.error('Error inserting condition:', insertError);
-        throw new Error(`Errore durante l'inserimento della patologia: ${insertError?.message || 'Unknown error'}`);
-      }
-      
-      patologiaId = newCondition.id;
-      console.log('Created new condition with ID:', patologiaId);
-    } else {
-      patologiaId = existingConditions[0].id;
-      console.log('Found existing condition with ID:', patologiaId);
-    }
-
-    const title = row['title'] || row['Titolo'] || '';
-    const symptoms = row['symptoms'] || row['Sintomi'] || '';
-    const hasMedication = row['has_medication'] || row['Cura Farmacologica']?.toUpperCase() === 'Y';
+  while (attempts < maxAttempts) {
+    // Genera un numero casuale tra 1000 e 9999
+    const randomNum = Math.floor(Math.random() * 9000) + 1000;
+    const username = `User${randomNum}`;
     
-    const validatedRow: ImportedReview = {
-      condition_id: patologiaId,
-      title: title,
-      symptoms: symptoms,
-      experience: experience,
-      diagnosis_difficulty: validateNumericField(
-        row['diagnosis_difficulty'] || row['Difficoltà diagnosi'], 
-        'Difficoltà diagnosi'
-      ),
-      symptoms_severity: validateNumericField(
-        row['symptoms_severity'] || row['Fastidio sintomi'], 
-        'Fastidio sintomi'
-      ),
-      has_medication: hasMedication,
-      medication_effectiveness: validateNumericField(
-        row['medication_effectiveness'] || row['Efficacia farmaci'], 
-        'Efficacia farmaci'
-      ),
-      healing_possibility: validateNumericField(
-        row['healing_possibility'] || row['Possibilità guarigione'], 
-        'Possibilità guarigione'
-      ),
-      social_discomfort: validateNumericField(
-        row['social_discomfort'] || row['Disagio sociale'], 
-        'Disagio sociale'
-      ),
-      created_at: formatDate(row['created_at'] || row['Data']),
-      status: 'approved',
-      user_id: finalUserId
-    };
-
-    console.log('Validated row:', validatedRow);
-    return validatedRow;
-  } catch (error) {
-    console.error('Error in validateRow:', error);
-    throw error;
+    // Verifica se l'username esiste già
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('username')
+      .eq('username', username)
+      .single();
+    
+    if (!existingUser) {
+      return username;
+    }
+    
+    attempts++;
   }
+  
+  // Fallback con timestamp se non riusciamo a trovare un username univoco
+  return `User${Date.now()}`;
+};
+
+// Funzione per creare un nuovo utente
+const createUser = async (username: string): Promise<string> => {
+  const userId = uuidv4();
+  const createdAt = generateRandomDate();
+  
+  const { error } = await supabase
+    .from('users')
+    .insert({
+      id: userId,
+      username: username,
+      created_at: createdAt,
+      gdpr_consent: true
+    });
+  
+  if (error) {
+    throw new Error(`Errore nella creazione dell'utente ${username}: ${error.message}`);
+  }
+  
+  return username;
+};
+
+export const validateRow = async (row: any): Promise<any> => {
+  console.log('Validating row:', row);
+  
+  // Estrai i dati dalla riga
+  const title = row['Titolo'] || row['Title'] || '';
+  const symptoms = row['Sintomi'] || row['Symptoms'] || '';
+  const experience = row['Esperienza'] || row['Experience'] || '';
+  const conditionId = row['Patologia ID'] || row['Condition ID'] || row['condition_id'];
+  
+  // Valida i campi obbligatori
+  if (!title || title.trim() === '') {
+    throw new Error('Il titolo è obbligatorio');
+  }
+  
+  if (!symptoms || symptoms.trim() === '') {
+    throw new Error('I sintomi sono obbligatori');
+  }
+  
+  if (!experience || experience.trim() === '') {
+    throw new Error('L\'esperienza è obbligatoria');
+  }
+  
+  if (!conditionId) {
+    throw new Error('L\'ID della patologia è obbligatorio');
+  }
+  
+  // Verifica che la patologia esista
+  const { data: condition, error: conditionError } = await supabase
+    .from('PATOLOGIE')
+    .select('id')
+    .eq('id', conditionId)
+    .single();
+  
+  if (conditionError || !condition) {
+    throw new Error(`Patologia con ID ${conditionId} non trovata`);
+  }
+  
+  // Crea un nuovo utente univoco
+  const username = await createUniqueUsername();
+  await createUser(username);
+  
+  // Prepara i dati della recensione con data casuale
+  const reviewData = {
+    title: title.trim(),
+    symptoms: symptoms.trim(),
+    experience: experience.trim(),
+    condition_id: parseInt(conditionId.toString()),
+    username: username,
+    created_at: generateRandomDate(),
+    status: 'approved',
+    // Campi opzionali con valori di default se non specificati
+    diagnosis_difficulty: row['Difficoltà Diagnosi'] || row['Diagnosis Difficulty'] || Math.floor(Math.random() * 5) + 1,
+    symptoms_severity: row['Gravità Sintomi'] || row['Symptoms Severity'] || Math.floor(Math.random() * 5) + 1,
+    has_medication: row['Ha Farmaco'] !== undefined ? Boolean(row['Ha Farmaco']) : Math.random() > 0.5,
+    medication_effectiveness: row['Efficacia Farmaco'] || row['Medication Effectiveness'] || Math.floor(Math.random() * 5) + 1,
+    healing_possibility: row['Possibilità Guarigione'] || row['Healing Possibility'] || Math.floor(Math.random() * 5) + 1,
+    social_discomfort: row['Disagio Sociale'] || row['Social Discomfort'] || Math.floor(Math.random() * 5) + 1
+  };
+  
+  console.log('Validated review data:', reviewData);
+  return reviewData;
 };

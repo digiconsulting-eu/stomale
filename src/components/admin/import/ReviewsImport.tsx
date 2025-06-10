@@ -13,30 +13,7 @@ import { useAuthSession } from "@/hooks/useAuthSession";
 export const ReviewsImport = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastImportTimestamp, setLastImportTimestamp] = useState<string | null>(null);
-  const [users, setUsers] = useState<Array<{id: string, username: string}>>([]);
   const { data: session } = useAuthSession();
-
-  // Carica la lista degli utenti per riferimento
-  useEffect(() => {
-    const loadUsers = async () => {
-      if (!session) return;
-      
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, username');
-      
-      if (error) {
-        console.error('Errore nel caricamento degli utenti:', error);
-        return;
-      }
-      
-      if (data) {
-        setUsers(data);
-      }
-    };
-    
-    loadUsers();
-  }, [session]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -67,16 +44,7 @@ export const ReviewsImport = () => {
           const validatedRow = await validateRow(row);
           
           if (validatedRow) {
-            console.log(`Inserting review for condition ID ${validatedRow.condition_id} and user ID ${validatedRow.user_id}`);
-            
-            // Verifica che l'utente esista prima di inserire la recensione
-            if (validatedRow.user_id) {
-              const userExists = users.some(user => user.id === validatedRow.user_id);
-              if (!userExists) {
-                errors.push(`Riga ${index + 2}: User ID "${validatedRow.user_id}" non trovato nel database`);
-                continue;
-              }
-            }
+            console.log(`Inserting review for condition ID ${validatedRow.condition_id} and user ${validatedRow.username}`);
             
             const { error: insertError } = await supabase
               .from('reviews')
@@ -107,7 +75,7 @@ export const ReviewsImport = () => {
       if (validReviews.length > 0) {
         setLastImportTimestamp(timestamp);
         toast.success(
-          `${validReviews.length} recensioni importate con successo${
+          `${validReviews.length} recensioni importate con successo con nuovi utenti creati automaticamente${
             errors.length > 0 ? `. ${errors.length} recensioni ignorate per errori.` : '.'
           }`
         );
@@ -130,15 +98,34 @@ export const ReviewsImport = () => {
     }
 
     try {
-      const { error } = await supabase
+      // Prima elimina le recensioni importate
+      const { error: reviewsError } = await supabase
         .from('reviews')
         .delete()
         .eq('import_timestamp', lastImportTimestamp);
 
-      if (error) {
-        console.error('Error undoing import:', error);
-        toast.error("Errore durante l'annullamento dell'importazione");
+      if (reviewsError) {
+        console.error('Error deleting reviews:', reviewsError);
+        toast.error("Errore durante l'eliminazione delle recensioni");
         return;
+      }
+
+      // Poi elimina gli utenti creati durante l'importazione (che iniziano con "User")
+      // ma solo quelli senza altre recensioni
+      const { error: usersError } = await supabase
+        .from('users')
+        .delete()
+        .like('username', 'User%')
+        .not('username', 'in', `(
+          SELECT DISTINCT username 
+          FROM reviews 
+          WHERE username IS NOT NULL AND import_timestamp != '${lastImportTimestamp}'
+        )`);
+
+      if (usersError) {
+        console.error('Error deleting users:', usersError);
+        // Non blocchiamo l'operazione se c'è un errore nell'eliminazione degli utenti
+        console.log('Users deletion failed, but reviews were deleted successfully');
       }
 
       toast.success("Ultima importazione annullata con successo");
@@ -153,6 +140,18 @@ export const ReviewsImport = () => {
     <div className="space-y-6">
       <ImportInstructions />
       
+      <div className="bg-blue-50 p-4 rounded-md">
+        <h3 className="font-semibold text-blue-800 mb-2">Importazione Automatica</h3>
+        <p className="text-blue-700 text-sm">
+          Durante l'importazione verranno creati automaticamente:
+        </p>
+        <ul className="text-blue-700 text-sm mt-2 list-disc list-inside">
+          <li>Nuovi utenti con username univoci (User1234, User5678, ecc.)</li>
+          <li>Date casuali per ogni recensione tra 1/1/2020 e 10/6/2025</li>
+          <li>Valori casuali per campi opzionali se non specificati</li>
+        </ul>
+      </div>
+      
       <div className="flex flex-wrap items-center gap-4">
         <ImportTemplate />
         
@@ -162,7 +161,7 @@ export const ReviewsImport = () => {
           className="flex items-center gap-2"
         >
           <Users className="h-4 w-4" />
-          Visualizza gli ID Utenti
+          Visualizza Utenti su Supabase
         </Button>
         
         <Button
