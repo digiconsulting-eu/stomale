@@ -4,16 +4,25 @@ import { v4 as uuidv4 } from "uuid";
 
 export interface ReviewRow {
   Titolo?: string;
+  title?: string;
   Sintomi?: string;
+  symptoms?: string;
   Esperienza?: string;
+  experience?: string;
   'Patologia'?: string;
   'Patologia ID'?: number | string;
   'Difficoltà Diagnosi'?: number | string;
+  diagnosis_difficulty?: number | string;
   'Gravità Sintomi'?: number | string;
+  symptoms_severity?: number | string;
   'Ha Farmaco'?: boolean | string;
+  has_medication?: boolean | string;
   'Efficacia Farmaco'?: number | string;
+  medication_effectiveness?: number | string;
   'Possibilità Guarigione'?: number | string;
+  healing_possibility?: number | string;
   'Disagio Sociale'?: number | string;
+  social_discomfort?: number | string;
 }
 
 // Funzione per generare una data casuale tra 1/1/2020 e 10/6/2025
@@ -148,10 +157,10 @@ export const validateRow = async (row: any): Promise<any> => {
   console.log('=== VALIDATING ROW ===');
   console.log('Raw row data:', row);
   
-  // Estrai i dati dalla riga
-  const title = row['Titolo'] || row['Title'] || '';
-  const symptoms = row['Sintomi'] || row['Symptoms'] || '';
-  const experience = row['Esperienza'] || row['Experience'] || '';
+  // Estrai i dati dalla riga - supporta sia nomi italiani che inglesi
+  const title = row['Titolo'] || row['Title'] || row['title'] || '';
+  const symptoms = row['Sintomi'] || row['Symptoms'] || row['symptoms'] || '';
+  const experience = row['Esperienza'] || row['Experience'] || row['experience'] || '';
   
   // Cerca prima per nome della patologia, poi per ID
   const conditionName = row['Patologia'] || row['Condition'] || row['condition'];
@@ -165,15 +174,15 @@ export const validateRow = async (row: any): Promise<any> => {
   console.log('- Condition ID:', conditionId);
   
   // Valida i campi obbligatori
-  if (!title || title.trim() === '') {
+  if (!title || title.toString().trim() === '') {
     throw new Error('Il titolo è obbligatorio');
   }
   
-  if (!symptoms || symptoms.trim() === '') {
+  if (!symptoms || symptoms.toString().trim() === '') {
     throw new Error('I sintomi sono obbligatori');
   }
   
-  if (!experience || experience.trim() === '') {
+  if (!experience || experience.toString().trim() === '') {
     throw new Error('L\'esperienza è obbligatoria');
   }
   
@@ -214,20 +223,20 @@ export const validateRow = async (row: any): Promise<any> => {
   
   // Prepara i dati della recensione con data casuale
   const reviewData = {
-    title: title.trim(),
-    symptoms: symptoms.trim(),
-    experience: experience.trim(),
+    title: title.toString().trim(),
+    symptoms: symptoms.toString().trim(),
+    experience: experience.toString().trim(),
     condition_id: finalConditionId,
     username: username,
     created_at: generateRandomDate(),
     status: 'approved',
     // Campi opzionali con valori di default se non specificati
-    diagnosis_difficulty: row['Difficoltà Diagnosi'] || row['Diagnosis Difficulty'] || Math.floor(Math.random() * 5) + 1,
-    symptoms_severity: row['Gravità Sintomi'] || row['Symptoms Severity'] || Math.floor(Math.random() * 5) + 1,
-    has_medication: row['Ha Farmaco'] !== undefined ? Boolean(row['Ha Farmaco']) : Math.random() > 0.5,
-    medication_effectiveness: row['Efficacia Farmaco'] || row['Medication Effectiveness'] || Math.floor(Math.random() * 5) + 1,
-    healing_possibility: row['Possibilità Guarigione'] || row['Healing Possibility'] || Math.floor(Math.random() * 5) + 1,
-    social_discomfort: row['Disagio Sociale'] || row['Social Discomfort'] || Math.floor(Math.random() * 5) + 1
+    diagnosis_difficulty: row['Difficoltà Diagnosi'] || row['Diagnosis Difficulty'] || row['diagnosis_difficulty'] || Math.floor(Math.random() * 5) + 1,
+    symptoms_severity: row['Gravità Sintomi'] || row['Symptoms Severity'] || row['symptoms_severity'] || Math.floor(Math.random() * 5) + 1,
+    has_medication: row['Ha Farmaco'] !== undefined ? Boolean(row['Ha Farmaco']) : (row['has_medication'] !== undefined ? Boolean(row['has_medication']) : Math.random() > 0.5),
+    medication_effectiveness: row['Efficacia Farmaco'] || row['Medication Effectiveness'] || row['medication_effectiveness'] || Math.floor(Math.random() * 5) + 1,
+    healing_possibility: row['Possibilità Guarigione'] || row['Healing Possibility'] || row['healing_possibility'] || Math.floor(Math.random() * 5) + 1,
+    social_discomfort: row['Disagio Sociale'] || row['Social Discomfort'] || row['social_discomfort'] || Math.floor(Math.random() * 5) + 1
   };
   
   console.log('Final validated review data:', reviewData);
