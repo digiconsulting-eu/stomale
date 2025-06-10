@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -14,10 +15,17 @@ export const ReviewsImport = () => {
   const [lastImportTimestamp, setLastImportTimestamp] = useState<string | null>(null);
   const { data: session } = useAuthSession();
 
+  console.log('ReviewsImport component mounted');
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('=== FILE UPLOAD TRIGGERED ===');
+    console.log('Event:', event);
+    console.log('Event target:', event.target);
+    console.log('Files:', event.target.files);
+    
     const file = event.target.files?.[0];
     if (!file) {
-      console.log('No file selected');
+      console.log('No file selected - returning early');
       return;
     }
 
@@ -118,7 +126,9 @@ export const ReviewsImport = () => {
     } finally {
       console.log('=== IMPORT PROCESS ENDED ===');
       setIsLoading(false);
-      event.target.value = '';
+      if (event.target) {
+        event.target.value = '';
+      }
     }
   };
 
@@ -195,22 +205,30 @@ export const ReviewsImport = () => {
           Visualizza Utenti su Supabase
         </Button>
         
-        <Button
-          variant="outline"
-          className="relative"
-          disabled={isLoading}
-        >
-          {isLoading && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          )}
-          Seleziona File Excel
+        <div className="relative">
+          <Button
+            variant="outline"
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            {isLoading && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Seleziona File Excel
+          </Button>
           <input
             type="file"
-            accept=".xlsx"
+            accept=".xlsx,.xls"
             onChange={handleFileUpload}
-            className="absolute inset-0 opacity-0 cursor-pointer"
+            className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+            disabled={isLoading}
+            onClick={(e) => {
+              console.log('File input clicked');
+              // Reset the value to allow selecting the same file again
+              e.currentTarget.value = '';
+            }}
           />
-        </Button>
+        </div>
 
         {lastImportTimestamp && (
           <Button
