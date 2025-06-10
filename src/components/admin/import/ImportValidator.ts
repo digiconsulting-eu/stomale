@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 
@@ -26,6 +27,7 @@ const generateRandomDate = (): string => {
 // Funzione per creare un username progressivo
 const createUniqueUsername = async (): Promise<string> => {
   try {
+    console.log('Creating unique username...');
     // Trova il numero più alto esistente
     const { data: existingUsers, error } = await supabase
       .from('users')
@@ -37,6 +39,8 @@ const createUniqueUsername = async (): Promise<string> => {
       console.error('Error fetching existing users:', error);
       throw error;
     }
+
+    console.log('Existing users with Anonimo prefix:', existingUsers);
 
     let nextNumber = 1;
     
@@ -56,16 +60,21 @@ const createUniqueUsername = async (): Promise<string> => {
       }
     }
 
-    return `Anonimo${nextNumber}`;
+    const username = `Anonimo${nextNumber}`;
+    console.log('Generated username:', username);
+    return username;
   } catch (error) {
     console.error('Error creating unique username:', error);
     // Fallback con timestamp se c'è un errore
-    return `Anonimo${Date.now()}`;
+    const fallbackUsername = `Anonimo${Date.now()}`;
+    console.log('Using fallback username:', fallbackUsername);
+    return fallbackUsername;
   }
 };
 
 // Funzione per creare un nuovo utente
 const createUser = async (username: string): Promise<string> => {
+  console.log('Creating user:', username);
   const userId = uuidv4();
   const createdAt = generateRandomDate();
   
@@ -79,14 +88,17 @@ const createUser = async (username: string): Promise<string> => {
     });
   
   if (error) {
+    console.error('Error creating user:', error);
     throw new Error(`Errore nella creazione dell'utente ${username}: ${error.message}`);
   }
   
+  console.log('User created successfully:', username);
   return username;
 };
 
 // Funzione per trovare o creare una patologia per nome
 const findOrCreateCondition = async (conditionName: string): Promise<number> => {
+  console.log('=== FINDING OR CREATING CONDITION ===');
   console.log('Looking for condition:', conditionName);
   
   // Prima cerca la patologia esistente (case-insensitive)
@@ -95,6 +107,9 @@ const findOrCreateCondition = async (conditionName: string): Promise<number> => 
     .select('id, Patologia')
     .ilike('Patologia', conditionName.trim())
     .single();
+  
+  console.log('Search result:', existingCondition);
+  console.log('Search error:', searchError);
   
   if (searchError && searchError.code !== 'PGRST116') {
     console.error('Error searching for condition:', searchError);
@@ -117,6 +132,9 @@ const findOrCreateCondition = async (conditionName: string): Promise<number> => 
     .select('id')
     .single();
   
+  console.log('Create result:', newCondition);
+  console.log('Create error:', createError);
+  
   if (createError) {
     console.error('Error creating condition:', createError);
     throw new Error(`Errore nella creazione della patologia: ${createError.message}`);
@@ -127,7 +145,8 @@ const findOrCreateCondition = async (conditionName: string): Promise<number> => 
 };
 
 export const validateRow = async (row: any): Promise<any> => {
-  console.log('Validating row:', row);
+  console.log('=== VALIDATING ROW ===');
+  console.log('Raw row data:', row);
   
   // Estrai i dati dalla riga
   const title = row['Titolo'] || row['Title'] || '';
@@ -137,6 +156,13 @@ export const validateRow = async (row: any): Promise<any> => {
   // Cerca prima per nome della patologia, poi per ID
   const conditionName = row['Patologia'] || row['Condition'] || row['condition'];
   const conditionId = row['Patologia ID'] || row['Condition ID'] || row['condition_id'];
+  
+  console.log('Extracted data:');
+  console.log('- Title:', title);
+  console.log('- Symptoms:', symptoms);
+  console.log('- Experience:', experience);
+  console.log('- Condition Name:', conditionName);
+  console.log('- Condition ID:', conditionId);
   
   // Valida i campi obbligatori
   if (!title || title.trim() === '') {
@@ -159,8 +185,10 @@ export const validateRow = async (row: any): Promise<any> => {
   
   // Se è specificato il nome della patologia, lo usa (ha priorità sull'ID)
   if (conditionName) {
+    console.log('Using condition name to find/create condition');
     finalConditionId = await findOrCreateCondition(conditionName);
   } else {
+    console.log('Using condition ID, verifying it exists');
     // Altrimenti usa l'ID specificato e verifica che esista
     const { data: condition, error: conditionError } = await supabase
       .from('PATOLOGIE')
@@ -168,12 +196,17 @@ export const validateRow = async (row: any): Promise<any> => {
       .eq('id', conditionId)
       .single();
     
+    console.log('Condition verification result:', condition);
+    console.log('Condition verification error:', conditionError);
+    
     if (conditionError || !condition) {
       throw new Error(`Patologia con ID ${conditionId} non trovata`);
     }
     
     finalConditionId = parseInt(conditionId.toString());
   }
+  
+  console.log('Final condition ID:', finalConditionId);
   
   // Crea un nuovo utente con username progressivo
   const username = await createUniqueUsername();
@@ -197,6 +230,6 @@ export const validateRow = async (row: any): Promise<any> => {
     social_discomfort: row['Disagio Sociale'] || row['Social Discomfort'] || Math.floor(Math.random() * 5) + 1
   };
   
-  console.log('Validated review data:', reviewData);
+  console.log('Final validated review data:', reviewData);
   return reviewData;
 };

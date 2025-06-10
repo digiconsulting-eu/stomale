@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -17,18 +16,39 @@ export const ReviewsImport = () => {
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+
+    console.log('=== STARTING IMPORT PROCESS ===');
+    console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
 
     setIsLoading(true);
-    console.log('Starting file upload process...');
 
     try {
+      console.log('Reading file as array buffer...');
       const data = await file.arrayBuffer();
+      console.log('Array buffer created, size:', data.byteLength);
+
+      console.log('Creating workbook...');
       const workbook = XLSX.read(data);
+      console.log('Workbook created, sheets:', workbook.SheetNames);
+
+      if (!workbook.SheetNames[0]) {
+        console.error('No sheets found in workbook');
+        toast.error("Il file Excel non contiene fogli");
+        return;
+      }
+
+      console.log('Reading worksheet:', workbook.SheetNames[0]);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      console.log('JSON data extracted:', jsonData.length, 'rows');
+      console.log('First row sample:', jsonData[0]);
 
       if (jsonData.length === 0) {
+        console.log('File is empty');
         toast.error("Il file è vuoto");
         return;
       }
@@ -37,11 +57,15 @@ export const ReviewsImport = () => {
       const validReviews = [];
       const errors = [];
       const timestamp = new Date().toISOString();
+      console.log('Import timestamp:', timestamp);
 
       for (const [index, row] of jsonData.entries()) {
         try {
-          console.log(`Validating row ${index + 1}:`, row);
+          console.log(`=== Validating row ${index + 1} ===`);
+          console.log('Row data:', row);
+          
           const validatedRow = await validateRow(row);
+          console.log('Row validated successfully:', validatedRow);
           
           if (validatedRow) {
             console.log(`Inserting review for condition ID ${validatedRow.condition_id} and user ${validatedRow.username}`);
@@ -54,7 +78,7 @@ export const ReviewsImport = () => {
               });
 
             if (insertError) {
-              console.error('Errore di inserimento:', insertError);
+              console.error('Database insert error:', insertError);
               errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
             } else {
               validReviews.push(validatedRow);
@@ -66,6 +90,10 @@ export const ReviewsImport = () => {
           errors.push(`Riga ${index + 2}: ${(error as Error).message}`);
         }
       }
+
+      console.log('=== IMPORT SUMMARY ===');
+      console.log('Valid reviews:', validReviews.length);
+      console.log('Errors:', errors.length);
 
       if (errors.length > 0) {
         console.error('Validation errors:', errors);
@@ -83,9 +111,12 @@ export const ReviewsImport = () => {
         toast.error("Nessuna recensione valida trovata nel file.");
       }
     } catch (error) {
-      console.error('Errore durante l\'importazione:', error);
-      toast.error("Si è verificato un errore durante l'importazione del file");
+      console.error('=== CRITICAL ERROR IN IMPORT ===');
+      console.error('Error details:', error);
+      console.error('Error stack:', (error as Error).stack);
+      toast.error("Si è verificato un errore durante l'importazione del file: " + (error as Error).message);
     } finally {
+      console.log('=== IMPORT PROCESS ENDED ===');
       setIsLoading(false);
       event.target.value = '';
     }
@@ -195,3 +226,5 @@ export const ReviewsImport = () => {
     </div>
   );
 };
+
+export default ReviewsImport;
