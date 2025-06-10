@@ -75,7 +75,7 @@ export const ReviewsImport = () => {
       if (validReviews.length > 0) {
         setLastImportTimestamp(timestamp);
         toast.success(
-          `${validReviews.length} recensioni importate con successo con nuovi utenti creati automaticamente${
+          `${validReviews.length} recensioni importate con successo con nuovi utenti creati automaticamente (Anonimo1, Anonimo2, ecc.)${
             errors.length > 0 ? `. ${errors.length} recensioni ignorate per errori.` : '.'
           }`
         );
@@ -110,12 +110,12 @@ export const ReviewsImport = () => {
         return;
       }
 
-      // Poi elimina gli utenti creati durante l'importazione (che iniziano con "User")
+      // Poi elimina gli utenti creati durante l'importazione (che iniziano con "Anonimo")
       // ma solo quelli senza altre recensioni
       const { error: usersError } = await supabase
         .from('users')
         .delete()
-        .like('username', 'User%')
+        .like('username', 'Anonimo%')
         .not('username', 'in', `(
           SELECT DISTINCT username 
           FROM reviews 
@@ -146,7 +146,7 @@ export const ReviewsImport = () => {
           Durante l'importazione verranno creati automaticamente:
         </p>
         <ul className="text-blue-700 text-sm mt-2 list-disc list-inside">
-          <li>Nuovi utenti con username univoci (User1234, User5678, ecc.)</li>
+          <li>Nuovi utenti con username progressivi (Anonimo1, Anonimo2, Anonimo3, ecc.)</li>
           <li>Date casuali per ogni recensione tra 1/1/2020 e 10/6/2025</li>
           <li>Valori casuali per campi opzionali se non specificati</li>
         </ul>

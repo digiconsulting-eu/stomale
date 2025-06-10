@@ -23,32 +23,45 @@ const generateRandomDate = (): string => {
   return new Date(randomTime).toISOString();
 };
 
-// Funzione per creare un username univoco
+// Funzione per creare un username progressivo
 const createUniqueUsername = async (): Promise<string> => {
-  let attempts = 0;
-  const maxAttempts = 100;
-  
-  while (attempts < maxAttempts) {
-    // Genera un numero casuale tra 1000 e 9999
-    const randomNum = Math.floor(Math.random() * 9000) + 1000;
-    const username = `User${randomNum}`;
-    
-    // Verifica se l'username esiste già
-    const { data: existingUser } = await supabase
+  try {
+    // Trova il numero più alto esistente
+    const { data: existingUsers, error } = await supabase
       .from('users')
       .select('username')
-      .eq('username', username)
-      .single();
-    
-    if (!existingUser) {
-      return username;
+      .like('username', 'Anonimo%')
+      .order('username', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching existing users:', error);
+      throw error;
     }
+
+    let nextNumber = 1;
     
-    attempts++;
+    if (existingUsers && existingUsers.length > 0) {
+      // Estrae tutti i numeri dagli username esistenti
+      const numbers = existingUsers
+        .map(user => {
+          const match = user.username.match(/^Anonimo(\d+)$/);
+          return match ? parseInt(match[1], 10) : 0;
+        })
+        .filter(num => num > 0)
+        .sort((a, b) => b - a); // Ordina in modo decrescente
+
+      // Prende il numero più alto e aggiunge 1
+      if (numbers.length > 0) {
+        nextNumber = numbers[0] + 1;
+      }
+    }
+
+    return `Anonimo${nextNumber}`;
+  } catch (error) {
+    console.error('Error creating unique username:', error);
+    // Fallback con timestamp se c'è un errore
+    return `Anonimo${Date.now()}`;
   }
-  
-  // Fallback con timestamp se non riusciamo a trovare un username univoco
-  return `User${Date.now()}`;
 };
 
 // Funzione per creare un nuovo utente
@@ -109,7 +122,7 @@ export const validateRow = async (row: any): Promise<any> => {
     throw new Error(`Patologia con ID ${conditionId} non trovata`);
   }
   
-  // Crea un nuovo utente univoco
+  // Crea un nuovo utente con username progressivo
   const username = await createUniqueUsername();
   await createUser(username);
   
