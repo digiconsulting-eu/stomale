@@ -177,6 +177,9 @@ export const ReviewsImport = () => {
     }
   };
 
+  // Debug: aggiungi log per verificare lo stato del componente
+  console.log('Component render - isLoading:', isLoading, 'lastImportTimestamp:', lastImportTimestamp);
+
   return (
     <div className="space-y-6">
       <ImportInstructions />
@@ -210,6 +213,11 @@ export const ReviewsImport = () => {
             variant="outline"
             disabled={isLoading}
             className="flex items-center gap-2"
+            onClick={() => {
+              console.log('=== BUTTON CLICKED - Debug Info ===');
+              console.log('Button disabled:', isLoading);
+              console.log('Will trigger file input click');
+            }}
           >
             {isLoading && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -219,10 +227,16 @@ export const ReviewsImport = () => {
           <input
             type="file"
             accept=".xlsx,.xls"
-            onChange={handleFileUpload}
+            onChange={(e) => {
+              console.log('=== INPUT CHANGE EVENT TRIGGERED ===');
+              console.log('Input change event:', e);
+              console.log('Files from event:', e.target.files);
+              handleFileUpload(e);
+            }}
             className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
             disabled={isLoading}
             onClick={(e) => {
+              console.log('=== INPUT CLICK EVENT ===');
               console.log('File input clicked');
               // Reset the value to allow selecting the same file again
               e.currentTarget.value = '';
