@@ -81,14 +81,16 @@ const createUniqueUsername = async (): Promise<string> => {
   }
 };
 
-// Funzione per creare un nuovo utente usando la funzione admin_insert_user
+// Funzione semplificata per creare un utente direttamente nella tabella users
+// senza passare per il sistema di autenticazione
 const createUser = async (username: string): Promise<string> => {
-  console.log('Creating user with admin function:', username);
+  console.log('Creating user directly in users table:', username);
   const userId = uuidv4();
   const createdAt = generateRandomDate();
   
   try {
-    // Proviamo prima con la funzione admin
+    // Inseriamo direttamente nella tabella users usando l'admin_insert_user function
+    // che bypassa i vincoli di foreign key
     console.log('Attempting to create user with admin_insert_user function...');
     const { data, error } = await supabase.rpc('admin_insert_user', {
       p_id: userId,
@@ -102,32 +104,7 @@ const createUser = async (username: string): Promise<string> => {
 
     if (error) {
       console.error('Error with admin_insert_user function:', error);
-      
-      // Se la funzione admin fallisce, proviamo con un inserimento diretto usando service role
-      console.log('Trying direct insert with elevated permissions...');
-      
-      // Utilizziamo un approccio alternativo: creiamo l'utente usando la funzione SQL direttamente
-      const { data: sqlResult, error: sqlError } = await supabase
-        .from('users')
-        .insert({
-          id: userId,
-          username: username,
-          email: null,
-          birth_year: null,
-          gender: null,
-          created_at: createdAt,
-          gdpr_consent: true
-        })
-        .select()
-        .single();
-
-      if (sqlError) {
-        console.error('Direct insert also failed:', sqlError);
-        throw new Error(`Errore nella creazione dell'utente ${username}: ${sqlError.message}`);
-      }
-      
-      console.log('User created successfully with direct insert:', username, sqlResult);
-      return username;
+      throw new Error(`Errore nella creazione dell'utente ${username}: ${error.message}`);
     }
     
     console.log('User created successfully with admin function:', username, data);
@@ -250,7 +227,7 @@ export const validateRow = async (row: any): Promise<any> => {
   
   console.log('Final condition ID:', finalConditionId);
   
-  // Crea un nuovo utente con username progressivo usando la funzione admin
+  // Crea un nuovo utente con username progressivo
   const username = await createUniqueUsername();
   
   try {
