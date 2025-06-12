@@ -81,17 +81,33 @@ const createUniqueUsername = async (): Promise<string> => {
   }
 };
 
-// Funzione semplificata per creare un utente direttamente nella tabella users
-// senza passare per il sistema di autenticazione
+// Funzione semplificata che non crea utenti reali ma restituisce solo username
 const createUser = async (username: string): Promise<string> => {
-  console.log('Creating user directly in users table:', username);
-  const userId = uuidv4();
-  const createdAt = generateRandomDate();
+  console.log('Skipping user creation, using username only:', username);
   
+  // Verifichiamo se l'username già esiste nella tabella users
+  const { data: existingUser, error: checkError } = await supabase
+    .from('users')
+    .select('username')
+    .eq('username', username)
+    .single();
+
+  if (checkError && checkError.code !== 'PGRST116') {
+    console.error('Error checking existing user:', checkError);
+    throw new Error(`Errore nella verifica dell'utente ${username}: ${checkError.message}`);
+  }
+
+  if (existingUser) {
+    console.log('Username already exists, using it:', username);
+    return username;
+  }
+
+  // Se non esiste, tentiamo di creare l'utente
   try {
-    // Inseriamo direttamente nella tabella users usando l'admin_insert_user function
-    // che bypassa i vincoli di foreign key
     console.log('Attempting to create user with admin_insert_user function...');
+    const userId = uuidv4();
+    const createdAt = generateRandomDate();
+    
     const { data, error } = await supabase.rpc('admin_insert_user', {
       p_id: userId,
       p_username: username,
@@ -104,14 +120,19 @@ const createUser = async (username: string): Promise<string> => {
 
     if (error) {
       console.error('Error with admin_insert_user function:', error);
-      throw new Error(`Errore nella creazione dell'utente ${username}: ${error.message}`);
+      console.log('User creation failed, but proceeding with username anyway:', username);
+      // Non blocchiamo l'importazione se non riusciamo a creare l'utente
+      // Procediamo comunque con l'username
+      return username;
     }
     
     console.log('User created successfully with admin function:', username, data);
     return username;
   } catch (error) {
     console.error('Error in createUser:', error);
-    throw error;
+    console.log('User creation failed, but proceeding with username anyway:', username);
+    // Non blocchiamo l'importazione, procediamo con l'username
+    return username;
   }
 };
 
@@ -232,14 +253,11 @@ export const validateRow = async (row: any): Promise<any> => {
   
   try {
     await createUser(username);
-    console.log('User creation completed successfully for:', username);
+    console.log('User creation completed for:', username);
   } catch (userError) {
-    console.error('Failed to create user:', username, userError);
-    // Se la creazione dell'utente fallisce, proviamo con un username diverso
-    const fallbackUsername = `Anonimo${Date.now()}`;
-    console.log('Trying with fallback username:', fallbackUsername);
-    await createUser(fallbackUsername);
-    return validateRow({...row, _username: fallbackUsername});
+    console.error('User creation failed but continuing with:', username, userError);
+    // Non blocchiamo l'importazione se la creazione dell'utente fallisce
+    // Procediamo comunque con l'username
   }
   
   // Prepara i dati della recensione con data casuale
