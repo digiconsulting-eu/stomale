@@ -15,18 +15,11 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url)
-    const path = url.pathname
-    const filename = path.substring(path.lastIndexOf('/') + 1) // e.g., sitemap-reviews-1.xml
-    const pageMatch = filename.match(/sitemap-reviews-(\d+)\.xml/)
-
-    if (!pageMatch || !pageMatch[1]) {
-      return new Response('Invalid sitemap page format', { status: 400, headers: corsHeaders })
-    }
-    
-    const page = parseInt(pageMatch[1], 10)
+    const pageParam = url.searchParams.get('page') || '1'
+    const page = parseInt(pageParam, 10)
     
     // Validate page parameter
-    if (isNaN(page) || page < 1) {
+    if (isNaN(page) || page < 1 || page > 10) {
       return new Response('Invalid page parameter', { status: 400, headers: corsHeaders })
     }
     

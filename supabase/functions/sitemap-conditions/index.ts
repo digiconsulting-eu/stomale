@@ -30,16 +30,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Ottieni il parametro della lettera dal percorso URL
+    // Ottieni il parametro della lettera dalla query string
     const url = new URL(req.url);
-    const path = url.pathname;
-    const filename = path.substring(path.lastIndexOf('/') + 1); // e.g., sitemap-conditions-a.xml
-    const letterMatch = filename.match(/sitemap-conditions-(.+)\.xml/);
-
-    if (!letterMatch || !letterMatch[1]) {
-      return new Response('Invalid sitemap letter format', { status: 400, headers: corsHeaders });
-    }
-    const letter = letterMatch[1];
+    const letter = url.searchParams.get('letter');
 
     if (!letter) {
       return new Response('Parametro letter mancante', { status: 400, headers: corsHeaders });

@@ -1,0 +1,119 @@
+
+name: Generate Conditions Sitemaps
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Run every Sunday at midnight
+  workflow_dispatch:  # Allow manual execution
+
+jobs:
+  generate-sitemaps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Supabase
+        run: npm install @supabase/supabase-js
+      
+      - name: Create directories and verify
+        run: |
+          mkdir -p public/sitemaps
+          echo "Directory structure:"
+          ls -la public/
+          echo "Sitemaps directory:"
+          ls -la public/sitemaps/
+          
+          # Make sure there's no sitemap-index.xml before starting to prevent merging issues
+          if [ -f public/sitemap-index.xml ]; then
+            echo "Removing existing sitemap-index.xml to create a fresh one"
+            rm public/sitemap-index.xml
+          fi
+      
+      - name: Verify secrets
+        run: |
+          if [ -z "${{ secrets.SUPABASE_URL }}" ]; then
+            echo "SUPABASE_URL is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" ]; then
+            echo "SUPABASE_SERVICE_ROLE_KEY is not set"
+            exit 1
+          fi
+          echo "Secrets are configured correctly"
+      
+      - name: Generate conditions sitemaps
+        run: |
+          echo "Starting sitemap generation process..."
+          node scripts/generateConditionsSitemap.js
+          echo "Sitemap generation completed."
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      
+      - name: Validate sitemap-index.xml
+        run: |
+          echo "Validating sitemap-index.xml..."
+          # Check if the file exists
+          if [ ! -f public/sitemap-index.xml ]; then
+            echo "ERROR: sitemap-index.xml doesn't exist!"
+            exit 1
+          fi
+          
+          # Check if the file starts with XML declaration and only has one
+          XML_DECL=$(grep -c "<?xml" public/sitemap-index.xml)
+          if [ "$XML_DECL" -ne 1 ]; then
+            echo "ERROR: Found $XML_DECL XML declarations in sitemap-index.xml. There should be exactly 1!"
+            head -n 10 public/sitemap-index.xml
+            exit 1
+          fi
+          
+          # Check if the first line contains the XML declaration
+          FIRST_LINE=$(head -n 1 public/sitemap-index.xml)
+          if [[ "$FIRST_LINE" != *"<?xml"* ]]; then
+            echo "ERROR: First line doesn't contain XML declaration!"
+            echo "First line: $FIRST_LINE"
+            exit 1
+          fi
+          
+          # Check if there are any empty lines before the XML declaration
+          if grep -q "^$" public/sitemap-index.xml; then
+            echo "ERROR: Found empty lines in sitemap-index.xml!"
+            head -n 10 public/sitemap-index.xml
+            exit 1
+          fi
+          
+          echo "sitemap-index.xml is valid"
+      
+      - name: List generated files
+        run: |
+          echo "Generated sitemap files:"
+          ls -la public/sitemaps/
+          echo "Sitemap index content (first 10 lines):"
+          head -n 10 public/sitemap-index.xml
+      
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # Check if there are any changes to commit
+          if git status --porcelain | grep -q "sitemap"; then
+            git add public/sitemaps/ public/sitemap-index.xml
+            git commit -m "Update condition sitemaps [skip ci]"
+            git push
+            echo "Changes committed and pushed successfully."
+          else
+            echo "No sitemap changes to commit."
+          fi
