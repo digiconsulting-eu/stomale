@@ -1,4 +1,6 @@
 
+import { slugify } from "./slugify";
+
 /**
  * Generates a standardized URL path for a review
  * @param condition The medical condition
@@ -7,8 +9,8 @@
  * @returns Formatted URL path string
  */
 export const generateReviewPath = (condition: string, reviewId: number, title: string): string => {
-  const formattedCondition = condition.trim().toLowerCase();
-  const formattedTitle = title.trim().toLowerCase().replace(/\s+/g, '-');
+  const conditionSlug = slugify(condition);
+  const titleSlug = slugify(title);
   
-  return `/patologia/${formattedCondition}/esperienza/${reviewId}-${formattedTitle}`;
+  return `/patologia/${conditionSlug}/esperienza/${reviewId}-${titleSlug}`;
 };

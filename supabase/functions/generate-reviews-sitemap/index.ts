@@ -7,6 +7,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Funzione slugify robusta
+function slugify(text: string) {
+  if (!text) return '';
+  return text
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-')
+    .substring(0, 70);
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -55,20 +70,6 @@ serve(async (req) => {
 
     console.log(`Found ${reviews?.length || 0} reviews`)
 
-    // Function to create slug from title
-    function slugify(text: string) {
-      return text
-        .toString()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, '-')
-        .replace(/[^\w-]+/g, '')
-        .replace(/--+/g, '-')
-        .substring(0, 50); // Limit slug length
-    }
-
     // Generate XML
     let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -77,9 +78,9 @@ serve(async (req) => {
     if (reviews && reviews.length > 0) {
       reviews.forEach((review) => {
         if (review.PATOLOGIE && review.PATOLOGIE.Patologia) {
-          const condition = review.PATOLOGIE.Patologia.toLowerCase().replace(/\s+/g, '-');
-          const slugTitle = slugify(review.title);
-          const url = `https://stomale.info/patologia/${condition}/esperienza/${review.id}-${slugTitle}`;
+          const conditionSlug = slugify(review.PATOLOGIE.Patologia);
+          const titleSlug = slugify(review.title);
+          const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`;
           
           xmlContent += `  <url>
     <loc>${url}</loc>

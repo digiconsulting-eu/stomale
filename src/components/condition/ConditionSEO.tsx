@@ -1,8 +1,8 @@
-
 import { Helmet } from "react-helmet";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { getConditionMetaDescription } from "@/utils/pageTitle";
 import { Review } from "@/types/review";
+import { slugify } from "@/utils/slugify";
 
 interface ConditionSEOProps {
   condition: string;
@@ -65,7 +65,7 @@ export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
     metaDescription = metaDescription.substring(0, 157) + "...";
   }
   
-  const canonicalUrl = `https://stomale.info/patologia/${condition.toLowerCase()}`;
+  const canonicalUrl = `https://stomale.info/patologia/${slugify(condition)}`;
   const ogImageUrl = "https://stomale.info/og-image.svg"; // Explicitly provide og:image URL
   
   return (

@@ -1,6 +1,6 @@
-
 import { Review } from "@/types/review";
 import { getReviewMetaDescription } from "@/utils/pageTitle";
+import { slugify } from "./slugify";
 
 export const generateReviewMetaDescription = (review: Review): string => {
   let metaDescription = "";
@@ -35,6 +35,7 @@ export const generateReviewMetaDescription = (review: Review): string => {
 };
 
 export const generateCanonicalUrl = (condition: string, reviewId: number, title: string): string => {
-  const encodedTitle = encodeURIComponent(title.toLowerCase().replace(/\s+/g, '-'));
-  return `https://stomale.info/patologia/${condition.toLowerCase()}/esperienza/${reviewId}-${encodedTitle}`;
+  const conditionSlug = slugify(condition);
+  const titleSlug = slugify(title);
+  return `https://stomale.info/patologia/${conditionSlug}/esperienza/${reviewId}-${titleSlug}`;
 };

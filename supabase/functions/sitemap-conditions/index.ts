@@ -8,9 +8,19 @@ const corsHeaders = {
   'Content-Type': 'application/xml; charset=utf-8',
 };
 
-// Formatta il nome della patologia per l'URL - mantenendo gli spazi per la codifica %20
-function formatPathName(name: string) {
-  return name.toLowerCase();
+// Funzione slugify robusta
+function slugify(text: string) {
+  if (!text) return '';
+  return text
+    .toString()
+    .normalize('NFD') // Normalizza i caratteri accentati
+    .replace(/[\u0300-\u036f]/g, '') // Rimuove gli accenti
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-') // Sostituisce spazi con -
+    .replace(/[^\w-]+/g, '') // Rimuove caratteri non validi
+    .replace(/--+/g, '-') // Sostituisce multipli - con uno solo
+    .substring(0, 70); // Limita la lunghezza per sicurezza
 }
 
 Deno.serve(async (req) => {
@@ -72,11 +82,10 @@ Deno.serve(async (req) => {
 
     if (conditions && conditions.length > 0) {
       for (const condition of conditions) {
-        // Utilizziamo formatPathName per generare l'URL corretto
-        const conditionPath = formatPathName(condition.Patologia);
+        const conditionSlug = slugify(condition.Patologia);
         
         xml += '  <url>\n';
-        xml += `    <loc>https://stomale.info/patologia/${conditionPath}</loc>\n`;
+        xml += `    <loc>https://stomale.info/patologia/${conditionSlug}</loc>\n`;
         xml += '    <changefreq>weekly</changefreq>\n';
         xml += '    <priority>0.8</priority>\n';
         xml += '  </url>\n';
