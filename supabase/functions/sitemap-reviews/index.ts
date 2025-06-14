@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     const page = parseInt(pageParam, 10)
     
     // Validate page parameter
-    if (isNaN(page) || page < 1 || page > 10) {
+    if (isNaN(page) || page < 1) {
       return new Response('Invalid page parameter', { status: 400, headers: corsHeaders })
     }
     

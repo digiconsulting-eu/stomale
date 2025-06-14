@@ -35,11 +35,13 @@ Deno.serve(async (req) => {
     }
     
     const totalReviews = count || 0
-    console.log(`Total review URLs: ${totalReviews}`)
+    const reviewsPerPage = 100; // Must match sitemap-reviews function
+    const totalReviewPages = Math.ceil(totalReviews / reviewsPerPage);
+    
+    console.log(`Total review URLs: ${totalReviews}, Total pages: ${totalReviewPages}`)
     
     // Define the condition groups and specific review pages (now only 1-9)
     const conditionGroups = ['a', 'b', 'c', 'd', 'e-l', 'm-r', 's-z']
-    const reviewPages = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     const today = new Date().toISOString().split('T')[0]
     
     // Build the XML string without any leading whitespace
@@ -53,9 +55,9 @@ Deno.serve(async (req) => {
       xml += `  <sitemap>\n    <loc>https://stomale.info/sitemaps/sitemap-conditions-${group}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
     }
     
-    // Add review sitemap entries - now only 1-9
-    for (const page of reviewPages) {
-      xml += `  <sitemap>\n    <loc>https://stomale.info/sitemap-reviews-${page}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
+    // Add review sitemap entries dynamically
+    for (let i = 1; i <= totalReviewPages; i++) {
+      xml += `  <sitemap>\n    <loc>https://stomale.info/sitemap-reviews-${i}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
     }
     
     // Close the sitemapindex tag
