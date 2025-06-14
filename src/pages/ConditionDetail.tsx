@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useConditionData } from "@/hooks/useConditionData";
@@ -85,6 +84,7 @@ export default function ConditionDetail() {
 
   const stats = calculateStats(reviews);
   const ratingValue = calculateRating(stats);
+  const reviewsCount = reviews?.length || 0;
 
   const handleNavigate = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
@@ -107,7 +107,7 @@ export default function ConditionDetail() {
 
   return (
     <div className="container py-8">
-      <ConditionSEO condition={condition} reviews={reviews} />
+      <ConditionSEO condition={condition} reviews={reviews} reviewsCount={reviewsCount} />
       
       <ConditionSchema 
         condition={condition} 
@@ -135,7 +135,7 @@ export default function ConditionDetail() {
           <ConditionContent 
             condition={condition} 
             isAdmin={isAdmin}
-            reviewsCount={reviews?.length || 0}
+            reviewsCount={reviewsCount}
             reviews={reviews}
             isLoading={isLoading}
             onRetry={handleRetryLoad}

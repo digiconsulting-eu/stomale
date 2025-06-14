@@ -4,29 +4,27 @@ import { slugify } from "./slugify";
 
 export const generateReviewMetaDescription = (review: Review): string => {
   let metaDescription = "";
+  const condition = review.PATOLOGIE.Patologia;
   
-  // Try symptoms first as they're usually more descriptive
-  if (review.symptoms && review.symptoms.length > 50) {
-    // Use symptoms and truncate to a reasonable length
-    metaDescription = `${review.PATOLOGIE.Patologia.toUpperCase()}: ${review.title}. ${review.symptoms.substring(0, 130).trim()}... Leggi l'esperienza completa su StoMale.info.`;
-  } 
-  // Fall back to experience if symptoms aren't available or too short
-  else if (review.experience && review.experience.length > 60) {
-    // Use experience and truncate to a reasonable length
-    metaDescription = `${review.PATOLOGIE.Patologia.toUpperCase()}: ${review.title}. ${review.experience.substring(0, 130).trim()}... Leggi l'esperienza completa su StoMale.info.`;
-  } 
-  // If no good content is available, use a combined approach
-  else if (review.symptoms && review.experience) {
-    // Combine both for a more complete picture
-    const combinedText = `${review.symptoms.substring(0, 60).trim()} - ${review.experience.substring(0, 60).trim()}`;
-    metaDescription = `${review.PATOLOGIE.Patologia.toUpperCase()}: ${review.title}. ${combinedText}... Leggi l'esperienza completa su StoMale.info.`;
-  } 
-  // Fallback to generic description if we still don't have something useful
-  else {
-    metaDescription = getReviewMetaDescription(review.PATOLOGIE.Patologia, review.title);
+  // Create a compelling snippet from the user's own words.
+  // Prioritize the experience text as it's often more narrative.
+  let contentSnippet = "";
+  if (review.experience && review.experience.length > 60) {
+    contentSnippet = review.experience;
+  } else if (review.symptoms && review.symptoms.length > 50) {
+    contentSnippet = review.symptoms;
   }
 
-  // Ensure the meta description is truncated to a reasonable length for SEO
+  if (contentSnippet) {
+    // Craft a descriptive sentence
+    const snippet = contentSnippet.substring(0, 90).trim().replace(/\s+/g, ' ');
+    metaDescription = `Esperienza con ${condition}: "${review.title}". Un paziente descrive: "${snippet}...". Leggi la testimonianza completa su StoMale.info.`;
+  } else {
+    // Fallback to the generic but well-written description if content is too short
+    metaDescription = getReviewMetaDescription(condition, review.title);
+  }
+
+  // Ensure the meta description is truncated to the optimal length for SEO
   if (metaDescription.length > 160) {
     metaDescription = metaDescription.substring(0, 157) + "...";
   }

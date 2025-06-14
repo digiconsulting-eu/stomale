@@ -1,3 +1,4 @@
+
 import { Helmet } from "react-helmet";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { getConditionMetaDescription } from "@/utils/pageTitle";
@@ -6,58 +7,33 @@ import { slugify } from "@/utils/slugify";
 
 interface ConditionSEOProps {
   condition: string;
-  reviews?: Review[];  // Optional reviews array to extract actual content for meta description
+  reviews?: Review[];
+  reviewsCount: number;
 }
 
-export const ConditionSEO = ({ condition, reviews }: ConditionSEOProps) => {
-  const conditionTitle = capitalizeFirstLetter(condition);
+export const ConditionSEO = ({ condition, reviews, reviewsCount }: ConditionSEOProps) => {
   const formattedCondition = condition.toUpperCase();
-  const pageTitle = `${formattedCondition} | Recensioni ed Esperienze | StoMale.info`;
+  // Dynamic page title based on whether reviews exist
+  const pageTitle = `${formattedCondition} | ${reviewsCount > 0 ? `${reviewsCount} Recensioni e Storie` : 'Informazioni e Esperienze'} | StoMale.info`;
   
-  // Generate a more specific meta description if reviews are available
   let metaDescription = "";
   
   if (reviews && reviews.length > 0) {
-    console.log(`Generating meta description for condition: ${condition} with ${reviews.length} reviews`);
-    
-    // Try to create a meta description from the reviews' content
-    // Check multiple reviews to find good content
-    for (let i = 0; i < Math.min(5, reviews.length); i++) {
-      const review = reviews[i];
-      
-      // Use symptoms from the review as they're often more descriptive
-      if (review.symptoms && review.symptoms.length > 50) {
-        console.log(`Using symptoms from review #${i+1}: ${review.symptoms.substring(0, 30)}...`);
-        metaDescription = `${formattedCondition}: ${review.symptoms.substring(0, 150).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
-        break;
-      } 
-      // Fall back to experience if symptoms aren't available or too short
-      else if (review.experience && review.experience.length > 60) {
-        console.log(`Using experience from review #${i+1}: ${review.experience.substring(0, 30)}...`);
-        metaDescription = `${formattedCondition}: ${review.experience.substring(0, 150).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
-        break;
-      }
-    }
-    
-    // If we still don't have a description and there are more reviews, try to combine a couple
-    if (!metaDescription && reviews.length >= 2) {
-      console.log('Attempting to combine content from multiple reviews');
-      
-      const experienceTexts = reviews.slice(0, 3)
-        .filter(r => r.experience && r.experience.length > 30)
-        .map(r => r.experience.trim());
-      
-      if (experienceTexts.length > 0) {
-        metaDescription = `${formattedCondition}: ${experienceTexts[0].substring(0, 120).trim()}... Leggi esperienze e recensioni su StoMale.info.`;
-        console.log(`Created combined meta description: ${metaDescription.substring(0, 50)}...`);
-      }
+    // Create a summary from the latest reviews to make the description unique and compelling.
+    const reviewSnippets = reviews
+      .map(r => r.experience || r.symptoms || '')
+      .filter(text => text.length > 20)
+      .slice(0, 2); // Take first two good snippets
+
+    if (reviewSnippets.length > 0) {
+      const snippetText = reviewSnippets.map(s => `"${s.substring(0, 60).trim().replace(/\s+/g, ' ')}..."`).join(' ');
+      metaDescription = `Leggi ${reviewsCount} esperienze di pazienti con ${formattedCondition}. ${snippetText} Scopri sintomi, cure e storie reali su StoMale.info.`;
     }
   }
   
-  // Fallback to generic description if no content could be extracted
+  // Fallback to generic description if no good content could be extracted
   if (!metaDescription) {
     metaDescription = getConditionMetaDescription(condition);
-    console.log(`Using fallback generic description: ${metaDescription.substring(0, 50)}...`);
   }
   
   // Ensure the meta description is truncated to a reasonable length for SEO

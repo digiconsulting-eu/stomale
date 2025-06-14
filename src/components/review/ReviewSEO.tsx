@@ -2,6 +2,7 @@
 import { Helmet } from "react-helmet";
 import { Review } from "@/types/review";
 import { getReviewMetaDescription } from "@/utils/pageTitle";
+import { slugify } from "@/utils/slugify";
 
 interface ReviewSEOProps {
   review: Review;
@@ -49,7 +50,7 @@ export const ReviewSEO = ({ review, metaDescription, canonicalUrl, pageTitle }: 
         "@type": "ListItem",
         "position": 2,
         "name": review.PATOLOGIE?.Patologia?.toUpperCase() || 'Patologia',
-        "item": `https://stomale.info/patologia/${review.condition.toLowerCase()}`
+        "item": `https://stomale.info/patologia/${slugify(review.PATOLOGIE?.Patologia || '')}`
       },
       {
         "@type": "ListItem",
