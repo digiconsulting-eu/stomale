@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
     
     // Add review sitemap entries dynamically
     for (let i = 1; i <= totalReviewPages; i++) {
-      xml += `  <sitemap>\n    <loc>https://stomale.info/sitemap-reviews-${i}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
+      xml += `  <sitemap>\n    <loc>https://stomale.info/sitemaps/sitemap-reviews-${i}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>\n`;
     }
     
     // Close the sitemapindex tag
