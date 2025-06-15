@@ -226,6 +226,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/morbo%20di%20hashimoto</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/morbo%20di%20hashimoto%20(tiroidite)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -272,6 +277,11 @@
   </url>
   <url>
     <loc>https://stomale.info/patologia/neurite%20ottica</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/neurite%20vestibolare</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -437,6 +447,11 @@
   </url>
   <url>
     <loc>https://stomale.info/patologia/otite%20bollosa</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/otite%20bolosa</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -616,6 +616,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://stomale.info/patologia/infezione%20da%20cmv</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://stomale.info/patologia/infezione%20da%20cytomegalovirus%20(cmv)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -697,6 +702,11 @@
   </url>
   <url>
     <loc>https://stomale.info/patologia/intolleranze%20alimentari</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/intossicazione%20da%20monossido</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -887,6 +897,11 @@
   </url>
   <url>
     <loc>https://stomale.info/patologia/lupus%20erimatoso%20sistemico</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://stomale.info/patologia/lupus%20eritematoso%20sistemico</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
