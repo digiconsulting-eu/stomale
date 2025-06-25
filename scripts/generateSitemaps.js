@@ -18,9 +18,9 @@ const generateSitemaps = async () => {
     
     // Fetch delle recensioni
     const { data: reviews, error } = await supabase
-      .from('RECENSIONI')
+      .from('reviews')
       .select('id, username, condition_id, title, created_at, PATOLOGIE(id, Patologia)')
-      .filter('is_published', 'eq', true)
+      .filter('status', 'eq', 'approved')
       .order('id');
     
     if (error) {
@@ -28,31 +28,78 @@ const generateSitemaps = async () => {
     }
     
     if (!reviews || !reviews.length) {
-      console.log('Nessun URL di recensione trovato');
+      console.log('Nessuna recensione trovata');
       return;
     }
     
-    // Costruisci gli URL delle recensioni
+    console.log(`Trovate ${reviews.length} recensioni`);
+    
+    // Funzione per slugificare i titoli (manteniamo questa per i titoli)
+    const slugify = (text) => {
+      if (!text) return '';
+      return text
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
+        .replace(/--+/g, '-')
+        .substring(0, 70);
+    };
+    
+    // Costruisci gli URL delle recensioni usando il nuovo formato
     const reviewUrls = reviews.map(review => {
       if (!review.PATOLOGIE) return null;
       
       const condition = review.PATOLOGIE.Patologia;
-      // Usa encodeURIComponent per codificare gli spazi come %20
-      const cleanedCondition = encodeURIComponent(condition.toLowerCase().trim());
+      // Usa encodeURIComponent per codificare gli spazi e caratteri speciali
+      const encodedCondition = encodeURIComponent(condition.toLowerCase().trim());
       
       const title = review.title || '';
-      const cleanedTitle = title.toLowerCase()
-                               .trim()
-                               .replace(/[^\w\s-]/g, '')
-                               .replace(/\s+/g, '-')
-                               .replace(/--+/g, '-');
+      const titleSlug = slugify(title);
       
       return {
         id: review.id,
-        url: `https://stomale.info/patologia/${cleanedCondition}/esperienza/${review.id}-${cleanedTitle}`,
-        lastmod: review.created_at
+        url: `/patologia/${encodedCondition}/esperienza/${review.id}-${titleSlug}`,
+        lastmod: review.created_at,
+        condition: condition,
+        title: title
       };
     }).filter(Boolean);
+    
+    console.log(`Generati ${reviewUrls.length} URL di recensioni`);
+    
+    // Prima, pulisci la tabella review_urls esistente
+    console.log('Pulendo la tabella review_urls...');
+    const { error: deleteError } = await supabase
+      .from('review_urls')
+      .delete()
+      .neq('id', 0); // Elimina tutti i record
+    
+    if (deleteError) {
+      console.error('Errore nella pulizia della tabella:', deleteError);
+      // Continua comunque
+    }
+    
+    // Inserisci i nuovi URL nella tabella review_urls
+    console.log('Inserendo nuovi URL nella tabella review_urls...');
+    const { error: insertError } = await supabase
+      .from('review_urls')
+      .insert(reviewUrls.map(item => ({
+        review_id: item.id,
+        url: item.url,
+        condition: item.condition,
+        title: item.title
+      })));
+    
+    if (insertError) {
+      console.error('Errore nell\'inserimento degli URL:', insertError);
+      throw insertError;
+    }
+    
+    console.log('URL inseriti con successo nella tabella review_urls');
     
     // Dividi in chunks da 5 URL per sitemap
     const chunks = [];
@@ -69,7 +116,7 @@ const generateSitemaps = async () => {
       const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${chunk.map(item => `  <url>
-    <loc>${item.url}</loc>
+    <loc>https://stomale.info${item.url}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`).join('\n')}
