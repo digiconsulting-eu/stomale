@@ -48,7 +48,14 @@ export const ReviewCard = ({
   const safeUsername = username || 'Anonimo';
   
   // Generate the review path using our utility function
-  const reviewPath = generateReviewPath(safeCondition.toLowerCase(), id, title);
+  const reviewPath = generateReviewPath(safeCondition, id, title);
+  
+  console.log('ReviewCard generating path:', {
+    condition: safeCondition,
+    id,
+    title,
+    generatedPath: reviewPath
+  });
 
   // Create structured data for the review card
   const reviewSchema = {
@@ -95,7 +102,7 @@ export const ReviewCard = ({
             <span>{safeUsername}</span>
           </p>
           <Link 
-            to={`/patologia/${safeCondition.toLowerCase()}`}
+            to={`/patologia/${encodeURIComponent(safeCondition.toLowerCase())}`}
             className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
           >
             <span>{safeCondition.toUpperCase()}</span>

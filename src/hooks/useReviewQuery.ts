@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizeConditionName } from "@/utils/urlUtils";
 
 const extractReviewId = (slug: string) => {
   const parts = slug.split('-');
@@ -12,7 +13,7 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
     queryKey: ['review', slug, condition],
     queryFn: async () => {
       console.log('Fetching review with slug:', slug);
-      console.log('Condition:', condition);
+      console.log('Condition from URL:', condition);
       
       if (!slug || !condition) {
         console.log('Missing slug or condition');
@@ -60,22 +61,23 @@ export const useReviewQuery = (slug: string | undefined, condition: string | und
       }
       
       if (!data) {
-        console.log('No review found with these parameters');
+        console.log('No review found with ID:', reviewId);
         return null;
       }
 
-      // Verify that the condition matches - use case-insensitive comparison 
-      // and handle both encoded and decoded versions
-      const decodedCondition = decodeURIComponent(condition).toLowerCase();
-      const reviewCondition = data.PATOLOGIE?.Patologia.toLowerCase();
+      // Normalize both condition names for comparison
+      const urlCondition = normalizeConditionName(condition);
+      const reviewCondition = normalizeConditionName(data.PATOLOGIE?.Patologia || '');
       
-      console.log('Comparing conditions:', {
-        decodedCondition,
-        reviewCondition
+      console.log('Comparing normalized conditions:', {
+        urlCondition,
+        reviewCondition,
+        originalUrl: condition,
+        originalReview: data.PATOLOGIE?.Patologia
       });
       
-      if (reviewCondition !== decodedCondition) {
-        console.log('Condition mismatch');
+      if (reviewCondition !== urlCondition) {
+        console.log('Condition mismatch after normalization');
         return null;
       }
 

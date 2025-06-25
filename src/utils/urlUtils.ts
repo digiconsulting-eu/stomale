@@ -9,8 +9,19 @@ import { slugify } from "./slugify";
  * @returns Formatted URL path string
  */
 export const generateReviewPath = (condition: string, reviewId: number, title: string): string => {
-  const conditionSlug = slugify(condition);
+  // Use URL encoding for spaces instead of slugifying to match the routing pattern
+  const conditionParam = encodeURIComponent(condition.toLowerCase());
   const titleSlug = slugify(title);
   
-  return `/patologia/${conditionSlug}/esperienza/${reviewId}-${titleSlug}`;
+  return `/patologia/${conditionParam}/esperienza/${reviewId}-${titleSlug}`;
+};
+
+/**
+ * Normalize condition name for URL matching
+ * @param condition The condition name from URL or database
+ * @returns Normalized condition name
+ */
+export const normalizeConditionName = (condition: string): string => {
+  // Decode URL encoding and normalize to lowercase
+  return decodeURIComponent(condition).toLowerCase().trim();
 };
