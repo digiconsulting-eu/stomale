@@ -25,6 +25,30 @@ export interface ReviewRow {
   social_discomfort?: number | string;
 }
 
+// Funzione per pulire e convertire valori numerici
+const cleanNumericValue = (value: any): number => {
+  if (value === null || value === undefined || value === '' || value === ' ' || value === '-') {
+    return Math.floor(Math.random() * 5) + 1; // Valore casuale tra 1 e 5
+  }
+  
+  const numValue = parseInt(value.toString().trim());
+  if (isNaN(numValue)) {
+    return Math.floor(Math.random() * 5) + 1; // Valore casuale se non è un numero valido
+  }
+  
+  return numValue;
+};
+
+// Funzione per pulire valori booleani
+const cleanBooleanValue = (value: any): boolean => {
+  if (value === null || value === undefined || value === '' || value === ' ' || value === '-') {
+    return Math.random() > 0.5; // Valore casuale
+  }
+  
+  const strValue = value.toString().toLowerCase().trim();
+  return strValue === 'true' || strValue === 'yes' || strValue === 'si' || strValue === '1';
+};
+
 // Funzione per generare una data casuale tra 1/1/2020 e 10/6/2025
 const generateRandomDate = (): string => {
   const start = new Date('2020-01-01').getTime();
@@ -260,7 +284,7 @@ export const validateRow = async (row: any): Promise<any> => {
     // Procediamo comunque con l'username
   }
   
-  // Prepara i dati della recensione con data casuale
+  // Prepara i dati della recensione con data casuale e valori puliti
   const reviewData = {
     title: title.toString().trim(),
     symptoms: symptoms.toString().trim(),
@@ -269,13 +293,13 @@ export const validateRow = async (row: any): Promise<any> => {
     username: username,
     created_at: generateRandomDate(),
     status: 'approved',
-    // Campi opzionali con valori di default se non specificati
-    diagnosis_difficulty: row['Difficoltà Diagnosi'] || row['Diagnosis Difficulty'] || row['diagnosis_difficulty'] || Math.floor(Math.random() * 5) + 1,
-    symptoms_severity: row['Gravità Sintomi'] || row['Symptoms Severity'] || row['symptoms_severity'] || Math.floor(Math.random() * 5) + 1,
-    has_medication: row['Ha Farmaco'] !== undefined ? Boolean(row['Ha Farmaco']) : (row['has_medication'] !== undefined ? Boolean(row['has_medication']) : Math.random() > 0.5),
-    medication_effectiveness: row['Efficacia Farmaco'] || row['Medication Effectiveness'] || row['medication_effectiveness'] || Math.floor(Math.random() * 5) + 1,
-    healing_possibility: row['Possibilità Guarigione'] || row['Healing Possibility'] || row['healing_possibility'] || Math.floor(Math.random() * 5) + 1,
-    social_discomfort: row['Disagio Sociale'] || row['Social Discomfort'] || row['social_discomfort'] || Math.floor(Math.random() * 5) + 1
+    // Campi opzionali con valori puliti
+    diagnosis_difficulty: cleanNumericValue(row['Difficoltà Diagnosi'] || row['Diagnosis Difficulty'] || row['diagnosis_difficulty']),
+    symptoms_severity: cleanNumericValue(row['Gravità Sintomi'] || row['Symptoms Severity'] || row['symptoms_severity']),
+    has_medication: cleanBooleanValue(row['Ha Farmaco'] || row['has_medication']),
+    medication_effectiveness: cleanNumericValue(row['Efficacia Farmaco'] || row['Medication Effectiveness'] || row['medication_effectiveness']),
+    healing_possibility: cleanNumericValue(row['Possibilità Guarigione'] || row['Healing Possibility'] || row['healing_possibility']),
+    social_discomfort: cleanNumericValue(row['Disagio Sociale'] || row['Social Discomfort'] || row['social_discomfort'])
   };
   
   console.log('Final validated review data:', reviewData);
