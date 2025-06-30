@@ -16,11 +16,12 @@ const generateSitemaps = async () => {
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // Fetch delle recensioni
+    // Fetch delle recensioni usando la nuova colonna patologia
     const { data: reviews, error } = await supabase
       .from('reviews')
-      .select('id, username, condition_id, title, created_at, PATOLOGIE(id, Patologia)')
+      .select('id, username, title, created_at, patologia')
       .filter('status', 'eq', 'approved')
+      .not('patologia', 'is', null)
       .order('id');
     
     if (error) {
@@ -51,9 +52,7 @@ const generateSitemaps = async () => {
     
     // Costruisci gli URL delle recensioni usando il nuovo formato
     const reviewUrls = reviews.map(review => {
-      if (!review.PATOLOGIE) return null;
-      
-      const condition = review.PATOLOGIE.Patologia;
+      const condition = review.patologia;
       // Usa encodeURIComponent per codificare gli spazi e caratteri speciali
       const encodedCondition = encodeURIComponent(condition.toLowerCase().trim());
       
@@ -67,7 +66,7 @@ const generateSitemaps = async () => {
         condition: condition,
         title: title
       };
-    }).filter(Boolean);
+    });
     
     console.log(`Generati ${reviewUrls.length} URL di recensioni`);
     

@@ -281,6 +281,7 @@ export type Database = {
           import_timestamp: string | null
           likes_count: number | null
           medication_effectiveness: number | null
+          patologia: string | null
           social_discomfort: number | null
           status: string | null
           symptoms: string
@@ -302,6 +303,7 @@ export type Database = {
           import_timestamp?: string | null
           likes_count?: number | null
           medication_effectiveness?: number | null
+          patologia?: string | null
           social_discomfort?: number | null
           status?: string | null
           symptoms: string
@@ -323,6 +325,7 @@ export type Database = {
           import_timestamp?: string | null
           likes_count?: number | null
           medication_effectiveness?: number | null
+          patologia?: string | null
           social_discomfort?: number | null
           status?: string | null
           symptoms?: string

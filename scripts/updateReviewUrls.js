@@ -15,11 +15,12 @@ const updateReviewUrls = async () => {
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // Fetch delle recensioni approvate
+    // Fetch delle recensioni approvate usando la nuova colonna patologia
     const { data: reviews, error } = await supabase
       .from('reviews')
-      .select('id, title, PATOLOGIE(id, Patologia)')
+      .select('id, title, patologia')
       .filter('status', 'eq', 'approved')
+      .not('patologia', 'is', null)
       .order('id');
     
     if (error) {
@@ -50,12 +51,7 @@ const updateReviewUrls = async () => {
     
     // Costruisci gli URL delle recensioni usando il nuovo formato
     const reviewUrls = reviews.map(review => {
-      if (!review.PATOLOGIE) {
-        console.warn(`Recensione ${review.id} senza patologia associata`);
-        return null;
-      }
-      
-      const condition = review.PATOLOGIE.Patologia;
+      const condition = review.patologia;
       // Usa encodeURIComponent per codificare gli spazi e caratteri speciali
       const encodedCondition = encodeURIComponent(condition.toLowerCase().trim());
       
@@ -68,7 +64,7 @@ const updateReviewUrls = async () => {
         condition: condition,
         title: title
       };
-    }).filter(Boolean);
+    });
     
     console.log(`Generati ${reviewUrls.length} URL di recensioni`);
     
