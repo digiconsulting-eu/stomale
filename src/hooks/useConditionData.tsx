@@ -11,16 +11,20 @@ export const useConditionData = () => {
   
   console.log("useConditionData hook called with condition:", condition);
 
+  // Convert URL condition (with hyphens) to database condition (with spaces)
+  const normalizedCondition = condition ? condition.replace(/-/g, ' ').toUpperCase() : '';
+  console.log("Normalized condition for DB query:", normalizedCondition);
+
   // Fetch condition data
   const { data: patologiaData, isLoading: patologiaLoading } = useQuery({
-    queryKey: ["patologia", condition, retryCount],
+    queryKey: ["patologia", normalizedCondition, retryCount],
     queryFn: async () => {
-      if (!condition) {
+      if (!normalizedCondition) {
         console.error("No condition provided to useConditionData");
         return null;
       }
       
-      console.log("Fetching patologia data for:", condition);
+      console.log("Fetching patologia data for:", normalizedCondition);
       
       // Refresh the session first
       try {
@@ -33,7 +37,7 @@ export const useConditionData = () => {
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('id, Patologia')
-        .eq('Patologia', condition.toUpperCase())
+        .eq('Patologia', normalizedCondition)
         .single();
       
       if (error) {
@@ -44,7 +48,7 @@ export const useConditionData = () => {
       console.log("Patologia data fetched:", data);
       return data;
     },
-    enabled: !!condition,
+    enabled: !!normalizedCondition,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
@@ -114,7 +118,7 @@ export const useConditionData = () => {
     return {
       id: review.id,
       title: review.title,
-      condition: condition || '',
+      condition: condition || '', // Use original condition from URL for display
       symptoms: review.symptoms || '',
       experience: review.experience,
       diagnosis_difficulty: review.diagnosis_difficulty,

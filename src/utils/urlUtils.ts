@@ -9,8 +9,8 @@ import { slugify } from "./slugify";
  * @returns Formatted URL path string
  */
 export const generateReviewPath = (condition: string, reviewId: number, title: string): string => {
-  // Use URL encoding for spaces instead of slugifying to match the routing pattern
-  const conditionParam = encodeURIComponent(condition.toLowerCase());
+  // Convert spaces to hyphens for URL consistency
+  const conditionParam = condition.toLowerCase().replace(/\s+/g, '-');
   const titleSlug = slugify(title);
   
   return `/patologia/${conditionParam}/esperienza/${reviewId}-${titleSlug}`;
@@ -22,6 +22,24 @@ export const generateReviewPath = (condition: string, reviewId: number, title: s
  * @returns Normalized condition name
  */
 export const normalizeConditionName = (condition: string): string => {
-  // Decode URL encoding and normalize to lowercase
-  return decodeURIComponent(condition).toLowerCase().trim();
+  // Convert hyphens to spaces and normalize to lowercase
+  return condition.replace(/-/g, ' ').toLowerCase().trim();
+};
+
+/**
+ * Convert condition name from URL format to database format
+ * @param urlCondition The condition name from URL (with hyphens)
+ * @returns Database condition name (with spaces, uppercase)
+ */
+export const urlConditionToDbCondition = (urlCondition: string): string => {
+  return urlCondition.replace(/-/g, ' ').toUpperCase();
+};
+
+/**
+ * Convert condition name from database format to URL format
+ * @param dbCondition The condition name from database (with spaces)
+ * @returns URL condition name (with hyphens, lowercase)
+ */
+export const dbConditionToUrlCondition = (dbCondition: string): string => {
+  return dbCondition.toLowerCase().replace(/\s+/g, '-');
 };
