@@ -6,6 +6,7 @@ import { BreadcrumbNav } from "@/components/home/BreadcrumbNav";
 import { HomeSEO } from "@/components/home/HomeSEO";
 import { HeroSection } from "@/components/home/HeroSection";
 import { ReviewsSection } from "@/components/home/ReviewsSection";
+import { CallToActionSection } from "@/components/home/CallToActionSection";
 import { FaqSection } from "@/components/home/FaqSection";
 import { HomeErrorDisplay } from "@/components/home/HomeErrorDisplay";
 
@@ -42,6 +43,7 @@ export default function Index() {
         <BreadcrumbNav />
         <HeroSection />
         <ReviewsSection latestReviews={latestReviews} isLoading={isLoading} />
+        <CallToActionSection />
         <FaqSection />
       </div>
     </>
