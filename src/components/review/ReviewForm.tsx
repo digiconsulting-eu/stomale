@@ -49,6 +49,9 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
     },
   });
 
+  // Watch condition value to re-run validation on selection
+  const conditionValue = form.watch("condition");
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -156,7 +159,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
     if (form.getValues("condition")) {
       validateCondition();
     }
-  }, [form, defaultCondition]);
+  }, [form, defaultCondition, conditionValue]);
 
   const onSubmit = async (data: FormValues) => {
     if (isSubmitting) return;
