@@ -76,10 +76,10 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           await resetSupabaseClient();
         }
         
-        // Check if the condition exists in the database
+        // Check if the condition exists in the database with exact match
         const { data, error } = await supabase
           .from('PATOLOGIE')
-          .select('id')
+          .select('id, Patologia')
           .ilike('Patologia', currentCondition)
           .maybeSingle();
         
@@ -88,9 +88,26 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           toast.error("Errore nella validazione della patologia. Riprova.");
           setConditionValidated(false);
         } else if (!data) {
-          console.warn('Condition not found:', currentCondition);
+          console.warn('Exact condition not found:', currentCondition);
           
-          // Try a more flexible search (case insensitive)
+          // Try to find by normalizing spaces and case
+          const normalizedCondition = currentCondition.trim().toUpperCase();
+          const { data: normalizedData, error: normalizedError } = await supabase
+            .from('PATOLOGIE')
+            .select('id, Patologia')
+            .ilike('Patologia', normalizedCondition)
+            .maybeSingle();
+          
+          if (!normalizedError && normalizedData) {
+            console.log('Found match with normalized search:', normalizedData);
+            // Update form value to match exact DB format
+            form.setValue('condition', normalizedData.Patologia);
+            form.clearErrors('condition');
+            setConditionValidated(true);
+            return;
+          }
+          
+          // Try partial match as last resort
           const { data: flexibleData, error: flexibleError } = await supabase
             .from('PATOLOGIE')
             .select('id, Patologia')
@@ -100,13 +117,15 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           if (!flexibleError && flexibleData && flexibleData.length > 0) {
             console.log('Found similar conditions:', flexibleData);
             
-            // Check if there's a close enough match
+            // Check if there's a close enough match (case-insensitive)
             const exactMatch = flexibleData.find(
-              c => c.Patologia.toLowerCase() === currentCondition.toLowerCase()
+              c => c.Patologia.toLowerCase().trim() === currentCondition.toLowerCase().trim()
             );
             
             if (exactMatch) {
               console.log('Found exact match (case-insensitive):', exactMatch);
+              // Update form value to match exact DB format
+              form.setValue('condition', exactMatch.Patologia);
               form.clearErrors('condition');
               setConditionValidated(true);
               return;
@@ -120,6 +139,8 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
           setConditionValidated(false);
         } else {
           console.log('Condition validated successfully:', data);
+          // Update form value to match exact DB format
+          form.setValue('condition', data.Patologia);
           form.clearErrors('condition');
           setConditionValidated(true);
         }

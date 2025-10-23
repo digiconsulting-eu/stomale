@@ -166,19 +166,31 @@ export const ConditionSelect = ({ form }: ConditionSelectProps) => {
     }
   }, [form]);
 
-  // Reset custom value state when dropdown closes
+  // Handle auto-selection when there's an exact match
   useEffect(() => {
-    if (!open) {
-      setIsCustomValue(false);
+    if (!open && searchQuery) {
+      const normalizedSearch = normalizeText(searchQuery);
       
-      // If we have a selected value but it's not validated, clear it
-      if (selectedValue && isCustomValue) {
+      // Check if there's an exact match in the filtered conditions
+      const exactMatch = filteredConditions.find(
+        condition => normalizeText(condition.Patologia) === normalizedSearch
+      );
+      
+      if (exactMatch) {
+        // Auto-select the exact match
+        console.log('Auto-selecting exact match:', exactMatch.Patologia);
+        form.setValue("condition", exactMatch.Patologia, { shouldValidate: true });
+        setSelectedValue(exactMatch.Patologia);
+        setIsCustomValue(false);
+        setSearchQuery(""); // Clear search query
+      } else if (isCustomValue) {
+        // If we have a selected value but it's not validated, clear it
         console.log('Clearing invalid selected value:', selectedValue);
         form.setValue("condition", "", { shouldValidate: true });
         setSelectedValue("");
       }
     }
-  }, [open, form, isCustomValue, selectedValue]);
+  }, [open, searchQuery, filteredConditions, form, isCustomValue, selectedValue]);
 
   return (
     <FormField
