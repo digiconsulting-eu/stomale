@@ -1,0 +1,29 @@
+# robots.txt per StoMale.info
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://stomale.info/sitemap.xml
+Sitemap: https://stomale.info/sitemap-index.xml
+
+# Disallow admin and private pages
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /login
+Disallow: /register
+Disallow: /gestione-recensioni
+Disallow: /gestione-utenti
+
+# Allow all static assets
+Allow: /assets/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.gif
+Allow: /*.svg
+Allow: /*.webp
+
+# Crawl delay (optional - set to 1 second to be polite)
+Crawl-delay: 1

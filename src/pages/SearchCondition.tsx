@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle, setMetaDescription, getSearchMetaDescription } from "@/utils/pageTitle";
 import { useConditions } from "@/hooks/useConditions";
 import { SearchInput } from "@/components/search/SearchInput";
+import { SearchConditionSEO } from "@/components/search/SearchConditionSEO";
 import { LetterFilter } from "@/components/search/LetterFilter";
 import { ConditionsGrid } from "@/components/search/ConditionsGrid";
 import { 
@@ -59,8 +60,10 @@ export default function SearchCondition() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Cerca Patologia</h1>
+    <>
+      <SearchConditionSEO />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Cerca Patologia</h1>
       
       <SearchInput 
         value={searchTerm}
@@ -127,6 +130,7 @@ export default function SearchCondition() {
           </Pagination>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };

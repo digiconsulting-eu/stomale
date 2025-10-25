@@ -78,8 +78,13 @@ export const ReviewSEO = ({ review, metaDescription, canonicalUrl, pageTitle }: 
 
   return (
     <Helmet>
+      <html lang="it" />
       <title>{pageTitle}</title>
       <meta name="description" content={metaDescription} />
+      <meta name="robots" content="index, follow, max-image-preview:large" />
+      <meta name="author" content={review.username || "Utente Anonimo"} />
+      <meta name="article:published_time" content={new Date(review.created_at).toISOString()} />
+      <meta name="article:author" content={review.username || "Utente Anonimo"} />
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content="article" />
@@ -90,6 +95,8 @@ export const ReviewSEO = ({ review, metaDescription, canonicalUrl, pageTitle }: 
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:site_name" content="StoMale.info" />
+      <meta property="og:locale" content="it_IT" />
+      <meta property="article:published_time" content={new Date(review.created_at).toISOString()} />
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />

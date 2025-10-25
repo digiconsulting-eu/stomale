@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { setPageTitle, getDefaultPageTitle } from "@/utils/pageTitle";
 import { ReviewsContent } from "@/components/reviews/ReviewsContent";
+import { ReviewsSEO } from "@/components/reviews/ReviewsSEO";
 import { DatabaseReview } from "@/types/review";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
@@ -189,13 +190,16 @@ const Reviews = () => {
   }
 
   return (
-    <ReviewsContent
-      reviews={data?.reviews || []}
-      isLoading={isLoading}
-      currentPage={currentPage}
-      totalPages={data?.totalPages || 0}
-      setCurrentPage={setCurrentPage}
-    />
+    <>
+      <ReviewsSEO />
+      <ReviewsContent
+        reviews={data?.reviews || []}
+        isLoading={isLoading}
+        currentPage={currentPage}
+        totalPages={data?.totalPages || 0}
+        setCurrentPage={setCurrentPage}
+      />
+    </>
   );
 };
 

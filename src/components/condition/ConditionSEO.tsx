@@ -46,8 +46,10 @@ export const ConditionSEO = ({ condition, reviews, reviewsCount }: ConditionSEOP
   
   return (
     <Helmet>
+      <html lang="it" />
       <title>{pageTitle}</title>
       <meta name="description" content={metaDescription} />
+      <meta name="robots" content="index, follow, max-image-preview:large" />
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content="website" />
@@ -58,6 +60,7 @@ export const ConditionSEO = ({ condition, reviews, reviewsCount }: ConditionSEOP
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:site_name" content="StoMale.info" />
+      <meta property="og:locale" content="it_IT" />
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />

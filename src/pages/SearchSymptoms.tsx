@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewsGrid } from "@/components/reviews/ReviewsGrid";
+import { SearchSymptomsSEO } from "@/components/search/SearchSymptomsSEO";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
@@ -92,8 +93,10 @@ const { data: reviews, isLoading } = useQuery({
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-primary">Cerca Sintomi</h1>
+    <>
+      <SearchSymptomsSEO searchTerm={isSearching ? searchTerm : undefined} resultsCount={reviews?.length} />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8 text-primary">Cerca Sintomi</h1>
       
       <div className="mb-8">
         <div className="flex gap-2 max-w-2xl mx-auto">
@@ -148,10 +151,11 @@ const { data: reviews, isLoading } = useQuery({
           NON deve essere utilizzato per autodiagnosi o come sostituto di una consulenza medica.
         </p>
         <p>
-          È sempre necessario consultare un medico o uno specialista per una corretta diagnosi 
+        È sempre necessario consultare un medico o uno specialista per una corretta diagnosi 
           e per la prescrizione di eventuali trattamenti.
         </p>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
