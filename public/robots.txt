@@ -2,9 +2,8 @@
 User-agent: *
 Allow: /
 
-# Sitemap
+# Sitemap principale
 Sitemap: https://stomale.info/sitemap.xml
-Sitemap: https://stomale.info/sitemap-index.xml
 
 # Disallow admin and private pages
 Disallow: /admin
