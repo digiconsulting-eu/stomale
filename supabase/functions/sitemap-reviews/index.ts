@@ -18,15 +18,15 @@ Deno.serve(async (req) => {
     const pageParam = url.searchParams.get('page') || '1'
     const page = parseInt(pageParam, 10)
     
-    // Validate page parameter
-    if (isNaN(page) || page < 1 || page > 10) {
+    // Validate page parameter (max 50 pages for 25000 reviews)
+    if (isNaN(page) || page < 1 || page > 50) {
       return new Response('Invalid page parameter', { status: 400, headers: corsHeaders })
     }
     
     console.log(`Generating sitemap for reviews, page ${page}`)
     
-    // Calculate pagination limits - 100 reviews per page
-    const limit = 100
+    // Calculate pagination limits - 500 reviews per page
+    const limit = 500
     const offset = (page - 1) * limit
     
     console.log(`Using offset ${offset} and limit ${limit}`)
