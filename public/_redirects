@@ -1,10 +1,10 @@
 
-/sitemap.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index 200! Content-Type=application/xml
-/sitemap-index.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index 200! Content-Type=application/xml
-/sitemap-reviews-:page.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews?page=:page 200! Content-Type=application/xml
-/sitemaps/sitemap-conditions-:letter.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=:letter 200! Content-Type=application/xml
-/sitemaps/sitemap-static.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-static 200! Content-Type=application/xml
-/sitemaps/* /sitemaps/:splat 200! Content-Type=application/xml
+/sitemap.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index 302!
+/sitemap-index.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index 302!
+/sitemap-reviews-:page.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews?page=:page 302!
+/sitemaps/sitemap-conditions-:letter.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=:letter 302!
+/sitemaps/sitemap-static.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-static 302!
+/sitemaps/* /sitemaps/:splat 200
 # Reindirizzamento da URL con trattini a URL con spazi codificati per le patologie
 /patologia/:condition-* /patologia/:condition%20:splat 301
 # Reindirizzamento da vecchi articoli a nuove recensioni - specifico per Nutella
