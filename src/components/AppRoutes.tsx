@@ -1,5 +1,6 @@
 
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
@@ -24,6 +25,44 @@ import Reviews from "@/pages/Reviews";
 import Welcome from "@/pages/Welcome";
 import ThankYou from "@/pages/ThankYou";
 import AuthCallback from "@/pages/AuthCallback";
+
+// Component to handle sitemap redirects
+const SitemapRedirect = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    const path = location.pathname;
+    
+    // Extract page number from sitemap-reviews-{page}.xml
+    const reviewMatch = path.match(/\/sitemap-reviews-(\d+)\.xml$/);
+    if (reviewMatch) {
+      const page = reviewMatch[1];
+      window.location.replace(`https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews?page=${page}`);
+      return;
+    }
+    
+    // Handle other sitemaps
+    if (path === '/sitemap.xml' || path === '/sitemap-index.xml') {
+      window.location.replace('https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index');
+      return;
+    }
+    
+    if (path === '/sitemaps/sitemap-static.xml') {
+      window.location.replace('https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-static');
+      return;
+    }
+    
+    // Handle condition sitemaps
+    const conditionMatch = path.match(/\/sitemaps\/sitemap-conditions-([a-z-]+)\.xml$/);
+    if (conditionMatch) {
+      const letter = conditionMatch[1];
+      window.location.replace(`https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=${letter}`);
+      return;
+    }
+  }, [location]);
+  
+  return <div className="min-h-screen flex items-center justify-center">Reindirizzamento...</div>;
+};
 
 export const AppRoutes = () => {
   return (
@@ -111,6 +150,13 @@ export const AppRoutes = () => {
         element={<Navigate to="/patologia/algodistrofia" replace />} 
       />
       <Route path="/news/*" element={<Navigate to="/recensioni" replace />} />
+      
+      {/* Sitemap routes - must come before any catch-all */}
+      <Route path="/sitemap.xml" element={<SitemapRedirect />} />
+      <Route path="/sitemap-index.xml" element={<SitemapRedirect />} />
+      <Route path="/sitemap-reviews-:page.xml" element={<SitemapRedirect />} />
+      <Route path="/sitemaps/sitemap-static.xml" element={<SitemapRedirect />} />
+      <Route path="/sitemaps/sitemap-conditions-:letter.xml" element={<SitemapRedirect />} />
     </Routes>
   );
 };
