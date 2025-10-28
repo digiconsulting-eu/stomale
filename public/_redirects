@@ -1,6 +1,5 @@
 
-/* /index.html 200
-/sitemap.xml /sitemap-index.xml 200! Content-Type=application/xml
+/sitemap.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index 200! Content-Type=application/xml
 /sitemap-index.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-index 200! Content-Type=application/xml
 /sitemap-reviews-:page.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-reviews?page=:page 200! Content-Type=application/xml
 /sitemaps/sitemap-conditions-:letter.xml https://hnuhdoycwpjfjhthfqbt.supabase.co/functions/v1/sitemap-conditions?letter=:letter 200! Content-Type=application/xml
@@ -16,3 +15,4 @@
 /azienda/algodistrofia /patologia/algodistrofia 301!
 # Rotta catch-all che deve venire DOPO gli specifici reindirizzamenti
 /news/* /recensioni 301!
+/* /index.html 200
