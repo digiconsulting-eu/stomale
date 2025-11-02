@@ -181,12 +181,12 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       setIsSubmitting(true);
       console.log('Starting review submission with data:', data);
 
-      // Set a timeout to handle stalled submissions
+      // Set a timeout to handle stalled submissions (increased to 60 seconds)
       submissionTimeoutRef.current = window.setTimeout(() => {
         setIsSubmitting(false);
         setSubmissionError("La richiesta ha impiegato troppo tempo. Riprova più tardi.");
         toast.error("Timeout durante l'invio della recensione. Riprova più tardi.");
-      }, 20000);
+      }, 60000);
 
       // Check client health before proceeding
       const isHealthy = await checkClientHealth();

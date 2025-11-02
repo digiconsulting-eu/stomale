@@ -6,7 +6,7 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
     controller.abort();
-  }, 30000); // Increased timeout to prevent rate limits
+  }, 60000); // Increased timeout to 60 seconds for slow server response
   
   try {
     console.log('Starting login process for:', email);
