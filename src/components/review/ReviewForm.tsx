@@ -184,11 +184,7 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
         toast.error("Timeout durante l'invio della recensione. Riprova più tardi.");
       }, 60000);
 
-      // Check client health before proceeding
-      const isHealthy = await checkClientHealth();
-      if (!isHealthy) {
-        await resetSupabaseClient();
-      }
+      // Proceed directly without preflight health check to avoid stalls
 
       // Check authentication
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
