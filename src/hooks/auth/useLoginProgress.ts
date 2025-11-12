@@ -26,12 +26,12 @@ export const useLoginProgress = () => {
       });
     }, 200);
     
-    // After 20 seconds, consider it timed out (increased from 15)
+    // After 60 seconds, consider it timed out (increased from 20)
     const timeoutId = setTimeout(() => {
       clearInterval(interval);
       setLoginTimedOut(true);
       setLoginProgress(100);
-    }, 20000);
+    }, 60000);
     
     return { interval, timeoutId };
   };
