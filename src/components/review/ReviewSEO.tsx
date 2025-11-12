@@ -12,24 +12,28 @@ interface ReviewSEOProps {
 }
 
 export const ReviewSEO = ({ review, metaDescription, canonicalUrl, pageTitle }: ReviewSEOProps) => {
-  // Fixed schema.org markup for reviews - correct type for author and proper itemReviewed
-  const reviewSchema = {
+  // Article schema for patient experience - Google doesn't support Review for medical conditions
+  const articleSchema = {
     "@context": "https://schema.org",
-    "@type": "Review",
-    "reviewRating": {
-      "@type": "Rating",
-      "ratingValue": review.rating || 3,
-      "bestRating": "5",
-      "worstRating": "1"
-    },
+    "@type": "Article",
+    "headline": review.title,
+    "datePublished": new Date(review.created_at).toISOString(),
+    "dateModified": new Date(review.created_at).toISOString(),
     "author": {
       "@type": "Person",
       "name": review.username || "Utente Anonimo"
     },
-    "datePublished": new Date(review.created_at).toISOString(),
-    "name": review.title,
-    "reviewBody": review.experience,
-    "itemReviewed": {
+    "publisher": {
+      "@type": "Organization",
+      "name": "StoMale.info",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://stomale.info/og-image.svg"
+      }
+    },
+    "description": metaDescription,
+    "articleBody": review.experience,
+    "about": {
       "@type": "MedicalCondition",
       "name": review.PATOLOGIE?.Patologia
     }
@@ -113,7 +117,7 @@ export const ReviewSEO = ({ review, metaDescription, canonicalUrl, pageTitle }: 
         {JSON.stringify(webPageSchema)}
       </script>
       <script type="application/ld+json">
-        {JSON.stringify(reviewSchema)}
+        {JSON.stringify(articleSchema)}
       </script>
       <script type="application/ld+json">
         {JSON.stringify(breadcrumbSchema)}
