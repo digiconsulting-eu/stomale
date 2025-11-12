@@ -73,12 +73,8 @@ export const ReviewForm = ({ defaultCondition = "" }) => {
       try {
         console.log('Validating condition:', currentCondition);
         
-        // Check if the client is healthy before validation
-        const isHealthy = await checkClientHealth();
-        if (!isHealthy) {
-          await resetSupabaseClient();
-        }
-        
+        // Skip health check to avoid blocking validation; rely on direct Supabase queries
+
         // Check if the condition exists in the database with exact match
         const { data, error } = await supabase
           .from('PATOLOGIE')
