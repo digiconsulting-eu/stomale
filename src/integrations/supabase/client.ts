@@ -35,25 +35,34 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, supabas
 export const checkClientHealth = async (): Promise<boolean> => {
   try {
     console.log('Checking Supabase client health...');
-    
-    // Use a simple GET request instead of HEAD to check if client can reach Supabase
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000); // hard timeout 4s
+
     const response = await fetch(`${supabaseUrl}/rest/v1/PATOLOGIE?select=id&limit=1`, {
       method: 'GET',
       headers: {
         'apikey': supabaseKey,
         'Authorization': `Bearer ${supabaseKey}`,
         'Content-Type': 'application/json',
-      }
+      },
+      signal: controller.signal,
     });
-    
+
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
       console.error('Supabase health check failed with HTTP status:', response.status);
       return false;
     }
-    
+
     console.log('Supabase client health check passed');
     return true;
   } catch (error) {
+    if ((error as Error).name === 'AbortError') {
+      console.warn('Supabase health check aborted due to timeout');
+      return false;
+    }
     console.error('Supabase client health check failed with exception:', error);
     return false;
   }
@@ -87,6 +96,9 @@ export const resetSupabaseClient = async () => {
 export const verifyApiKeyWorks = async () => {
   try {
     console.log('Verifying Supabase API key is working...');
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
     
     const response = await fetch(`${supabaseUrl}/rest/v1/PATOLOGIE?select=id&limit=1`, {
       method: 'GET',
@@ -94,8 +106,11 @@ export const verifyApiKeyWorks = async () => {
         'apikey': supabaseKey,
         'Authorization': `Bearer ${supabaseKey}`,
         'Content-Type': 'application/json',
-      }
+      },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       console.error('API key verification failed with HTTP status:', response.status);
@@ -105,6 +120,10 @@ export const verifyApiKeyWorks = async () => {
     console.log('API key verification passed');
     return true;
   } catch (error) {
+    if ((error as Error).name === 'AbortError') {
+      console.warn('API key verification aborted due to timeout');
+      return false;
+    }
     console.error('API key verification failed with exception:', error);
     return false;
   }
