@@ -113,21 +113,32 @@ const createUser = async (supabase: any, username: string): Promise<void> => {
   }
 };
 
+const normalizeConditionName = (name: string): string => {
+  return name.trim().toLowerCase().replace(/-/g, ' ').replace(/\s+/g, ' ');
+};
+
 const findOrCreateCondition = async (supabase: any, conditionName: string): Promise<number> => {
-  const { data: existingCondition, error: searchError } = await supabase
-    .from('PATOLOGIE')
-    .select('id, Patologia')
-    .ilike('Patologia', conditionName.trim())
-    .single();
+  const normalizedName = normalizeConditionName(conditionName);
   
-  if (searchError && searchError.code !== 'PGRST116') {
-    throw new Error(`Errore nella ricerca della patologia: ${searchError.message}`);
+  // Fetch all conditions to compare normalized names
+  const { data: allConditions, error: fetchError } = await supabase
+    .from('PATOLOGIE')
+    .select('id, Patologia');
+  
+  if (fetchError) {
+    throw new Error(`Errore nella ricerca delle patologie: ${fetchError.message}`);
   }
+  
+  // Find a matching condition by normalized name
+  const existingCondition = allConditions?.find((condition: any) => 
+    normalizeConditionName(condition.Patologia) === normalizedName
+  );
   
   if (existingCondition) {
     return existingCondition.id;
   }
   
+  // Create new condition with the original name (not normalized)
   const { data: newCondition, error: createError } = await supabase
     .from('PATOLOGIE')
     .insert({
