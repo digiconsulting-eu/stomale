@@ -179,9 +179,7 @@ Deno.serve(async (req) => {
         }
 
         const conditionId = await findOrCreateCondition(supabase, conditionName);
-        const username = await createUniqueUsername(supabase);
-        await createUser(supabase, username);
-
+        const username = null;
         const reviewData = {
           title: title.toString().trim(),
           symptoms: symptoms.toString().trim(),
