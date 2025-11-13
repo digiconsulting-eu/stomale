@@ -90,21 +90,26 @@ const createUser = async (supabase: any, username: string): Promise<void> => {
     const userId = uuidv4();
     const createdAt = generateRandomDate();
     
-    const { error } = await supabase.rpc('admin_insert_user', {
-      p_id: userId,
-      p_username: username,
-      p_email: null,
-      p_birth_year: null,
-      p_gender: null,
-      p_created_at: createdAt,
-      p_gdpr_consent: true
-    });
+    const { error } = await supabase
+      .from('users')
+      .insert({
+        id: userId,
+        username: username,
+        email: null,
+        birth_year: null,
+        gender: null,
+        created_at: createdAt,
+        gdpr_consent: true,
+        gdpr_consent_date: createdAt
+      });
 
     if (error) {
       console.error('Error creating user:', error);
+      throw error;
     }
   } catch (error) {
     console.error('Error in createUser:', error);
+    throw error;
   }
 };
 
