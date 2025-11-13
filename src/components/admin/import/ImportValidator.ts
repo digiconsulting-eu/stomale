@@ -284,14 +284,13 @@ export const validateRow = async (row: any): Promise<any> => {
     // Procediamo comunque con l'username
   }
   
-  // Prepara i dati della recensione con data corrente e valori puliti
+  // Prepara i dati della recensione (created_at verrà impostato automaticamente dal DB)
   const reviewData = {
     title: title.toString().trim(),
     symptoms: symptoms.toString().trim(),
     experience: experience.toString().trim(),
     condition_id: finalConditionId,
     username: username,
-    created_at: new Date().toISOString(),
     status: 'approved',
     // Campi opzionali con valori puliti
     diagnosis_difficulty: cleanNumericValue(row['Difficoltà Diagnosi'] || row['Diagnosis Difficulty'] || row['diagnosis_difficulty']),
