@@ -87,9 +87,7 @@ export const ReviewsImport = () => {
       if (imported > 0) {
         setLastImportTimestamp(new Date().toISOString());
         toast.success(
-          `${imported} recensioni importate con successo con nuovi utenti creati automaticamente (Anonimo1, Anonimo2, ecc.)${
-            errorCount > 0 ? `. ${errorCount} recensioni ignorate per errori.` : '.'
-          }`
+          `${imported} recensioni importate con successo${errorCount > 0 ? ` (${errorCount} righe con errori)` : ''}.`
         );
       } else {
         toast.error("Nessuna recensione valida trovata nel file.");
