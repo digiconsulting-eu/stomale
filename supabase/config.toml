@@ -15,6 +15,8 @@ port = 54323
 api_url = "http://localhost"
 
 [functions]
+[functions.import-reviews]
+verify_jwt = true
 [functions.sitemap-reviews]
 verify_jwt = false
 [functions.sitemap-conditions]

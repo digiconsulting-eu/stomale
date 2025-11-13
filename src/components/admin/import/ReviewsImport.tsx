@@ -6,7 +6,6 @@ import * as XLSX from 'xlsx';
 import { Loader2, Trash2, Users } from "lucide-react";
 import { ImportInstructions } from "./ImportInstructions";
 import { ImportTemplate } from "./ImportTemplate";
-import { validateRow } from "./ImportValidator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
@@ -61,58 +60,35 @@ export const ReviewsImport = () => {
         return;
       }
 
-      console.log(`Processing ${jsonData.length} rows...`);
-      const validReviews = [];
-      const errors = [];
-      const timestamp = new Date().toISOString();
-      console.log('Import timestamp:', timestamp);
+      console.log(`Processing ${jsonData.length} rows via edge function...`);
+      
+      // Chiama l'edge function per l'importazione
+      const { data: result, error: functionError } = await supabase.functions.invoke('import-reviews', {
+        body: { reviews: jsonData }
+      });
 
-      for (const [index, row] of jsonData.entries()) {
-        try {
-          console.log(`=== Validating row ${index + 1} ===`);
-          console.log('Row data:', row);
-          
-          const validatedRow = await validateRow(row);
-          console.log('Row validated successfully:', validatedRow);
-          
-          if (validatedRow) {
-            console.log(`Inserting review for condition ID ${validatedRow.condition_id} and user ${validatedRow.username}`);
-            
-            const { error: insertError } = await supabase
-              .from('reviews')
-              .insert({
-                ...validatedRow,
-                import_timestamp: timestamp
-              });
-
-            if (insertError) {
-              console.error('Database insert error:', insertError);
-              errors.push(`Riga ${index + 2}: Errore durante l'inserimento nel database: ${insertError.message}`);
-            } else {
-              validReviews.push(validatedRow);
-              console.log(`Successfully inserted review for row ${index + 1}`);
-            }
-          }
-        } catch (error) {
-          console.error(`Error processing row ${index + 1}:`, error);
-          errors.push(`Riga ${index + 2}: ${(error as Error).message}`);
-        }
+      if (functionError) {
+        console.error('Edge function error:', functionError);
+        toast.error(`Errore durante l'importazione: ${functionError.message}`);
+        return;
       }
+
+      const { imported, errors: errorCount, errorDetails } = result;
 
       console.log('=== IMPORT SUMMARY ===');
-      console.log('Valid reviews:', validReviews.length);
-      console.log('Errors:', errors.length);
+      console.log('Imported reviews:', imported);
+      console.log('Errors:', errorCount);
 
-      if (errors.length > 0) {
-        console.error('Validation errors:', errors);
-        errors.forEach(error => toast.error(error));
+      if (errorCount > 0) {
+        console.error('Import errors:', errorDetails);
+        toast.error(`${errorCount} recensioni hanno avuto errori durante l'importazione`);
       }
 
-      if (validReviews.length > 0) {
-        setLastImportTimestamp(timestamp);
+      if (imported > 0) {
+        setLastImportTimestamp(new Date().toISOString());
         toast.success(
-          `${validReviews.length} recensioni importate con successo con nuovi utenti creati automaticamente (Anonimo1, Anonimo2, ecc.)${
-            errors.length > 0 ? `. ${errors.length} recensioni ignorate per errori.` : '.'
+          `${imported} recensioni importate con successo con nuovi utenti creati automaticamente (Anonimo1, Anonimo2, ecc.)${
+            errorCount > 0 ? `. ${errorCount} recensioni ignorate per errori.` : '.'
           }`
         );
       } else {
