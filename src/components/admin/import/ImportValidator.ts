@@ -49,10 +49,10 @@ const cleanBooleanValue = (value: any): boolean => {
   return strValue === 'true' || strValue === 'yes' || strValue === 'si' || strValue === '1';
 };
 
-// Funzione per generare una data casuale tra 1/1/2020 e 10/6/2025
+// Funzione per generare una data casuale tra 1/1/2023 e 10/11/2025
 const generateRandomDate = (): string => {
-  const start = new Date('2020-01-01').getTime();
-  const end = new Date('2025-06-10').getTime();
+  const start = new Date('2023-01-01').getTime();
+  const end = new Date('2025-11-10').getTime();
   const randomTime = start + Math.random() * (end - start);
   return new Date(randomTime).toISOString();
 };
@@ -284,13 +284,14 @@ export const validateRow = async (row: any): Promise<any> => {
     // Procediamo comunque con l'username
   }
   
-  // Prepara i dati della recensione (created_at verrà impostato automaticamente dal DB)
+  // Prepara i dati della recensione con data casuale tra 1/1/2023 e 10/11/2025
   const reviewData = {
     title: title.toString().trim(),
     symptoms: symptoms.toString().trim(),
     experience: experience.toString().trim(),
     condition_id: finalConditionId,
     username: username,
+    created_at: generateRandomDate(),
     status: 'approved',
     // Campi opzionali con valori puliti
     diagnosis_difficulty: cleanNumericValue(row['Difficoltà Diagnosi'] || row['Diagnosis Difficulty'] || row['diagnosis_difficulty']),
