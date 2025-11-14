@@ -2,6 +2,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { urlConditionToDbCondition } from "@/utils/urlUtils";
 import { DatabaseReview, Review } from "@/types/review";
 import { useState, useEffect } from "react";
 
@@ -12,7 +13,7 @@ export const useConditionData = () => {
   console.log("useConditionData hook called with condition:", condition);
 
   // Convert URL condition (with hyphens) to database condition (with spaces)
-  const normalizedCondition = condition ? condition.replace(/-/g, ' ').toUpperCase() : '';
+  const normalizedCondition = condition ? urlConditionToDbCondition(condition) : '';
   console.log("Normalized condition for DB query:", normalizedCondition);
 
   // Fetch condition data
