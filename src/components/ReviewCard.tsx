@@ -63,7 +63,7 @@ export const ReviewCard = ({
     "@type": "Review",
     "itemReviewed": {
       "@type": "MedicalCondition",
-      "name": capitalizeFirstLetter(safeCondition)
+      "name": capitalizeFirstLetter(safeCondition.replace(/-/g, ' '))
     },
     "author": {
       "@type": "Person",
@@ -105,7 +105,7 @@ export const ReviewCard = ({
             to={`/patologia/${encodeURIComponent(safeCondition.toLowerCase())}`}
             className="inline-block px-4 py-1 bg-[#E4F1FF] text-primary rounded-full text-sm mb-3 hover:bg-primary/10"
           >
-            <span>{safeCondition.toUpperCase()}</span>
+            <span>{safeCondition.replace(/-/g, ' ').toUpperCase()}</span>
           </Link>
           <p className="text-gray-600 line-clamp-3 mb-4 break-words flex-grow">{safePreview}</p>
           

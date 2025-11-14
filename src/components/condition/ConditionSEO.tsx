@@ -12,7 +12,7 @@ interface ConditionSEOProps {
 }
 
 export const ConditionSEO = ({ condition, reviews, reviewsCount }: ConditionSEOProps) => {
-  const formattedCondition = condition.toUpperCase();
+  const formattedCondition = condition.replace(/-/g, ' ').toUpperCase();
   // Dynamic page title based on whether reviews exist
   const pageTitle = `${formattedCondition} | ${reviewsCount > 0 ? `${reviewsCount} Recensioni e Storie` : 'Informazioni e Esperienze'} | StoMale.info`;
   

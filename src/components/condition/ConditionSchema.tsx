@@ -13,12 +13,12 @@ export const ConditionSchema = ({ condition, reviews, ratingValue }: ConditionSc
   const conditionSchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": capitalizeFirstLetter(condition),
-    "description": `Informazioni, esperienze e recensioni su ${condition.toUpperCase()} condivise da pazienti.`,
+    "name": capitalizeFirstLetter(condition.replace(/-/g, ' ')),
+    "description": `Informazioni, esperienze e recensioni su ${condition.replace(/-/g, ' ').toUpperCase()} condivise da pazienti.`,
     "mainEntity": {
       "@type": "MedicalCondition",
-      "name": capitalizeFirstLetter(condition),
-      "alternateName": condition.toUpperCase()
+      "name": capitalizeFirstLetter(condition.replace(/-/g, ' ')),
+      "alternateName": condition.replace(/-/g, ' ').toUpperCase()
     }
   };
 
@@ -26,7 +26,7 @@ export const ConditionSchema = ({ condition, reviews, ratingValue }: ConditionSc
   const aggregateRatingSchema = reviews.length > 0 ? {
     "@context": "https://schema.org",
     "@type": "Product", // Using Product as it's a commonly accepted type for aggregate ratings
-    "name": `Esperienze con ${capitalizeFirstLetter(condition)}`,
+    "name": `Esperienze con ${capitalizeFirstLetter(condition.replace(/-/g, ' '))}`,
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": ratingValue.toFixed(1),
