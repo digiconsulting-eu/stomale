@@ -23,7 +23,7 @@ export const ConditionOverview = ({ condition, isAdmin }: ConditionOverviewProps
       const { data, error } = await supabase
         .from('PATOLOGIE')
         .select('Descrizione')
-        .eq('Patologia', condition.toUpperCase())
+        .eq('Patologia', condition.replace(/-/g, ' ').toUpperCase())
         .single();
       
       if (error) throw error;
@@ -36,7 +36,7 @@ export const ConditionOverview = ({ condition, isAdmin }: ConditionOverviewProps
       const { error } = await supabase
         .from('PATOLOGIE')
         .upsert({
-          Patologia: condition.toUpperCase(),
+          Patologia: condition.replace(/-/g, ' ').toUpperCase(),
           Descrizione: editedDescription
         }, {
           onConflict: 'Patologia'
@@ -57,7 +57,7 @@ export const ConditionOverview = ({ condition, isAdmin }: ConditionOverviewProps
     <Card className="p-6">
       <div className="flex justify-between items-start">
         <h2 className="text-xl font-semibold mb-4">
-          Cos'è {capitalizeFirstLetter(condition)}?
+          Cos'è {capitalizeFirstLetter(condition.replace(/-/g, ' '))}?
         </h2>
         {isAdmin && (
           <Button

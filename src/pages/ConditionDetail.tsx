@@ -28,7 +28,7 @@ export default function ConditionDetail() {
     retryFetch 
   } = useConditionData();
 
-  const conditionTitle = condition ? capitalizeFirstLetter(condition) : '';
+  const conditionTitle = condition ? capitalizeFirstLetter(condition.replace(/-/g, ' ')) : '';
   const pageTitle = condition ? `${condition.toUpperCase()} | Recensioni ed Esperienze | StoMale.info` : '';
   const metaDescription = getConditionMetaDescription(condition || '');
 
@@ -144,7 +144,7 @@ export default function ConditionDetail() {
       </div>
 
       <div className="mt-8">
-        <Disclaimer condition={capitalizeFirstLetter(condition)} />
+        <Disclaimer condition={capitalizeFirstLetter(condition.replace(/-/g, ' '))} />
       </div>
     </div>
   );
