@@ -29,7 +29,7 @@ export default function ConditionDetail() {
   } = useConditionData();
 
   const conditionTitle = condition ? capitalizeFirstLetter(condition.replace(/-/g, ' ')) : '';
-  const pageTitle = condition ? `${condition.toUpperCase()} | Recensioni ed Esperienze | StoMale.info` : '';
+  const pageTitle = condition ? `${condition.replace(/-/g, ' ').toUpperCase()} | Recensioni ed Esperienze | StoMale.info` : '';
   const metaDescription = getConditionMetaDescription(condition || '');
 
   // Check if user is admin

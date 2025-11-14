@@ -54,7 +54,7 @@ export const RelatedReviews = ({ condition, reviewId }: RelatedReviewsProps) => 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm">
       <h3 className="text-xl font-semibold mb-4">
-        Altre esperienze su {condition.toUpperCase()}
+        Altre esperienze su {condition.replace(/-/g, ' ').toUpperCase()}
       </h3>
       <div className="space-y-4">
         {otherReviews.map((review) => (

@@ -24,5 +24,5 @@ export const getReviewMetaDescription = (condition: string, title: string) => {
 };
 
 export const getConditionMetaDescription = (condition: string) => {
-  return `Scopri esperienze, sintomi, cure e trattamenti per ${condition.toUpperCase()} su StoMale.info. Leggi recensioni e testimonianze di chi convive con questa patologia e condividi la tua esperienza.`;
+  return `Scopri esperienze, sintomi, cure e trattamenti per ${condition.replace(/-/g, ' ').toUpperCase()} su StoMale.info. Leggi recensioni e testimonianze di chi convive con questa patologia e condividi la tua esperienza.`;
 };
