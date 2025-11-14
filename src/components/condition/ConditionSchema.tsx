@@ -22,33 +22,27 @@ export const ConditionSchema = ({ condition, reviews, ratingValue }: ConditionSc
     }
   };
 
-  // Create separate schema for aggregate rating if there are reviews
-  const aggregateRatingSchema = reviews.length > 0 ? {
+  // Don't use Review schema for medical conditions - Google doesn't support it
+  // Use Article schema instead for patient experiences
+  const articlesSchema = reviews.length > 0 ? {
     "@context": "https://schema.org",
-    "@type": "Product", // Using Product as it's a commonly accepted type for aggregate ratings
-    "name": `Esperienze con ${capitalizeFirstLetter(condition.replace(/-/g, ' '))}`,
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": ratingValue.toFixed(1),
-      "bestRating": "5",
-      "worstRating": "1",
-      "ratingCount": reviews.length,
-      "reviewCount": reviews.length
-    },
-    "review": reviews.slice(0, 5).map(review => ({
-      "@type": "Review",
-      "reviewRating": {
-        "@type": "Rating",
-        "ratingValue": review.rating || 3,
-        "bestRating": "5",
-        "worstRating": "1"
-      },
-      "author": {
-        "@type": "Person",
-        "name": review.username || "Utente Anonimo"
-      },
-      "reviewBody": review.experience || "",
-      "name": review.title || `Esperienza con ${condition}`
+    "@type": "ItemList",
+    "itemListElement": reviews.slice(0, 5).map((review, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Article",
+        "headline": review.title || `Esperienza con ${condition}`,
+        "author": {
+          "@type": "Person",
+          "name": review.username || "Utente Anonimo"
+        },
+        "articleBody": review.experience || "",
+        "about": {
+          "@type": "MedicalCondition",
+          "name": capitalizeFirstLetter(condition.replace(/-/g, ' '))
+        }
+      }
     }))
   } : null;
 
@@ -61,7 +55,7 @@ export const ConditionSchema = ({ condition, reviews, ratingValue }: ConditionSc
       {reviews.length > 0 && (
         <script 
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(aggregateRatingSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articlesSchema) }}
         />
       )}
     </>
