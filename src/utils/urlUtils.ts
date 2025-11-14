@@ -32,7 +32,10 @@ export const normalizeConditionName = (condition: string): string => {
  * @returns Database condition name (with spaces, uppercase)
  */
 export const urlConditionToDbCondition = (urlCondition: string): string => {
-  return urlCondition.replace(/-/g, ' ').toUpperCase();
+  // Convert '---' (used to represent ' - ' in URLs) back to ' - ' for DB match
+  const normalized = urlCondition.replace(/---/g, ' - ');
+  // Then convert remaining hyphens to spaces and uppercase
+  return normalized.replace(/-/g, ' ').toUpperCase().trim();
 };
 
 /**
