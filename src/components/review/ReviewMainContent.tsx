@@ -54,16 +54,13 @@ export const ReviewMainContent = ({
   ) / 5);
 
   return (
-    <div className="bg-white rounded-xl p-4 md:p-8 shadow-sm w-full max-w-full" itemScope itemType="https://schema.org/Review">
+    <div className="bg-white rounded-xl p-4 md:p-8 shadow-sm w-full max-w-full" itemScope itemType="https://schema.org/Article">
       <meta itemProp="author" content={username || "Utente Anonimo"} />
       <meta itemProp="datePublished" content={date} />
+      <meta itemProp="headline" content={title} />
       
-      <div itemProp="itemReviewed" itemScope itemType="https://schema.org/MedicalCondition">
+      <div itemProp="about" itemScope itemType="https://schema.org/MedicalCondition">
         <meta itemProp="name" content={condition} />
-      </div>
-      
-      <div itemProp="reviewRating" itemScope itemType="https://schema.org/Rating">
-        <meta itemProp="ratingValue" content={String(overallRating)} />
         <meta itemProp="bestRating" content="5" />
         <meta itemProp="worstRating" content="1" />
       </div>
