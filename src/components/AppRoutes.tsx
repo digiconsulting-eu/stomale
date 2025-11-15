@@ -13,6 +13,7 @@ import UserDashboard from "@/pages/UserDashboard";
 import Admin from "@/pages/Admin";
 import ReviewManagement from "@/pages/ReviewManagement";
 import UserManagement from "@/pages/UserManagement";
+import ReviewRiskAnalysis from "@/pages/ReviewRiskAnalysis";
 import ImportTab from "@/components/admin/ImportTab";
 import InsertCondition from "@/pages/InsertCondition";
 import SearchCondition from "@/pages/SearchCondition";
@@ -82,6 +83,15 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute adminOnly={true}>
             <ImportTab />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/review-risk-analysis"
+        element={
+          <ProtectedRoute adminOnly={true}>
+            <ReviewRiskAnalysis />
           </ProtectedRoute>
         }
       />
