@@ -52,7 +52,7 @@ export const RelatedReviews = ({ condition, reviewId }: RelatedReviewsProps) => 
   }
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm">
+    <div className="bg-white rounded-xl p-6 shadow-sm sticky top-4">
       <h3 className="text-xl font-semibold mb-4">
         Altre esperienze su {condition.replace(/-/g, ' ').toUpperCase()}
       </h3>

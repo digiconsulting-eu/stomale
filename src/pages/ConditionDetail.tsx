@@ -8,7 +8,6 @@ import { ConditionStats } from "@/components/condition/ConditionStats";
 import { ConditionSEO } from "@/components/condition/ConditionSEO";
 import { ConditionSchema } from "@/components/condition/ConditionSchema";
 import { ConditionContent } from "@/components/condition/ConditionContent";
-import { ConditionRelatedReviews } from "@/components/condition/ConditionRelatedReviews";
 import { setPageTitle, setMetaDescription, getConditionMetaDescription } from "@/utils/pageTitle";
 import { capitalizeFirstLetter } from "@/utils/textUtils";
 import { calculateStats, calculateRating } from "@/utils/conditionUtils";
@@ -121,12 +120,12 @@ export default function ConditionDetail() {
         conditionId={patologiaData?.id || 0} 
       />
 
-      <div className="grid lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-3">
+      <div className="grid md:grid-cols-12 gap-6">
+        <div className="md:col-span-4">
           <ConditionStats stats={stats} />
         </div>
 
-        <div className="lg:col-span-6">
+        <div className="md:col-span-8">
           <ConditionActions
             condition={condition}
             onNavigate={handleNavigate}
@@ -140,13 +139,6 @@ export default function ConditionDetail() {
             reviews={reviews}
             isLoading={isLoading}
             onRetry={handleRetryLoad}
-          />
-        </div>
-
-        <div className="lg:col-span-3">
-          <ConditionRelatedReviews 
-            condition={condition}
-            conditionId={patologiaData?.id || 0}
           />
         </div>
       </div>
