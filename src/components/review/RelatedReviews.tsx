@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewCard } from "@/components/ReviewCard";
+import { urlConditionToDbCondition } from "@/utils/urlUtils";
 
 interface RelatedReviewsProps {
   condition: string;
@@ -9,14 +10,16 @@ interface RelatedReviewsProps {
 }
 
 export const RelatedReviews = ({ condition, reviewId }: RelatedReviewsProps) => {
+  const normalizedCondition = urlConditionToDbCondition(condition);
+  
   const { data: otherReviews } = useQuery({
-    queryKey: ['condition-reviews', condition],
+    queryKey: ['condition-reviews', normalizedCondition],
     queryFn: async () => {
-      console.log('Fetching other reviews for condition:', condition);
+      console.log('Fetching other reviews for condition:', normalizedCondition);
       const { data: patologiaData } = await supabase
         .from('PATOLOGIE')
         .select('id')
-        .eq('Patologia', condition.toUpperCase())
+        .eq('Patologia', normalizedCondition)
         .single();
 
       if (!patologiaData) {
