@@ -1,0 +1,8 @@
+-- Correggi "CARCINOMA SQUAMO-CELLULARE" (stesso problema di BASOCELLULARE)
+UPDATE "PATOLOGIE" 
+SET "Patologia" = 'CARCINOMA SQUAMOCELLULARE'
+WHERE id = 257;
+
+UPDATE reviews 
+SET patologia = 'CARCINOMA SQUAMOCELLULARE'
+WHERE condition_id = 257;
