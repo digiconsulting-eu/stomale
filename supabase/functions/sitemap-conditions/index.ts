@@ -48,8 +48,8 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Costruisci la query in base al parametro letter
-    let query = supabase.from('PATOLOGIE').select('id, Patologia').order('Patologia');
+    // Costruisci la query in base al parametro letter - include created_at per lastmod
+    let query = supabase.from('PATOLOGIE').select('id, Patologia, created_at').order('Patologia');
 
     if (letter === 'a') {
       query = query.ilike('Patologia', 'A%');
@@ -83,9 +83,11 @@ Deno.serve(async (req) => {
     if (conditions && conditions.length > 0) {
       for (const condition of conditions) {
         const conditionSlug = slugify(condition.Patologia);
+        const lastmodDate = condition.created_at ? new Date(condition.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
         
         xml += '  <url>\n';
         xml += `    <loc>https://stomale.info/patologia/${conditionSlug}</loc>\n`;
+        xml += `    <lastmod>${lastmodDate}</lastmod>\n`;
         xml += '    <changefreq>weekly</changefreq>\n';
         xml += '    <priority>0.8</priority>\n';
         xml += '  </url>\n';

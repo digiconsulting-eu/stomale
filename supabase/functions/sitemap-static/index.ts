@@ -14,41 +14,50 @@ Deno.serve(async (req) => {
   try {
     console.log('Generating static sitemap')
     
+    const today = new Date().toISOString().split('T')[0];
+    
     // Generate XML sitemap for static pages
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://stomale.info/</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://stomale.info/recensioni</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://stomale.info/cerca-patologia</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://stomale.info/cerca-sintomi</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://stomale.info/privacy-policy</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://stomale.info/cookie-policy</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://stomale.info/terms</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

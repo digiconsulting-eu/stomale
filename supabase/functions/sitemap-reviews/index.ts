@@ -62,10 +62,10 @@ Deno.serve(async (req) => {
       return new Response(xml, { headers: corsHeaders });
     }
     
-    // If we have URLs, fetch them
+    // If we have URLs, fetch them with review data for lastmod
     const { data: reviewUrls, error } = await supabase
       .from('review_urls')
-      .select('url')
+      .select('url, review_id, reviews(updated_at, created_at)')
       .range(offset, offset + limit - 1)
     
     if (error) {
@@ -96,8 +96,13 @@ Deno.serve(async (req) => {
     for (const reviewUrl of reviewUrls) {
       if (reviewUrl.url) {
         console.log(`Adding URL: ${reviewUrl.url}`)
+        // Get lastmod from review data
+        const lastmod = reviewUrl.reviews?.updated_at || reviewUrl.reviews?.created_at
+        const lastmodDate = lastmod ? new Date(lastmod).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+        
         xml += `  <url>
     <loc>https://stomale.info${reviewUrl.url}</loc>
+    <lastmod>${lastmodDate}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

@@ -101,7 +101,7 @@ export const ReviewsGrid = ({ reviews, isLoading }: ReviewsGridProps) => {
             itemType="https://schema.org/ListItem"
           >
             <meta itemProp="position" content={String(index + 1)} />
-            <div itemProp="item" itemScope itemType="https://schema.org/Review">
+            <div itemProp="item" itemScope itemType="https://schema.org/Article">
               <ReviewCard
                 id={review.id}
                 title={review.title}
