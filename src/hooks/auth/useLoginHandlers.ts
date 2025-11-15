@@ -72,9 +72,19 @@ export const useLoginHandlers = (noAutoRedirect: boolean = false) => {
       setLoginProgress(100);
       toast.success("Accesso effettuato!");
       
+      // Clear prevention flags BEFORE navigating
+      sessionStorage.removeItem('onLoginPage');
+      localStorage.removeItem('preventRedirects');
+      localStorage.removeItem('loginPageActive');
+      localStorage.removeItem('last-login-attempt');
+      
       // Navigate
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 200));
       navigate(redirectTarget, { replace: true });
+      
+      // Finalize state
+      setIsLoading(false);
+      isProcessing.current = false;
       
     } catch (error: any) {
       clearInterval(interval);
