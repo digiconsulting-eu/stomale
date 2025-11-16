@@ -69,36 +69,47 @@ export default function Login() {
   }, [navigate]);
   
   // Redirect robusto: ascolta l'evento SIGNED_IN anche se la submit non completa
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        try {
-          // Aggiorna stato locale
-          localStorage.setItem('isLoggedIn', 'true');
-          const email = session.user.email || '';
-          if (email) {
-            const { data: adminData } = await supabase
-              .from('admin')
-              .select('email')
-              .eq('email', email)
-              .maybeSingle();
-            const isAdmin = !!adminData;
-            localStorage.setItem('isAdmin', String(isAdmin));
-          }
-        } catch (e) {
-          // ignora
-        } finally {
-          // Pulisci i flag che bloccano redirect e naviga
-          sessionStorage.removeItem('onLoginPage');
-          localStorage.removeItem('preventRedirects');
-          localStorage.removeItem('loginPageActive');
-          const isAdmin = localStorage.getItem('isAdmin') === 'true';
-          navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      try {
+        // Aggiorna stato locale senza chiamate Supabase qui (evita deadlock)
+        localStorage.setItem('isLoggedIn', 'true');
+      } finally {
+        // Pulisci i flag che bloccano redirect e naviga
+        sessionStorage.removeItem('onLoginPage');
+        localStorage.removeItem('preventRedirects');
+        localStorage.removeItem('loginPageActive');
+
+        // Usa lo stato già disponibile (impostato da loginUtils) oppure fallback a dashboard
+        const isAdminLS = localStorage.getItem('isAdmin') === 'true';
+        navigate(isAdminLS ? '/admin' : '/dashboard', { replace: true });
+
+        // Defer: aggiorna admin state senza bloccare il redirect
+        const email = session.user.email || '';
+        if (email) {
+          setTimeout(async () => {
+            try {
+              const { data: adminData } = await supabase
+                .from('admin')
+                .select('email')
+                .eq('email', email)
+                .maybeSingle();
+              const isAdmin = !!adminData;
+              localStorage.setItem('isAdmin', String(isAdmin));
+              if (isAdmin && window.location.pathname !== '/admin') {
+                navigate('/admin', { replace: true });
+              }
+            } catch (_) {
+              // ignora errori qui
+            }
+          }, 0);
         }
       }
-    });
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    }
+  });
+  return () => subscription.unsubscribe();
+}, [navigate]);
 
   return (
     <div className="container mx-auto px-4 py-8">
