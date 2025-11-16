@@ -2,8 +2,9 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx';
 
 interface Review {
@@ -34,8 +35,10 @@ interface ReviewRisk {
 }
 
 const ReviewRiskAnalysis = () => {
+  const navigate = useNavigate();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [stats, setStats] = useState<any>(null);
+  const [results, setResults] = useState<ReviewRisk[]>([]);
   const { toast } = useToast();
 
   const calculateRiskScore = (review: Review): { score: number; reasons: string[] } => {
@@ -186,6 +189,7 @@ const ReviewRiskAnalysis = () => {
       };
 
       setStats(statistics);
+      setResults(analysisResults);
 
       // Crea Excel
       const ws = XLSX.utils.json_to_sheet(analysisResults);
@@ -325,6 +329,61 @@ const ReviewRiskAnalysis = () => {
               </>
             )}
           </Button>
+
+          {results.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="font-semibold">Anteprima Recensioni a Rischio (Prime 50)</h3>
+              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                {results.slice(0, 50).map((result) => (
+                  <div
+                    key={result.id}
+                    className={`p-4 border rounded-lg ${
+                      result.rischio === 'CRITICO' ? 'border-red-300 bg-red-50' :
+                      result.rischio === 'ALTO' ? 'border-orange-300 bg-orange-50' :
+                      result.rischio === 'MEDIO' ? 'border-yellow-300 bg-yellow-50' :
+                      result.rischio === 'BASSO' ? 'border-blue-300 bg-blue-50' :
+                      'border-green-300 bg-green-50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <div className="font-semibold">ID {result.id}: {result.titolo}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {result.patologia} - {result.username}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="text-2xl font-bold">{result.punteggio}</div>
+                          <div className="text-xs text-muted-foreground">{result.rischio}</div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/admin/reviews?highlight=${result.id}`)}
+                          className="flex items-center gap-1"
+                        >
+                          <Edit className="h-3 w-3" />
+                          Modifica
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-sm space-y-1">
+                      <div>
+                        <span className="font-medium">Motivi: </span>
+                        <span className="text-muted-foreground">{result.motivi}</span>
+                      </div>
+                      <div className="flex gap-4 text-xs text-muted-foreground">
+                        <span>Lunghezza: {result.lunghezza_esperienza} char</span>
+                        <span>Likes: {result.likes}</span>
+                        <span>Commenti: {result.commenti}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
