@@ -35,6 +35,7 @@ interface SEOIssue {
 const ReviewSEOAnalysis = () => {
   const navigate = useNavigate();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [results, setResults] = useState<SEOIssue[]>([]);
   const [stats, setStats] = useState<{ [key: string]: number }>({});
 
@@ -189,7 +190,7 @@ const ReviewSEOAnalysis = () => {
     };
   };
 
-  const analyzeAndExport = async () => {
+  const analyzeReviews = async () => {
     setIsAnalyzing(true);
     toast.info("Inizio analisi SEO...");
 
@@ -225,8 +226,26 @@ const ReviewSEOAnalysis = () => {
       setResults(analyzed);
       setStats(statsData);
 
+      toast.success("Analisi completata!");
+    } catch (error) {
+      console.error('Errore durante analisi:', error);
+      toast.error("Errore durante l'analisi");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const exportToExcel = async () => {
+    if (results.length === 0) {
+      toast.error("Esegui prima l'analisi per esportare i dati");
+      return;
+    }
+
+    setIsExporting(true);
+    
+    try {
       // Crea Excel
-      const detailData = analyzed.map(item => ({
+      const detailData = results.map(item => ({
         'ID Recensione': item.reviewId,
         'Titolo': item.title,
         'Autore': item.username,
@@ -238,7 +257,7 @@ const ReviewSEOAnalysis = () => {
         'Raccomandazioni': item.recommendations.join('; ')
       }));
 
-      const statsSheetData = Object.entries(statsData).map(([key, value]) => ({
+      const statsSheetData = Object.entries(stats).map(([key, value]) => ({
         'Metrica': key,
         'Valore': value
       }));
@@ -252,12 +271,12 @@ const ReviewSEOAnalysis = () => {
       
       XLSX.writeFile(wb, `analisi_seo_recensioni_${new Date().toISOString().split('T')[0]}.xlsx`);
 
-      toast.success("Analisi completata ed esportata!");
+      toast.success("Report esportato con successo!");
     } catch (error) {
-      console.error('Errore durante analisi:', error);
-      toast.error("Errore durante l'analisi");
+      console.error('Errore durante esportazione:', error);
+      toast.error("Errore durante l'esportazione");
     } finally {
-      setIsAnalyzing(false);
+      setIsExporting(false);
     }
   };
 
@@ -323,24 +342,45 @@ const ReviewSEOAnalysis = () => {
             </div>
           )}
 
-          <Button 
-            onClick={analyzeAndExport}
-            disabled={isAnalyzing}
-            className="w-full"
-            size="lg"
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Analisi in corso...
-              </>
-            ) : (
-              <>
-                <Download className="mr-2 h-5 w-5" />
-                Analizza ed Esporta Report SEO
-              </>
-            )}
-          </Button>
+          <div className="flex gap-3">
+            <Button 
+              onClick={analyzeReviews}
+              disabled={isAnalyzing}
+              className="flex-1"
+              size="lg"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Analisi in corso...
+                </>
+              ) : (
+                <>
+                  Analizza Recensioni
+                </>
+              )}
+            </Button>
+
+            <Button 
+              onClick={exportToExcel}
+              disabled={isExporting || results.length === 0}
+              variant="outline"
+              className="flex-1"
+              size="lg"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Esportazione...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-5 w-5" />
+                  Esporta Report Excel
+                </>
+              )}
+            </Button>
+          </div>
 
           {results.length > 0 && (
             <div className="space-y-3">

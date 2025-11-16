@@ -37,6 +37,7 @@ interface ReviewRisk {
 const ReviewRiskAnalysis = () => {
   const navigate = useNavigate();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [results, setResults] = useState<ReviewRisk[]>([]);
   const { toast } = useToast();
@@ -119,7 +120,7 @@ const ReviewRiskAnalysis = () => {
     return 'AUTENTICA';
   };
 
-  const analyzeAndDownload = async () => {
+  const analyzeReviews = async () => {
     setIsAnalyzing(true);
     
     try {
@@ -191,37 +192,9 @@ const ReviewRiskAnalysis = () => {
       setStats(statistics);
       setResults(analysisResults);
 
-      // Crea Excel
-      const ws = XLSX.utils.json_to_sheet(analysisResults);
-      ws['!cols'] = [
-        { wch: 8 }, { wch: 50 }, { wch: 30 }, { wch: 15 }, { wch: 12 },
-        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 60 }, { wch: 8 },
-        { wch: 10 }, { wch: 80 }
-      ];
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Analisi Rischio');
-
-      // Foglio statistiche
-      const statsData = [
-        { Categoria: 'AUTENTICA', Conteggio: statistics.autentica, Percentuale: `${(statistics.autentica / statistics.totale * 100).toFixed(1)}%` },
-        { Categoria: 'BASSO', Conteggio: statistics.basso, Percentuale: `${(statistics.basso / statistics.totale * 100).toFixed(1)}%` },
-        { Categoria: 'MEDIO', Conteggio: statistics.medio, Percentuale: `${(statistics.medio / statistics.totale * 100).toFixed(1)}%` },
-        { Categoria: 'ALTO', Conteggio: statistics.alto, Percentuale: `${(statistics.alto / statistics.totale * 100).toFixed(1)}%` },
-        { Categoria: 'CRITICO', Conteggio: statistics.critico, Percentuale: `${(statistics.critico / statistics.totale * 100).toFixed(1)}%` },
-        { Categoria: 'TOTALE', Conteggio: statistics.totale, Percentuale: '100%' }
-      ];
-
-      const wsStats = XLSX.utils.json_to_sheet(statsData);
-      XLSX.utils.book_append_sheet(wb, wsStats, 'Statistiche');
-
-      // Download
-      const filename = `analisi-recensioni-rischio-${new Date().toISOString().split('T')[0]}.xlsx`;
-      XLSX.writeFile(wb, filename);
-
       toast({
         title: "✅ Analisi completata!",
-        description: `File ${filename} scaricato con successo`,
+        description: `${statistics.totale} recensioni analizzate`,
       });
 
     } catch (error) {
@@ -233,6 +206,64 @@ const ReviewRiskAnalysis = () => {
       });
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const exportToExcel = async () => {
+    if (results.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Nessun dato",
+        description: "Esegui prima l'analisi per esportare i dati",
+      });
+      return;
+    }
+
+    setIsExporting(true);
+    
+    try {
+      // Crea Excel
+      const ws = XLSX.utils.json_to_sheet(results);
+      ws['!cols'] = [
+        { wch: 8 }, { wch: 50 }, { wch: 30 }, { wch: 15 }, { wch: 12 },
+        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 60 }, { wch: 8 },
+        { wch: 10 }, { wch: 80 }
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Analisi Rischio');
+
+      // Foglio statistiche
+      const statsData = [
+        { Categoria: 'AUTENTICA', Conteggio: stats.autentica, Percentuale: `${(stats.autentica / stats.totale * 100).toFixed(1)}%` },
+        { Categoria: 'BASSO', Conteggio: stats.basso, Percentuale: `${(stats.basso / stats.totale * 100).toFixed(1)}%` },
+        { Categoria: 'MEDIO', Conteggio: stats.medio, Percentuale: `${(stats.medio / stats.totale * 100).toFixed(1)}%` },
+        { Categoria: 'ALTO', Conteggio: stats.alto, Percentuale: `${(stats.alto / stats.totale * 100).toFixed(1)}%` },
+        { Categoria: 'CRITICO', Conteggio: stats.critico, Percentuale: `${(stats.critico / stats.totale * 100).toFixed(1)}%` },
+        { Categoria: 'TOTALE', Conteggio: stats.totale, Percentuale: '100%' }
+      ];
+
+      const wsStats = XLSX.utils.json_to_sheet(statsData);
+      XLSX.utils.book_append_sheet(wb, wsStats, 'Statistiche');
+
+      // Download
+      const filename = `analisi-recensioni-rischio-${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(wb, filename);
+
+      toast({
+        title: "✅ Report esportato!",
+        description: `File ${filename} scaricato con successo`,
+      });
+
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        variant: "destructive",
+        title: "Errore",
+        description: "Errore durante l'esportazione del report",
+      });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -311,24 +342,45 @@ const ReviewRiskAnalysis = () => {
             </div>
           )}
 
-          <Button 
-            onClick={analyzeAndDownload} 
-            disabled={isAnalyzing}
-            className="w-full"
-            size="lg"
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Analisi in corso...
-              </>
-            ) : (
-              <>
-                <Download className="mr-2 h-5 w-5" />
-                Genera e Scarica Report Excel
-              </>
-            )}
-          </Button>
+          <div className="flex gap-3">
+            <Button 
+              onClick={analyzeReviews} 
+              disabled={isAnalyzing}
+              className="flex-1"
+              size="lg"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Analisi in corso...
+                </>
+              ) : (
+                <>
+                  Analizza Recensioni
+                </>
+              )}
+            </Button>
+            
+            <Button 
+              onClick={exportToExcel} 
+              disabled={isExporting || results.length === 0}
+              variant="outline"
+              className="flex-1"
+              size="lg"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Esportazione...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-5 w-5" />
+                  Esporta Report Excel
+                </>
+              )}
+            </Button>
+          </div>
 
           {results.length > 0 && (
             <div className="space-y-4">
