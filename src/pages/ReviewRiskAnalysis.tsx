@@ -136,8 +136,11 @@ const ReviewRiskAnalysis = () => {
     try {
       toast({
         title: "Analisi in corso...",
-        description: "Recupero e analisi di tutte le recensioni",
+        description: "Recupero recensioni dal database",
       });
+
+      console.log('[Analysis] Starting review fetch...');
+      const startTime = Date.now();
 
       const { data: reviews, error } = await supabase
         .from('reviews')
@@ -157,34 +160,67 @@ const ReviewRiskAnalysis = () => {
 
       if (error) throw error;
 
-      const analysisResults: ReviewRisk[] = [];
+      const fetchTime = Date.now() - startTime;
+      console.log(`[Analysis] Fetched ${reviews?.length || 0} reviews in ${fetchTime}ms`);
 
-      reviews?.forEach((review) => {
-        const { score, reasons } = calculateRiskScore(review as Review);
-        const risk = getRiskCategory(score);
-        
-        const conditionSlug = (review.patologia || '').toLowerCase().replace(/\s+/g, '-');
-        const titleSlug = review.title.toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .substring(0, 50);
-        const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`;
-
-        analysisResults.push({
-          id: review.id,
-          titolo: review.title,
-          patologia: review.patologia || 'N/A',
-          username: review.username || 'NULL',
-          data_creazione: new Date(review.created_at).toLocaleDateString('it-IT'),
-          lunghezza_esperienza: (review.experience || '').length,
-          rischio: risk,
-          punteggio: score,
-          motivi: reasons.join('; '),
-          likes: review.likes_count || 0,
-          commenti: review.comments_count || 0,
-          url: url
+      if (!reviews || reviews.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "Nessuna recensione",
+          description: "Non ci sono recensioni approvate da analizzare",
         });
+        setIsAnalyzing(false);
+        return;
+      }
+
+      toast({
+        title: "Analisi in corso...",
+        description: `Analisi di ${reviews.length} recensioni...`,
       });
+
+      const analysisResults: ReviewRisk[] = [];
+      const batchSize = 50;
+      let processed = 0;
+
+      // Process in batches to avoid blocking UI
+      for (let i = 0; i < reviews.length; i += batchSize) {
+        const batch = reviews.slice(i, i + batchSize);
+        
+        batch.forEach((review) => {
+          const { score, reasons } = calculateRiskScore(review as Review);
+          const risk = getRiskCategory(score);
+          
+          const conditionSlug = (review.patologia || '').toLowerCase().replace(/\s+/g, '-');
+          const titleSlug = review.title.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .substring(0, 50);
+          const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`;
+
+          analysisResults.push({
+            id: review.id,
+            titolo: review.title,
+            patologia: review.patologia || 'N/A',
+            username: review.username || 'NULL',
+            data_creazione: new Date(review.created_at).toLocaleDateString('it-IT'),
+            lunghezza_esperienza: (review.experience || '').length,
+            rischio: risk,
+            punteggio: score,
+            motivi: reasons.join('; '),
+            likes: review.likes_count || 0,
+            commenti: review.comments_count || 0,
+            url: url
+          });
+        });
+
+        processed += batch.length;
+        console.log(`[Analysis] Processed ${processed}/${reviews.length} reviews`);
+
+        // Allow UI to update between batches
+        if (i + batchSize < reviews.length) {
+          await new Promise(resolve => setTimeout(resolve, 0));
+        }
+      }
 
       // Ordina per punteggio decrescente
       analysisResults.sort((a, b) => b.punteggio - a.punteggio);
@@ -202,13 +238,16 @@ const ReviewRiskAnalysis = () => {
       setStats(statistics);
       setResults(analysisResults);
 
+      const totalTime = Date.now() - startTime;
+      console.log(`[Analysis] Complete! Total time: ${totalTime}ms`);
+
       toast({
         title: "✅ Analisi completata!",
-        description: `${statistics.totale} recensioni analizzate`,
+        description: `${statistics.totale} recensioni analizzate in ${(totalTime / 1000).toFixed(1)}s`,
       });
 
     } catch (error) {
-      console.error('Error:', error);
+      console.error('[Analysis] Error:', error);
       toast({
         variant: "destructive",
         title: "Errore",
