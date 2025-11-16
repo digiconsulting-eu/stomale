@@ -116,13 +116,15 @@ export const ReviewEditDialog = ({
     return 'AUTENTICA';
   };
 
-  const handleAnalyzeRisk = () => {
+  const handleAnalyzeRisk = (showToast = true) => {
     setIsAnalyzing(true);
     try {
       const { score, reasons } = calculateRiskScore(experience);
       const category = getRiskCategory(score);
       setRiskAnalysis({ score, category, reasons });
-      toast.success("Analisi rischio completata", { duration: 3000 });
+      if (showToast) {
+        toast.success("Analisi rischio completata", { duration: 3000 });
+      }
     } catch (error) {
       console.error('Error analyzing risk:', error);
       toast.error("Errore durante l'analisi del rischio");
@@ -164,8 +166,8 @@ export const ReviewEditDialog = ({
 
       toast.success("Recensione aggiornata con successo", { duration: 3000 });
       
-      // Calcola automaticamente il rischio dopo il salvataggio
-      handleAnalyzeRisk();
+      // Calcola automaticamente il rischio dopo il salvataggio (senza mostrare toast)
+      handleAnalyzeRisk(false);
       
     } catch (error) {
       console.error('Error in handleSave:', error);
@@ -283,7 +285,7 @@ export const ReviewEditDialog = ({
           <div className="flex gap-2 w-full">
             <Button 
               variant="outline" 
-              onClick={handleAnalyzeRisk} 
+              onClick={() => handleAnalyzeRisk(true)} 
               disabled={isAnalyzing || isSaving}
               className="mr-auto"
             >
