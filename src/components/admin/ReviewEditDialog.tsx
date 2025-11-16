@@ -173,125 +173,131 @@ export const ReviewEditDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white">
-        <DialogHeader>
-          <DialogTitle>Modifica Recensione #{reviewId}</DialogTitle>
-          <DialogDescription>
-            Modifica i contenuti della recensione. Tutti i campi sono obbligatori.
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Security Warnings */}
-        <Alert variant="destructive" className="border-orange-300 bg-orange-50">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Avvisi di Sicurezza (2 errori outdated)</AlertTitle>
-          <AlertDescription className="text-sm space-y-1">
-            <p>• Verifica manualmente che il contenuto non violi le policy</p>
-            <p>• Controlla presenza di informazioni mediche sensibili</p>
-          </AlertDescription>
-        </Alert>
-        
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Titolo</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Titolo della recensione"
-              className="bg-white"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="symptoms">Sintomi</Label>
-            <Textarea
-              id="symptoms"
-              value={symptoms}
-              onChange={(e) => setSymptoms(e.target.value)}
-              placeholder="Descrivi i sintomi..."
-              rows={5}
-              className="bg-white"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="experience">Esperienza</Label>
-            <Textarea
-              id="experience"
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              placeholder="Racconta la tua esperienza..."
-              rows={10}
-              className="bg-white"
-            />
-          </div>
-
-          {/* Risk Analysis Result */}
-          {riskAnalysis && (
-            <Alert className={`
-              ${riskAnalysis.category === 'CRITICO' ? 'border-red-500 bg-red-50' :
-                riskAnalysis.category === 'ALTO' ? 'border-orange-500 bg-orange-50' :
-                riskAnalysis.category === 'MEDIO' ? 'border-yellow-500 bg-yellow-50' :
-                riskAnalysis.category === 'BASSO' ? 'border-blue-500 bg-blue-50' :
-                'border-green-500 bg-green-50'}
-            `}>
-              <TrendingUp className="h-4 w-4" />
-              <AlertTitle className="flex items-center gap-2">
-                Analisi Rischio AI
-                <Badge variant={riskAnalysis.category === 'CRITICO' || riskAnalysis.category === 'ALTO' ? 'destructive' : 'secondary'}>
-                  {riskAnalysis.category}
-                </Badge>
-              </AlertTitle>
-              <AlertDescription>
-                <p className="font-semibold mb-2">Punteggio: {riskAnalysis.score}/100</p>
-                {riskAnalysis.reasons.length > 0 && (
-                  <div className="text-sm">
-                    <p className="font-medium mb-1">Motivi:</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      {riskAnalysis.reasons.map((reason, idx) => (
-                        <li key={idx}>{reason}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </AlertDescription>
-            </Alert>
-          )}
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col bg-white p-0">
+        <div className="px-6 pt-6 pb-4 border-b">
+          <DialogHeader>
+            <DialogTitle>Modifica Recensione #{reviewId}</DialogTitle>
+            <DialogDescription>
+              Modifica i contenuti della recensione. Tutti i campi sono obbligatori.
+            </DialogDescription>
+          </DialogHeader>
         </div>
 
-        <DialogFooter className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handleAnalyzeRisk} 
-            disabled={isAnalyzing || isSaving}
-            className="mr-auto"
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analisi...
-              </>
-            ) : (
-              <>
-                <TrendingUp className="mr-2 h-4 w-4" />
-                Calcola Rischio
-              </>
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {/* Security Warnings */}
+          <Alert variant="destructive" className="border-orange-300 bg-orange-50 mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Avvisi di Sicurezza (2 errori outdated)</AlertTitle>
+            <AlertDescription className="text-sm space-y-1">
+              <p>• Verifica manualmente che il contenuto non violi le policy</p>
+              <p>• Controlla presenza di informazioni mediche sensibili</p>
+            </AlertDescription>
+          </Alert>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Titolo</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Titolo della recensione"
+                className="bg-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="symptoms">Sintomi</Label>
+              <Textarea
+                id="symptoms"
+                value={symptoms}
+                onChange={(e) => setSymptoms(e.target.value)}
+                placeholder="Descrivi i sintomi..."
+                rows={5}
+                className="bg-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="experience">Esperienza</Label>
+              <Textarea
+                id="experience"
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+                placeholder="Racconta la tua esperienza..."
+                rows={10}
+                className="bg-white"
+              />
+            </div>
+
+            {/* Risk Analysis Result */}
+            {riskAnalysis && (
+              <Alert className={`
+                ${riskAnalysis.category === 'CRITICO' ? 'border-red-500 bg-red-50' :
+                  riskAnalysis.category === 'ALTO' ? 'border-orange-500 bg-orange-50' :
+                  riskAnalysis.category === 'MEDIO' ? 'border-yellow-500 bg-yellow-50' :
+                  riskAnalysis.category === 'BASSO' ? 'border-blue-500 bg-blue-50' :
+                  'border-green-500 bg-green-50'}
+              `}>
+                <TrendingUp className="h-4 w-4" />
+                <AlertTitle className="flex items-center gap-2">
+                  Analisi Rischio AI
+                  <Badge variant={riskAnalysis.category === 'CRITICO' || riskAnalysis.category === 'ALTO' ? 'destructive' : 'secondary'}>
+                    {riskAnalysis.category}
+                  </Badge>
+                </AlertTitle>
+                <AlertDescription>
+                  <p className="font-semibold mb-2">Punteggio: {riskAnalysis.score}/100</p>
+                  {riskAnalysis.reasons.length > 0 && (
+                    <div className="text-sm">
+                      <p className="font-medium mb-1">Motivi:</p>
+                      <ul className="list-disc list-inside space-y-1">
+                        {riskAnalysis.reasons.map((reason, idx) => (
+                          <li key={idx}>{reason}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </AlertDescription>
+              </Alert>
             )}
-          </Button>
-          <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            Annulla
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvataggio...
-              </>
-            ) : (
-              'Salva Modifiche'
-            )}
-          </Button>
+          </div>
+        </div>
+
+        <DialogFooter className="px-6 py-4 border-t bg-gray-50 flex-shrink-0">
+          <div className="flex gap-2 w-full">
+            <Button 
+              variant="outline" 
+              onClick={handleAnalyzeRisk} 
+              disabled={isAnalyzing || isSaving}
+              className="mr-auto"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analisi...
+                </>
+              ) : (
+                <>
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  Calcola Rischio
+                </>
+              )}
+            </Button>
+            <Button variant="outline" onClick={onClose} disabled={isSaving}>
+              Annulla
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvataggio...
+                </>
+              ) : (
+                'Salva Modifiche'
+              )}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
