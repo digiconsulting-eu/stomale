@@ -42,6 +42,7 @@ const ReviewRiskAnalysis = () => {
   const [stats, setStats] = useState<any>(null);
   const [results, setResults] = useState<ReviewRisk[]>([]);
   const [riskFilter, setRiskFilter] = useState<string>('all');
+  const [useAI, setUseAI] = useState(true);
   const { toast } = useToast();
 
   const calculateRiskScore = (review: Review): { score: number; reasons: string[] } => {
@@ -175,87 +176,120 @@ const ReviewRiskAnalysis = () => {
 
       toast({
         title: "Analisi in corso...",
-        description: `Analisi di ${reviews.length} recensioni...`,
+        description: `Analisi di ${reviews.length} recensioni con ${useAI ? 'AI' : 'algoritmo euristico'}...`,
       });
 
-      const analysisResults: ReviewRisk[] = [];
-      const batchSize = 50;
-      let processed = 0;
+      let analysisResults: ReviewRisk[] = [];
 
-      // Process in batches to avoid blocking UI
-      for (let i = 0; i < reviews.length; i += batchSize) {
-        const batch = reviews.slice(i, i + batchSize);
-        
-        batch.forEach((review) => {
-          const { score, reasons } = calculateRiskScore(review as Review);
-          const risk = getRiskCategory(score);
-          
-          const conditionSlug = (review.patologia || '').toLowerCase().replace(/\s+/g, '-');
-          const titleSlug = review.title.toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .substring(0, 50);
-          const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`;
-
-          analysisResults.push({
-            id: review.id,
-            titolo: review.title,
-            patologia: review.patologia || 'N/A',
-            username: review.username || 'NULL',
-            data_creazione: new Date(review.created_at).toLocaleDateString('it-IT'),
-            lunghezza_esperienza: (review.experience || '').length,
-            rischio: risk,
-            punteggio: score,
-            motivi: reasons.join('; '),
-            likes: review.likes_count || 0,
-            commenti: review.comments_count || 0,
-            url: url
-          });
+      if (useAI) {
+        // Use AI analysis via edge function
+        console.log('[Analysis] Using AI analysis');
+        const { data: aiResults, error: aiError } = await supabase.functions.invoke('analyze-review-risk', {
+          body: { reviews }
         });
 
-        processed += batch.length;
-        console.log(`[Analysis] Processed ${processed}/${reviews.length} reviews`);
+        if (aiError) {
+          console.error('AI analysis error:', aiError);
+          toast({
+            variant: "destructive",
+            title: "Errore analisi AI",
+            description: "Errore durante l'analisi AI. Uso algoritmo euristico come fallback.",
+          });
+          // Fallback to heuristic
+          analysisResults = analyzeWithHeuristic(reviews);
+        } else {
+          // Map AI results to ReviewRisk format
+          analysisResults = reviews.map((review) => {
+            const aiResult = aiResults.results.find((r: any) => r.id === review.id);
+            
+            const conditionSlug = (review.patologia || '').toLowerCase().replace(/\s+/g, '-');
+            const titleSlug = review.title.toLowerCase()
+              .replace(/[^a-z0-9\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .substring(0, 50);
+            const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`;
 
-        // Allow UI to update between batches
-        if (i + batchSize < reviews.length) {
-          await new Promise(resolve => setTimeout(resolve, 0));
+            return {
+              id: review.id,
+              titolo: review.title,
+              patologia: review.patologia || 'N/D',
+              username: review.username || 'Anonimo',
+              data_creazione: new Date(review.created_at).toLocaleDateString('it-IT'),
+              lunghezza_esperienza: review.experience.length,
+              rischio: aiResult?.category || 'MEDIO',
+              punteggio: aiResult?.score || 50,
+              motivi: aiResult?.reasons?.join('; ') || 'Analisi non disponibile',
+              likes: review.likes_count || 0,
+              commenti: review.comments_count || 0,
+              url,
+            };
+          });
         }
+      } else {
+        // Use heuristic analysis
+        console.log('[Analysis] Using heuristic analysis');
+        analysisResults = analyzeWithHeuristic(reviews);
       }
 
-      // Ordina per punteggio decrescente
-      analysisResults.sort((a, b) => b.punteggio - a.punteggio);
+      const analysisTime = Date.now() - startTime;
+      console.log(`[Analysis] Complete in ${analysisTime}ms (${(analysisTime / 1000).toFixed(2)}s)`);
 
-      // Calcola statistiche
-      const statistics = {
-        autentica: analysisResults.filter(r => r.rischio === 'AUTENTICA').length,
-        basso: analysisResults.filter(r => r.rischio === 'BASSO').length,
-        medio: analysisResults.filter(r => r.rischio === 'MEDIO').length,
-        alto: analysisResults.filter(r => r.rischio === 'ALTO').length,
-        critico: analysisResults.filter(r => r.rischio === 'CRITICO').length,
-        totale: analysisResults.length
-      };
-
-      setStats(statistics);
       setResults(analysisResults);
 
-      const totalTime = Date.now() - startTime;
-      console.log(`[Analysis] Complete! Total time: ${totalTime}ms`);
+      const statsData = {
+        total: analysisResults.length,
+        critico: analysisResults.filter(r => r.rischio === 'CRITICO').length,
+        alto: analysisResults.filter(r => r.rischio === 'ALTO').length,
+        medio: analysisResults.filter(r => r.rischio === 'MEDIO').length,
+        basso: analysisResults.filter(r => r.rischio === 'BASSO').length,
+        autentica: analysisResults.filter(r => r.rischio === 'AUTENTICA').length,
+      };
+      setStats(statsData);
 
       toast({
-        title: "✅ Analisi completata!",
-        description: `${statistics.totale} recensioni analizzate in ${(totalTime / 1000).toFixed(1)}s`,
+        title: "Analisi completata",
+        description: `${analysisResults.length} recensioni analizzate in ${(analysisTime / 1000).toFixed(1)}s`,
+        duration: 3000,
       });
-
     } catch (error) {
       console.error('[Analysis] Error:', error);
       toast({
         variant: "destructive",
         title: "Errore",
-        description: "Errore durante l'analisi delle recensioni",
+        description: error instanceof Error ? error.message : "Errore durante l'analisi",
       });
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const analyzeWithHeuristic = (reviews: Review[]): ReviewRisk[] => {
+    return reviews.map((review) => {
+      const { score, reasons } = calculateRiskScore(review);
+      const risk = getRiskCategory(score);
+      
+      const conditionSlug = (review.patologia || '').toLowerCase().replace(/\s+/g, '-');
+      const titleSlug = review.title.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 50);
+      const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`;
+
+      return {
+        id: review.id,
+        titolo: review.title,
+        patologia: review.patologia || 'N/D',
+        username: review.username || 'Anonimo',
+        data_creazione: new Date(review.created_at).toLocaleDateString('it-IT'),
+        lunghezza_esperienza: review.experience.length,
+        rischio: risk,
+        punteggio: score,
+        motivi: reasons.join('; '),
+        likes: review.likes_count || 0,
+        commenti: review.comments_count || 0,
+        url,
+      };
+    });
   };
 
   const exportToExcel = async () => {
@@ -390,6 +424,25 @@ const ReviewRiskAnalysis = () => {
               </div>
             </div>
           )}
+
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-blue-900">Modalità di analisi</h4>
+                <p className="text-sm text-blue-700">
+                  {useAI ? 'AI (Gemini 2.5 Flash) - Più accurata' : 'Algoritmo euristico - Più veloce'}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setUseAI(!useAI)}
+                className="ml-4"
+              >
+                {useAI ? '🤖 AI Attivo' : '⚙️ Euristico'}
+              </Button>
+            </div>
+          </div>
 
           <div className="flex gap-3">
             <Button 

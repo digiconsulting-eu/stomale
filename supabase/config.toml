@@ -1,6 +1,9 @@
 
 project_id = "hnuhdoycwpjfjhthfqbt"
 
+[functions.analyze-review-risk]
+verify_jwt = false
+
 [api]
 enabled = true
 port = 54321
