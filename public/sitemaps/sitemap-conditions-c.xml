@@ -96,12 +96,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/carcinoma%20baso-cellulare</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://stomale.info/patologia/carcinoma%20baso-cellulare%20(basalioma)</loc>
+    <loc>https://stomale.info/patologia/carcinoma%20basocellulare%20(basalioma)</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -111,7 +106,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://stomale.info/patologia/carcinoma%20squamo-cellulare</loc>
+    <loc>https://stomale.info/patologia/carcinoma%20squamocellulare</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
