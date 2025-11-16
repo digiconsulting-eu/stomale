@@ -26,19 +26,31 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
         // First check localStorage for faster response
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
         const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
+        const lastLoginAttempt = localStorage.getItem('last-login-attempt');
+        const isRecentLoginAttempt = lastLoginAttempt ? (Date.now() - parseInt(lastLoginAttempt, 10) < 2 * 60 * 1000) : false;
         
-        // Promise with a timeout to prevent blocking
+        // Promise with a timeout to prevent blocking (give Supabase more time right after SIGNED_IN)
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<{data: {session: null}}>((resolve) => {
-          setTimeout(() => resolve({ data: { session: null } }), 3000);
+          setTimeout(() => resolve({ data: { session: null } }), 6000);
         });
         
         // Use Promise.race to ensure we don't block for too long
         const { data } = await Promise.race([sessionPromise, timeoutPromise]);
-        const session = data.session;
+        let session = data.session;
+        
+        // If session isn't ready yet but we know a login just happened, try to heal/refresh once
+        if (!session && (isLoggedIn || isRecentLoginAttempt)) {
+          console.log('ProtectedRoute: No session yet, attempting health check/refresh...');
+          const healthy = await checkSessionHealth();
+          if (healthy) {
+            const { data: refetched } = await supabase.auth.getSession();
+            session = refetched.session;
+          }
+        }
         
         if (!session) {
-          console.log('ProtectedRoute: No session found, redirecting to login');
+          console.log('ProtectedRoute: No session found after retry, redirecting to login');
           localStorage.removeItem('isLoggedIn');
           localStorage.removeItem('isAdmin');
           
