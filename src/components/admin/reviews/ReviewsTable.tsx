@@ -116,6 +116,7 @@ console.log("Reviews data in ReviewsTable:", reviews);
                     title={review.title}
                     symptoms={review.symptoms}
                     experience={review.experience}
+                    patologia={review.patologia || review.PATOLOGIE?.Patologia}
                     autoOpenEdit={openEdit && highlightedId === review.id}
                   />
                 </TableCell>

@@ -101,7 +101,7 @@ const ReviewManagement = () => {
 
   // Open edit dialog directly if requested via URL (robust fallback)
   const navigate = useNavigate();
-  const [prefillEdit, setPrefillEdit] = useState<null | { id: number; title: string; symptoms: string; experience: string }>(null);
+  const [prefillEdit, setPrefillEdit] = useState<null | { id: number; title: string; symptoms: string; experience: string; patologia?: string }>(null);
 
   useEffect(() => {
     const edit = searchParams.get('edit') === '1';
@@ -120,6 +120,7 @@ const ReviewManagement = () => {
             title: found.title,
             symptoms: found.symptoms,
             experience: found.experience,
+            patologia: found.patologia || found.PATOLOGIE?.Patologia,
           });
           return;
         }
@@ -128,7 +129,7 @@ const ReviewManagement = () => {
       try {
         const { data, error } = await supabase
           .from('reviews')
-          .select('id,title,symptoms,experience')
+          .select('id,title,symptoms,experience,patologia')
           .eq('id', id)
           .maybeSingle();
         if (error) {
@@ -145,6 +146,7 @@ const ReviewManagement = () => {
           title: data.title,
           symptoms: data.symptoms,
           experience: data.experience,
+          patologia: data.patologia,
         });
       } catch (err) {
         console.error('Unexpected error fetching single review:', err);
@@ -176,6 +178,7 @@ const ReviewManagement = () => {
           currentTitle={prefillEdit.title}
           currentSymptoms={prefillEdit.symptoms}
           currentExperience={prefillEdit.experience}
+          currentPatologia={prefillEdit.patologia}
           isOpen={true}
           onClose={() => {
             setPrefillEdit(null);

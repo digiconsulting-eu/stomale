@@ -23,6 +23,7 @@ interface ReviewEditDialogProps {
   currentTitle: string;
   currentSymptoms: string;
   currentExperience: string;
+  currentPatologia?: string;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -38,6 +39,7 @@ export const ReviewEditDialog = ({
   currentTitle,
   currentSymptoms,
   currentExperience,
+  currentPatologia,
   isOpen,
   onClose,
 }: ReviewEditDialogProps) => {
@@ -45,6 +47,7 @@ export const ReviewEditDialog = ({
   const [title, setTitle] = useState(currentTitle);
   const [symptoms, setSymptoms] = useState(currentSymptoms);
   const [experience, setExperience] = useState(currentExperience);
+  const [patologia, setPatologia] = useState(currentPatologia || '');
   const [isSaving, setIsSaving] = useState(false);
   const [riskAnalysis, setRiskAnalysis] = useState<RiskAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -119,7 +122,7 @@ export const ReviewEditDialog = ({
       const { score, reasons } = calculateRiskScore(experience);
       const category = getRiskCategory(score);
       setRiskAnalysis({ score, category, reasons });
-      toast.success("Analisi rischio completata");
+      toast.success("Analisi rischio completata", { duration: 3000 });
     } catch (error) {
       console.error('Error analyzing risk:', error);
       toast.error("Errore durante l'analisi del rischio");
@@ -129,7 +132,7 @@ export const ReviewEditDialog = ({
   };
 
   const handleSave = async () => {
-    if (!title.trim() || !symptoms.trim() || !experience.trim()) {
+    if (!title.trim() || !symptoms.trim() || !experience.trim() || !patologia.trim()) {
       toast.error("Tutti i campi sono obbligatori");
       return;
     }
@@ -142,6 +145,7 @@ export const ReviewEditDialog = ({
           title: title.trim(),
           symptoms: symptoms.trim(),
           experience: experience.trim(),
+          patologia: patologia.trim(),
           updated_at: new Date().toISOString()
         })
         .eq('id', reviewId);
@@ -158,7 +162,7 @@ export const ReviewEditDialog = ({
         queryClient.invalidateQueries({ queryKey: ['review', reviewId] })
       ]);
 
-      toast.success("Recensione aggiornata con successo");
+      toast.success("Recensione aggiornata con successo", { duration: 3000 });
       
       // Calcola automaticamente il rischio dopo il salvataggio
       handleAnalyzeRisk();
@@ -202,6 +206,17 @@ export const ReviewEditDialog = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Titolo della recensione"
+                className="bg-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="patologia">Patologia</Label>
+              <Input
+                id="patologia"
+                value={patologia}
+                onChange={(e) => setPatologia(e.target.value)}
+                placeholder="Nome della patologia"
                 className="bg-white"
               />
             </div>
