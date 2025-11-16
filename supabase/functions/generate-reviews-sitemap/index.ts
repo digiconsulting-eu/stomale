@@ -76,8 +76,8 @@ serve(async (req) => {
 `
 
     if (reviews && reviews.length > 0) {
-      reviews.forEach((review) => {
-        if (review.PATOLOGIE && review.PATOLOGIE.Patologia) {
+      reviews.forEach((review: any) => {
+        if (review.PATOLOGIE && !Array.isArray(review.PATOLOGIE) && review.PATOLOGIE.Patologia) {
           const conditionSlug = slugify(review.PATOLOGIE.Patologia);
           const titleSlug = slugify(review.title);
           const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`;

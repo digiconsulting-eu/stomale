@@ -50,10 +50,11 @@ Deno.serve(async (req) => {
     })
 
   } catch (error) {
-    console.error('Error generating sitemap:', error)
-    return new Response(`Error generating sitemap: ${error.message}`, {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error generating sitemap:', errorMessage);
+    return new Response(`Error generating sitemap: ${errorMessage}`, {
       status: 500,
       headers: corsHeaders
-    })
+    });
   }
 })

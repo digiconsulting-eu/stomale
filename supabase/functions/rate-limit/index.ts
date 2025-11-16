@@ -163,11 +163,12 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('[Rate Limit] Fatal error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    console.error('[Rate Limit] Fatal error:', errorMessage);
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',
-        message: error.message 
+        message: errorMessage
       }),
       {
         status: 500,

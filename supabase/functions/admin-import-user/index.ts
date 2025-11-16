@@ -123,10 +123,10 @@ serve(async (req) => {
       
       // Create a placeholder user in the auth.users table
       const { error: createAuthUserError } = await supabase.auth.admin.createUser({
-        uuid: user.id,
         email: email,
         email_confirm: true,
         user_metadata: {
+          user_id: user.id,
           birth_year: user.birth_year,
           gender: user.gender,
           gdprConsent: user.gdpr_consent === undefined ? true : user.gdpr_consent
@@ -183,9 +183,11 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Function error:", error.message);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error("Function error:", errorMessage);
     return new Response(
-      JSON.stringify({ error: error.message, stack: error.stack, success: false }),
+      JSON.stringify({ error: errorMessage, stack: errorStack, success: false }),
       { 
         status: 500, 
         headers: corsHeaders
