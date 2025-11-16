@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Download, Loader2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import * as XLSX from 'xlsx';
 
 interface Review {
@@ -40,6 +41,7 @@ const ReviewRiskAnalysis = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [results, setResults] = useState<ReviewRisk[]>([]);
+  const [riskFilter, setRiskFilter] = useState<string>('all');
   const { toast } = useToast();
 
   const calculateRiskScore = (review: Review): { score: number; reasons: string[] } => {
@@ -118,6 +120,14 @@ const ReviewRiskAnalysis = () => {
     if (score >= 30) return 'MEDIO';
     if (score >= 15) return 'BASSO';
     return 'AUTENTICA';
+  };
+
+  const getFilteredResults = () => {
+    if (riskFilter === 'all') return results;
+    if (riskFilter === 'alto') return results.filter(r => r.rischio === 'CRITICO' || r.rischio === 'ALTO');
+    if (riskFilter === 'medio') return results.filter(r => r.rischio === 'MEDIO');
+    if (riskFilter === 'basso') return results.filter(r => r.rischio === 'BASSO' || r.rischio === 'AUTENTICA');
+    return results;
   };
 
   const analyzeReviews = async () => {
@@ -384,9 +394,25 @@ const ReviewRiskAnalysis = () => {
 
           {results.length > 0 && (
             <div className="space-y-4">
-              <h3 className="font-semibold">Anteprima Recensioni a Rischio (Prime 50)</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Anteprima Recensioni a Rischio</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Filtra per livello:</span>
+                  <Select value={riskFilter} onValueChange={setRiskFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Tutti i livelli" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti i livelli</SelectItem>
+                      <SelectItem value="alto">Alto (Critico + Alto)</SelectItem>
+                      <SelectItem value="medio">Medio</SelectItem>
+                      <SelectItem value="basso">Basso (Basso + Autentica)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {results.slice(0, 50).map((result) => (
+                {getFilteredResults().slice(0, 50).map((result) => (
                   <div
                     key={result.id}
                     className={`p-4 border rounded-lg ${
