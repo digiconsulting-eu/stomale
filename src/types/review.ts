@@ -18,6 +18,7 @@ export interface DatabaseReview {
   username?: string;
   likes_count?: number;
   comments_count?: number;
+  patologia?: string;
   PATOLOGIE?: {
     id: number;
     Patologia: string;

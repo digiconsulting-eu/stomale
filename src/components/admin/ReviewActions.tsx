@@ -13,10 +13,11 @@ interface ReviewActionsProps {
   title: string;
   symptoms: string;
   experience: string;
+  patologia?: string;
   autoOpenEdit?: boolean;
 }
 
-export const ReviewActions = ({ reviewId, status, title, symptoms, experience, autoOpenEdit }: ReviewActionsProps) => {
+export const ReviewActions = ({ reviewId, status, title, symptoms, experience, patologia, autoOpenEdit }: ReviewActionsProps) => {
   const queryClient = useQueryClient();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -118,6 +119,7 @@ useEffect(() => {
         currentTitle={title}
         currentSymptoms={symptoms}
         currentExperience={experience}
+        currentPatologia={patologia}
         isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
       />
