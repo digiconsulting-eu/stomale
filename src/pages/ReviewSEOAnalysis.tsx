@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Edit } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import * as XLSX from 'xlsx';
 
 interface Review {
@@ -32,6 +33,7 @@ interface SEOIssue {
 }
 
 const ReviewSEOAnalysis = () => {
+  const navigate = useNavigate();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<SEOIssue[]>([]);
   const [stats, setStats] = useState<{ [key: string]: number }>({});
@@ -283,6 +285,10 @@ const ReviewSEOAnalysis = () => {
               <li><strong>Information Value:</strong> Valore informativo per l'utente</li>
               <li><strong>Technical Quality:</strong> Titoli, struttura, formattazione</li>
             </ul>
+            <p className="text-xs text-muted-foreground mt-3">
+              <strong>Nota:</strong> Questa analisi NON valuta se il contenuto è generato da AI. 
+              Per l'analisi AI usa la pagina "Analisi Rischi AI".
+            </p>
           </div>
 
           <div className="bg-muted p-4 rounded-lg space-y-2">
@@ -351,15 +357,26 @@ const ReviewSEOAnalysis = () => {
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <div>
+                      <div className="flex-1">
                         <div className="font-semibold">ID {result.reviewId}: {result.title}</div>
                         <div className="text-sm text-muted-foreground">
                           {result.patologia} - {result.username}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold">{result.score}</div>
-                        <div className="text-xs text-muted-foreground">{result.impactLevel}</div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="text-2xl font-bold">{result.score}</div>
+                          <div className="text-xs text-muted-foreground">{result.impactLevel}</div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/admin/reviews?highlight=${result.reviewId}`)}
+                          className="flex items-center gap-1"
+                        >
+                          <Edit className="h-3 w-3" />
+                          Modifica
+                        </Button>
                       </div>
                     </div>
                     <div className="text-sm space-y-1">
