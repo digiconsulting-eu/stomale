@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Download, Loader2, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import * as XLSX from 'xlsx';
 
 interface Review {
@@ -38,6 +39,7 @@ const ReviewSEOAnalysis = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [results, setResults] = useState<SEOIssue[]>([]);
   const [stats, setStats] = useState<{ [key: string]: number }>({});
+  const [impactFilter, setImpactFilter] = useState<string>('all');
 
   const analyzeSEO = (review: Review): SEOIssue => {
     let score = 100;
@@ -188,6 +190,14 @@ const ReviewSEOAnalysis = () => {
       recommendations,
       impactLevel
     };
+  };
+
+  const getFilteredResults = () => {
+    if (impactFilter === 'all') return results;
+    if (impactFilter === 'alto') return results.filter(r => r.impactLevel === 'CRITICO' || r.impactLevel === 'ALTO');
+    if (impactFilter === 'medio') return results.filter(r => r.impactLevel === 'MEDIO');
+    if (impactFilter === 'basso') return results.filter(r => r.impactLevel === 'BASSO');
+    return results;
   };
 
   const analyzeReviews = async () => {
@@ -384,9 +394,25 @@ const ReviewSEOAnalysis = () => {
 
           {results.length > 0 && (
             <div className="space-y-3">
-              <h3 className="font-semibold text-lg">Prime 10 Recensioni con Problemi SEO:</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-lg">Anteprima Recensioni con Problemi SEO</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Filtra per impatto:</span>
+                  <Select value={impactFilter} onValueChange={setImpactFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Tutti i livelli" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tutti i livelli</SelectItem>
+                      <SelectItem value="alto">Alto (Critico + Alto)</SelectItem>
+                      <SelectItem value="medio">Medio</SelectItem>
+                      <SelectItem value="basso">Basso</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="space-y-2">
-                {results.slice(0, 10).map(result => (
+                {getFilteredResults().slice(0, 50).map(result => (
                   <div 
                     key={result.reviewId}
                     className={`p-4 rounded-lg border-l-4 ${
