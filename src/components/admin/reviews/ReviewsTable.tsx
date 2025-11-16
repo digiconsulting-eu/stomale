@@ -37,13 +37,21 @@ export const ReviewsTable = ({ reviews }: ReviewsTableProps) => {
   // Auto-expand highlighted review from URL
   useEffect(() => {
     const highlightId = searchParams.get('highlight');
-    if (highlightId) {
-      const reviewId = parseInt(highlightId);
+    if (!highlightId) return;
+
+    const reviewId = parseInt(highlightId);
+    // Ensure the correct page is selected so the row exists
+    const index = reviews.findIndex((r) => r.id === reviewId);
+    if (index !== -1) {
+      const targetPage = Math.floor(index / ITEMS_PER_PAGE) + 1;
+      if (currentPage !== targetPage) {
+        setCurrentPage(targetPage);
+      }
       if (!expandedReviews.includes(reviewId)) {
-        setExpandedReviews(prev => [...prev, reviewId]);
+        setExpandedReviews((prev) => [...prev, reviewId]);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, reviews]);
 
 // URL params for auto-open edit
 const highlightIdParam = searchParams.get('highlight');
