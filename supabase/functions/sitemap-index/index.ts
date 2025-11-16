@@ -104,10 +104,11 @@ Deno.serve(async (req) => {
     return new Response(xml, { headers: responseHeaders })
     
   } catch (error) {
-    console.error('Unexpected error generating sitemap index:', error)
-    return new Response(`Internal Server Error: ${error.message}`, { 
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Unexpected error generating sitemap index:', errorMessage);
+    return new Response(`Internal Server Error: ${errorMessage}`, { 
       status: 500, 
       headers: corsHeaders 
-    })
+    });
   }
 })

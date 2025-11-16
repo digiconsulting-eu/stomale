@@ -66,10 +66,11 @@ Deno.serve(async (req) => {
     return new Response(xml, { headers: corsHeaders })
     
   } catch (error) {
-    console.error('Unexpected error generating static sitemap:', error)
-    return new Response(`Internal Server Error: ${error.message}`, { 
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Unexpected error generating static sitemap:', errorMessage);
+    return new Response(`Internal Server Error: ${errorMessage}`, { 
       status: 500, 
       headers: corsHeaders 
-    })
+    });
   }
 })

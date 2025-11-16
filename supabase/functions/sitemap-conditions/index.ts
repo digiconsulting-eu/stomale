@@ -99,7 +99,8 @@ Deno.serve(async (req) => {
     // Restituisci la sitemap
     return new Response(xml, { headers: corsHeaders });
   } catch (error) {
-    console.error('Errore:', error.message);
-    return new Response(`Errore del server: ${error.message}`, { status: 500, headers: corsHeaders });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Errore:', errorMessage);
+    return new Response(`Errore del server: ${errorMessage}`, { status: 500, headers: corsHeaders });
   }
 });

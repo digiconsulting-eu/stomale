@@ -97,7 +97,8 @@ Deno.serve(async (req) => {
       if (reviewUrl.url) {
         console.log(`Adding URL: ${reviewUrl.url}`)
         // Get lastmod from review data
-        const lastmod = reviewUrl.reviews?.updated_at || reviewUrl.reviews?.created_at
+        const reviews: any = reviewUrl.reviews;
+        const lastmod = (!Array.isArray(reviews) && reviews?.updated_at) || (!Array.isArray(reviews) && reviews?.created_at);
         const lastmodDate = lastmod ? new Date(lastmod).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
         
         xml += `  <url>
@@ -133,10 +134,11 @@ Deno.serve(async (req) => {
     return new Response(xml, { headers: corsHeaders })
     
   } catch (error) {
-    console.error('Unexpected error generating sitemap:', error)
-    return new Response(`Internal Server Error: ${error.message}`, { 
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Unexpected error generating sitemap:', errorMessage);
+    return new Response(`Internal Server Error: ${errorMessage}`, { 
       status: 500, 
       headers: corsHeaders 
-    })
+    });
   }
 })
