@@ -106,19 +106,53 @@ const ReviewManagement = () => {
   useEffect(() => {
     const edit = searchParams.get('edit') === '1';
     const highlightId = searchParams.get('highlight');
-    if (!edit || !highlightId || !reviews || reviews.length === 0 || prefillEdit) return;
+    if (!edit || !highlightId || prefillEdit) return;
 
     const id = parseInt(highlightId, 10);
-    const found = reviews.find(r => r.id === id);
-    if (found) {
-      // Open a top-level dialog to ensure editing even if table pagination/rendering delays
-      setPrefillEdit({
-        id: found.id,
-        title: found.title,
-        symptoms: found.symptoms,
-        experience: found.experience,
-      });
-    }
+
+    const tryOpen = async () => {
+      // Try from loaded list first
+      if (reviews && reviews.length > 0) {
+        const found = reviews.find(r => r.id === id);
+        if (found) {
+          setPrefillEdit({
+            id: found.id,
+            title: found.title,
+            symptoms: found.symptoms,
+            experience: found.experience,
+          });
+          return;
+        }
+      }
+      // Fallback: fetch just this review
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('id,title,symptoms,experience')
+          .eq('id', id)
+          .maybeSingle();
+        if (error) {
+          console.error('Error fetching review for edit:', error);
+          toast.error('Errore nel recupero della recensione da modificare');
+          return;
+        }
+        if (!data) {
+          toast.error('Recensione non trovata');
+          return;
+        }
+        setPrefillEdit({
+          id: data.id,
+          title: data.title,
+          symptoms: data.symptoms,
+          experience: data.experience,
+        });
+      } catch (err) {
+        console.error('Unexpected error fetching single review:', err);
+        toast.error('Errore inatteso durante il recupero della recensione');
+      }
+    };
+
+    tryOpen();
   }, [searchParams, reviews, prefillEdit]);
 
   return (
