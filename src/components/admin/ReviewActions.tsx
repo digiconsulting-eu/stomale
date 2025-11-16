@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ConfirmDialog } from "../ConfirmDialog";
 import { ReviewEditDialog } from "./ReviewEditDialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Edit } from "lucide-react";
 
 interface ReviewActionsProps {
@@ -13,14 +13,21 @@ interface ReviewActionsProps {
   title: string;
   symptoms: string;
   experience: string;
+  autoOpenEdit?: boolean;
 }
 
-export const ReviewActions = ({ reviewId, status, title, symptoms, experience }: ReviewActionsProps) => {
+export const ReviewActions = ({ reviewId, status, title, symptoms, experience, autoOpenEdit }: ReviewActionsProps) => {
   const queryClient = useQueryClient();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [actionType, setActionType] = useState<'approved' | 'removed'>('approved');
+const [actionType, setActionType] = useState<'approved' | 'removed'>('approved');
 
+// Auto open edit dialog when requested via URL param
+useEffect(() => {
+  if (autoOpenEdit) {
+    setIsEditDialogOpen(true);
+  }
+}, [autoOpenEdit]);
   const handleStatusChange = async (newStatus: 'approved' | 'removed') => {
     try {
       console.log('Attempting to update review status:', { reviewId, newStatus, currentStatus: status });

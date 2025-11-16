@@ -45,8 +45,13 @@ export const ReviewsTable = ({ reviews }: ReviewsTableProps) => {
     }
   }, [searchParams]);
 
-  // Debugging output
-  console.log("Reviews data in ReviewsTable:", reviews);
+// URL params for auto-open edit
+const highlightIdParam = searchParams.get('highlight');
+const highlightedId = highlightIdParam ? parseInt(highlightIdParam) : null;
+const openEdit = searchParams.get('edit') === '1';
+
+// Debugging output
+console.log("Reviews data in ReviewsTable:", reviews);
   
   if (!reviews || reviews.length === 0) {
     return (
@@ -103,6 +108,7 @@ export const ReviewsTable = ({ reviews }: ReviewsTableProps) => {
                     title={review.title}
                     symptoms={review.symptoms}
                     experience={review.experience}
+                    autoOpenEdit={openEdit && highlightedId === review.id}
                   />
                 </TableCell>
               </TableRow>

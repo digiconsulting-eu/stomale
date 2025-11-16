@@ -438,7 +438,7 @@ const ReviewRiskAnalysis = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => navigate(`/admin/reviews?highlight=${result.id}`)}
+                          onClick={() => navigate(`/admin/reviews?highlight=${result.id}&edit=1`)}
                           className="flex items-center gap-1"
                         >
                           <Edit className="h-3 w-3" />
