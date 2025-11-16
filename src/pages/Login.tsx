@@ -7,6 +7,7 @@ import { LoginProgress } from "@/components/auth/LoginProgress";
 import { LoginCard } from "@/components/auth/LoginCard";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -65,6 +66,38 @@ export default function Login() {
         console.log("Login page unmount: Keeping redirect prevention flags - auth in progress or login succeeded");
       }
     };
+  }, [navigate]);
+  
+  // Redirect robusto: ascolta l'evento SIGNED_IN anche se la submit non completa
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        try {
+          // Aggiorna stato locale
+          localStorage.setItem('isLoggedIn', 'true');
+          const email = session.user.email || '';
+          if (email) {
+            const { data: adminData } = await supabase
+              .from('admin')
+              .select('email')
+              .eq('email', email)
+              .maybeSingle();
+            const isAdmin = !!adminData;
+            localStorage.setItem('isAdmin', String(isAdmin));
+          }
+        } catch (e) {
+          // ignora
+        } finally {
+          // Pulisci i flag che bloccano redirect e naviga
+          sessionStorage.removeItem('onLoginPage');
+          localStorage.removeItem('preventRedirects');
+          localStorage.removeItem('loginPageActive');
+          const isAdmin = localStorage.getItem('isAdmin') === 'true';
+          navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   return (
