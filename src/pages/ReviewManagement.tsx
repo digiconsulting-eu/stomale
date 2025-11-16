@@ -8,7 +8,8 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { ReviewEditDialog } from "@/components/admin/ReviewEditDialog";
 
 const ReviewManagement = () => {
   const [searchParams] = useSearchParams();
@@ -98,6 +99,28 @@ const ReviewManagement = () => {
     }
   }, [searchParams, reviews]);
 
+  // Open edit dialog directly if requested via URL (robust fallback)
+  const navigate = useNavigate();
+  const [prefillEdit, setPrefillEdit] = useState<null | { id: number; title: string; symptoms: string; experience: string }>(null);
+
+  useEffect(() => {
+    const edit = searchParams.get('edit') === '1';
+    const highlightId = searchParams.get('highlight');
+    if (!edit || !highlightId || !reviews || reviews.length === 0 || prefillEdit) return;
+
+    const id = parseInt(highlightId, 10);
+    const found = reviews.find(r => r.id === id);
+    if (found) {
+      // Open a top-level dialog to ensure editing even if table pagination/rendering delays
+      setPrefillEdit({
+        id: found.id,
+        title: found.title,
+        symptoms: found.symptoms,
+        experience: found.experience,
+      });
+    }
+  }, [searchParams, reviews, prefillEdit]);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <AdminHeader />
@@ -112,6 +135,20 @@ const ReviewManagement = () => {
           Esporta Excel
         </Button>
       </div>
+
+      {prefillEdit && (
+        <ReviewEditDialog
+          reviewId={prefillEdit.id}
+          currentTitle={prefillEdit.title}
+          currentSymptoms={prefillEdit.symptoms}
+          currentExperience={prefillEdit.experience}
+          isOpen={true}
+          onClose={() => {
+            setPrefillEdit(null);
+            navigate('/admin/reviews', { replace: true });
+          }}
+        />
+      )}
 
       {error ? (
         <div className="p-6 bg-red-50 border border-red-200 rounded-lg my-4">
