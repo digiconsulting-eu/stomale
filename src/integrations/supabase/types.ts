@@ -452,6 +452,7 @@ export type Database = {
         }
         Returns: Json
       }
+      clean_slug: { Args: { text: string }; Returns: string }
       is_admin: { Args: { user_id: string }; Returns: boolean }
       populate_review_urls: { Args: never; Returns: undefined }
       unaccent: { Args: { "": string }; Returns: string }
