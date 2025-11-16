@@ -165,9 +165,7 @@ export const ReviewEditDialog = ({
       ]);
 
       toast.success("Recensione aggiornata con successo", { duration: 3000 });
-      
-      // Calcola automaticamente il rischio dopo il salvataggio (senza mostrare toast)
-      handleAnalyzeRisk(false);
+      onClose();
       
     } catch (error) {
       console.error('Error in handleSave:', error);
