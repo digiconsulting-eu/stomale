@@ -8,8 +8,10 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
 
 const ReviewManagement = () => {
+  const [searchParams] = useSearchParams();
   const { data: reviews, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-reviews'],
     queryFn: async () => {
@@ -78,6 +80,23 @@ const ReviewManagement = () => {
   useEffect(() => {
     refetch();
   }, [refetch]);
+
+  // Scroll to highlighted review if present in URL
+  useEffect(() => {
+    const highlightId = searchParams.get('highlight');
+    if (highlightId) {
+      setTimeout(() => {
+        const element = document.getElementById(`review-${highlightId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+          setTimeout(() => {
+            element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+          }, 3000);
+        }
+      }, 500);
+    }
+  }, [searchParams, reviews]);
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -13,6 +13,7 @@ import { ReviewActions } from "../ReviewActions";
 import { ReviewsPagination } from "../../reviews/ReviewsPagination";
 import { DatabaseReview } from "@/types/review";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 50;
 
@@ -21,6 +22,7 @@ interface ReviewsTableProps {
 }
 
 export const ReviewsTable = ({ reviews }: ReviewsTableProps) => {
+  const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedReviews, setExpandedReviews] = useState<number[]>([]);
 
@@ -31,6 +33,17 @@ export const ReviewsTable = ({ reviews }: ReviewsTableProps) => {
         : [...prev, reviewId]
     );
   };
+
+  // Auto-expand highlighted review from URL
+  useEffect(() => {
+    const highlightId = searchParams.get('highlight');
+    if (highlightId) {
+      const reviewId = parseInt(highlightId);
+      if (!expandedReviews.includes(reviewId)) {
+        setExpandedReviews(prev => [...prev, reviewId]);
+      }
+    }
+  }, [searchParams]);
 
   // Debugging output
   console.log("Reviews data in ReviewsTable:", reviews);
@@ -60,7 +73,8 @@ export const ReviewsTable = ({ reviews }: ReviewsTableProps) => {
           {reviews.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((review) => (
             <React.Fragment key={review.id}>
               <TableRow 
-                className="cursor-pointer hover:bg-gray-50"
+                id={`review-${review.id}`}
+                className="cursor-pointer hover:bg-gray-50 transition-all"
                 onClick={() => toggleReview(review.id)}
               >
                 <TableCell>
@@ -82,8 +96,14 @@ export const ReviewsTable = ({ reviews }: ReviewsTableProps) => {
                     {review.status === "approved" ? "Approvata" : "Rimossa"}
                   </Badge>
                 </TableCell>
-                <TableCell>
-                  <ReviewActions reviewId={review.id} status={review.status} />
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <ReviewActions 
+                    reviewId={review.id} 
+                    status={review.status}
+                    title={review.title}
+                    symptoms={review.symptoms}
+                    experience={review.experience}
+                  />
                 </TableCell>
               </TableRow>
               {expandedReviews.includes(review.id) && (
