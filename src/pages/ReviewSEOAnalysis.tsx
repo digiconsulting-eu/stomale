@@ -303,18 +303,21 @@ const ReviewSEOAnalysis = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="bg-muted p-4 rounded-lg space-y-3">
-            <h3 className="font-semibold">Criteri di Valutazione Google:</h3>
+            <h3 className="font-semibold">Criteri di Valutazione SEO per UGC:</h3>
             <ul className="space-y-2 text-sm">
-              <li><strong>Thin Content:</strong> Contenuto troppo breve o scarso</li>
-              <li><strong>Duplicate Content:</strong> Frasi ripetitive o contenuto simile</li>
-              <li><strong>Keyword Stuffing:</strong> Uso eccessivo della keyword target</li>
-              <li><strong>E-A-T:</strong> Expertise, Authoritativeness, Trustworthiness</li>
-              <li><strong>User Signals:</strong> Engagement, likes, commenti</li>
-              <li><strong>Content Freshness:</strong> Freschezza e aggiornamento del contenuto</li>
-              <li><strong>Information Value:</strong> Valore informativo per l'utente</li>
-              <li><strong>Technical Quality:</strong> Titoli, struttura, formattazione</li>
+              <li><strong>Thin Content:</strong> Lunghezza minima per evitare penalizzazioni Google</li>
+              <li><strong>Keyword Stuffing:</strong> Ripetizione eccessiva della patologia nel titolo/testo</li>
+              <li><strong>Qualità Titolo:</strong> Lunghezza ottimale per SERP (30-60 caratteri)</li>
+              <li><strong>Engagement:</strong> Likes e commenti come segnale di qualità utente</li>
+              <li><strong>Contenuto Generico:</strong> Frasi troppo comuni che riducono l'unicità</li>
+              <li><strong>Autenticità UGC:</strong> Dettagli specifici e linguaggio personale</li>
             </ul>
-            <p className="text-xs text-muted-foreground mt-3">
+            <p className="text-xs text-muted-foreground mt-3 italic">
+              <strong>Nota importante:</strong> Questa analisi è ottimizzata per User Generated Content. 
+              NON penalizza la mancanza di struttura professionale, paragrafi formali o linguaggio medico tecnico, 
+              che sono normali nelle recensioni autentiche degli utenti. Le recensioni personali NON sono articoli professionali.
+            </p>
+            <p className="text-xs text-muted-foreground">
               <strong>Nota:</strong> Questa analisi NON valuta se il contenuto è generato da AI. 
               Per l'analisi AI usa la pagina "Analisi Rischi AI".
             </p>
