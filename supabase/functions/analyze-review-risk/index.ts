@@ -20,8 +20,8 @@ serve(async (req) => {
 
     console.log(`Analyzing ${reviews.length} reviews with AI`);
 
-    // Analyze reviews in batches to avoid rate limits
-    const batchSize = 10;
+    // Analyze reviews in smaller batches
+    const batchSize = 5; // Reduce to 5 per batch for faster processing
     const results = [];
 
     for (let i = 0; i < reviews.length; i += batchSize) {
@@ -128,7 +128,7 @@ Scala:
 
       // Small delay between batches to avoid rate limits
       if (i + batchSize < reviews.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 

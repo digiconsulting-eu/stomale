@@ -182,48 +182,71 @@ const ReviewRiskAnalysis = () => {
       let analysisResults: ReviewRisk[] = [];
 
       if (useAI) {
-        // Use AI analysis via edge function
+        // Use AI analysis via edge function - process in frontend batches
         console.log('[Analysis] Using AI analysis');
-        const { data: aiResults, error: aiError } = await supabase.functions.invoke('analyze-review-risk', {
-          body: { reviews }
-        });
-
-        if (aiError) {
-          console.error('AI analysis error:', aiError);
+        const frontendBatchSize = 50; // Process 50 reviews at a time
+        const totalBatches = Math.ceil(reviews.length / frontendBatchSize);
+        
+        for (let i = 0; i < reviews.length; i += frontendBatchSize) {
+          const batch = reviews.slice(i, i + frontendBatchSize);
+          const batchNum = Math.floor(i / frontendBatchSize) + 1;
+          
+          console.log(`[Analysis] Processing frontend batch ${batchNum}/${totalBatches}`);
           toast({
-            variant: "destructive",
-            title: "Errore analisi AI",
-            description: "Errore durante l'analisi AI. Uso algoritmo euristico come fallback.",
+            title: "Analisi AI in corso...",
+            description: `Batch ${batchNum}/${totalBatches} (${batch.length} recensioni)`,
           });
-          // Fallback to heuristic
-          analysisResults = analyzeWithHeuristic(reviews);
-        } else {
-          // Map AI results to ReviewRisk format
-          analysisResults = reviews.map((review) => {
-            const aiResult = aiResults.results.find((r: any) => r.id === review.id);
-            
-            const conditionSlug = (review.patologia || '').toLowerCase().replace(/\s+/g, '-');
-            const titleSlug = review.title.toLowerCase()
-              .replace(/[^a-z0-9\s-]/g, '')
-              .replace(/\s+/g, '-')
-              .substring(0, 50);
-            const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`;
 
-            return {
-              id: review.id,
-              titolo: review.title,
-              patologia: review.patologia || 'N/D',
-              username: review.username || 'Anonimo',
-              data_creazione: new Date(review.created_at).toLocaleDateString('it-IT'),
-              lunghezza_esperienza: review.experience.length,
-              rischio: aiResult?.category || 'MEDIO',
-              punteggio: aiResult?.score || 50,
-              motivi: aiResult?.reasons?.join('; ') || 'Analisi non disponibile',
-              likes: review.likes_count || 0,
-              commenti: review.comments_count || 0,
-              url,
-            };
-          });
+          try {
+            const { data: aiResults, error: aiError } = await supabase.functions.invoke('analyze-review-risk', {
+              body: { reviews: batch }
+            });
+
+            if (aiError) {
+              console.error('AI analysis error for batch:', aiError);
+              // Fallback to heuristic for this batch
+              const heuristicBatch = analyzeWithHeuristic(batch);
+              analysisResults.push(...heuristicBatch);
+            } else {
+              // Map AI results to ReviewRisk format
+              const batchResults = batch.map((review) => {
+                const aiResult = aiResults.results.find((r: any) => r.id === review.id);
+                
+                const conditionSlug = (review.patologia || '').toLowerCase().replace(/\s+/g, '-');
+                const titleSlug = review.title.toLowerCase()
+                  .replace(/[^a-z0-9\s-]/g, '')
+                  .replace(/\s+/g, '-')
+                  .substring(0, 50);
+                const url = `https://stomale.info/patologia/${conditionSlug}/esperienza/${review.id}-${titleSlug}`;
+
+                return {
+                  id: review.id,
+                  titolo: review.title,
+                  patologia: review.patologia || 'N/D',
+                  username: review.username || 'Anonimo',
+                  data_creazione: new Date(review.created_at).toLocaleDateString('it-IT'),
+                  lunghezza_esperienza: review.experience.length,
+                  rischio: aiResult?.category || 'MEDIO',
+                  punteggio: aiResult?.score || 50,
+                  motivi: aiResult?.reasons?.join('; ') || 'Analisi non disponibile',
+                  likes: review.likes_count || 0,
+                  commenti: review.comments_count || 0,
+                  url,
+                };
+              });
+              analysisResults.push(...batchResults);
+            }
+          } catch (error) {
+            console.error('Error processing batch:', error);
+            // Fallback to heuristic for this batch
+            const heuristicBatch = analyzeWithHeuristic(batch);
+            analysisResults.push(...heuristicBatch);
+          }
+
+          // Small delay between batches
+          if (i + frontendBatchSize < reviews.length) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
         }
       } else {
         // Use heuristic analysis
