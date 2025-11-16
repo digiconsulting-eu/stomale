@@ -3,16 +3,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ConfirmDialog } from "../ConfirmDialog";
+import { ReviewEditDialog } from "./ReviewEditDialog";
 import { useState } from "react";
+import { Edit } from "lucide-react";
 
 interface ReviewActionsProps {
   reviewId: number;
   status: string;
+  title: string;
+  symptoms: string;
+  experience: string;
 }
 
-export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
+export const ReviewActions = ({ reviewId, status, title, symptoms, experience }: ReviewActionsProps) => {
   const queryClient = useQueryClient();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<'approved' | 'removed'>('approved');
 
   const handleStatusChange = async (newStatus: 'approved' | 'removed') => {
@@ -63,11 +69,25 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
   return (
     <>
       <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsEditDialogOpen(true);
+          }}
+        >
+          <Edit className="h-3 w-3 mr-1" />
+          Modifica
+        </Button>
         {status !== 'approved' && (
           <Button
             variant="outline"
             size="sm"
-            onClick={() => openConfirmDialog('approved')}
+            onClick={(e) => {
+              e.stopPropagation();
+              openConfirmDialog('approved');
+            }}
           >
             Pubblica
           </Button>
@@ -76,12 +96,24 @@ export const ReviewActions = ({ reviewId, status }: ReviewActionsProps) => {
           <Button
             variant="destructive"
             size="sm"
-            onClick={() => openConfirmDialog('removed')}
+            onClick={(e) => {
+              e.stopPropagation();
+              openConfirmDialog('removed');
+            }}
           >
             Rimuovi
           </Button>
         )}
       </div>
+
+      <ReviewEditDialog
+        reviewId={reviewId}
+        currentTitle={title}
+        currentSymptoms={symptoms}
+        currentExperience={experience}
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+      />
 
       <ConfirmDialog
         isOpen={isConfirmDialogOpen}
