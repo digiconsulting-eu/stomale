@@ -1,7 +1,7 @@
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { FileUp, AlertTriangle } from "lucide-react";
+import { FileUp, AlertTriangle, Search } from "lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ const Admin = () => {
     <div className="container mx-auto px-4 py-8">
       <AdminHeader />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-8">
         {/* Review Management Card */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-bold mb-4">Gestione Recensioni</h2>
@@ -56,7 +56,7 @@ const Admin = () => {
 
         {/* Review Risk Analysis Card */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold mb-4">Analisi Rischi</h2>
+          <h2 className="text-2xl font-bold mb-4">Analisi Rischi AI</h2>
           <p className="text-gray-600 mb-6">
             Analizza le recensioni per identificare contenuti potenzialmente generati da AI.
           </p>
@@ -65,7 +65,22 @@ const Admin = () => {
             className="w-full flex items-center justify-center gap-2"
           >
             <AlertTriangle className="h-4 w-4" />
-            Vai ad Analisi Rischi
+            Analisi AI
+          </Button>
+        </div>
+
+        {/* SEO Analysis Card */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold mb-4">Analisi SEO</h2>
+          <p className="text-gray-600 mb-6">
+            Analizza come Google valuta e potenzialmente penalizza le recensioni.
+          </p>
+          <Button 
+            onClick={() => navigate('/admin/review-seo-analysis')}
+            className="w-full flex items-center justify-center gap-2"
+          >
+            <Search className="h-4 w-4" />
+            Analisi SEO
           </Button>
         </div>
       </div>
