@@ -141,15 +141,22 @@ export const ReviewEditDialog = ({
 
     setIsSaving(true);
     try {
+      const updateData: any = {
+        title: title.trim(),
+        symptoms: symptoms.trim(),
+        experience: experience.trim(),
+        patologia: patologia.trim(),
+        updated_at: new Date().toISOString()
+      };
+
+      // If risk analysis was performed, include risk_category
+      if (riskAnalysis) {
+        updateData.risk_category = riskAnalysis.category;
+      }
+
       const { error } = await supabase
         .from('reviews')
-        .update({
-          title: title.trim(),
-          symptoms: symptoms.trim(),
-          experience: experience.trim(),
-          patologia: patologia.trim(),
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', reviewId);
 
       if (error) {
