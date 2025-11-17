@@ -287,6 +287,7 @@ export type Database = {
           likes_count: number | null
           medication_effectiveness: number | null
           patologia: string | null
+          risk_category: string | null
           social_discomfort: number | null
           status: string | null
           symptoms: string
@@ -309,6 +310,7 @@ export type Database = {
           likes_count?: number | null
           medication_effectiveness?: number | null
           patologia?: string | null
+          risk_category?: string | null
           social_discomfort?: number | null
           status?: string | null
           symptoms: string
@@ -331,6 +333,7 @@ export type Database = {
           likes_count?: number | null
           medication_effectiveness?: number | null
           patologia?: string | null
+          risk_category?: string | null
           social_discomfort?: number | null
           status?: string | null
           symptoms?: string
