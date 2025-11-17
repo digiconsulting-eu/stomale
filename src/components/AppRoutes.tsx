@@ -15,6 +15,7 @@ import ReviewManagement from "@/pages/ReviewManagement";
 import UserManagement from "@/pages/UserManagement";
 import ReviewRiskAnalysis from "@/pages/ReviewRiskAnalysis";
 import ReviewSEOAnalysis from "@/pages/ReviewSEOAnalysis";
+import SitemapManager from "@/pages/SitemapManager";
 import ImportTab from "@/components/admin/ImportTab";
 import InsertCondition from "@/pages/InsertCondition";
 import SearchCondition from "@/pages/SearchCondition";
@@ -102,6 +103,15 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute adminOnly={true}>
             <ReviewSEOAnalysis />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/sitemap-manager"
+        element={
+          <ProtectedRoute adminOnly={true}>
+            <SitemapManager />
           </ProtectedRoute>
         }
       />

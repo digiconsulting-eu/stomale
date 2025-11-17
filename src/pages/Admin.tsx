@@ -1,7 +1,7 @@
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { FileUp, AlertTriangle, Search } from "lucide-react";
+import { FileUp, AlertTriangle, Search, RefreshCw } from "lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -81,6 +81,21 @@ const Admin = () => {
           >
             <Search className="h-4 w-4" />
             Analisi SEO
+          </Button>
+        </div>
+
+        {/* Sitemap Manager Card */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold mb-4">Gestione Sitemap</h2>
+          <p className="text-gray-600 mb-6">
+            Rigenera le sitemap XML dal database delle recensioni.
+          </p>
+          <Button 
+            onClick={() => navigate('/admin/sitemap-manager')}
+            className="w-full flex items-center justify-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Gestisci Sitemap
           </Button>
         </div>
       </div>
