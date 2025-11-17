@@ -259,6 +259,18 @@ const ReviewRiskAnalysis = () => {
 
       setResults(analysisResults);
 
+      // Save risk_category to database for all analyzed reviews
+      console.log('[Database] Saving risk categories...');
+      const updatePromises = analysisResults.map(result => 
+        supabase
+          .from('reviews')
+          .update({ risk_category: result.rischio })
+          .eq('id', result.id)
+      );
+      
+      await Promise.all(updatePromises);
+      console.log('[Database] Risk categories saved successfully');
+
       const statsData = {
         total: analysisResults.length,
         critico: analysisResults.filter(r => r.rischio === 'CRITICO').length,
